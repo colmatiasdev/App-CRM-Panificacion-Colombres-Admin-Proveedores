@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Toro Rápido - Pedidos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="pedidos.css">
+</head>
+<body>
+
+<div id="overlay-carga">
+    <i class="fas fa-spinner fa-spin fa-3x" style="color: var(--whatsapp-color);"></i>
+    <p style="margin-top:15px; font-weight:700;">Procesando pedido...</p>
+</div>
+
+<div class="contenedor">
+    <div id="cargando" style="text-align:center; padding: 40px; color: var(--rojo-toro);">
+        <i class="fas fa-spinner fa-spin fa-2x"></i><br><br>Cargando menú...
+    </div>
+    
+    <div id="contenedor-menu"></div>
+
+    <div class="qty-notice-card">
+        <i class="fa-solid fa-circle-info" style="color: var(--oro-promo); font-size: 1.2em;"></i>
+        <div class="qty-notice-text">
+            <b>¿Necesitás más de 9 unidades?</b> Seleccioná el máximo y avisamos por WhatsApp al confirmar. ¡Nosotros lo modificamos!
+        </div>
+    </div>
+
+    <div class="resumen-caja" id="caja-resumen">
+        <div style="font-weight: 800; margin-bottom: 15px; color: var(--azul-oscuro); text-align: center; text-transform: uppercase;">Resumen de Pedido</div>
+        <div id="lista-resumen"></div>
+        
+        <div class="fila-resumen" id="fila-envio" style="border-bottom: none; color: #166534;">
+            <span>Gastos de Envío</span>
+            <strong id="monto-envio">$ 0</strong>
+        </div>
+
+        <div class="total-badge">
+            <span style="font-weight:700;">TOTAL ESTIMADO</span>
+            <span id="monto-total-display" style="font-weight:900; color:var(--rojo-toro); font-size:1.4em;">$ 0</span>
+        </div>
+        <div class="zona-aviso">
+            ⚠️ Una vez recibido el pedido, analizaremos tu domicilio para confirmar si contamos con entregas en tu zona.
+        </div>
+    </div>
+
+    <div class="datos-cliente">
+        <div style="font-weight: 800; color: #166534; margin-bottom: 15px; font-size: 1em; text-align: center;">📍 DATOS DE ENTREGA</div>
+        
+        <div class="input-group">
+            <label>Nombre de quien recibe:</label>
+            <i class="fa-solid fa-user"></i>
+            <input type="text" id="cust-name" class="input-field" placeholder="Ej: Juan Pérez">
+        </div>
+
+        <div class="input-group">
+            <label>WhatsApp:</label>
+            <i class="fa-solid fa-phone"></i>
+            <input type="tel" id="cust-phone" class="input-field" placeholder="Ej: 3814556677">
+        </div>
+
+        <div class="input-group">
+            <label>Domicilio:</label>
+            <i class="fa-solid fa-location-dot"></i>
+            <input type="text" id="cust-address" class="input-field" placeholder="Calle, número, barrio...">
+        </div>
+    </div>
+
+    <button onclick="enviarPedido()" class="boton-pedido">
+        <i class="fa-brands fa-whatsapp fa-xl"></i> ENVIAR POR WHATSAPP
+    </button>
+    <a href="confirmacion.html" class="boton-confirmacion">
+        <i class="fa-solid fa-circle-check fa-lg"></i> CONFIRMAR PEDIDO
+    </a>
+</div>
+
+<script>
+    const TELEFONO_NEGOCIO = "5493814130520"; 
+    const URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRTNEWKO90itVxMNkeLNQn3wfoScs6t4mGHh9DKJz4fMsdCf4xOj72cSSJfkTKopOuIEfqJawOjbB8X/pub?gid=1924165913&single=true&output=csv"; 
+    const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycby5-AAAxjPm68aNc6hQ0zk6prVUoGe5TAlWUCbzq3eKHW8_mkZneSZ0GM8Tb5sOExs_/exec";
+
+    const COSTO_ENVIO_BASE = 1500; 
+    const MINIMO_ENVIO_GRATIS = 25000;
+
+    function formatearMoneda(valor) { return `$ ${Number(valor).toLocaleString('es-AR')}`; }
+
+    function toggleCategoria(elemento) {
+        const bloquePadre = elemento.parentElement;
+        const estaActiva = bloquePadre.classList.contains('activa');
+        document.querySelectorAll('.categoria-bloque').forEach(b => b.classList.remove('activa'));
+        if (!estaActiva) {
+            bloquePadre.classList.add('activa');
+            setTimeout(() => { elemento.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
+        }
+    }
+
+    function cambiarCant(id, delta) {
+        const display = document.getElementById(`qty-val-${id}`);
+        let valor = parseInt(display.innerText) + delta;
+        if (valor < 0) valor = 0;
+        if (valor > 9) valor = 9;
+        display.innerText = valor;
+        calcularResumen();
+    }
+
+    async function obtenerMenu() {
+        try {
+            const respuesta = await fetch(URL_CSV);
+            const datosCsv = await respuesta.text();
+            const filas = datosCsv.split("\n").slice(1);
+            const menuAgrupado = {};
+            filas.forEach((fila, indice) => {
+                const columnas = fila.split(",");
+                if(columnas.length >= 5) {
+                    const cat = columnas[1].trim();
+                    if(!menuAgrupado[cat]) menuAgrupado[cat] = [];
+                    menuAgrupado[cat].push({ 
+                        idReal: columnas[0].trim(), nombre: columnas[2].trim(), 
+                        desc: columnas[3].trim(), precio: parseFloat(columnas[4]), 
+                        img: columnas[5]?.trim() || "", catOriginal: cat, idInt: indice
+                    });
+                }
+            });
+            document.getElementById('cargando').style.display = 'none';
+            dibujarMenu(menuAgrupado);
+        } catch (e) { console.error(e); }
+    }
+
+    function dibujarMenu(agrupado) {
+        const contenedor = document.getElementById('contenedor-menu');
+        for (const cat in agrupado) {
+            const esPromo = cat.toUpperCase().includes("PROMO");
+            const div = document.createElement('div');
+            div.className = `categoria-bloque ${esPromo ? 'es-promo' : ''}`;
+            div.innerHTML = `<div class="categoria-header" onclick="toggleCategoria(this)"><span>${cat}</span><i class="fa-solid fa-chevron-down"></i></div><div class="categoria-contenido"></div>`;
+            const cont = div.querySelector('.categoria-contenido');
+            agrupado[cat].forEach(p => {
+                const f = document.createElement('div');
+                f.className = 'producto-fila';
+                f.innerHTML = `
+                    <div class="producto-arriba">
+                        <img src="${p.img}" class="producto-img" onerror="this.src='https://via.placeholder.com/150?text=Toro'">
+                        <div class="producto-info">
+                            <span class="producto-nombre">${p.nombre}</span>
+                            <span class="producto-desc">${p.desc}</span>
+                            <span class="producto-precio">${formatearMoneda(p.precio)}</span>
+                        </div>
+                    </div>
+                    <div class="selector-cantidad">
+                        <button class="btn-qty" onclick="cambiarCant(${p.idInt}, -1)"><i class="fa-solid fa-minus"></i></button>
+                        <span class="qty-num" id="qty-val-${p.idInt}" 
+                              data-idreal="${p.idReal}" data-precio="${p.precio}" 
+                              data-nombre="${p.nombre}" data-promo="${esPromo}" data-cat="${p.catOriginal}">0</span>
+                        <button class="btn-qty" onclick="cambiarCant(${p.idInt}, 1)"><i class="fa-solid fa-plus"></i></button>
+                    </div>`;
+                cont.appendChild(f);
+            });
+            contenedor.appendChild(div);
+        }
+    }
+
+    function calcularResumen() {
+        let subtotal = 0; 
+        let htmlItems = "";
+        document.querySelectorAll('.qty-num').forEach(el => {
+            const cant = parseInt(el.innerText);
+            if(cant > 0) {
+                const sub = cant * parseFloat(el.dataset.precio);
+                subtotal += sub;
+                const prefijo = el.dataset.promo === "true" ? "[PROMO] " : "";
+                htmlItems += `<div class="fila-resumen"><span>x${cant} ${prefijo}${el.dataset.nombre}</span><strong>${formatearMoneda(sub)}</strong></div>`;
+            }
+        });
+        const costoEnvio = (subtotal > 0 && subtotal < MINIMO_ENVIO_GRATIS) ? COSTO_ENVIO_BASE : 0;
+        document.getElementById('lista-resumen').innerHTML = htmlItems;
+        document.getElementById('monto-envio').innerText = (subtotal > 0 && subtotal >= MINIMO_ENVIO_GRATIS) ? "¡GRATIS!" : (subtotal > 0 ? formatearMoneda(costoEnvio) : "$ 0");
+        document.getElementById('monto-total-display').innerText = formatearMoneda(subtotal + costoEnvio);
+        document.getElementById('caja-resumen').style.display = subtotal > 0 ? 'block' : 'none';
+    }
+
+    async function enviarPedido() {
+        const n = document.getElementById('cust-name').value.trim();
+        const w = document.getElementById('cust-phone').value.trim();
+        const d = document.getElementById('cust-address').value.trim();
+        if(!n || !d || !w) { alert("⚠️ Por favor, completa tus datos de entrega."); return; }
+
+        let productosParaSheet = [];
+        let itemsWhatsApp = ""; 
+        let subtotal = 0;
+
+        document.querySelectorAll('.qty-num').forEach(el => {
+            const cant = parseInt(el.innerText);
+            if(cant > 0) {
+                const precio = parseFloat(el.dataset.precio);
+                const itemSub = cant * precio;
+                subtotal += itemSub;
+                const prefijoWA = el.dataset.promo === "true" ? "[PROMO] " : "";
+                itemsWhatsApp += `- (x${cant}) ${prefijoWA}${el.dataset.nombre} ${formatearMoneda(itemSub)}\n`;
+                
+                productosParaSheet.push({
+                    categoria: el.dataset.cat,
+                    idproducto: el.dataset.idreal, 
+                    producto: el.dataset.nombre,
+                    precio: precio,
+                    cantidad: cant,
+                    subtotal: itemSub
+                });
+            }
+        });
+
+        if(subtotal === 0) { alert("❌ Selecciona productos antes de enviar."); return; }
+
+        document.getElementById('overlay-carga').style.display = 'flex';
+        const costoEnvio = subtotal >= MINIMO_ENVIO_GRATIS ? 0 : COSTO_ENVIO_BASE;
+        const ahora = new Date();
+        const idPedido = "PED-" + ahora.getTime();
+
+        try {
+            await fetch(URL_APPS_SCRIPT, {
+                method: "POST",
+                mode: "no-cors", 
+                body: JSON.stringify({
+                    idpedido: idPedido,
+                    fecha: ahora.toLocaleDateString('es-AR'),
+                    hora: ahora.toLocaleTimeString('es-AR'),
+                    cliente: n, whatsapp: w, direccion: d,
+                    total: subtotal + costoEnvio,
+                    productos: productosParaSheet
+                })
+            });
+        } catch (e) { console.error(e); }
+
+        let msg = `*TORO RÁPIDO - NUEVO PEDIDO*\n_ID: ${idPedido}_\n\n*CLIENTE:* ${n}\n*DIR:* ${d}\n*TEL:* ${w}\n\n*DETALLE:*\n${itemsWhatsApp}`;
+        msg += `\n*SUBTOTAL:* ${formatearMoneda(subtotal)}`;
+        msg += `\n*ENVÍO:* ${costoEnvio === 0 ? "¡GRATIS!" : formatearMoneda(costoEnvio)}`;
+        msg += `\n*TOTAL:* ${formatearMoneda(subtotal + costoEnvio)}\n\n_⚠️ Sujeto a confirmación de zona._`;
+
+        document.getElementById('overlay-carga').style.display = 'none';
+        window.open(`https://wa.me/${TELEFONO_NEGOCIO}?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    window.onload = obtenerMenu;
+</script>
+</body>
+</html>
