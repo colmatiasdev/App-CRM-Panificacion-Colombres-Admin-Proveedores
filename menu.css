@@ -186,9 +186,17 @@ body {
     box-shadow: 0 4px 12px rgba(15,23,42,0.08);
     transition: 0.2s;
 }
+.tab-promo {
+    border: 1px solid rgba(251, 191, 36, 0.4);
+}
 .tab.active {
     background: var(--primary-red);
     color: white;
+}
+.tab.active-promo {
+    background: var(--toro-gold);
+    color: #7c2d12;
+    box-shadow: 0 6px 16px rgba(251, 191, 36, 0.35);
 }
 
 .content {
@@ -240,6 +248,21 @@ body {
 
 .menu-section { margin-top: 20px; }
 .section-title { font-weight: 800; color: var(--dark-blue); margin-bottom: 12px; }
+.menu-section.section-promo .section-title {
+    color: #7c2d12;
+    background: linear-gradient(90deg, rgba(251, 191, 36, 0.35), rgba(251, 191, 36, 0.15));
+    padding: 8px 14px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid rgba(251, 191, 36, 0.7);
+    box-shadow: 0 8px 16px rgba(251, 191, 36, 0.25);
+}
+.menu-section.section-promo .section-title::before {
+    content: "👑";
+    font-size: 1.05em;
+}
 .items-list { display: grid; gap: 12px; }
 .item {
     display: grid;

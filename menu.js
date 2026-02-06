@@ -193,15 +193,17 @@ const renderMenu = (menuData) => {
     sectionsContainer.innerHTML = "";
 
     menuData.forEach((section, index) => {
+        const isPromo = normalizeKey(section.category).includes("promo");
         const sectionId = `cat-${slugify(section.category)}`;
         const tab = document.createElement("button");
-        tab.className = `tab${index === 0 ? " active" : ""}`;
+        tab.className = `tab${isPromo ? " tab-promo" : ""}${index === 0 ? " active" : ""}`;
         tab.dataset.target = sectionId;
+        tab.dataset.promo = isPromo ? "true" : "false";
         tab.textContent = section.category;
         tabsContainer.appendChild(tab);
 
         const sectionEl = document.createElement("section");
-        sectionEl.className = "menu-section";
+        sectionEl.className = `menu-section${isPromo ? " section-promo" : ""}`;
         sectionEl.id = sectionId;
         sectionEl.innerHTML = `
             <div class="section-title">${section.category}</div>
@@ -307,7 +309,9 @@ const initCategoriesV2 = () => {
             if (section.offsetTop <= top) activeId = section.id;
         });
         buttons.forEach((btn) => {
-            btn.classList.toggle("active", btn.dataset.target === activeId);
+            const isActive = btn.dataset.target === activeId;
+            btn.classList.toggle("active", isActive);
+            btn.classList.toggle("active-promo", isActive && btn.dataset.promo === "true");
         });
     };
     window.addEventListener("scroll", () => requestAnimationFrame(onScroll));
