@@ -33,9 +33,21 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         return indices;
     };
+    const loadSlideBg = (slide) => {
+        if (!slide || slide.dataset.loadedBg) return;
+        const url = slide.getAttribute("data-bg");
+        if (url) {
+            slide.style.backgroundImage = `url('${url}')`;
+            slide.dataset.loadedBg = "1";
+        }
+    };
     const setActiveSlide = (nextIndex) => {
         slides.forEach((slide) => slide.classList.remove("active"));
-        slides[nextIndex].classList.add("active");
+        const activeSlide = slides[nextIndex];
+        activeSlide.classList.add("active");
+        loadSlideBg(activeSlide);
+        const nextIdx = (nextIndex + 1) % slides.length;
+        if (slides.length > 1) requestIdleCallback(() => loadSlideBg(slides[nextIdx]), { timeout: 500 });
     };
     let order = slides.length ? shuffleIndices(slides.length) : [];
     if (order.length > 1) {
@@ -48,6 +60,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let orderIndex = 0;
     if (order.length) {
         setActiveSlide(order[orderIndex]);
+        const nextIdx = (orderIndex + 1) % order.length;
+        requestIdleCallback(() => loadSlideBg(slides[order[(orderIndex + 1) % order.length]]), { timeout: 600 });
     }
     const advanceSlide = () => {
         if (slides.length < 2) return;
@@ -60,6 +74,17 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     if (slides.length > 1) {
         setInterval(advanceSlide, 5000);
+    }
+    const menuHref = document.querySelector("#link-menu-activo, .btn-menu-version")?.getAttribute("href");
+    if (menuHref) {
+        const doPrefetch = () => {
+            const link = document.createElement("link");
+            link.rel = "prefetch";
+            link.href = menuHref;
+            document.head.appendChild(link);
+        };
+        if (typeof requestIdleCallback !== "undefined") requestIdleCallback(doPrefetch, { timeout: 2000 });
+        else setTimeout(doPrefetch, 1500);
     }
 
     const igConfig = window.APP_CONFIG?.instagram || {};
@@ -123,7 +148,7 @@ const FETCH_SHEET_TIMEOUT = 12000;
 
 /** Obtiene filas de cualquier hoja vía Apps Script (action=list&sheetName=...). */
 const fetchSheetData = async (sheetName) => {
-    const scriptUrl = window.APP_CONFIG?.appsScriptMenuUrl || window.APP_CONFIG?.appsScriptUrl || "";
+    const scriptUrl = window.APP_CONFIG?.appsScriptMenuUrl || window.APP_CONFIG?.appsScriptPedidosUrl || "";
     if (!scriptUrl || !sheetName) return null;
     const sep = scriptUrl.includes("?") ? "&" : "?";
     const url = `${scriptUrl}${sep}action=list&sheetName=${encodeURIComponent(sheetName)}&_ts=${Date.now()}`;
@@ -505,7 +530,7 @@ const loadHorarioAtencion = async () => {
         updateHeroEstadoLocal(false);
     };
 
-    const scriptUrl = window.APP_CONFIG?.appsScriptMenuUrl || window.APP_CONFIG?.appsScriptUrl || "";
+    const scriptUrl = window.APP_CONFIG?.appsScriptMenuUrl || window.APP_CONFIG?.appsScriptPedidosUrl || "";
     if (!scriptUrl) {
         hideLoadingShowFallback();
         updateHeroEstadoLocal(false);

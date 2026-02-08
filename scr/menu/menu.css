@@ -8,12 +8,14 @@
 }
 
 * { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
 body {
     position: relative;
     margin: 0;
     font-family: 'Inter', system-ui, sans-serif;
     background: #f1f5f9;
     color: #334155;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .menu-loading {
@@ -56,8 +58,10 @@ body {
     margin-bottom: 16px;
 }
 .back-btn {
-    width: 36px;
-    height: 36px;
+    min-width: 44px;
+    min-height: 44px;
+    width: 44px;
+    height: 44px;
     border-radius: 12px;
     background: var(--soft-red);
     color: var(--primary-red);
@@ -956,11 +960,12 @@ body {
 
 .floating-checkout {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
+    bottom: max(20px, env(safe-area-inset-bottom));
+    right: max(20px, env(safe-area-inset-right));
     background: var(--dark-blue);
     color: white;
     padding: 12px 18px;
+    min-height: 44px;
     border-radius: 999px;
     text-decoration: none;
     display: inline-flex;
@@ -1010,5 +1015,5 @@ body {
     .item { padding: 10px; }
     .checkout-card { padding: 14px; border-radius: 18px; }
     .checkout-btn { height: 46px; font-size: 0.92em; }
-    .floating-checkout { bottom: 14px; right: 14px; padding: 10px 14px; font-size: 0.85em; }
+    .floating-checkout { bottom: max(14px, env(safe-area-inset-bottom)); right: max(14px, env(safe-area-inset-right)); padding: 10px 14px; min-height: 48px; font-size: 0.85em; }
 }

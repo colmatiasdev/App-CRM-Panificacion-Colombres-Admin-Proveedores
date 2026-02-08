@@ -197,7 +197,7 @@
     const FETCH_SHEET_TIMEOUT = 10000;
 
     async function fetchHorarioByDay() {
-        const scriptUrl = global.APP_CONFIG?.appsScriptMenuUrl || global.APP_CONFIG?.appsScriptUrl || "";
+        const scriptUrl = global.APP_CONFIG?.appsScriptMenuUrl || global.APP_CONFIG?.appsScriptPedidosUrl || "";
         const sheetName = global.APP_CONFIG?.horarioSheetName || "HORARIO-TORO-RAPIDO";
         if (!scriptUrl || !sheetName) return null;
         const sep = scriptUrl.includes("?") ? "&" : "?";

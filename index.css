@@ -5,11 +5,13 @@
 }
 
 * { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
 body {
     margin: 0;
     font-family: 'Inter', system-ui, sans-serif;
     background: #ffffff;
     color: var(--toro-dark);
+    -webkit-tap-highlight-color: transparent;
 }
 
 .hero-carousel {
@@ -23,6 +25,7 @@ body {
 .carousel-container {
     height: 100%;
     width: 100%;
+    contain: layout paint;
 }
 
 .slide {
@@ -251,6 +254,8 @@ body {
     background: var(--toro-red);
     color: white;
     padding: 14px 28px;
+    min-height: 44px;
+    min-width: 44px;
     border-radius: 50px;
     text-decoration: none;
     font-weight: 800;
@@ -258,6 +263,9 @@ body {
     transition: 0.3s;
     box-shadow: 0 8px 25px rgba(225, 29, 72, 0.4);
     font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(225, 29, 72, 0.6); }
@@ -266,11 +274,16 @@ body {
     background: rgba(255, 255, 255, 0.15);
     color: white;
     padding: 14px 28px;
+    min-height: 44px;
+    min-width: 44px;
     border-radius: 50px;
     text-decoration: none;
     font-weight: 700;
     border: 1px solid rgba(255, 255, 255, 0.3);
     font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .info-section-mensaje {
@@ -322,7 +335,8 @@ body {
     justify-content: center;
     background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
     color: white;
-    padding: 8px 16px;
+    padding: 12px 20px;
+    min-height: 44px;
     border-radius: 999px;
     text-decoration: none;
     font-weight: 800;
@@ -363,7 +377,8 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 8px 14px;
+    padding: 10px 18px;
+    min-height: 44px;
     border-radius: 999px;
     text-decoration: none;
     font-weight: 800;
@@ -548,16 +563,17 @@ body {
 }
 
 @media (max-width: 600px) {
-    .hero-carousel { height: 92vh; }
+    .hero-carousel { height: 100dvh; height: 92vh; }
+    .hero-overlay { padding: 16px; padding-top: max(16px, env(safe-area-inset-top)); }
     .hero-content h1 { font-size: 2rem; }
     .hero-content p { font-size: 0.95rem; }
-    .hero-btns { flex-direction: column; }
-    .btn-primary, .btn-secondary { width: 100%; text-align: center; }
+    .hero-btns { flex-direction: column; gap: 12px; }
+    .btn-primary, .btn-secondary { width: 100%; text-align: center; min-height: 48px; }
     .info-section-mensaje { padding: 50px 16px; }
     .info-header h2 { font-size: 1.4rem; }
     .social-section { padding: 40px 16px; }
-    .social-card { width: fit-content; }
-    .index-footer { padding: 28px 16px 22px; }
+    .social-card { width: fit-content; min-height: 48px; }
+    .index-footer { padding: 28px 16px 22px; padding-bottom: max(22px, env(safe-area-inset-bottom)); }
     .footer-title { font-size: 0.9rem; }
 }
 

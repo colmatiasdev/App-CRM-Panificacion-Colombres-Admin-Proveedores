@@ -24,9 +24,9 @@ window.APP_CONFIG = {
     },
 
     // ========== APPS SCRIPT Y FUENTES DE DATOS ==========
-    /** URL del despliegue de Google Apps Script para envío de pedidos y/o datos generales. */
-    appsScriptUrl: "https://script.google.com/macros/s/AKfycbxXjOn5ygjiIR7yBuoIcIvgLwF5U2ZgtQ-XGGA_YDP1Fkdk7N11QaMkOWxpKSUyw7hNKg/exec",
-    /** URL del despliegue de Apps Script para consultar menú y horarios (puede ser la misma que appsScriptUrl). */
+    /** URL del despliegue de Google Apps Script para envío de pedidos. */
+    appsScriptPedidosUrl: "https://script.google.com/macros/s/AKfycbxXjOn5ygjiIR7yBuoIcIvgLwF5U2ZgtQ-XGGA_YDP1Fkdk7N11QaMkOWxpKSUyw7hNKg/exec",
+    /** URL del despliegue de Apps Script para consultar menú y horarios (puede ser la misma que appsScriptPedidosUrl). */
     appsScriptMenuUrl: "https://script.google.com/macros/s/AKfycbxXjOn5ygjiIR7yBuoIcIvgLwF5U2ZgtQ-XGGA_YDP1Fkdk7N11QaMkOWxpKSUyw7hNKg/exec",
 
     // ========== MENÚ – HOJAS DE CÁLCULO ==========

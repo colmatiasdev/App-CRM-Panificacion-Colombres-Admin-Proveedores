@@ -1,5 +1,5 @@
 const TELEFONO_NEGOCIO = window.APP_CONFIG?.telefonoNegocio || "5493814130520";
-const URL_APPS_SCRIPT = window.APP_CONFIG?.appsScriptUrl || "https://script.google.com/macros/s/AKfycbzllzUCk1UqUV08XINHmy6Omvcl6JZ8_jRYY8k1WS2N_Kgnyec_mEp9CdVUdhrafC_B/exec";
+const URL_APPS_SCRIPT = window.APP_CONFIG?.appsScriptPedidosUrl || "https://script.google.com/macros/s/AKfycbzllzUCk1UqUV08XINHmy6Omvcl6JZ8_jRYY8k1WS2N_Kgnyec_mEp9CdVUdhrafC_B/exec";
 const COSTO_ENVIO_BASE = Number(window.APP_CONFIG?.costoEnvioBase) || 1500;
 const MONTO_MINIMO_ENVIO_GRATIS = Number(window.APP_CONFIG?.montoMinimoEnvioGratis) || 25000;
 
