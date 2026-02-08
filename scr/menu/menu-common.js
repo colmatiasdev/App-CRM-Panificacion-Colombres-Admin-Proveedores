@@ -398,7 +398,69 @@ const loadResumenV2 = async () => {
         const response = await fetch("../menu-resumen/menu-resumen.html");
         if (!response.ok) return;
         container.innerHTML = await response.text();
+        initHorarioAlertaMenu();
     } catch (error) { console.error(error); }
+};
+
+const MENU_COUNTDOWN_UMBRAL_SEG = 10 * 60;
+
+/** Rellena las alertas de horario (portada y resumen) con la misma lógica que index: minutos antes de apertura/cierre. */
+const initHorarioAlertaMenu = async () => {
+    if (typeof window.HorarioAtencion === "undefined") return;
+    const byDay = await window.HorarioAtencion.fetchHorarioByDay();
+    const estado = window.HorarioAtencion.getEstadoHorario(byDay);
+    const seg = estado.segundosHastaCierre != null ? estado.segundosHastaCierre : 0;
+    const mostrarCountdown = estado.tipo === "abierto-pronto-cierre" && seg > 0 && seg <= MENU_COUNTDOWN_UMBRAL_SEG;
+    const endMs = mostrarCountdown ? Date.now() + seg * 1000 : 0;
+
+    const renderAlerta = (containerId) => {
+        const wrap = document.getElementById(containerId);
+        if (!wrap) return;
+        const tipo = estado.tipo;
+        let html = "";
+        if (tipo === "abierto") {
+            html = `<div class="menu-horario-alerta menu-horario-abierto"><i class="fa-solid fa-store"></i><span>${estado.mensaje}</span><span class="menu-horario-badge">Local ABIERTO</span></div>`;
+        } else if (tipo === "abierto-pronto-cierre") {
+            if (mostrarCountdown) {
+                const initial = window.HorarioAtencion.formatCountdown(seg);
+                html = `<div class="menu-horario-alerta menu-horario-pronto-cierre"><i class="fa-solid fa-exclamation-triangle"></i><span class="menu-horario-countdown-label">Pedí antes del cierre</span><span class="menu-horario-countdown" data-end-ms="${endMs}">${initial}</span><span class="menu-horario-badge menu-horario-badge-amber">Local ABIERTO</span></div>`;
+            } else {
+                html = `<div class="menu-horario-alerta menu-horario-pronto-cierre"><i class="fa-solid fa-exclamation-triangle"></i><span>${estado.mensaje}</span><span class="menu-horario-badge menu-horario-badge-amber">Local ABIERTO</span></div>`;
+            }
+        } else if (tipo === "cerrado-abre-en") {
+            html = `<div class="menu-horario-alerta menu-horario-cerrado"><i class="fa-solid fa-clock"></i><span>${estado.mensaje}</span><span class="menu-horario-badge menu-horario-badge-red">Local CERRADO</span></div>`;
+        } else {
+            html = `<div class="menu-horario-alerta menu-horario-cerrado"><i class="fa-solid fa-store"></i><span>${estado.mensaje}</span><span class="menu-horario-badge menu-horario-badge-red">Local CERRADO</span></div>`;
+        }
+        wrap.innerHTML = html;
+        wrap.style.display = "";
+    };
+    renderAlerta("menu-horario-alerta-portada");
+    renderAlerta("menu-horario-alerta-resumen");
+
+    if (mostrarCountdown) {
+        if (window._menuHorarioCountdownInterval) clearInterval(window._menuHorarioCountdownInterval);
+        window._menuHorarioCountdownInterval = setInterval(() => {
+            const els = document.querySelectorAll(".menu-horario-countdown[data-end-ms]");
+            if (!els.length) return;
+            let anyActive = false;
+            els.forEach((el) => {
+                const endMsVal = Number(el.getAttribute("data-end-ms"));
+                const rest = (endMsVal - Date.now()) / 1000;
+                if (rest <= 0) {
+                    el.textContent = "00:00";
+                    el.removeAttribute("data-end-ms");
+                } else {
+                    anyActive = true;
+                    el.textContent = window.HorarioAtencion.formatCountdown(rest);
+                }
+            });
+            if (!anyActive && window._menuHorarioCountdownInterval) {
+                clearInterval(window._menuHorarioCountdownInterval);
+                window._menuHorarioCountdownInterval = null;
+            }
+        }, 1000);
+    }
 };
 
 const bindHeaderActions = () => {

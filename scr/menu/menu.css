@@ -140,6 +140,82 @@ body {
 }
 .badge-modern i { color: var(--primary-red); }
 
+.menu-horario-alerta-wrap {
+    margin-top: 12px;
+}
+#menu-horario-alerta-portada {
+    margin-top: 0;
+    padding: 14px 20px;
+    background: var(--gray-bg);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#menu-horario-alerta-portada .menu-horario-alerta {
+    margin: 0;
+}
+.menu-horario-alerta {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    justify-content: center;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+.menu-horario-alerta i { font-size: 1rem; }
+.menu-horario-abierto {
+    background: rgba(22, 101, 52, 0.2);
+    color: #166534;
+    border: 1px solid rgba(34, 197, 94, 0.5);
+}
+.menu-horario-abierto .menu-horario-badge {
+    background: rgba(34, 197, 94, 0.35);
+    color: #15803d;
+}
+.menu-horario-pronto-cierre {
+    background: rgba(245, 158, 11, 0.2);
+    color: #b45309;
+    border: 1px solid rgba(245, 158, 11, 0.5);
+}
+.menu-horario-pronto-cierre .menu-horario-badge-amber {
+    background: rgba(245, 158, 11, 0.4);
+    color: #92400e;
+}
+.menu-horario-countdown-label {
+    display: inline-block;
+}
+.menu-horario-countdown {
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    font-size: 1.05rem;
+    min-width: 3em;
+    display: inline-block;
+}
+.menu-horario-cerrado {
+    background: rgba(185, 28, 28, 0.12);
+    color: #b91c1c;
+    border: 1px solid rgba(185, 28, 28, 0.4);
+}
+.menu-horario-badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 4px 10px;
+    border-radius: 6px;
+}
+.menu-horario-badge-red {
+    background: rgba(185, 28, 28, 0.25);
+    color: #b91c1c;
+}
+#resumen-pedido .menu-horario-alerta-wrap {
+    margin-top: 0;
+    margin-bottom: 12px;
+}
+
 .promo {
     padding: 18px 20px 0;
 }
