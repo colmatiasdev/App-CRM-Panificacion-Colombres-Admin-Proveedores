@@ -319,7 +319,7 @@ const renderOneItem = (item) => {
             <article class="item item-compuesto ${item.available === false ? "is-out" : ""}">
                 <div class="item-compuesto-header">
                     <a href="${PRODUCTO_BASE}?id=${encodeURIComponent(item.id)}" class="item-img-link producto-ver-detalle" data-id="${encodeURIComponent(item.id)}" aria-label="Ver detalle de ${(item.name || "").replace(/"/g, "&quot;")}">
-                        <img src="${item.img || PLACEHOLDER_IMAGE}" alt="${item.name}" class="item-img" onerror="this.onerror=null;this.classList.add('img-error');this.src=window.__MENU_IMG_FALLBACK">
+                        <img src="${item.img || PLACEHOLDER_IMAGE}" alt="${item.name}" class="item-img" loading="lazy" decoding="async" onerror="this.onerror=null;this.classList.add('img-error');this.src=window.__MENU_IMG_FALLBACK">
                     </a>
                     ${item.available === false ? `<span class="out-badge">AGOTADO</span>` : ""}
                     <div class="item-compuesto-info">
@@ -345,7 +345,7 @@ const renderOneItem = (item) => {
     return `
             <article class="item ${item.available === false ? "is-out" : ""}">
                 <a href="${PRODUCTO_BASE}?id=${encodeURIComponent(item.id)}" class="item-img-link producto-ver-detalle" data-id="${encodeURIComponent(item.id)}" aria-label="Ver detalle de ${(item.name || "").replace(/"/g, "&quot;")}">
-                    <img src="${item.img || PLACEHOLDER_IMAGE}" alt="${item.name}" class="item-img" onerror="this.onerror=null;this.classList.add('img-error');this.src=window.__MENU_IMG_FALLBACK">
+                    <img src="${item.img || PLACEHOLDER_IMAGE}" alt="${item.name}" class="item-img" loading="lazy" decoding="async" onerror="this.onerror=null;this.classList.add('img-error');this.src=window.__MENU_IMG_FALLBACK">
                 </a>
                 ${item.available === false ? `<span class="out-badge">AGOTADO</span>` : ""}
                 <div>

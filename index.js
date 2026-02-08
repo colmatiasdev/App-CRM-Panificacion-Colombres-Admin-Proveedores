@@ -33,9 +33,21 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         return indices;
     };
+    const loadSlideBg = (slide) => {
+        if (!slide || slide.dataset.loadedBg) return;
+        const url = slide.getAttribute("data-bg");
+        if (url) {
+            slide.style.backgroundImage = `url('${url}')`;
+            slide.dataset.loadedBg = "1";
+        }
+    };
     const setActiveSlide = (nextIndex) => {
         slides.forEach((slide) => slide.classList.remove("active"));
-        slides[nextIndex].classList.add("active");
+        const activeSlide = slides[nextIndex];
+        activeSlide.classList.add("active");
+        loadSlideBg(activeSlide);
+        const nextIdx = (nextIndex + 1) % slides.length;
+        if (slides.length > 1) requestIdleCallback(() => loadSlideBg(slides[nextIdx]), { timeout: 500 });
     };
     let order = slides.length ? shuffleIndices(slides.length) : [];
     if (order.length > 1) {
@@ -48,6 +60,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let orderIndex = 0;
     if (order.length) {
         setActiveSlide(order[orderIndex]);
+        const nextIdx = (orderIndex + 1) % order.length;
+        requestIdleCallback(() => loadSlideBg(slides[order[(orderIndex + 1) % order.length]]), { timeout: 600 });
     }
     const advanceSlide = () => {
         if (slides.length < 2) return;
@@ -60,6 +74,17 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     if (slides.length > 1) {
         setInterval(advanceSlide, 5000);
+    }
+    const menuHref = document.querySelector("#link-menu-activo, .btn-menu-version")?.getAttribute("href");
+    if (menuHref) {
+        const doPrefetch = () => {
+            const link = document.createElement("link");
+            link.rel = "prefetch";
+            link.href = menuHref;
+            document.head.appendChild(link);
+        };
+        if (typeof requestIdleCallback !== "undefined") requestIdleCallback(doPrefetch, { timeout: 2000 });
+        else setTimeout(doPrefetch, 1500);
     }
 
     const igConfig = window.APP_CONFIG?.instagram || {};
@@ -123,7 +148,7 @@ const FETCH_SHEET_TIMEOUT = 12000;
 
 /** Obtiene filas de cualquier hoja vía Apps Script (action=list&sheetName=...). */
 const fetchSheetData = async (sheetName) => {
-    const scriptUrl = window.APP_CONFIG?.appsScriptMenuUrl || window.APP_CONFIG?.appsScriptUrl || "";
+    const scriptUrl = window.APP_CONFIG?.appsScriptMenuUrl || window.APP_CONFIG?.appsScriptPedidosUrl || "";
     if (!scriptUrl || !sheetName) return null;
     const sep = scriptUrl.includes("?") ? "&" : "?";
     const url = `${scriptUrl}${sep}action=list&sheetName=${encodeURIComponent(sheetName)}&_ts=${Date.now()}`;
@@ -154,6 +179,36 @@ const fetchSheetData = async (sheetName) => {
 };
 
 const fetchHorarioData = async () => fetchSheetData(window.APP_CONFIG?.horarioSheetName || "HORARIO-TORO-RAPIDO");
+
+/** Devuelve el feriado que corresponde a la fecha dada (mismo día), o null. */
+const getFeriadoParaFecha = (feriados, date) => {
+    if (!feriados || !feriados.length) return null;
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    for (const f of feriados) {
+        const fd = new Date(f.fecha);
+        fd.setHours(0, 0, 0, 0);
+        if (d.getTime() === fd.getTime()) return f;
+    }
+    return null;
+};
+
+/**
+ * Horario efectivo: si hoy es un feriado con SE_ATIENDE=SI, prevalece el horario del feriado para ese día.
+ * Si SE_ATIENDE=NO, prevalece el horario de HORARIO-TORO-RAPIDO (no se reemplaza).
+ */
+const mergeByDayConFeriadoHoy = (byDay, feriados) => {
+    const res = {};
+    for (const dia of ORDEN_DIAS) res[dia] = (byDay[dia] && [...byDay[dia]]) || [];
+    const hoy = new Date();
+    const feriadoHoy = getFeriadoParaFecha(feriados, hoy);
+    if (!feriadoHoy) return res;
+    const diaHoy = DIA_HOY_NAMES[hoy.getDay()];
+    if (feriadoHoy.seAtiende && feriadoHoy.rango24h) {
+        res[diaHoy] = [feriadoHoy.rango24h];
+    }
+    return res;
+};
 
 /** Agrupa filas por DIA y formatea franjas en 24h. Retorna { [dia]: ["07:00 - 15:00", "17:00 - 21:00"], ... } */
 const parseHorarioRows = (rows) => {
@@ -505,7 +560,7 @@ const loadHorarioAtencion = async () => {
         updateHeroEstadoLocal(false);
     };
 
-    const scriptUrl = window.APP_CONFIG?.appsScriptMenuUrl || window.APP_CONFIG?.appsScriptUrl || "";
+    const scriptUrl = window.APP_CONFIG?.appsScriptMenuUrl || window.APP_CONFIG?.appsScriptPedidosUrl || "";
     if (!scriptUrl) {
         hideLoadingShowFallback();
         updateHeroEstadoLocal(false);
@@ -551,10 +606,11 @@ const loadHorarioAtencion = async () => {
     }
 
     const byDay = parseHorarioRows(rawHorario);
-    const diasConDatos = Object.keys(byDay).filter((d) => byDay[d].length > 0);
+    const byDayEfectivo = mergeByDayConFeriadoHoy(byDay || {}, feriados);
+    const diasConDatos = Object.keys(byDay || {}).filter((d) => (byDay || {})[d].length > 0);
 
     if (rawHorario != null) {
-        updateHeroEstadoLocal(estaAbiertoAhora(byDay), byDay);
+        updateHeroEstadoLocal(estaAbiertoAhora(byDayEfectivo), byDayEfectivo);
     } else {
         updateHeroEstadoLocal(false);
     }
@@ -569,15 +625,16 @@ const loadHorarioAtencion = async () => {
 
     const mostrarSoloHoy = !!proximo;
     const diaHoy = DIA_HOY_NAMES[new Date().getDay()];
-    let ordenados = ORDEN_DIAS.filter((d) => byDay[d] && byDay[d].length > 0);
-    if (mostrarSoloHoy && byDay[diaHoy] && byDay[diaHoy].length > 0) {
+    const byDayHabitual = byDay || {};
+    let ordenados = ORDEN_DIAS.filter((d) => byDayHabitual[d] && byDayHabitual[d].length > 0);
+    if (mostrarSoloHoy && byDayHabitual[diaHoy] && byDayHabitual[diaHoy].length > 0) {
         ordenados = [diaHoy];
     } else if (mostrarSoloHoy) {
         ordenados = [];
     }
     const tituloRegular = mostrarSoloHoy ? '<div class="horario-regular-titulo">Horario habitual de atención</div>' : '';
     const fragmentos = ordenados.map((dia) => {
-        const rangos = byDay[dia].map((r) => `<span class="horario-rango${r === "CERRADO" ? " horario-cerrado" : ""}">${r}</span>`).join("");
+        const rangos = byDayHabitual[dia].map((r) => `<span class="horario-rango${r === "CERRADO" ? " horario-cerrado" : ""}">${r}</span>`).join("");
         return `<div class="horario-dia"><div class="horario-dia-col"><span class="horario-dia-nombre">${dia}</span></div><div class="horario-horarios-col">${rangos}</div></div>`;
     });
     listEl.innerHTML = tituloRegular + fragmentos.join("");

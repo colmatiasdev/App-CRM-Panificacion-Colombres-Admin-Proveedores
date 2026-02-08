@@ -2,23 +2,28 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0f172a">
     <title>Toro Rápido - Inicio</title>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" href="imagenes/portada/portada1.jpeg" as="image">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="scr/footer/footer.css">
     <link rel="stylesheet" href="index.css">
-    <script src="config.js"></script>
-    <script src="scr/footer/footer.js"></script>
+    <link rel="stylesheet" href="scr/footer/footer.css">
+    <script src="config.js" defer></script>
+    <script src="scr/footer/footer.js" defer></script>
 </head>
 <body>
 <section class="hero-carousel">
     <div class="carousel-container" id="carousel">
-        <div class="slide active" style="background-image: url('imagenes/portada/portada1.jpeg')"></div>
-        <div class="slide" style="background-image: url('imagenes/portada/portada2.jpeg')"></div>
-        <div class="slide" style="background-image: url('imagenes/portada/portada3.jpeg')"></div>
-        <div class="slide" style="background-image: url('imagenes/portada/portada4.jpeg')"></div>
-        <div class="slide" style="background-image: url('imagenes/portada/portada5.jpeg')"></div>
+        <div class="slide active" data-bg="imagenes/portada/portada1.jpeg" style="background-image: url('imagenes/portada/portada1.jpeg')"></div>
+        <div class="slide" data-bg="imagenes/portada/portada2.jpeg"></div>
+        <div class="slide" data-bg="imagenes/portada/portada3.jpeg"></div>
+        <div class="slide" data-bg="imagenes/portada/portada4.jpeg"></div>
+        <div class="slide" data-bg="imagenes/portada/portada5.jpeg"></div>
     </div>
 
     <div class="hero-overlay">
@@ -135,6 +140,6 @@
     </div>
 </footer>
 
-<script src="index.js"></script>
+<script src="index.js" defer></script>
 </body>
 </html>
