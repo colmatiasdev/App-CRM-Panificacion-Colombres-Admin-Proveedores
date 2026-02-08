@@ -372,21 +372,28 @@ const initActionsV2 = () => {
     });
 };
 
-/** Muestra u oculta el modo reserva en el botón y la alerta del resumen. */
-const applyReservaUI = (reserva) => {
+/** Muestra u oculta el modo reserva en el botón y la alerta del resumen. estado: { puedeReservar, textoHastaApertura } */
+const applyReservaUI = (estado) => {
+    const reserva = estado && estado.puedeReservar === true;
     const btn = document.getElementById("v2-confirm");
     const note = document.querySelector(".checkout-note");
     let alertaReserva = document.getElementById("menu-resumen-alerta-reserva");
     if (reserva && btn) {
         btn.innerHTML = "<i class=\"fa-solid fa-calendar-check\"></i> Realizar reserva";
         btn.classList.add("checkout-btn-reserva");
+        const tiempoLine = estado.textoHastaApertura
+            ? "<p class=\"menu-resumen-alerta-reserva-tiempo\">" + estado.textoHastaApertura + "</p>"
+            : "";
+        const content = "<div class=\"menu-resumen-alerta-reserva-content\"><div class=\"menu-resumen-alerta-reserva-titulo\"><i class=\"fa-solid fa-calendar-check\"></i> Estás realizando una <strong>RESERVA</strong></div><p class=\"menu-resumen-alerta-reserva-leyenda\">La reserva del pedido será tomada al momento de la apertura del local.</p>" + tiempoLine + "</div>";
         if (!alertaReserva) {
             alertaReserva = document.createElement("div");
             alertaReserva.id = "menu-resumen-alerta-reserva";
             alertaReserva.className = "menu-resumen-alerta-reserva";
-            alertaReserva.innerHTML = "<i class=\"fa-solid fa-info-circle\"></i><span>Estás realizando una <strong>reserva</strong>. El pedido será preparado para cuando abramos el local.</span>";
+            alertaReserva.innerHTML = content;
             if (note && note.parentNode) note.parentNode.insertBefore(alertaReserva, note);
             else btn.parentNode.appendChild(alertaReserva);
+        } else {
+            alertaReserva.innerHTML = content;
         }
         alertaReserva.style.display = "";
     } else if (btn) {
@@ -444,9 +451,19 @@ const initHorarioAlertaMenu = async () => {
         const wrap = document.getElementById(containerId);
         if (!wrap) return;
         const tipo = estado.tipo;
+        if (tipo === "cerrado" || tipo === "cerrado-abre-en") {
+            wrap.innerHTML = "";
+            wrap.style.display = "none";
+            return;
+        }
+        if (tipo === "abierto" && containerId === "menu-horario-alerta-resumen") {
+            wrap.innerHTML = "";
+            wrap.style.display = "none";
+            return;
+        }
         let html = "";
         if (tipo === "abierto") {
-            html = `<div class="menu-horario-alerta menu-horario-abierto"><i class="fa-solid fa-store"></i><span>${estado.mensaje}</span><span class="menu-horario-badge">Local ABIERTO</span></div>`;
+            html = `<div class="menu-horario-alerta menu-horario-abierto"><i class="fa-solid fa-store"></i><span class="menu-horario-badge">Local ABIERTO</span></div>`;
         } else if (tipo === "abierto-pronto-cierre") {
             if (mostrarCountdown) {
                 const initial = window.HorarioAtencion.formatCountdown(seg);
@@ -454,12 +471,6 @@ const initHorarioAlertaMenu = async () => {
             } else {
                 html = `<div class="menu-horario-alerta menu-horario-pronto-cierre"><i class="fa-solid fa-exclamation-triangle"></i><span>${estado.mensaje}</span><span class="menu-horario-badge menu-horario-badge-amber">Local ABIERTO</span></div>`;
             }
-        } else if (tipo === "cerrado-abre-en") {
-            html = `<div class="menu-horario-alerta menu-horario-cerrado"><i class="fa-solid fa-clock"></i><span>${estado.mensaje}</span><span class="menu-horario-badge menu-horario-badge-red">Local CERRADO</span></div>
-<div class="menu-cerrado-info"><i class="fa-solid fa-circle-info"></i><div class="menu-cerrado-info-text"><strong>Podés ver el menú las 24 hs</strong><span>Recorré la carta cuando quieras para conocer productos, precios y detalles. Cuando estemos abiertos, ya sabés qué pedir.</span></div></div>`;
-        } else {
-            html = `<div class="menu-horario-alerta menu-horario-cerrado"><i class="fa-solid fa-store"></i><span>${estado.mensaje}</span><span class="menu-horario-badge menu-horario-badge-red">Local CERRADO</span></div>
-<div class="menu-cerrado-info"><i class="fa-solid fa-circle-info"></i><div class="menu-cerrado-info-text"><strong>Podés ver el menú las 24 hs</strong><span>Recorré la carta cuando quieras para conocer productos, precios y detalles. Cuando estemos abiertos, ya sabés qué pedir.</span></div></div>`;
         }
         wrap.innerHTML = html;
         wrap.style.display = "";
@@ -468,17 +479,31 @@ const initHorarioAlertaMenu = async () => {
     renderAlerta("menu-horario-alerta-resumen");
 
     window.__menuPuedeReservar = estado.puedeReservar === true;
-    applyReservaUI(estado.puedeReservar === true);
+    applyReservaUI(estado);
 
     let floatingCerradoEl = document.getElementById("menu-floating-cerrado");
     if (floatingCerradoEl) floatingCerradoEl.remove();
+    const mostrarBadgeCerrado = window.APP_CONFIG?.mostrarBadgeFlotanteCerrado !== false;
+    const mostrarBadgeReserva = window.APP_CONFIG?.mostrarBadgeFlotanteReserva !== false;
     const esCerrado = estado.tipo === "cerrado" || estado.tipo === "cerrado-abre-en";
-    if (esCerrado) {
+    const esReserva = estado.puedeReservar === true;
+    const mostrarBadge = esCerrado && (esReserva ? mostrarBadgeReserva : mostrarBadgeCerrado);
+    if (mostrarBadge) {
+        const textoCerrado = esReserva
+            ? "Se encuentra habilitado para hacer un pedido"
+            : "Cerrado por el momento";
         floatingCerradoEl = document.createElement("div");
         floatingCerradoEl.id = "menu-floating-cerrado";
-        floatingCerradoEl.className = "floating-cerrado";
-        floatingCerradoEl.innerHTML = `<i class="fa-solid fa-store"></i><span class="floating-cerrado-texto">${estado.mensaje}</span><span class="floating-cerrado-badge">Local CERRADO</span>`;
+        const claseAbajo = !esReserva ? " floating-cerrado-abajo" : "";
+        floatingCerradoEl.className = "floating-cerrado" + (esReserva ? " floating-cerrado-reserva" : "") + claseAbajo;
+        const icono = esReserva ? "fa-calendar-check" : "fa-store";
+        floatingCerradoEl.innerHTML = `<div class="floating-cerrado-line1"><i class="fa-solid ${icono}"></i><span class="floating-cerrado-badge">Local CERRADO</span></div><span class="floating-cerrado-texto">${textoCerrado}</span>`;
         document.body.appendChild(floatingCerradoEl);
+    }
+
+    const floatingCheckoutEl = document.querySelector(".floating-checkout");
+    if (floatingCheckoutEl) {
+        floatingCheckoutEl.style.display = (esCerrado && !esReserva) ? "none" : "";
     }
 
     let floatingCountdownEl = document.getElementById("menu-floating-countdown");

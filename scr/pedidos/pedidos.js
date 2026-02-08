@@ -168,6 +168,22 @@ async function initPedidos() {
     const esReserva = params.get("reserva") === "1";
     const bannerReserva = document.getElementById("pedidos-banner-reserva");
     if (bannerReserva) bannerReserva.style.display = esReserva ? "block" : "none";
+    if (linkModificar) linkModificar.classList.toggle("boton-volver-menu-reserva", esReserva);
+    const linkModificarTexto = document.getElementById("link-modificar-texto");
+    if (linkModificarTexto) linkModificarTexto.textContent = esReserva ? "Modificar reserva" : "Modificar pedido";
+    const resumenNote = document.getElementById("resumen-menu-note");
+    if (resumenNote) resumenNote.textContent = esReserva ? "Revisá tu reserva antes de enviarla por WhatsApp." : "Revisá tu pedido antes de enviarlo por WhatsApp.";
+    if (esReserva && typeof window.HorarioAtencion !== "undefined") {
+        try {
+            const byDay = await window.HorarioAtencion.fetchHorarioByDay();
+            const estado = window.HorarioAtencion.getEstadoHorario(byDay);
+            const elTiempo = document.getElementById("pedidos-banner-reserva-tiempo");
+            if (elTiempo && estado.textoHastaApertura) {
+                elTiempo.textContent = estado.textoHastaApertura;
+                elTiempo.style.display = "";
+            }
+        } catch (e) { /* ignorar */ }
+    }
     renderResumenMenu();
     await cargarPie();
 }

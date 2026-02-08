@@ -255,15 +255,28 @@
         const horaStr = proxima ? `${String(proxima.hora).padStart(2, "0")}:${String(proxima.minuto).padStart(2, "0")}` : "";
         const horasReserva = Math.max(0, Number(global.APP_CONFIG?.horasAntesAperturaParaReserva) || 2);
         const puedeReservar = proxima && proxima.minutosDesdeAhora <= horasReserva * 60;
+        const minutosHastaApertura = proxima ? proxima.minutosDesdeAhora : null;
+        const textoHastaApertura = minutosHastaApertura != null ? formatTiempoHastaApertura(minutosHastaApertura) : null;
+        const extra = proxima ? { horaApertura: horaStr, minutosHastaApertura, textoHastaApertura } : {};
         if (mostrarAbreEn) {
-            return { abierto: false, tipo: "cerrado-abre-en", mensaje: `El local abre a las ${horaStr}`, horaApertura: horaStr, puedeReservar };
+            return { abierto: false, tipo: "cerrado-abre-en", mensaje: `El local abre a las ${horaStr}`, puedeReservar, ...extra };
         }
-        return { abierto: false, tipo: "cerrado", mensaje: "Cerrado por el momento", puedeReservar: !!puedeReservar };
+        return { abierto: false, tipo: "cerrado", mensaje: "Cerrado por el momento", puedeReservar: !!puedeReservar, ...extra };
+    }
+
+    function formatTiempoHastaApertura(minutos) {
+        const m = Math.max(0, Math.floor(minutos));
+        if (m < 60) return `Faltan ${m} min para la apertura`;
+        const h = Math.floor(m / 60);
+        const min = m % 60;
+        if (min === 0) return h === 1 ? "Falta 1 h para la apertura" : `Faltan ${h} h para la apertura`;
+        return `Faltan ${h} h ${min} min para la apertura`;
     }
 
     global.HorarioAtencion = {
         fetchHorarioByDay,
         getEstadoHorario,
-        formatCountdown
+        formatCountdown,
+        formatTiempoHastaApertura
     };
 })(typeof window !== "undefined" ? window : this);

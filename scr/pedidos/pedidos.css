@@ -28,10 +28,35 @@ body { font-family: 'Inter', system-ui, sans-serif; color: #334155; }
     color: #854d0e;
     line-height: 1.35;
 }
-.pedidos-banner-reserva i {
+.pedidos-banner-reserva-content { flex: 1; min-width: 0; }
+.pedidos-banner-reserva-titulo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 800;
+    font-size: 1rem;
+    margin-bottom: 6px;
+    color: #854d0e;
+}
+.pedidos-banner-reserva-titulo i {
     color: #ca8a04;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     flex-shrink: 0;
+}
+.pedidos-banner-reserva-titulo strong { color: #a16207; }
+.pedidos-banner-reserva-leyenda {
+    margin: 0 0 4px 0;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.35;
+    color: #854d0e;
+}
+.pedidos-banner-reserva-tiempo {
+    margin: 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #a16207;
+    line-height: 1.3;
 }
 .pedidos-banner-reserva strong { color: #a16207; }
 
@@ -206,6 +231,8 @@ body { font-family: 'Inter', system-ui, sans-serif; color: #334155; }
 
 .boton-pedido { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; background: var(--whatsapp-color); color: white; height: 65px; border-radius: 18px; border: none; font-size: 1.1em; font-weight: 800; margin-top: 20px; box-shadow: 0 10px 20px rgba(37, 211, 102, 0.2); cursor: pointer; }
 .boton-volver-menu { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; background: var(--rojo-toro); color: white; height: 55px; border-radius: 18px; text-decoration: none; font-size: 1em; font-weight: 800; margin-top: 12px; border: 1px solid rgba(225, 29, 72, 0.4); box-shadow: 0 10px 20px rgba(225, 29, 72, 0.22); }
+.boton-volver-menu.boton-volver-menu-reserva { background: #ca8a04; color: #1c1917; border-color: rgba(202, 138, 4, 0.5); box-shadow: 0 10px 20px rgba(202, 138, 4, 0.3); }
+.boton-volver-menu.boton-volver-menu-reserva:hover { background: #a16207; color: #fff; }
 
 
 #overlay-carga { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.8); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; }

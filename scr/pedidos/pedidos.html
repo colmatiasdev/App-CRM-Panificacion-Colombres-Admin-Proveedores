@@ -18,11 +18,14 @@
 
 <div class="contenedor">
     <div id="pedidos-banner-reserva" class="pedidos-banner-reserva" style="display:none;">
-        <i class="fa-solid fa-calendar-check"></i>
-        <span>Estás realizando una <strong>reserva</strong>. El pedido será preparado para cuando abramos el local.</span>
+        <div class="pedidos-banner-reserva-content">
+            <div class="pedidos-banner-reserva-titulo"><i class="fa-solid fa-calendar-check"></i> Estás realizando una <strong>RESERVA</strong></div>
+            <p class="pedidos-banner-reserva-leyenda">La reserva del pedido será tomada al momento de la apertura del local.</p>
+            <p id="pedidos-banner-reserva-tiempo" class="pedidos-banner-reserva-tiempo" style="display:none;"></p>
+        </div>
     </div>
     <a id="link-modificar-pedido" href="../menu/menu-simple/menu-simple.html" class="boton-volver-menu" onclick="sessionStorage.setItem('toro_scroll_resumen','1')">
-        <i class="fa-solid fa-pen-to-square"></i> Modificar pedido
+        <i class="fa-solid fa-pen-to-square"></i> <span id="link-modificar-texto">Modificar pedido</span>
     </a>
 
     <div class="resumen-menu" id="resumen-menu" style="display:none;">
@@ -40,7 +43,7 @@
             <span>Total</span>
             <strong id="resumen-menu-total">$ 0</strong>
         </div>
-        <div class="resumen-menu-note">Revisá tu pedido antes de enviarlo por WhatsApp.</div>
+        <div id="resumen-menu-note" class="resumen-menu-note">Revisá tu pedido antes de enviarlo por WhatsApp.</div>
     </div>
 
     <div class="resumen-caja" id="caja-resumen">
@@ -106,6 +109,7 @@
 </div>
 
     <script src="../../config.js"></script>
+    <script src="../menu/horario-atencion.js"></script>
     <script src="../footer/footer.js"></script>
     <script src="pedidos.js"></script>
 </body>

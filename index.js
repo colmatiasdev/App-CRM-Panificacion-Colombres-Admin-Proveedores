@@ -342,13 +342,16 @@ const startHeroCountdown = () => {
     }, 1000);
 };
 
-/** Actualiza el bloque hero "Local ABIERTO / CERRADO" según si estamos en horario de atención. Si está cerrado y hay byDay, puede mostrar "El local abre a las HH:MM" dentro del margen config. Si está abierto y faltan pocos min para cerrar, alerta para que realice el pedido. */
+/** Actualiza el bloque hero "Local ABIERTO" (fijo) o crea el badge flotante "Local CERRADO" (solo cerrado/reserva). */
 const updateHeroEstadoLocal = (abierto, byDay) => {
-    const floatingEl = document.getElementById("hero-floating-countdown");
-    if (floatingEl) floatingEl.remove();
+    const floatingCountdownEl = document.getElementById("hero-floating-countdown");
+    if (floatingCountdownEl) floatingCountdownEl.remove();
+    const floatingCerradoEl = document.getElementById("hero-floating-cerrado");
+    if (floatingCerradoEl) floatingCerradoEl.remove();
     const el = document.getElementById("hero-estado-local");
     if (!el) return;
     if (abierto) {
+        el.style.display = "";
         const minutosAntesCierre = Math.max(0, Number(window.APP_CONFIG?.minutosAntesCierre) || 30);
         const minHastaCierre = byDay ? getMinutosHastaCierre(byDay) : null;
         const segHastaCierre = byDay ? getSegundosHastaCierre(byDay) : null;
@@ -377,18 +380,27 @@ const updateHeroEstadoLocal = (abierto, byDay) => {
             }
         } else {
             el.setAttribute("data-estado", "abierto");
-            el.innerHTML = '<i class="fa-solid fa-store"></i><span class="hero-abierto-texto">Estamos atendiendo</span><span class="hero-abierto-badge">Local ABIERTO</span>';
+            el.innerHTML = '<i class="fa-solid fa-store"></i><span class="hero-abierto-badge">Local ABIERTO</span>';
         }
     } else {
-        el.setAttribute("data-estado", "cerrado");
-        const minutosAntes = Math.max(0, Number(window.APP_CONFIG?.minutosAntesApertura) || 20);
+        el.style.display = "none";
+        const mostrarBadgeCerrado = window.APP_CONFIG?.mostrarBadgeFlotanteCerrado !== false;
+        const mostrarBadgeReserva = window.APP_CONFIG?.mostrarBadgeFlotanteReserva !== false;
         const proxima = byDay ? getProximaApertura(byDay) : null;
-        const mostrarAbreEn = proxima && proxima.minutosDesdeAhora <= minutosAntes;
-        const horaStr = proxima ? `${String(proxima.hora).padStart(2, "0")}:${String(proxima.minuto).padStart(2, "0")}` : "";
-        if (mostrarAbreEn) {
-            el.innerHTML = `<i class="fa-solid fa-clock"></i><span class="hero-abierto-texto">El local abre a las ${horaStr}</span><span class="hero-abierto-badge hero-cerrado-badge">Local CERRADO</span>`;
-        } else {
-            el.innerHTML = '<i class="fa-solid fa-store"></i><span class="hero-abierto-texto">Cerrado por el momento</span><span class="hero-abierto-badge hero-cerrado-badge">Local CERRADO</span>';
+        const horasReserva = Math.max(0, Number(window.APP_CONFIG?.horasAntesAperturaParaReserva) || 2);
+        const puedeReservar = proxima && proxima.minutosDesdeAhora <= horasReserva * 60;
+        const esReserva = puedeReservar;
+        const mostrarBadge = (esReserva ? mostrarBadgeReserva : mostrarBadgeCerrado) !== false;
+        if (mostrarBadge) {
+            const textoCerrado = esReserva
+                ? "Se encuentra habilitado para hacer un pedido"
+                : "Cerrado por el momento";
+            const flCerrado = document.createElement("div");
+            flCerrado.id = "hero-floating-cerrado";
+            flCerrado.className = "floating-cerrado" + (esReserva ? " floating-cerrado-reserva" : "");
+            const icono = esReserva ? "fa-calendar-check" : "fa-store";
+            flCerrado.innerHTML = `<div class="floating-cerrado-line1"><i class="fa-solid ${icono}"></i><span class="floating-cerrado-badge">Local CERRADO</span></div><span class="floating-cerrado-texto">${textoCerrado}</span>`;
+            document.body.appendChild(flCerrado);
         }
     }
 };
