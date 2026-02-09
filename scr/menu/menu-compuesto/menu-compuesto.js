@@ -87,9 +87,23 @@ const parseDetalleCsv = (csvText) => {
 };
 
 const mapRowsToMenu = (rows) => {
+    const norm = (s) => String(s ?? "").trim().toLowerCase();
     const getValue = (row, candidates) => {
-        const found = candidates.find((key) => row[key] !== undefined);
-        return found ? row[found] : "";
+        let val = "";
+        const rowKeys = Object.keys(row || {});
+        const foundKey = rowKeys.find((rk) => candidates.some((c) => norm(rk) === norm(c)));
+        if (foundKey !== undefined) val = row[foundKey];
+        return val !== undefined && val !== null ? val : "";
+    };
+    const getFirstNonEmpty = (row, candidates) => {
+        for (const c of candidates) {
+            const rowKey = Object.keys(row || {}).find((rk) => norm(rk) === norm(c));
+            if (rowKey) {
+                const v = cleanText(row[rowKey]);
+                if (v) return v;
+            }
+        }
+        return "";
     };
     const grouped = new Map();
     rows.forEach((row, index) => {
@@ -102,7 +116,7 @@ const mapRowsToMenu = (rows) => {
         const agotadoValue = getValue(row, ["Producto Agotado", "productoagotado", "Agotado", "agotado"]);
         const stockValue = getValue(row, ["Stock", "stock"]);
         const available = parseAvailability(agotadoValue, stockValue);
-        const rawId = cleanText(getValue(row, ["idproducto", "IdProducto", "idmenu-unico", "idmenu-variable", "idmenuunico", "idmenuvariable", "ID", "id", "codigo", "sku"]));
+        const rawId = getFirstNonEmpty(row, ["idproducto", "IdProducto", "idmenu-unico", "idmenu-variable", "idmenuunico", "idmenuvariable", "ID", "id", "codigo", "sku"]);
         const orderValue = cleanText(getValue(row, ["orden", "Orden", "order", "posicion", "position"]));
         const order = orderValue === "" ? Number.POSITIVE_INFINITY : Number.parseFloat(orderValue);
         const enabledValue = getValue(row, ["Habilitado", "habilitado", "activo", "visible", "mostrar"]);
@@ -323,7 +337,9 @@ const applyOpcionesToMenu = (menuSections, opcionesMap) => {
     if (!opcionesMap || !menuSections) return;
     menuSections.forEach((section) => {
         (section.items || []).forEach((item) => {
-            item.opciones = opcionesMap.get(item.id) || [];
+            const id = item.id && String(item.id).trim();
+            const idVar = item.idmenuVariable && String(item.idmenuVariable).trim();
+            item.opciones = (id && opcionesMap.get(id)) || (idVar && opcionesMap.get(idVar)) || [];
         });
     });
 };
