@@ -205,12 +205,22 @@
             });
             updateTotalConOpciones();
         };
-        if (opcionesWrap && opcionesList && opcionesData.length > 0) {
+        const opcionesButtons = document.getElementById("producto-opciones-buttons");
+        if (opcionesWrap && opcionesList && opcionesButtons && opcionesData.length > 0) {
             opcionesWrap.style.display = "block";
+            opcionesButtons.innerHTML = opcionesData
+                .map(
+                    (group, gIdx) => `
+                <button type="button" id="producto-opcion-btn-${gIdx}" class="producto-opcion-btn" data-grupo-idx="${gIdx}" aria-expanded="false" aria-controls="producto-opcion-panel-${gIdx}">
+                    <span class="producto-opcion-btn-text">${escapeHtml(group.nombre)}</span>
+                    <i class="producto-opcion-btn-icon fa-solid fa-chevron-down" aria-hidden="true"></i>
+                </button>`
+                )
+                .join("");
             opcionesList.innerHTML = opcionesData
                 .map(
                     (group, gIdx) => `
-                <div class="producto-opcion-grupo" data-grupo-idx="${gIdx}">
+                <div id="producto-opcion-panel-${gIdx}" class="producto-opcion-grupo producto-opcion-panel" data-grupo-idx="${gIdx}" role="region" aria-labelledby="producto-opcion-btn-${gIdx}" hidden>
                     <h4 class="producto-opcion-grupo-title">${escapeHtml(group.nombre)}${group.obligatorio ? ' <span class="producto-opcion-obligatorio">(elegir al menos uno)</span>' : ""}</h4>
                     <div class="producto-opcion-opciones">
                         ${group.opciones
@@ -231,6 +241,16 @@
                 </div>`
                 )
                 .join("");
+            opcionesButtons.querySelectorAll(".producto-opcion-btn").forEach((btn) => {
+                const gIdx = btn.getAttribute("data-grupo-idx");
+                const panel = document.getElementById("producto-opcion-panel-" + gIdx);
+                btn.addEventListener("click", () => {
+                    const isOpen = panel.hidden === false;
+                    panel.hidden = isOpen;
+                    btn.setAttribute("aria-expanded", !isOpen);
+                    btn.classList.toggle("is-open", !isOpen);
+                });
+            });
             opcionesList.querySelectorAll("input").forEach((inp) => {
                 inp.addEventListener("change", collectSelected);
             });

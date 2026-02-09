@@ -340,10 +340,51 @@ body {
     color: var(--dark-blue);
     margin: 0 0 12px;
 }
+.producto-opciones-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+.producto-opcion-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 18px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    background: white;
+    color: var(--dark-blue);
+    font-size: 0.9rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, color 0.2s;
+    -webkit-tap-highlight-color: transparent;
+}
+.producto-opcion-btn:hover {
+    border-color: var(--primary-red);
+    background: var(--soft-red);
+    color: var(--primary-red);
+}
+.producto-opcion-btn.is-open {
+    border-color: var(--primary-red);
+    background: var(--soft-red);
+    color: var(--primary-red);
+}
+.producto-opcion-btn-icon {
+    font-size: 0.75rem;
+    transition: transform 0.2s;
+}
+.producto-opcion-btn.is-open .producto-opcion-btn-icon {
+    transform: rotate(180deg);
+}
 .producto-opciones-list {
     display: flex;
     flex-direction: column;
     gap: 16px;
+}
+.producto-opcion-panel {
+    margin-top: 0;
 }
 .producto-opcion-grupo {
     padding: 14px 16px;
