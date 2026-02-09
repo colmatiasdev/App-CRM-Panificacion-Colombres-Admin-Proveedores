@@ -87,13 +87,17 @@ body {
     max-width: 360px;
     border-radius: 0 0 8px 8px;
 }
+/* Arriba: arco frío (turquesa→violeta). Abajo: arco cálido (rojo→amarillo) */
 .header-portada-arc-top {
-    margin-bottom: 16px;
+    margin-top: 16px;
+    margin-bottom: 0;
+    border-radius: 8px 8px 0 0;
     background: var(--logo-arc-warm);
 }
 .header-portada-arc-bottom {
-    margin-top: 16px;
-    border-radius: 8px 8px 0 0;
+    margin-top: 0;
+    margin-bottom: 16px;
+    border-radius: 0 0 8px 8px;
     background: var(--logo-arc-cool);
 }
 .header-portada-inner {
@@ -111,20 +115,19 @@ body {
     margin: 0 0 2px;
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 }
+/* Mismo diseño que index .portada-logo-line2 (COLOMBRES) */
 .header-portada-line2 {
     font-family: 'Oswald', sans-serif;
-    font-size: 2.6rem;
+    font-size: 3.5rem;
     font-weight: 700;
     line-height: 1;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    margin: 0 0 10px;
-    background: linear-gradient(135deg, #0D9488 0%, #14B8A6 30%, #2DD4BF 60%, #0EA5E9 100%);
+    background: var(--logo-arc-cool);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 12px rgba(13, 148, 136, 0.5));
+    margin: 0 0 16px;
 }
 .header-portada-line3 {
     font-family: 'Dancing Script', cursive;
@@ -1233,7 +1236,7 @@ body {
     .header-title span { font-size: 0.8rem; letter-spacing: 2px; }
     .header-tagline { font-size: 0.88rem; }
     .header-portada-line1 { font-size: 1rem; letter-spacing: 0.2em; }
-    .header-portada-line2 { font-size: 2rem; }
+    .header-portada-line2 { font-size: 2.5rem; }
     .header-portada-line3 { font-size: 1.25rem; }
     .header-portada-line4 { font-size: 1.1rem; }
     .location-tag { font-size: 0.74rem; padding: 4px 8px; }
