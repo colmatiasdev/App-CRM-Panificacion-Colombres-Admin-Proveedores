@@ -220,7 +220,7 @@ const renderMenu = (menuData) => {
                     <a href="${PRODUCTO_BASE}?id=${encodeURIComponent(item.id)}" class="item-info-link producto-ver-detalle" data-id="${encodeURIComponent(item.id)}" aria-label="Ver detalle de ${item.name.replace(/"/g, "&quot;")}">
                         <h3 class="item-name">${item.name}</h3>
                         <p class="item-desc">${item.desc}</p>
-                        <div class="item-price">${formatV2(item.price)}</div>
+                        ${(typeof getItemOfferBlock === "function" ? getItemOfferBlock(item) : "") || `<div class="item-price">${formatV2(item.price)}</div>`}
                     </a>
                 </div>
                 <div class="item-action">
