@@ -41,6 +41,23 @@ let categoriesObserver = null;
 let scrollHandler = null;
 
 const formatV2 = (value) => `$ ${Number(value).toLocaleString("es-AR")}`;
+
+/** Bloque HTML resumido de oferta para ítem del menú (móvil). Retorna "" si no hay oferta. */
+const getItemOfferBlock = (item) => {
+    const price = Number(item.price) || 0;
+    const priceRegular = Number(item.priceRegular) || 0;
+    const raw = item.mostrarDescuento != null ? String(item.mostrarDescuento).trim().toUpperCase() : "";
+    const mostrarDescuento = raw === "SI" || raw === "SÍ" || item.mostrarDescuento === true;
+    if (!mostrarDescuento || priceRegular <= price || price <= 0) return "";
+    const porcentaje = Math.ceil((1 - price / priceRegular) * 100);
+    return `<div class="item-offer">
+        <span class="item-offer-badge"><i class="fa-solid fa-tag"></i> Oferta · ${porcentaje}%</span>
+        <span class="item-offer-price">${formatV2(price)}</span>
+        <span class="item-offer-antes">Antes ${formatV2(priceRegular)}</span>
+    </div>`;
+};
+if (typeof window !== "undefined") window.getItemOfferBlock = getItemOfferBlock;
+
 const normalizeKey = (value) => value
     .toString()
     .normalize("NFD")

@@ -478,6 +478,44 @@ body {
 .item h3 { margin: 0 0 6px; color: var(--dark-blue); }
 .item p { margin: 0 0 6px; font-size: 0.85em; color: var(--gray-text); }
 .item-price { font-weight: 900; color: var(--primary-red); }
+
+/* Bloque oferta resumido en ítem del menú (móvil) */
+.item-offer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 10px;
+    margin-top: 6px;
+}
+.item-offer-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: #b45309;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.item-offer-badge i {
+    font-size: 0.65rem;
+    opacity: 0.9;
+}
+.item-offer-price {
+    font-size: 1.05rem;
+    font-weight: 900;
+    color: var(--primary-red);
+}
+.item-offer-antes {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    text-decoration: line-through;
+}
+.item-compuesto .item-offer { margin-top: 4px; }
+.item-compuesto .item-offer-badge { font-size: 0.65rem; }
+.item-compuesto .item-offer-price { font-size: 0.95rem; }
+.item-compuesto .item-offer-antes { font-size: 0.75rem; }
+
 .item-info { position: relative; }
 .item-info-link {
     display: block;
@@ -492,6 +530,7 @@ body {
 .item-info-link .item-desc,
 .item-info-link p { color: var(--gray-text); }
 .item-info-link .item-price { color: var(--primary-red); }
+.item-info-link .item-offer { color: inherit; }
 
 /* Ítem tipo MENU-COMPUESTO */
 .item-compuesto {
