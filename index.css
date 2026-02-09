@@ -357,6 +357,10 @@ body {
     background: var(--logo-white);
     text-align: center;
 }
+.portada-logo-first {
+    min-height: 85vh;
+    padding-top: max(48px, env(safe-area-inset-top));
+}
 .portada-logo-arc {
     position: absolute;
     left: 0;
