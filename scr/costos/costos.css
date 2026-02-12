@@ -189,6 +189,61 @@ body.costos-page {
     background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
 }
 
+/* Leyenda de referencia Días actualiz. (al final de la tabla materia prima) */
+.costos-dias-leyenda {
+    margin-top: 16px;
+    padding: 12px 14px;
+    font-size: 0.8rem;
+    color: var(--muted);
+    background: #f8fafc;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    line-height: 1.6;
+}
+.costos-dias-leyenda-titulo {
+    font-weight: 600;
+    color: var(--logo-dark);
+    margin-right: 6px;
+}
+.costos-dias-leyenda-item {
+    display: inline-block;
+    padding: 2px 8px;
+    margin: 2px 4px 2px 0;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+.costos-dias-leyenda-item:not(.costos-dias-amarillo):not(.costos-dias-rojo):not(.costos-dias-urgente) {
+    background: #e2e8f0;
+    color: var(--logo-dark);
+}
+.costos-dias-leyenda .costos-dias-amarillo {
+    background: linear-gradient(135deg, #fefce8 0%, #fef9c3 100%);
+    color: #713f12;
+    border: 1px solid #eab308;
+}
+.costos-dias-leyenda .costos-dias-rojo {
+    background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%);
+    color: #7f1d1d;
+    border: 1px solid #dc2626;
+}
+.costos-dias-leyenda .costos-dias-urgente {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    color: #fff;
+    border: 1px solid #7f1d1d;
+}
+@media (max-width: 480px) {
+    .costos-dias-leyenda {
+        margin-top: 12px;
+        padding: 10px 12px;
+        font-size: 0.75rem;
+    }
+    .costos-dias-leyenda-item {
+        padding: 2px 6px;
+        font-size: 0.7rem;
+    }
+}
+
 /* ——— Responsive: sin barra horizontal — layout en tarjetas (tablet y móvil) ——— */
 @media (max-width: 768px) {
     body.costos-page {
