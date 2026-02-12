@@ -78,7 +78,8 @@ var ACTIONS = {
   CREATE: 'create',
   UPDATE: 'update',
   DELETE: 'delete',
-  SEARCH: 'search'
+  SEARCH: 'search',
+  FILL_IDS: 'fillIds'
 };
 
 /** Parámetros de búsqueda/filtro (query string o JSON body) */
@@ -112,21 +113,29 @@ function getSpreadsheet() {
   return SpreadsheetApp.getActiveSpreadsheet();
 }
 
-/** Obtiene la hoja por nombre o por gid */
+/** Obtiene la hoja por gid (prioridad) o por nombre */
 function getSheet(configSheet) {
   var ss = getSpreadsheet();
-  var sheet = ss.getSheetByName(configSheet.sheetName);
-  if (!sheet) {
-    sheet = ss.getSheets().filter(function (s) { return s.getSheetId() === configSheet.gid; })[0];
+  var sheets = ss.getSheets();
+  var sheet = null;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].getSheetId() === configSheet.gid) {
+      sheet = sheets[i];
+      break;
+    }
+  }
+  if (!sheet && configSheet.sheetName) {
+    sheet = ss.getSheetByName(configSheet.sheetName);
   }
   return sheet;
 }
 
-/** Convierte fila del sheet a objeto { header: value } */
+/** Convierte fila del sheet a objeto { header: value }. values puede ser array o tener menos elementos que headers. */
 function rowToObject(headers, values) {
   var obj = {};
+  var arr = Array.isArray(values) ? values : [];
   headers.forEach(function (h, i) {
-    obj[h] = values[i] != null ? values[i] : '';
+    obj[h] = i < arr.length && arr[i] !== null && arr[i] !== undefined ? arr[i] : '';
   });
   return obj;
 }

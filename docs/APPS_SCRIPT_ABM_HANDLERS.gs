@@ -30,12 +30,18 @@ function handleRequest(params) {
   }
   var data = sheet.getDataRange().getValues();
   if (data.length < 2) {
-    return jsonResponse(true, { headers: headers, rows: [] });
+    return jsonResponse(true, { headers: configSheet.headers, rows: [] });
   }
-  var headerRow = data[0];
+  var headerRow = (data[0] || []).map(function (c) { return (c != null ? String(c) : '').trim(); });
+  var numCols = headerRow.length;
   var rows = [];
   for (var i = 1; i < data.length; i++) {
-    rows.push(data[i]);
+    var raw = data[i] || [];
+    var row = [];
+    for (var j = 0; j < numCols; j++) {
+      row.push(j < raw.length && raw[j] !== null && raw[j] !== undefined ? raw[j] : '');
+    }
+    rows.push(row);
   }
 
   try {
@@ -155,7 +161,26 @@ function handleRequest(params) {
       return jsonResponse(true, { deleted: idDel });
     }
 
-    return jsonResponse(false, null, 'Acción no válida. Usar: list, get, search, create, update, delete');
+    /** Rellena idmateria-prima (o idpacking) vacíos en la hoja con COSTO-MP-xxx / COSTO-PK-xxx */
+    if (action === ACTIONS.FILL_IDS) {
+      var idColIdxFill = headerRow.indexOf(configSheet.idColumn);
+      if (idColIdxFill === -1) {
+        return jsonResponse(false, null, 'Columna "' + configSheet.idColumn + '" no encontrada en la hoja');
+      }
+      var updated = 0;
+      for (var f = 0; f < rows.length; f++) {
+        var cellVal = rows[f][idColIdxFill];
+        if (cellVal == null || String(cellVal).trim() === '') {
+          var newId = generateId(configSheet.idPrefix);
+          var rowNum = f + 2;
+          sheet.getRange(rowNum, idColIdxFill + 1).setValue(newId);
+          updated++;
+        }
+      }
+      return jsonResponse(true, { updated: updated, sheet: sheetKey });
+    }
+
+    return jsonResponse(false, null, 'Acción no válida. Usar: list, get, search, create, update, delete, fillIds');
   } catch (err) {
     return jsonResponse(false, null, err.message || 'Error en el servidor');
   }

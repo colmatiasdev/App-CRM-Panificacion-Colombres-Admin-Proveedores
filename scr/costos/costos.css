@@ -1,92 +1,368 @@
-/* Páginas del módulo Costos (Packing / Materia prima) */
+/* Páginas del módulo Costos (Packing / Materia prima) — optimizado móvil */
 :root {
     --logo-orange: #EA580C;
     --logo-teal: #0D9488;
+    --logo-teal-light: #ccfbf1;
+    --logo-teal-dark: #0f766e;
     --logo-dark: #1F2937;
+    --border: #e2e8f0;
+    --surface: #ffffff;
+    --muted: #64748b;
+    --muted-light: #94a3b8;
+    --safe-top: env(safe-area-inset-top, 0);
+    --safe-right: env(safe-area-inset-right, 0);
+    --safe-bottom: env(safe-area-inset-bottom, 0);
+    --safe-left: env(safe-area-inset-left, 0);
 }
 
 * { box-sizing: border-box; }
+
+html {
+    -webkit-text-size-adjust: 100%;
+}
+
 body.costos-page {
     margin: 0;
     font-family: 'Inter', system-ui, sans-serif;
-    background: #f8fafc;
+    background: linear-gradient(160deg, #f0fdfa 0%, #f8fafc 50%, #f1f5f9 100%);
     color: var(--logo-dark);
     min-height: 100vh;
-    padding: 20px;
+    min-height: calc(100vh - var(--safe-top) - var(--safe-bottom));
+    padding: 24px 20px 40px;
+    padding-left: max(20px, calc(20px + var(--safe-left)));
+    padding-right: max(20px, calc(20px + var(--safe-right)));
+    padding-bottom: max(40px, calc(40px + var(--safe-bottom)));
+    line-height: 1.5;
+    -webkit-tap-highlight-color: rgba(13, 148, 136, 0.15);
 }
 
 .costos-back {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     color: var(--logo-teal);
     text-decoration: none;
     font-weight: 600;
     font-size: 0.9rem;
-    margin-bottom: 24px;
+    margin-bottom: 28px;
+    padding: 6px 0;
+    border-radius: 6px;
+    transition: color 0.2s, background 0.2s;
 }
-.costos-back:hover { text-decoration: underline; }
+.costos-back:hover {
+    color: var(--logo-teal-dark);
+    background: var(--logo-teal-light);
+    text-decoration: none;
+}
 .costos-back-arrow { font-size: 1.1rem; }
 
 .costos-main {
-    max-width: 640px;
+    max-width: 720px;
     margin: 0 auto;
 }
 
 .costos-title {
     font-family: 'DM Serif Display', Georgia, serif;
-    font-size: 2rem;
+    font-size: 2.25rem;
     font-weight: 400;
     color: var(--logo-dark);
-    margin: 0 0 16px;
+    margin: 0 0 12px;
+    letter-spacing: -0.02em;
 }
 
 .costos-intro {
-    color: #64748b;
-    line-height: 1.6;
-    margin: 0 0 24px;
+    color: var(--muted);
+    line-height: 1.65;
+    margin: 0 0 28px;
+    font-size: 0.95rem;
 }
 
 .costos-placeholder {
-    color: #94a3b8;
+    color: var(--muted-light);
     font-size: 0.9rem;
     font-style: italic;
 }
 
 .costos-datos {
-    margin-top: 8px;
+    margin-top: 4px;
 }
 .costos-datos-message .costos-placeholder {
     margin: 0 0 8px;
 }
 .costos-loading {
-    color: #64748b;
+    color: var(--muted);
     font-size: 0.9rem;
+}
+
+.costos-table-wrap {
+    width: 100%;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.06), 0 2px 4px -2px rgba(0,0,0,0.04);
 }
 
 .costos-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.9rem;
-    background: #fff;
-    border-radius: 10px;
+    background: var(--surface);
+    border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
 .costos-table th,
 .costos-table td {
-    padding: 10px 12px;
+    padding: 12px 14px;
     text-align: left;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s ease;
 }
 .costos-table th {
-    background: var(--logo-teal);
+    background: linear-gradient(180deg, var(--logo-teal) 0%, var(--logo-teal-dark) 100%);
     color: #fff;
     font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
 }
-.costos-table tr:last-child td {
+
+/* Nombre del producto: en línea completa y destacado (prioridad UX) */
+.costos-table th.costos-cell-producto,
+.costos-table td.costos-cell-producto {
+    white-space: nowrap;
+    min-width: 12em;
+    font-weight: 600;
+    color: var(--logo-dark);
+}
+.costos-table tbody tr:nth-child(even):not(.costos-table-categoria) {
+    background: #fafbfc;
+}
+.costos-table tbody tr:last-child td {
     border-bottom: none;
 }
-.costos-table tbody tr:hover {
-    background: #f8fafc;
+.costos-table tbody tr:hover:not(.costos-table-categoria) td {
+    background: #f1f5f9;
+}
+.costos-table tbody tr:nth-child(even):not(.costos-table-categoria):hover td {
+    background: #e2e8f0;
+}
+
+/* Fila de agrupación por categoría */
+.costos-table tr.costos-table-categoria td {
+    background: linear-gradient(90deg, #ecfdf5 0%, #d1fae5 100%);
+    color: #065f46;
+    font-weight: 700;
+    font-size: 0.95rem;
+    padding: 14px 16px;
+    border-bottom: 2px solid #a7f3d0;
+    letter-spacing: 0.02em;
+}
+.costos-table tr.costos-table-categoria:hover td {
+    background: linear-gradient(90deg, #d1fae5 0%, #a7f3d0 100%);
+}
+
+/* Días transcurridos: badges sutiles por antigüedad */
+.costos-table td.costos-dias-amarillo {
+    background: linear-gradient(135deg, #fefce8 0%, #fef9c3 100%);
+    color: #713f12;
+    font-weight: 600;
+    border-left: 3px solid #eab308;
+}
+.costos-table td.costos-dias-rojo {
+    background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%);
+    color: #7f1d1d;
+    font-weight: 600;
+    border-left: 3px solid #dc2626;
+}
+.costos-table td.costos-dias-urgente {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    color: #fff;
+    font-weight: 700;
+    border-left: 4px solid #7f1d1d;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);
+}
+.costos-table tbody tr:hover td.costos-dias-amarillo {
+    background: linear-gradient(135deg, #fef9c3 0%, #fef08a 100%);
+}
+.costos-table tbody tr:hover td.costos-dias-rojo {
+    background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
+}
+.costos-table tbody tr:hover td.costos-dias-urgente {
+    background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+}
+
+/* ——— Responsive: sin barra horizontal — layout en tarjetas (tablet y móvil) ——— */
+@media (max-width: 768px) {
+    body.costos-page {
+        padding: 16px 12px 32px;
+        padding-left: max(12px, calc(12px + var(--safe-left)));
+        padding-right: max(12px, calc(12px + var(--safe-right)));
+    }
+    .costos-main {
+        max-width: 100%;
+    }
+    .costos-title {
+        font-size: 1.85rem;
+    }
+    .costos-intro {
+        font-size: 0.9rem;
+        margin-bottom: 20px;
+    }
+    .costos-table-wrap {
+        overflow: visible;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .costos-table {
+        display: block;
+        min-width: 0;
+        font-size: 0.9rem;
+        box-shadow: none;
+        background: transparent;
+    }
+    .costos-table thead {
+        display: none;
+    }
+    .costos-table tbody {
+        display: block;
+    }
+    .costos-table tr {
+        display: block;
+        margin-bottom: 12px;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        background: var(--surface);
+        border: 1px solid var(--border);
+    }
+    .costos-table tr.costos-table-categoria {
+        background: linear-gradient(90deg, #ecfdf5 0%, #d1fae5 100%);
+        border-color: #a7f3d0;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .costos-table tr.costos-table-categoria td {
+        display: block;
+        padding: 12px 14px;
+        font-size: 0.95rem;
+        border: none;
+        border-bottom: none;
+        background: transparent;
+    }
+    .costos-table tr.costos-table-categoria td::before {
+        display: none;
+    }
+    .costos-table td {
+        display: block;
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--border);
+        font-size: 0.9rem;
+        white-space: normal;
+        min-width: 0;
+    }
+    .costos-table td:last-child {
+        border-bottom: none;
+    }
+    .costos-table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: var(--muted);
+        display: block;
+        margin-bottom: 4px;
+    }
+    .costos-table tr.costos-table-categoria td::before {
+        display: none;
+    }
+    .costos-table tbody tr:hover:not(.costos-table-categoria) td,
+    .costos-table tbody tr:nth-child(even):not(.costos-table-categoria):hover td {
+        background: #f8fafc;
+    }
+    .costos-table td.costos-cell-producto {
+        font-weight: 600;
+        color: var(--logo-dark);
+    }
+    .costos-table td.costos-cell-producto::before {
+        color: var(--logo-teal-dark);
+    }
+}
+
+/* ——— Móvil: ajustes de espacio y toques ——— */
+@media (max-width: 480px) {
+    body.costos-page {
+        padding: 12px 10px 24px;
+        padding-left: max(10px, calc(10px + var(--safe-left)));
+        padding-right: max(10px, calc(10px + var(--safe-right)));
+        padding-bottom: max(24px, calc(24px + var(--safe-bottom)));
+    }
+    .costos-back {
+        margin-bottom: 20px;
+        padding: 10px 4px;
+        min-height: 44px;
+        min-width: 44px;
+        align-items: center;
+        border-radius: 8px;
+    }
+    .costos-title {
+        font-size: 1.5rem;
+        margin-bottom: 8px;
+        line-height: 1.25;
+    }
+    .costos-intro {
+        margin-bottom: 16px;
+        font-size: 0.875rem;
+        line-height: 1.55;
+    }
+    .costos-datos {
+        margin-top: 0;
+    }
+    .costos-table-wrap {
+        margin: 0 -2px;
+        margin-left: max(-2px, calc(-2px - var(--safe-left)));
+        margin-right: max(-2px, calc(-2px - var(--safe-right)));
+    }
+    .costos-table tr {
+        margin-bottom: 10px;
+        border-radius: 8px;
+    }
+    .costos-table td,
+    .costos-table tr.costos-table-categoria td {
+        padding: 8px 12px;
+        font-size: 0.875rem;
+    }
+    .costos-table td::before {
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 380px) {
+    body.costos-page {
+        padding: 10px 8px 20px;
+        padding-left: max(8px, calc(8px + var(--safe-left)));
+        padding-right: max(8px, calc(8px + var(--safe-right)));
+    }
+    .costos-back {
+        font-size: 0.85rem;
+        padding: 8px 2px;
+    }
+    .costos-title {
+        font-size: 1.35rem;
+    }
+    .costos-intro {
+        font-size: 0.8125rem;
+    }
+    .costos-table tr {
+        margin-bottom: 8px;
+    }
+    .costos-table td,
+    .costos-table tr.costos-table-categoria td {
+        padding: 6px 10px;
+        font-size: 0.8125rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .costos-back,
+    .costos-table th,
+    .costos-table td {
+        transition: none;
+    }
 }
