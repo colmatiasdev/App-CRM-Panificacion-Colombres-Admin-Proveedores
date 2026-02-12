@@ -26,6 +26,7 @@
         "Precio COSTO x Unidad",
         "Precio Equivalencia x Unidad",
         "Fecha Actualizada Al",
+        "Fecha-Actualizada-Al",
         "MARCA",
         "LUGAR"
     ].map(function (s) { return s.trim().toLowerCase(); });
@@ -102,6 +103,7 @@
             visibleIndexes = filtered.headers.map(function (_, i) { return i; });
         }
         var displayHeaders = [];
+        var displayHeadersLogic = [];
         var displaySources = [];
         var norm = function (s) { return String(s != null ? s : "").trim().toLowerCase(); };
         function normHeader(s) {
@@ -113,14 +115,24 @@
             /* Columna PRESENTACION = concatenación de: 1) Presentacion-Cantidad-Medida, 2) Presentacion-Unidad, 3) Presentacion-Tipo (oculta) → "1 KG [Paquete]" */
             if (normHeader(h) === "presentacion-cantidad-medida" && normHeader(next) === "presentacion-unidad") {
                 displayHeaders.push("Presentacion");
+                displayHeadersLogic.push("presentacion");
                 displaySources.push([visibleIndexes[d], visibleIndexes[d + 1]]);
                 d++;
             } else {
-                displayHeaders.push(h);
+                if (isDiasActualizacionColumn(norm(h))) {
+                    displayHeaders.push("Días actualiz.");
+                } else {
+                    displayHeaders.push(h);
+                }
+                displayHeadersLogic.push(norm(h));
                 displaySources.push([visibleIndexes[d]]);
             }
         }
-        var displayHeadersNorm = displayHeaders.map(function (h) { return norm(h); });
+        var displayHeadersNorm = displayHeadersLogic;
+        function isDiasActualizacionColumn(nameNorm) {
+            var n = (nameNorm || "").trim().toLowerCase().replace(/-/g, " ");
+            return n === "dias trascurridos actualizacion";
+        }
         function isProductNameColumn(nameNorm) {
             var n = (nameNorm || "").trim();
             return n === "producto" || n === "nombre" || n === "descripcion" || n === "insumo" || n === "nombre del producto" || n === "nombre producto";
@@ -128,12 +140,18 @@
         var fechaIdx = -1;
         var presentacionTipoIdx = -1;
         for (var fi = 0; fi < headers.length; fi++) {
-            if (norm(headers[fi]) === "fecha actualizada al") {
+            if (norm(headers[fi]).replace(/-/g, " ") === "fecha actualizada al") {
                 fechaIdx = fi;
             }
             if (normHeader(headers[fi]) === "presentacion-tipo") {
                 presentacionTipoIdx = fi;
             }
+        }
+        var hasDiasCol = displayHeadersLogic.some(function (n) { return isDiasActualizacionColumn(n); });
+        if (fechaIdx >= 0 && !hasDiasCol) {
+            displayHeaders.push("Días actualiz.");
+            displayHeadersLogic.push("dias trascurridos actualizacion");
+            displaySources.push([fechaIdx]);
         }
         /** Formato moneda Argentina: $ 1.456,59 (espacio después de $, punto miles, coma decimal). */
         function formatoMonedaArg(val) {
@@ -201,8 +219,8 @@
                 }
                 var text = raw;
                 var tdClass = "";
-                if (nameNorm === "dias trascurridos actualizacion") {
-                    var dateStr = raw || (fechaIdx >= 0 ? String(row[fechaIdx] != null ? row[fechaIdx] : "").trim() : "");
+                if (isDiasActualizacionColumn(nameNorm)) {
+                    var dateStr = (fechaIdx >= 0 ? String(row[fechaIdx] != null ? row[fechaIdx] : "").trim() : "");
                     text = diasDesdeFechaHastaHoy(dateStr);
                     tdClass = claseDiasActualizacion(text);
                 } else if (nameNorm === "precio") {
@@ -259,8 +277,28 @@
             });
         });
         html += "</tbody></table>";
-        container.innerHTML = "<div class=\"costos-table-wrap\">" + html + "</div>";
+        var leyenda = buildDiasLeyenda(config);
+        container.innerHTML = "<div class=\"costos-table-wrap\">" + html + "</div>" + leyenda;
         container.classList.remove("costos-datos-message");
+    }
+
+    /** Leyenda de referencia para Días actualiz. (umbrales desde config.diasActualizacion). */
+    function buildDiasLeyenda(cfg) {
+        var d = (cfg && cfg.diasActualizacion) ? cfg.diasActualizacion : {};
+        var limN = typeof d.limiteNormal === "number" ? d.limiteNormal : 30;
+        var limA = typeof d.limiteAmarillo === "number" ? d.limiteAmarillo : 60;
+        var limR = typeof d.limiteRojo === "number" ? d.limiteRojo : 100;
+        var clases = d.clases || {};
+        var cA = clases.amarillo || "costos-dias-amarillo";
+        var cR = clases.rojo || "costos-dias-rojo";
+        var cU = clases.urgente || "costos-dias-urgente";
+        return "<div class=\"costos-dias-leyenda\">" +
+            "<span class=\"costos-dias-leyenda-titulo\">Referencia Días actualiz.</span> " +
+            "<span class=\"costos-dias-leyenda-item\">menos de " + limN + " Normal</span> " +
+            "<span class=\"costos-dias-leyenda-item " + escapeHtml(cA) + "\">" + (limN + 1) + "–" + limA + " Atención</span> " +
+            "<span class=\"costos-dias-leyenda-item " + escapeHtml(cR) + "\">" + (limA + 1) + "–" + limR + " Revisar</span> " +
+            "<span class=\"costos-dias-leyenda-item " + escapeHtml(cU) + "\">más de " + limR + " Urgente</span>" +
+            "</div>";
     }
 
     /** Normaliza filas para que cada una tenga tantas celdas como headers (rellena con "" si falta). */
