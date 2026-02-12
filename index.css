@@ -1,5 +1,5 @@
+/* ========== Variables (paleta del logo) ========== */
 :root {
-    /* Paleta del logo (arcos superior e inferior) */
     --logo-red: #DC2626;
     --logo-orange: #EA580C;
     --logo-yellow: #F59E0B;
@@ -9,26 +9,18 @@
     --logo-purple: #8B5CF6;
     --logo-dark: #1F2937;
     --logo-white: #ffffff;
-    /* Gradientes del logo */
     --logo-arc-warm: linear-gradient(90deg, var(--logo-red), var(--logo-orange), var(--logo-yellow));
     --logo-arc-cool: linear-gradient(90deg, var(--logo-teal), var(--logo-green), var(--logo-blue), var(--logo-purple));
-    /* Compatibilidad */
-    --pan-primary: var(--logo-orange);
-    --pan-primary-light: var(--logo-yellow);
     --pan-dark: var(--logo-dark);
     --pan-cream: #FEFCE8;
-    --pan-wheat: var(--logo-yellow);
     --pan-white: #ffffff;
-    --toro-red: var(--logo-red);
-    --toro-dark: var(--logo-dark);
-    --toro-white: #ffffff;
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html { -webkit-text-size-adjust: 100%; -webkit-overflow-scrolling: touch; }
 body {
     margin: 0;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: system-ui, sans-serif;
     background: var(--pan-cream);
     color: var(--pan-dark);
     -webkit-tap-highlight-color: transparent;
@@ -36,330 +28,20 @@ body {
     overflow-x: hidden;
 }
 
-.hero-carousel {
-    position: relative;
-    height: 100vh;
-    width: 100%;
-    overflow: hidden;
-    background: var(--pan-dark);
-}
-
-.carousel-container {
-    height: 100%;
-    width: 100%;
-    contain: layout paint;
-}
-
-.slide {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-size: 100% auto;
-    background-position: center;
-    background-repeat: no-repeat;
-    opacity: 0;
-    transition: opacity 1.5s ease-in-out;
-    transform: scale(1.05);
-}
-
-.slide.active {
-    opacity: 0.65;
-    transform: scale(1);
-}
-
-.hero-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 20px;
-    z-index: 10;
-    background: linear-gradient(160deg, rgba(0, 0, 0, 0.5) 0%, rgba(31, 41, 55, 0.75) 25%, rgba(31, 41, 55, 0.65) 50%, rgba(0, 0, 0, 0.55) 100%);
-    backdrop-filter: blur(6px);
-}
-
-.hero-auth {
-    position: absolute;
-    top: max(16px, env(safe-area-inset-top));
-    left: max(16px, env(safe-area-inset-left));
-    z-index: 11;
-    display: flex;
-    gap: 12px;
-    align-items: center;
-}
-.hero-auth-link {
-    color: rgba(255, 255, 255, 0.95);
-    text-decoration: none;
-    font-size: 0.9rem;
-    font-weight: 600;
-    padding: 8px 14px;
-    border-radius: 50px;
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    transition: background 0.2s, color 0.2s;
-}
-.hero-auth-link:hover {
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-}
-.hero-auth-link-register {
-    background: var(--logo-arc-warm);
-    border-color: rgba(255, 255, 255, 0.3);
-    color: white;
-}
-.hero-auth-link-register:hover {
-    background: linear-gradient(90deg, #b91c1c, #c2410c, #d97706);
-    color: white;
-}
-
-.hero-estado-local-badge {
-    position: absolute;
-    top: max(16px, env(safe-area-inset-top));
-    right: max(16px, env(safe-area-inset-right));
-    margin-top: 0;
-    z-index: 11;
-}
-
-.hero-content h1 {
-    font-family: 'DM Serif Display', Georgia, serif;
-    font-size: 3rem;
-    color: white;
-    margin-bottom: 12px;
-    text-shadow: 0 2px 8px rgba(0,0,0,0.6), 0 4px 20px rgba(0,0,0,0.5);
-    font-weight: 400;
-}
-
-.hero-content p {
-    color: rgba(255,255,255,0.95);
-    font-size: 1.1rem;
-    max-width: 600px;
-    margin: 0 auto 26px;
-    text-shadow: 0 2px 10px rgba(0,0,0,0.6);
-}
-
-.hero-abierto {
-    display: inline-flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 8px 16px;
-    justify-content: center;
-    margin-top: 24px;
-    padding: 10px 16px;
-    background: rgba(0, 0, 0, 0.35);
-    color: rgba(255, 255, 255, 0.98);
-    border: 1px solid rgba(34, 197, 94, 0.5);
-    border-radius: 6px;
-    font-size: 0.9rem;
-    text-shadow: 0 2px 8px rgba(0,0,0,0.6);
-    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-}
-.hero-abierto i {
-    font-size: 1rem;
-    color: #4ade80;
-    filter: drop-shadow(0 1px 4px rgba(0,0,0,0.5));
-}
-.hero-abierto-texto {
-    font-weight: 600;
-}
-.hero-abierto-badge {
-    font-weight: 700;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: #86efac;
-    background: rgba(34, 197, 94, 0.35);
-    padding: 5px 12px;
-    border-radius: 6px;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
-}
-
-/* Efecto neón "Local ABIERTO" (index) */
-@keyframes neon-abierto-badge-glow {
-    0%, 100% { text-shadow: 0 0 6px #86efac, 0 0 12px rgba(74, 222, 128, 0.8), 0 0 18px rgba(34, 197, 94, 0.5); box-shadow: 0 0 10px rgba(74, 222, 128, 0.5), inset 0 0 8px rgba(255, 255, 255, 0.08); }
-    50% { text-shadow: 0 0 10px #86efac, 0 0 20px rgba(74, 222, 128, 0.9), 0 0 28px rgba(34, 197, 94, 0.6); box-shadow: 0 0 14px rgba(74, 222, 128, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.12); }
-}
-.hero-abierto[data-estado="abierto"] {
-    border-color: rgba(74, 222, 128, 0.7);
-    box-shadow: 0 0 12px rgba(34, 197, 94, 0.35), 0 4px 16px rgba(0,0,0,0.4);
-}
-.hero-abierto[data-estado="abierto"] i {
-    color: #86efac;
-    text-shadow: 0 0 8px rgba(74, 222, 128, 0.7), 0 0 14px rgba(34, 197, 94, 0.4);
-}
-.hero-abierto[data-estado="abierto"] .hero-abierto-badge {
-    color: #bbf7d0;
-    background: rgba(34, 197, 94, 0.45);
-    border: 1px solid rgba(74, 222, 128, 0.5);
-    text-shadow: 0 0 6px #86efac, 0 0 12px rgba(74, 222, 128, 0.8), 0 0 18px rgba(34, 197, 94, 0.5);
-    box-shadow: 0 0 10px rgba(74, 222, 128, 0.4), inset 0 0 8px rgba(255, 255, 255, 0.08);
-    animation: neon-abierto-badge-glow 2.5s ease-in-out infinite;
-}
-
-.hero-abierto[data-estado="verificando"] {
-    border-color: rgba(148, 163, 184, 0.5);
-    background: rgba(0, 0, 0, 0.35);
-}
-.hero-abierto[data-estado="verificando"] i {
-    color: #94a3b8;
-}
-.hero-abierto[data-estado="verificando"] .hero-abierto-texto {
-    color: rgba(255, 255, 255, 0.9);
-}
-
-.hero-abierto[data-estado="abierto-pronto-cierre"] {
-    border-color: rgba(245, 158, 11, 0.7);
-    background: rgba(120, 53, 15, 0.4);
-}
-.hero-abierto[data-estado="abierto-pronto-cierre"] i {
-    color: #fbbf24;
-}
-.hero-abierto[data-estado="abierto-pronto-cierre"] .hero-abierto-texto {
-    color: rgba(255, 255, 255, 0.98);
-}
-.hero-abierto-badge.hero-cierre-pronto-badge {
-    color: #fef3c7;
-    background: rgba(245, 158, 11, 0.45);
-}
-.hero-countdown {
-    font-variant-numeric: tabular-nums;
-    font-weight: 800;
-    font-size: 1.05rem;
-    min-width: 3em;
-}
-
-.floating-countdown {
-    position: fixed;
-    top: 16px;
-    right: 20px;
-    z-index: 1000;
-    background: rgba(245, 158, 11, 0.95);
-    color: #1c1917;
-    padding: 10px 16px;
-    border-radius: 12px;
-    display: inline-flex;
-    gap: 8px;
-    align-items: center;
-    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.4);
-    font-weight: 800;
-    font-variant-numeric: tabular-nums;
-    font-size: 1.1rem;
-}
-.floating-countdown i {
-    color: #1c1917;
-}
-
-/* Efecto neón solo en el badge "Local CERRADO" */
-@keyframes neon-cerrado-badge-glow {
-    0%, 100% { text-shadow: 0 0 6px #fecaca, 0 0 12px rgba(248, 113, 113, 0.8), 0 0 18px rgba(239, 68, 68, 0.5); box-shadow: 0 0 10px rgba(248, 113, 113, 0.5), inset 0 0 8px rgba(255, 255, 255, 0.1); }
-    50% { text-shadow: 0 0 10px #fecaca, 0 0 20px rgba(248, 113, 113, 0.9), 0 0 28px rgba(239, 68, 68, 0.6); box-shadow: 0 0 14px rgba(248, 113, 113, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.15); }
-}
-.hero-abierto[data-estado="cerrado"] {
-    border-color: rgba(185, 28, 28, 0.5);
-    background: rgba(0, 0, 0, 0.4);
-}
-.hero-abierto[data-estado="cerrado"] i {
-    color: #f87171;
-}
-.hero-abierto[data-estado="cerrado"] .hero-abierto-texto {
-    color: rgba(255, 255, 255, 0.9);
-}
-.hero-abierto-badge.hero-cerrado-badge {
-    color: #fecaca;
-    background: rgba(185, 28, 28, 0.4);
-    text-shadow: 0 0 6px #fecaca, 0 0 12px rgba(248, 113, 113, 0.8), 0 0 18px rgba(239, 68, 68, 0.5);
-    box-shadow: 0 0 10px rgba(248, 113, 113, 0.4), inset 0 0 8px rgba(255, 255, 255, 0.08);
-    animation: neon-cerrado-badge-glow 2.5s ease-in-out infinite;
-}
-
-.brand-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    background: var(--logo-arc-warm);
-    color: white;
-    padding: 8px 16px;
-    border-radius: 50px;
-    font-weight: 800;
-    font-size: 0.85rem;
-    margin-bottom: 16px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    text-shadow: 0 2px 8px rgba(0,0,0,0.4);
-    box-shadow: 0 4px 20px rgba(234, 88, 12, 0.4);
-}
-
-.hero-btns {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-    flex-wrap: wrap;
-}
-
-#hero-btns-menu {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    justify-content: center;
-}
-
-.btn-primary {
-    background: var(--logo-arc-warm);
-    color: white;
-    padding: 14px 28px;
-    min-height: 44px;
-    min-width: 44px;
-    border-radius: 50px;
-    text-decoration: none;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
-    transition: 0.3s;
-    box-shadow: 0 8px 25px rgba(220, 38, 38, 0.4);
-    font-size: 0.9rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.btn-primary:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(234, 88, 12, 0.5); }
-
-.btn-secondary {
-    background: rgba(255, 255, 255, 0.15);
-    color: white;
-    padding: 14px 28px;
-    min-height: 44px;
-    min-width: 44px;
-    border-radius: 50px;
-    text-decoration: none;
-    font-weight: 700;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    font-size: 0.9rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Portada tipo logo: misma disposición y colores del logo */
+/* ========== Portada logo ========== */
 .portada-logo {
     position: relative;
-    min-height: 70vh;
+    min-height: auto;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 48px 24px 56px;
+    padding: 32px 24px 40px;
     background: var(--logo-white);
     text-align: center;
 }
 .portada-logo-first {
-    min-height: 85vh;
-    padding-top: max(48px, env(safe-area-inset-top));
+    padding-top: max(32px, env(safe-area-inset-top));
 }
 .portada-logo-arc {
     position: absolute;
@@ -381,6 +63,14 @@ body {
 .portada-logo-inner {
     max-width: 520px;
     margin: 0 auto;
+}
+.portada-logo-img {
+    width: 140px;
+    height: auto;
+    max-height: 120px;
+    object-fit: contain;
+    margin: 0 auto 20px;
+    display: block;
 }
 .portada-logo-line1 {
     font-family: 'DM Serif Display', Georgia, serif;
@@ -416,7 +106,7 @@ body {
     font-size: 1.45rem;
     font-weight: 500;
     color: var(--logo-teal);
-    margin: 0 0 28px;
+    margin: 0;
 }
 .portada-logo-btn {
     display: inline-flex;
@@ -478,15 +168,16 @@ body {
 }
 
 @media (max-width: 600px) {
-    .portada-logo { min-height: 60vh; padding: 40px 16px 48px; }
+    .portada-logo { padding: 24px 16px 32px; }
+    .portada-logo-img { width: 100px; margin-bottom: 14px; }
     .portada-logo-line1 { font-size: 1.1rem; letter-spacing: 0.2em; }
     .portada-logo-line2 { font-size: 2.5rem; }
     .portada-logo-line3 { font-size: 1.4rem; }
     .portada-logo-line4 { font-size: 1.25rem; }
     .portada-logo-auth { flex-direction: column; }
-    .hero-auth-link { font-size: 0.82rem; padding: 6px 12px; }
 }
 
+/* ========== Info ========== */
 .info-section-mensaje {
     padding: 80px 20px;
     background: var(--pan-white);
@@ -511,9 +202,7 @@ body {
     height: 4px;
     background: var(--logo-arc-cool);
 }
-
 .info-container { max-width: 1000px; margin: 0 auto; text-align: center; }
-
 .info-header h2 {
     font-size: 2rem;
     margin-bottom: 12px;
@@ -521,268 +210,32 @@ body {
     font-weight: 400;
     color: var(--pan-dark);
 }
-
 .info-header p {
     color: #64748b;
     max-width: 700px;
     margin: 0 auto;
 }
 
-.social-section {
-    padding: 60px 20px;
-    background: var(--pan-cream);
+/* ========== Costos (Packing / Materia prima) ========== */
+.section-costos .info-header p {
+    margin-bottom: 24px;
 }
-.social-section:nth-child(4n+2) {
-    background: #ECFDF5;
-}
-.social-section:nth-child(4n+3) {
-    background: #F0F9FF;
-}
-.social-section:nth-child(4n+4) {
-    background: #FAF5FF;
-}
-.social-container {
-    max-width: 900px;
-    margin: 0 auto;
-    text-align: center;
-    display: grid;
-    gap: 16px;
-}
-.social-icon {
-    font-size: 2rem;
-    color: var(--logo-purple);
-}
-.social-section:nth-child(4n+2) .social-icon { color: var(--logo-teal); }
-.social-section:nth-child(4n+3) .social-icon { color: var(--logo-blue); }
-.social-section:nth-child(4n+4) .social-icon { color: var(--logo-green); }
-.social-icon.whatsapp-icon {
-    color: #25d366;
-}
-.social-title {
-    font-family: 'DM Serif Display', Georgia, serif;
-    font-size: 1.2rem;
-    font-weight: 400;
-    color: var(--pan-dark);
-}
-.social-card {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--logo-arc-warm);
-    color: white;
-    padding: 12px 20px;
-    min-height: 44px;
-    border-radius: 999px;
-    text-decoration: none;
-    font-weight: 800;
-    font-size: 0.82rem;
-    box-shadow: 0 10px 24px rgba(234, 88, 12, 0.35);
-    width: fit-content;
-    margin: 0 auto;
-}
-.whatsapp-card {
-    background: #25d366;
-    box-shadow: 0 10px 24px rgba(37, 211, 102, 0.3);
-}
-.delivery-grid {
-    display: grid;
-    gap: 12px;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-}
-.delivery-card {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    padding: 16px;
-    display: grid;
-    gap: 10px;
-    align-items: center;
-    justify-items: center;
-    text-align: center;
-    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
-}
-.delivery-icon {
-    font-size: 2rem;
-}
-.delivery-title {
-    font-weight: 700;
-    color: var(--pan-dark);
-}
-.delivery-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px 18px;
-    min-height: 44px;
-    border-radius: 999px;
-    text-decoration: none;
-    font-weight: 800;
-    font-size: 0.8rem;
-    color: white;
-}
-.delivery-btn.pedidosya { background: #e31a3d; }
-.delivery-btn.rappi { background: #ff441f; }
-
-/* Horario de atención (desde hoja HORARIO-TORO-RAPIDO) */
-#seccion-horario .social-container {
-    text-align: center;
-}
-.horario-atencion-wrap {
-    text-align: center;
-    max-width: 360px;
-    margin: 0 auto;
-}
-#seccion-horario .horario-list {
-    align-items: center;
-}
-#seccion-horario .horario-dia {
-    width: 100%;
-    max-width: 320px;
-    margin-left: auto;
-    margin-right: auto;
-    justify-items: center;
-    text-align: center;
-}
-#seccion-horario .horario-dia-nombre {
-    text-align: center;
-}
-#seccion-horario .horario-proximo-feriado {
-    margin-left: auto;
-    margin-right: auto;
-}
-.horario-loading {
-    color: #64748b;
-    font-size: 0.9rem;
-}
-.horario-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-}
-.horario-regular-titulo {
-    font-weight: 700;
-    font-size: 0.95rem;
-    color: var(--pan-dark);
-    margin-bottom: 10px;
-    text-align: center;
-    padding: 4px 0;
-}
-.horario-dia {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: center;
-    gap: 1rem 1.5rem;
-    padding: 8px 0;
-    border-bottom: 1px solid #e2e8f0;
-}
-.horario-dia:last-child {
-    border-bottom: none;
-}
-.horario-dia-col {
-    min-width: 100px;
-}
-.horario-dia-nombre {
-    font-weight: 700;
-    color: var(--pan-dark);
-    font-size: 0.95rem;
-}
-.horario-horarios-col {
+.costos-btns {
     display: flex;
     flex-wrap: wrap;
+    gap: 12px;
     justify-content: center;
-    align-items: center;
-    gap: 0.25rem 0.75rem;
-    text-align: center;
-    min-width: 11rem;
+    margin-top: 8px;
 }
-.horario-rango {
-    font-size: 0.9rem;
-    color: #475569;
-    font-variant-numeric: tabular-nums;
+.costos-btn {
+    min-width: 160px;
 }
-.horario-rango.horario-cerrado {
-    display: block;
-    width: 100%;
-    text-align: center;
-    box-sizing: border-box;
-}
-.horario-rango:not(:last-child)::after {
-    content: " · ";
-    color: #94a3b8;
-    margin: 0 2px;
-}
-.horario-fallback {
-    margin-top: 4px;
+@media (max-width: 600px) {
+    .costos-btns { flex-direction: column; }
+    .costos-btn { width: 100%; }
 }
 
-.horario-proximo-feriado {
-    margin-bottom: 14px;
-    padding: 16px 18px;
-    border-radius: 14px;
-    border: 1px solid #e2e8f0;
-    background: #f8fafc;
-}
-.horario-proximo-feriado-titulo {
-    font-weight: 800;
-    font-size: 1rem;
-    letter-spacing: 0.05em;
-    margin-bottom: 12px;
-    text-align: center;
-}
-.horario-proximo-feriado-titulo.horario-feriado-cerrado {
-    color: #b91c1c;
-    background: #fef2f2;
-    padding: 8px 16px;
-    border-radius: 8px;
-    display: block;
-    border: 1px solid #fecaca;
-}
-.horario-proximo-feriado-titulo.horario-feriado-abierto {
-    color: #166534;
-    background: #f0fdf4;
-    padding: 8px 16px;
-    border-radius: 8px;
-    display: block;
-    border: 1px solid #bbf7d0;
-}
-.horario-proximo-feriado-dia {
-    font-size: 0.95rem;
-    color: var(--pan-dark);
-    font-weight: 600;
-    margin-bottom: 6px;
-    text-align: center;
-}
-.horario-proximo-feriado-nombre {
-    font-size: 0.95rem;
-    font-weight: 400;
-    color: #475569;
-    margin-bottom: 10px;
-    text-align: center;
-}
-.horario-proximo-feriado-leyenda-label {
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    margin-bottom: 4px;
-}
-.horario-proximo-feriado-horario {
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: #166534;
-    font-variant-numeric: tabular-nums;
-    margin-bottom: 10px;
-}
-.horario-proximo-feriado-motivo {
-    font-size: 0.88rem;
-    color: #475569;
-    line-height: 1.5;
-    margin-top: 6px;
-    padding-top: 8px;
-    border-top: 1px dashed #e2e8f0;
-}
-
+/* ========== Footer ========== */
 .index-footer {
     padding: 36px 20px 28px;
     background: var(--pan-white);
@@ -812,97 +265,14 @@ body {
     margin: 0;
     color: var(--pan-dark);
 }
-.footer-links {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-.footer-link {
-    color: var(--logo-orange);
-    text-decoration: none;
-    font-weight: 700;
-    font-size: 0.85rem;
-}
 .footer-meta {
     color: #94a3b8;
     font-size: 0.75rem;
 }
 
 @media (max-width: 600px) {
-    .hero-carousel { height: 100dvh; height: 92vh; }
-    .hero-overlay { padding: 16px; padding-top: max(16px, env(safe-area-inset-top)); }
-    .hero-content h1 { font-size: 2rem; }
-    .hero-content p { font-size: 0.95rem; }
-    .hero-btns { flex-direction: column; gap: 12px; }
-    .btn-primary, .btn-secondary { width: 100%; text-align: center; min-height: 48px; }
     .info-section-mensaje { padding: 50px 16px; }
     .info-header h2 { font-size: 1.4rem; }
-    .social-section { padding: 40px 16px; }
-    .social-card { width: fit-content; min-height: 48px; }
     .index-footer { padding: 28px 16px 22px; padding-bottom: max(22px, env(safe-area-inset-bottom)); }
     .footer-title { font-size: 0.9rem; }
-}
-
-/* Badge flotante "Local CERRADO" (solo en index cuando está cerrado/reserva) */
-.floating-cerrado {
-    position: fixed;
-    top: max(12px, env(safe-area-inset-top));
-    right: max(12px, env(safe-area-inset-right));
-    z-index: 1000;
-    background: rgba(185, 28, 28, 0.78);
-    color: #fff;
-    padding: 10px 12px;
-    border-radius: 12px;
-    display: inline-flex;
-    flex-direction: column;
-    gap: 6px;
-    align-items: center;
-    box-shadow: 0 4px 16px rgba(185, 28, 28, 0.25);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    font-size: 0.8125rem;
-    font-weight: 600;
-    max-width: min(220px, calc(100vw - 32px));
-    -webkit-tap-highlight-color: transparent;
-    backdrop-filter: blur(10px);
-}
-.floating-cerrado-reserva {
-    background: rgba(202, 138, 4, 0.52);
-    color: #1c1917;
-    box-shadow: 0 4px 16px rgba(202, 138, 4, 0.2);
-    border-color: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(12px);
-}
-.floating-cerrado-reserva .floating-cerrado-texto { color: #1c1917; }
-.floating-cerrado-reserva i { color: #854d0e; }
-.floating-cerrado-reserva .floating-cerrado-badge {
-    background: rgba(0, 0, 0, 0.35);
-    border: 1px solid rgba(248, 113, 113, 0.4);
-    color: #fecaca;
-    font-size: 0.7rem;
-    padding: 5px 10px;
-    letter-spacing: 0.08em;
-}
-.floating-cerrado-line1 { display: flex; align-items: center; gap: 8px; min-height: 22px; }
-.floating-cerrado i { color: rgba(254, 202, 202, 0.95); flex-shrink: 0; font-size: 0.95rem; }
-.floating-cerrado-texto { color: rgba(255, 255, 255, 0.95); line-height: 1.25; text-align: center; font-size: 0.75rem; font-weight: 500; }
-.floating-cerrado-badge {
-    font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
-    background: rgba(255, 255, 255, 0.12); padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.1);
-}
-@keyframes neon-floating-cerrado-badge {
-    0%, 100% { text-shadow: 0 0 6px #fecaca, 0 0 12px rgba(248, 113, 113, 0.8), 0 0 18px rgba(239, 68, 68, 0.5); box-shadow: 0 0 10px rgba(248, 113, 113, 0.5), inset 0 0 8px rgba(255, 255, 255, 0.1); }
-    50% { text-shadow: 0 0 10px #fecaca, 0 0 20px rgba(248, 113, 113, 0.9), 0 0 28px rgba(239, 68, 68, 0.6); box-shadow: 0 0 14px rgba(248, 113, 113, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.15); }
-}
-.floating-cerrado .floating-cerrado-badge {
-    color: #fecaca;
-    text-shadow: 0 0 6px #fecaca, 0 0 12px rgba(248, 113, 113, 0.8), 0 0 18px rgba(239, 68, 68, 0.5);
-    box-shadow: 0 0 10px rgba(248, 113, 113, 0.4), inset 0 0 8px rgba(255, 255, 255, 0.08);
-    animation: neon-floating-cerrado-badge 2.5s ease-in-out infinite;
-}
-.floating-cerrado-reserva .floating-cerrado-badge {
-    color: #fecaca;
-    text-shadow: 0 0 6px #fecaca, 0 0 12px rgba(248, 113, 113, 0.85), 0 0 20px rgba(239, 68, 68, 0.55);
-    box-shadow: 0 0 12px rgba(248, 113, 113, 0.5), 0 0 20px rgba(239, 68, 68, 0.25), inset 0 0 10px rgba(255, 255, 255, 0.06);
-    animation: neon-floating-cerrado-badge 2.5s ease-in-out infinite;
 }
