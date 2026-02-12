@@ -1,0 +1,251 @@
+/* ========== Variables (paleta del logo) ========== */
+:root {
+    --logo-red: #DC2626;
+    --logo-orange: #EA580C;
+    --logo-yellow: #F59E0B;
+    --logo-teal: #0D9488;
+    --logo-green: #22C55E;
+    --logo-blue: #0EA5E9;
+    --logo-purple: #8B5CF6;
+    --logo-dark: #1F2937;
+    --logo-white: #ffffff;
+    --logo-arc-warm: linear-gradient(90deg, var(--logo-red), var(--logo-orange), var(--logo-yellow));
+    --logo-arc-cool: linear-gradient(90deg, var(--logo-teal), var(--logo-green), var(--logo-blue), var(--logo-purple));
+    --pan-dark: var(--logo-dark);
+    --pan-cream: #FEFCE8;
+    --pan-white: #ffffff;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { -webkit-text-size-adjust: 100%; -webkit-overflow-scrolling: touch; }
+body {
+    margin: 0;
+    font-family: system-ui, sans-serif;
+    background: var(--pan-cream);
+    color: var(--pan-dark);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    overflow-x: hidden;
+}
+
+/* ========== Portada logo ========== */
+.portada-logo {
+    position: relative;
+    min-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px 56px;
+    background: var(--logo-white);
+    text-align: center;
+}
+.portada-logo-first {
+    min-height: 85vh;
+    padding-top: max(48px, env(safe-area-inset-top));
+}
+.portada-logo-arc {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 12px;
+    border-radius: 0 0 12px 12px;
+}
+.portada-logo-arc-top {
+    top: 0;
+    background: var(--logo-arc-warm);
+    border-radius: 0 0 12px 12px;
+}
+.portada-logo-arc-bottom {
+    bottom: 0;
+    background: var(--logo-arc-cool);
+    border-radius: 12px 12px 0 0;
+}
+.portada-logo-inner {
+    max-width: 520px;
+    margin: 0 auto;
+}
+.portada-logo-line1 {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 1.35rem;
+    font-weight: 400;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--logo-red);
+    margin: 0 0 4px;
+}
+.portada-logo-line2 {
+    font-family: 'Oswald', sans-serif;
+    font-size: 3.5rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: var(--logo-arc-cool);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin: 0 0 16px;
+}
+.portada-logo-line3 {
+    font-family: 'Dancing Script', cursive;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--logo-orange);
+    margin: 0 0 4px;
+}
+.portada-logo-line4 {
+    font-family: 'Dancing Script', cursive;
+    font-size: 1.45rem;
+    font-weight: 500;
+    color: var(--logo-teal);
+    margin: 0 0 28px;
+}
+.portada-logo-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 24px;
+    min-height: 44px;
+    border-radius: 50px;
+    background: var(--logo-arc-warm);
+    color: white;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 0.04em;
+    box-shadow: 0 8px 24px rgba(220, 38, 38, 0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.portada-logo-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(234, 88, 12, 0.4);
+}
+.portada-logo-auth {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+.portada-logo-btn-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    min-height: 44px;
+    border-radius: 50px;
+    background: transparent;
+    color: var(--logo-teal);
+    border: 2px solid var(--logo-teal);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.9rem;
+    transition: background 0.2s, color 0.2s, transform 0.2s;
+}
+.portada-logo-btn-outline:hover {
+    background: var(--logo-teal);
+    color: white;
+    transform: translateY(-2px);
+}
+.portada-logo-btn-secondary {
+    background: transparent;
+    color: var(--logo-dark);
+    border: 2px solid var(--logo-dark);
+    box-shadow: none;
+}
+.portada-logo-btn-secondary:hover {
+    background: var(--logo-dark);
+    color: white;
+    box-shadow: 0 6px 20px rgba(31, 41, 55, 0.3);
+}
+
+@media (max-width: 600px) {
+    .portada-logo { min-height: 60vh; padding: 40px 16px 48px; }
+    .portada-logo-line1 { font-size: 1.1rem; letter-spacing: 0.2em; }
+    .portada-logo-line2 { font-size: 2.5rem; }
+    .portada-logo-line3 { font-size: 1.4rem; }
+    .portada-logo-line4 { font-size: 1.25rem; }
+    .portada-logo-auth { flex-direction: column; }
+}
+
+/* ========== Info ========== */
+.info-section-mensaje {
+    padding: 80px 20px;
+    background: var(--pan-white);
+    color: var(--pan-dark);
+    position: relative;
+}
+.info-section-mensaje::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 4px;
+    background: var(--logo-arc-warm);
+}
+.info-section-mensaje::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 4px;
+    background: var(--logo-arc-cool);
+}
+.info-container { max-width: 1000px; margin: 0 auto; text-align: center; }
+.info-header h2 {
+    font-size: 2rem;
+    margin-bottom: 12px;
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-weight: 400;
+    color: var(--pan-dark);
+}
+.info-header p {
+    color: #64748b;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+/* ========== Footer ========== */
+.index-footer {
+    padding: 36px 20px 28px;
+    background: var(--pan-white);
+    position: relative;
+}
+.index-footer::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 4px;
+    background: var(--logo-arc-cool);
+}
+.footer-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    display: grid;
+    gap: 14px;
+    text-align: center;
+}
+.footer-title {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 1.1rem;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    margin: 0;
+    color: var(--pan-dark);
+}
+.footer-meta {
+    color: #94a3b8;
+    font-size: 0.75rem;
+}
+
+@media (max-width: 600px) {
+    .info-section-mensaje { padding: 50px 16px; }
+    .info-header h2 { font-size: 1.4rem; }
+    .index-footer { padding: 28px 16px 22px; padding-bottom: max(22px, env(safe-area-inset-bottom)); }
+    .footer-title { font-size: 0.9rem; }
+}
