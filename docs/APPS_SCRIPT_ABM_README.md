@@ -73,6 +73,13 @@ Todas las peticiones usan el parámetro **`action`**. Opcionalmente **`sheet`** 
 - Elimina la fila correspondiente.
 - Devuelve: `{ deleted: "COSTO-MP-xxxx" }`.
 
+### 7. Rellenar IDs vacíos – `action=fillIds`
+
+- **GET** `?action=fillIds&sheet=materiaPrima` (o `sheet=packing`)
+- Recorre todas las filas de la hoja y, donde la columna **idmateria-prima** (o **idpacking**) esté vacía, escribe un ID generado (COSTO-MP-xxx o COSTO-PK-xxx).
+- **Modifica la hoja directamente.** Conviene ejecutarlo una vez para completar IDs existentes.
+- Devuelve: `{ updated: 42, sheet: "materiaPrima" }`.
+
 ---
 
 ## Formato de respuesta
