@@ -77,6 +77,34 @@
         return result;
     }
 
+    /** Genera un valor alfanumérico único para idmateria-prima. Formato: COSTO-MP- + 10 caracteres alfanuméricos */
+    var ALFANUM = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    function generarIdMateriaPrima(seed) {
+        var base = (Date.now().toString(36) + (seed != null ? Number(seed).toString(36) : "")).slice(-6);
+        var rnd = "";
+        for (var i = 0; i < 4; i++) {
+            rnd += ALFANUM[Math.floor(Math.random() * ALFANUM.length)];
+        }
+        return "COSTO-MP-" + base + rnd;
+    }
+
+    /** Completa idmateria-prima vacíos en las filas de materia prima. Primera columna = idmateria-prima. */
+    function completarIdMateriaPrima(headers, rows) {
+        var idx = -1;
+        for (var i = 0; i < headers.length; i++) {
+            if (String(headers[i]).trim().toLowerCase().replace(/\s/g, "") === "idmateria-prima") {
+                idx = i;
+                break;
+            }
+        }
+        if (idx < 0) return;
+        rows.forEach(function (row, i) {
+            if (row[idx] == null || String(row[idx]).trim() === "") {
+                row[idx] = generarIdMateriaPrima(i);
+            }
+        });
+    }
+
     function run(container) {
         if (!container) return;
 
@@ -97,6 +125,9 @@
                 if (data.headers.length === 0 && data.rows.length === 0) {
                     showMessage(container, "<p class=\"costos-placeholder\">La hoja no tiene datos o la URL no es correcta.</p>");
                     return;
+                }
+                if (container === containerMateria) {
+                    completarIdMateriaPrima(data.headers, data.rows);
                 }
                 showTable(container, data.headers, data.rows);
             })
