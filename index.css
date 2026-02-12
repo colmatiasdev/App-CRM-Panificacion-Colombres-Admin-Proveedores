@@ -31,18 +31,17 @@ body {
 /* ========== Portada logo ========== */
 .portada-logo {
     position: relative;
-    min-height: 70vh;
+    min-height: auto;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 48px 24px 56px;
+    padding: 32px 24px 40px;
     background: var(--logo-white);
     text-align: center;
 }
 .portada-logo-first {
-    min-height: 85vh;
-    padding-top: max(48px, env(safe-area-inset-top));
+    padding-top: max(32px, env(safe-area-inset-top));
 }
 .portada-logo-arc {
     position: absolute;
@@ -64,6 +63,14 @@ body {
 .portada-logo-inner {
     max-width: 520px;
     margin: 0 auto;
+}
+.portada-logo-img {
+    width: 140px;
+    height: auto;
+    max-height: 120px;
+    object-fit: contain;
+    margin: 0 auto 20px;
+    display: block;
 }
 .portada-logo-line1 {
     font-family: 'DM Serif Display', Georgia, serif;
@@ -99,7 +106,7 @@ body {
     font-size: 1.45rem;
     font-weight: 500;
     color: var(--logo-teal);
-    margin: 0 0 28px;
+    margin: 0;
 }
 .portada-logo-btn {
     display: inline-flex;
@@ -161,7 +168,8 @@ body {
 }
 
 @media (max-width: 600px) {
-    .portada-logo { min-height: 60vh; padding: 40px 16px 48px; }
+    .portada-logo { padding: 24px 16px 32px; }
+    .portada-logo-img { width: 100px; margin-bottom: 14px; }
     .portada-logo-line1 { font-size: 1.1rem; letter-spacing: 0.2em; }
     .portada-logo-line2 { font-size: 2.5rem; }
     .portada-logo-line3 { font-size: 1.4rem; }
@@ -206,6 +214,25 @@ body {
     color: #64748b;
     max-width: 700px;
     margin: 0 auto;
+}
+
+/* ========== Costos (Packing / Materia prima) ========== */
+.section-costos .info-header p {
+    margin-bottom: 24px;
+}
+.costos-btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 8px;
+}
+.costos-btn {
+    min-width: 160px;
+}
+@media (max-width: 600px) {
+    .costos-btns { flex-direction: column; }
+    .costos-btn { width: 100%; }
 }
 
 /* ========== Footer ========== */
