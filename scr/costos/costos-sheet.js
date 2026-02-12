@@ -5,8 +5,8 @@
  */
 (function () {
     const config = window.APP_CONFIG || {};
-    const urlPacking = config.googleSheetCostosUrl || "";
-    const urlMateria = (config.googleSheetMateriaPrimaUrl || "").trim() || urlPacking;
+    const urlPacking = (config.googleSheetPackingUrl || "").trim();
+    const urlMateria = (config.googleSheetMateriaPrimaUrl || "").trim();
     const containerPacking = document.getElementById("datos-packing");
     const containerMateria = document.getElementById("datos-materia-prima");
 
@@ -84,7 +84,7 @@
         if (!url || url.trim() === "") {
             showMessage(
                 container,
-                '<p class="costos-placeholder">Para ver datos de una hoja de Google Sheets, configurá <strong>googleSheetCostosUrl</strong> en <code>config.js</code>.</p><p class="costos-placeholder">Ver <a href="../../docs/CONFIGURAR_GOOGLE_SHEETS.md" target="_blank" rel="noopener">docs/CONFIGURAR_GOOGLE_SHEETS.md</a>.</p>'
+                '<p class="costos-placeholder">Para ver datos, configurá <strong>googleSheetPackingUrl</strong> o <strong>googleSheetMateriaPrimaUrl</strong> en <code>config.js</code>.</p><p class="costos-placeholder">Ver <a href="../../docs/CONFIGURAR_GOOGLE_SHEETS.md" target="_blank" rel="noopener">docs/CONFIGURAR_GOOGLE_SHEETS.md</a>.</p>'
             );
             return;
         }
@@ -95,7 +95,7 @@
             .then(function (text) {
                 var data = parseCsv(text);
                 if (data.headers.length === 0 && data.rows.length === 0) {
-                    showMessage(container, '<p class="costos-placeholder">La hoja no tiene datos o la URL no es correcta.</p>');
+                    showMessage(container, "<p class=\"costos-placeholder\">La hoja no tiene datos o la URL no es correcta.</p>");
                     return;
                 }
                 showTable(container, data.headers, data.rows);

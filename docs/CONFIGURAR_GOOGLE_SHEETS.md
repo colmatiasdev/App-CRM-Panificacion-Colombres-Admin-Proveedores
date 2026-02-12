@@ -27,18 +27,23 @@ Para que Packing o Materia prima muestren datos de una hoja de Google Sheets, se
 
 ---
 
-## 3. Configurar la URL en el proyecto
+## 3. Configurar las URLs en el proyecto
 
-1. Abrí **`config.js`** en la raíz del proyecto.
-2. En **`googleSheetCostosUrl`** pegá la URL que copiaste:
-   ```js
-   googleSheetCostosUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vXXXX.../pub?gid=0&single=true&output=csv"
-   ```
-3. Si usás **una hoja para Packing y otra para Materia prima**:
-   - Publicá cada pestaña por separado y obtené dos URLs.
-   - Podés usar una sola URL en `googleSheetCostosUrl` para la hoja principal y luego en el código indicar qué `gid` usar para cada módulo, o guardar dos URLs (en ese caso habría que agregar en `config.js` algo como `googleSheetPackingUrl` y `googleSheetMateriaPrimaUrl`).
+En **`config.js`** (raíz del proyecto) hay una variable por módulo:
 
-Por ahora con **una URL** en `googleSheetCostosUrl` alcanza si todo está en una sola pestaña; si necesitás dos URLs distintas, se pueden agregar en `config.js`.
+| Variable | Módulo | Uso |
+|----------|--------|-----|
+| **`googleSheetPackingUrl`** | Packing | URL CSV pública de la hoja de costos de packing. |
+| **`googleSheetMateriaPrimaUrl`** | Materia prima | URL CSV pública de la hoja de costo de materia prima. |
+
+Ejemplo:
+
+```js
+googleSheetPackingUrl: "https://docs.google.com/spreadsheets/d/e/.../pub?gid=0&single=true&output=csv",
+googleSheetMateriaPrimaUrl: "https://docs.google.com/spreadsheets/d/e/.../pub?gid=0&single=true&output=csv"
+```
+
+Cada módulo usa solo su URL; si una está vacía, esa página mostrará el mensaje para configurarla.
 
 ---
 
