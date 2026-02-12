@@ -52,3 +52,41 @@ body.costos-page {
     font-size: 0.9rem;
     font-style: italic;
 }
+
+.costos-datos {
+    margin-top: 8px;
+}
+.costos-datos-message .costos-placeholder {
+    margin: 0 0 8px;
+}
+.costos-loading {
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.costos-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.costos-table th,
+.costos-table td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+}
+.costos-table th {
+    background: var(--logo-teal);
+    color: #fff;
+    font-weight: 600;
+}
+.costos-table tr:last-child td {
+    border-bottom: none;
+}
+.costos-table tbody tr:hover {
+    background: #f8fafc;
+}

@@ -8,13 +8,17 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="costos.css">
+    <script src="../../config.js"></script>
 </head>
 <body class="costos-page">
     <a href="../../index.html#costos" class="costos-back"><span class="costos-back-arrow">←</span> Volver al inicio</a>
     <main class="costos-main">
         <h1 class="costos-title">Packing</h1>
         <p class="costos-intro">Módulo para cargar y gestionar los costos de packing (empaque, envases, etiquetas) que se aplican al cálculo del costo de cada producto.</p>
-        <p class="costos-placeholder">Contenido en desarrollo.</p>
+        <div id="datos-packing" class="costos-datos">
+            <p class="costos-loading">Cargando datos…</p>
+        </div>
     </main>
+    <script src="costos-sheet.js"></script>
 </body>
 </html>
