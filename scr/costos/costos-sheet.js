@@ -334,7 +334,25 @@
                     headers: headers.slice(),
                     row: row.slice()
                 });
-                var priceBlock = (precio ? "<div class=\"costos-card-price\">" + escapeHtml(precio) + "</div>" : "") +
+                function parsePrecioNum(str) {
+                    if (!str || !String(str).trim()) return NaN;
+                    var s = String(str).trim().replace(/\$\s?/g, "").replace(/\s/g, "");
+                    if (s.indexOf(",") !== -1) {
+                        s = s.replace(/\./g, "").replace(",", ".");
+                    }
+                    return parseFloat(s);
+                }
+                var numActual = parsePrecioNum(precio);
+                var numAnterior = parsePrecioNum(precioAnterior);
+                var trendIcon = "";
+                if (!isNaN(numActual) && !isNaN(numAnterior) && numActual !== numAnterior) {
+                    if (numActual > numAnterior) {
+                        trendIcon = "<i class=\"fa-solid fa-arrow-trend-up costos-trend-up\" title=\"Subi\u00f3 el precio\" aria-hidden=\"true\"></i>";
+                    } else {
+                        trendIcon = "<i class=\"fa-solid fa-arrow-trend-down costos-trend-down\" title=\"Baj\u00f3 el precio\" aria-hidden=\"true\"></i>";
+                    }
+                }
+                var priceBlock = (precio ? "<div class=\"costos-card-price\">" + escapeHtml(precio) + (trendIcon ? " " + trendIcon : "") + "</div>" : "") +
                     "<a href=\"#\" class=\"costos-card-edit-btn\" title=\"Editar precio / registro\" aria-label=\"Editar registro\"><i class=\"fa-solid fa-pen\" aria-hidden=\"true\"></i></a>";
                 cardsHtml += "<div class=\"costos-card\">" +
                     "<div class=\"costos-card-main\">" +
@@ -375,6 +393,7 @@
                             headers: rec.headers,
                             row: rec.row
                         }));
+                        sessionStorage.setItem("costosDistinctCategorias", JSON.stringify(groupOrder));
                         window.location.href = "editar-materia-prima.html" + (rec.id ? "?id=" + encodeURIComponent(rec.id) : "");
                     } catch (err) {
                         window.location.href = "editar-materia-prima.html" + (rec.id ? "?id=" + encodeURIComponent(rec.id) : "");
