@@ -100,6 +100,8 @@ Todas las respuestas son JSON:
 3. **Quién puede acceder**: según necesites (solo tu org o “Cualquier usuario” para probar desde el front).
 4. Copiá la URL del despliegue y usala en el front como base para las llamadas (ej. `fetch(url + '?action=list&sheet=materiaPrima')`).
 
+**CORS y POST desde el navegador:** Las peticiones GET suelen funcionar desde cualquier origen. Para **POST** (create, update), enviá el cuerpo como **application/x-www-form-urlencoded** (por ejemplo con `URLSearchParams` en el body del `fetch`) en lugar de JSON, para reducir problemas de CORS por preflight. El script acepta tanto JSON como form-urlencoded en `doPost`.
+
 ---
 
 ## Ajustar headers de Packing

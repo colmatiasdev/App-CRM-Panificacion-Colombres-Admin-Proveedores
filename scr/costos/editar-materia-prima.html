@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="costos.css">
+    <script src="../../config.js"></script>
 </head>
 <body class="costos-page">
     <a href="materia-prima.html" class="costos-back"><span class="costos-back-arrow">←</span> Volver a Materia prima</a>
@@ -212,6 +213,8 @@
                             if (isPrecioEditable(nameNorm)) {
                                 input.value = "";
                                 input.placeholder = "Ingrese el precio actual";
+                                input.setAttribute("required", "required");
+                                input.setAttribute("aria-required", "true");
                             } else {
                                 input.value = value;
                                 input.placeholder = "Ej: 18800,00";
@@ -222,8 +225,9 @@
                             textarea.className = "costos-edit-input costos-edit-textarea";
                             textarea.name = "field_" + i;
                             textarea.setAttribute("data-header-index", String(i));
+                            textarea.setAttribute("aria-required", "false");
                             textarea.value = value;
-                            textarea.placeholder = "Cargar observaciones…";
+                            textarea.placeholder = "Cargar observaciones… (opcional)";
                             textarea.rows = 4;
                             wrap.appendChild(textarea);
                         }
@@ -281,8 +285,26 @@
                         updatePrecioCosto();
                     })();
 
+                    (function () {
+                        var saveBtn = formEl.querySelector(".costos-edit-btn-save");
+                        var precioInput = formEl.querySelector(".costos-edit-input[placeholder=\"Ingrese el precio actual\"]");
+                        if (!saveBtn || !precioInput) return;
+                        function setSaveButtonState() {
+                            saveBtn.disabled = !(precioInput.value || "").trim();
+                        }
+                        setSaveButtonState();
+                        precioInput.addEventListener("input", setSaveButtonState);
+                        precioInput.addEventListener("change", setSaveButtonState);
+                    })();
+
                     formEl.addEventListener("submit", function (e) {
                         e.preventDefault();
+                        var precioActualInput = formEl.querySelector(".costos-edit-input[placeholder=\"Ingrese el precio actual\"]");
+                        if (precioActualInput && !(precioActualInput.value || "").trim()) {
+                            alert("El precio actual es obligatorio. Ingresá un valor antes de guardar.");
+                            precioActualInput.focus();
+                            return;
+                        }
                         var inputs = formEl.querySelectorAll(".costos-edit-input");
                         var newRow = row.slice();
                         inputs.forEach(function (input) {
@@ -301,7 +323,51 @@
                                 row: newRow
                             }));
                         } catch (err) {}
-                        alert("Cambios guardados en esta sesión. Para persistir en la planilla, conecte esta página con su backend o API.");
+                        var appsScriptUrl = (window.APP_CONFIG && window.APP_CONFIG.appsScriptUrl) ? String(window.APP_CONFIG.appsScriptUrl).trim() : "";
+                        if (!appsScriptUrl) {
+                            alert("No está configurada la URL de la API (appsScriptUrl en config.js). Los cambios quedaron guardados solo en esta sesión.");
+                            return;
+                        }
+                        var headers = data.headers || [];
+                        var body = { action: "update", sheet: "materiaPrima", id: data.id || "" };
+                        for (var h = 0; h < headers.length; h++) {
+                            var headerName = String(headers[h] != null ? headers[h] : "").trim();
+                            if (headerName) body[headerName] = newRow[h] != null ? newRow[h] : "";
+                        }
+                        var saveBtn = formEl.querySelector(".costos-edit-btn-save");
+                        var btnText = saveBtn ? saveBtn.innerHTML : "";
+                        if (saveBtn) {
+                            saveBtn.disabled = true;
+                            saveBtn.innerHTML = "<i class=\"fa-solid fa-spinner fa-spin\" aria-hidden=\"true\"></i> Guardando…";
+                        }
+                        var formBody = new URLSearchParams();
+                        for (var key in body) {
+                            if (body.hasOwnProperty(key)) formBody.append(key, body[key] != null ? body[key] : "");
+                        }
+                        fetch(appsScriptUrl, {
+                            method: "POST",
+                            body: formBody
+                        })
+                            .then(function (res) { return res.json(); })
+                            .then(function (json) {
+                                if (saveBtn) {
+                                    saveBtn.disabled = false;
+                                    saveBtn.innerHTML = btnText;
+                                }
+                                if (json && json.success) {
+                                    alert("Cambios guardados en la hoja correctamente.");
+                                    window.location.href = "materia-prima.html";
+                                } else {
+                                    alert("Error al guardar en la hoja: " + (json && json.error ? json.error : "Respuesta inválida"));
+                                }
+                            })
+                            .catch(function (err) {
+                                if (saveBtn) {
+                                    saveBtn.disabled = false;
+                                    saveBtn.innerHTML = btnText;
+                                }
+                                alert("Error de conexión al guardar: " + (err.message || "Revisá appsScriptUrl y que la hoja esté publicada."));
+                            });
                     });
                 } catch (err) {
                     noDataEl.style.display = "block";
