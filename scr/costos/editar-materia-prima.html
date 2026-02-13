@@ -1339,9 +1339,16 @@
                             } else {
                                 u = row[idxPresUnid] != null ? String(row[idxPresUnid]).trim() : "";
                             }
-                            var fieldTum = formEl.querySelector(".costos-edit-field[data-field=\"equivalencia-tipo-unidad-medida\"]") || formEl.querySelector(".costos-edit-field[data-field=\"tipo-unidad-medida\"]");
+                            var sectionEquiv = formEl.querySelector(".costos-edit-seccion-presentacion-equivalencia .costos-edit-section-equivalencia");
+                            var selTum = sectionEquiv ? sectionEquiv.querySelector("select.costos-edit-select-tipo-unidad-medida") : null;
+                            if (!selTum) {
+                                var fieldAux = formEl.querySelector(".costos-edit-field[data-field=\"equivalencia-tipo-unidad-medida\"]") || formEl.querySelector(".costos-edit-field[data-field=\"tipo-unidad-medida\"]");
+                                var wrapAux = fieldAux ? fieldAux.querySelector(".costos-edit-tipo-unidad-medida-wrap") : null;
+                                selTum = wrapAux ? wrapAux.querySelector("select.costos-edit-select-tipo-unidad-medida") : null;
+                            }
+                            var fieldTum = (selTum && selTum.closest) ? selTum.closest(".costos-edit-field") : null;
+                            if (!fieldTum) fieldTum = formEl.querySelector(".costos-edit-field[data-field=\"equivalencia-tipo-unidad-medida\"]") || formEl.querySelector(".costos-edit-field[data-field=\"tipo-unidad-medida\"]");
                             var wrapTum = fieldTum ? fieldTum.querySelector(".costos-edit-tipo-unidad-medida-wrap") : null;
-                            var selTum = wrapTum ? wrapTum.querySelector("select.costos-edit-select-tipo-unidad-medida") : null;
                             var hidTum = wrapTum ? wrapTum.querySelector("input[type=hidden].costos-edit-input") : null;
                             var spanTum = fieldTum ? fieldTum.querySelector(".costos-edit-value-cell .costos-edit-value") : null;
                             if (selTum && selTum.value && selTum.value !== "__nueva__") {
@@ -1357,8 +1364,13 @@
                             }
                             var uNorm = (window.COSTOS_EQUIVALENCIA && window.COSTOS_EQUIVALENCIA.normalizar) ? window.COSTOS_EQUIVALENCIA.normalizar(u) : u;
                             var dNorm = (window.COSTOS_EQUIVALENCIA && window.COSTOS_EQUIVALENCIA.normalizar) ? window.COSTOS_EQUIVALENCIA.normalizar(d) : d;
-                            var valor = calcularEquivalenciaValor(q, uNorm, dNorm);
-                            if (!isNaN(valor)) {
+                            var out = (window.COSTOS_EQUIVALENCIA && window.COSTOS_EQUIVALENCIA.convertWithDebug) ? window.COSTOS_EQUIVALENCIA.convertWithDebug(q, uNorm, dNorm) : null;
+                            var mismaCat = out && out.debug && out.debug.mismaCategoria;
+                            var valor = out ? out.value : calcularEquivalenciaValor(q, uNorm, dNorm);
+                            if (out && !mismaCat && u && d) {
+                                cantidadSpan.textContent = "—";
+                                hiddenEquiv.value = "";
+                            } else if (!isNaN(valor)) {
                                 var entero = Math.round(valor);
                                 cantidadSpan.textContent = String(entero);
                                 hiddenEquiv.value = String(entero);
@@ -1366,19 +1378,40 @@
                                 cantidadSpan.textContent = "—";
                                 hiddenEquiv.value = "";
                             }
+                            var leyenda = fieldTum ? fieldTum.querySelector(".costos-edit-equivalencia-leyenda") : null;
+                            if (!leyenda && fieldTum) {
+                                leyenda = document.createElement("p");
+                                leyenda.className = "costos-edit-equivalencia-leyenda";
+                                leyenda.setAttribute("role", "alert");
+                                fieldTum.appendChild(leyenda);
+                            }
+                            if (leyenda) {
+                                if (out && !out.debug.mismaCategoria && u && d) {
+                                    leyenda.textContent = "Debe seleccionar una unidad de medida a Convertir que sea de la misma categoría (ej. masa con masa, longitud con longitud).";
+                                    leyenda.classList.add("costos-edit-equivalencia-leyenda-visible");
+                                } else {
+                                    leyenda.textContent = "";
+                                    leyenda.classList.remove("costos-edit-equivalencia-leyenda-visible");
+                                }
+                            }
                             var debugSection = document.getElementById("costos-debug-equivalencia");
                             var debugContent = debugSection ? document.getElementById("costos-debug-equivalencia-content") : null;
-                            if (debugSection && debugSection.style.display !== "none" && debugContent && window.COSTOS_EQUIVALENCIA && window.COSTOS_EQUIVALENCIA.convertWithDebug) {
-                                var out = window.COSTOS_EQUIVALENCIA.convertWithDebug(q, uNorm, dNorm);
+                            if (debugSection && debugSection.style.display !== "none" && debugContent && out) {
                                 var db = out.debug;
-                                debugContent.textContent = "Cantidad (origen): " + db.cantidad + "\n" +
-                                    "Unidad presentación (origen): \"" + db.unidadOrigen + "\" → normalizado: \"" + db.normalizadoOrigen + "\"\n" +
-                                    "Convertir a (destino): \"" + db.unidadDestino + "\" → normalizado: \"" + db.normalizadoDestino + "\"\n" +
-                                    "Categoría: " + db.categoria + "\n" +
-                                    "Factor origen: " + db.factorOrigen + " | Factor destino: " + db.factorDestino + "\n" +
-                                    "Misma categoría: " + db.mismaCategoria + "\n" +
-                                    "Fórmula: " + db.formula + "\n" +
-                                    "Resultado (equivalencia): " + db.resultado;
+                                var catOrigenStr = db.categoriaOrigen != null ? db.categoriaOrigen : db.categoria;
+                                var catDestinoStr = db.categoriaDestino != null ? db.categoriaDestino : db.categoria;
+                                var formulaLine = db.mismaCategoria
+                                    ? "Fórmula (valores): " + db.formula + "\n\nR = Resultado (equivalencia): " + db.resultado
+                                    : "Fórmula no aplicada: origen y destino son de distinta categoría (" + catOrigenStr + " ≠ " + catDestinoStr + ").\nR = C (sin convertir) = " + db.resultado;
+                                debugContent.textContent =
+                                    "C = Cantidad (origen): " + db.cantidad + "\n" +
+                                    "UP-Origen = Unidad presentación (origen): \"" + db.unidadOrigen + "\" → normalizado: \"" + db.normalizadoOrigen + "\"\n" +
+                                    "UD-Destino = Unidad destino (Convertir a): \"" + db.unidadDestino + "\" → normalizado: \"" + db.normalizadoDestino + "\"\n" +
+                                    "Cat-Origen = Categoría origen: " + catOrigenStr + " | Cat-Destino = Categoría destino: " + catDestinoStr + "\n" +
+                                    "FO = Factor origen: " + db.factorOrigen + " | FD = Factor destino: " + db.factorDestino + "\n" +
+                                    "Misma categoría: " + db.mismaCategoria + "\n\n" +
+                                    "Fórmula (cuando misma categoría): R = C × FO / FD\n" +
+                                    formulaLine;
                             }
                         }
                         formEl.addEventListener("input", function (e) {
