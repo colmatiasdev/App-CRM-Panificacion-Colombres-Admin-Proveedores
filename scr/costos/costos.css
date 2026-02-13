@@ -305,9 +305,35 @@ body.costos-page {
     align-items: flex-start;
     gap: 12px;
 }
-.costos-card-info {
+.costos-card-left-wrap {
     flex: 1;
     min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.costos-card-left {
+    min-width: 0;
+}
+.costos-card-info {
+    min-width: 0;
+}
+.costos-card-presentacion-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+.costos-card-presentacion-row .costos-card-presentacion:empty,
+.costos-card-presentacion-row .costos-card-old-price:empty {
+    display: none;
+}
+.costos-card-presentacion-row .costos-card-old-price {
+    margin-bottom: 0;
+    flex-shrink: 0;
+    text-align: right;
 }
 .costos-card-name {
     font-size: 1.1rem;
@@ -332,6 +358,9 @@ body.costos-page {
     color: var(--muted-light);
     text-decoration: line-through;
     margin-bottom: 2px;
+}
+.costos-card-price-row {
+    display: block;
 }
 .costos-card-price {
     font-size: 1.25rem;
@@ -425,14 +454,46 @@ body.costos-page {
         flex-direction: column;
         gap: 10px;
     }
+    .costos-card-left-wrap {
+        display: contents;
+    }
+    .costos-card-left {
+        width: 100%;
+        order: 0;
+    }
     .costos-card-price-side {
+        order: 1;
         text-align: right;
         width: 100%;
     }
-    .costos-card-days {
-        display: block;
+    .costos-card-presentacion-row {
+        order: 2;
+        width: 100%;
+    }
+    .costos-card-info {
+        width: 100%;
+    }
+    .costos-card-name {
+        width: 100%;
+    }
+    .costos-card-price-row {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-top: 8px;
+        width: 100%;
+    }
+    .costos-card-price-row .costos-card-price {
+        text-align: right;
+        font-size: 1.2rem;
+    }
+    .costos-card-price-row .costos-card-days {
         text-align: left;
-        margin-top: 6px;
+        margin-top: 0;
+        flex-shrink: 0;
+        max-width: 60%;
     }
     .costos-extra-info {
         grid-template-columns: 1fr;

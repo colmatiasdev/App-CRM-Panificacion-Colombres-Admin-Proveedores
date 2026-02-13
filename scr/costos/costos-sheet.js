@@ -318,14 +318,22 @@
                 var extraHtml = "<div class=\"costos-extra-info\">" + extraParts.join("") + "</div>";
                 cardsHtml += "<div class=\"costos-card\">" +
                     "<div class=\"costos-card-main\">" +
+                    "<div class=\"costos-card-left-wrap\">" +
+                    "<div class=\"costos-card-left\">" +
                     "<div class=\"costos-card-info\">" +
                     "<h2 class=\"costos-card-name\">" + escapeHtml(nombre) + "</h2>" +
+                    "</div>" +
+                    "</div>" +
+                    "<div class=\"costos-card-presentacion-row\">" +
                     (presentacion ? "<div class=\"costos-card-presentacion\">" + escapeHtml(presentacion) + "</div>" : "") +
+                    (precioAnterior ? "<span class=\"costos-card-old-price\">Ant: " + escapeHtml(precioAnterior) + "</span>" : "") +
+                    "</div>" +
                     "</div>" +
                     "<div class=\"costos-card-price-side\">" +
-                    (precioAnterior ? "<span class=\"costos-card-old-price\">Ant: " + escapeHtml(precioAnterior) + "</span>" : "") +
+                    "<div class=\"costos-card-price-row\">" +
                     (precio ? "<div class=\"costos-card-price\">" + escapeHtml(precio) + "</div>" : "") +
                     (regText ? "<span class=\"costos-card-days " + escapeHtml(diasClass) + "\">" + escapeHtml(regText) + "</span>" : "") +
+                    "</div>" +
                     "</div>" +
                     "</div>" +
                     "<button type=\"button\" class=\"costos-expand-btn\" aria-expanded=\"false\"><i class=\"fa-solid fa-plus costos-expand-icon\"></i> <span class=\"costos-expand-text\">INFORMACION</span></button>" +
