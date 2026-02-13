@@ -24,6 +24,12 @@
         </div>
         <p class="costos-intro">Módulo para cargar los precios de los proveedores (harina, levadura, insumos) y utilizarlos en el cálculo del costo de los productos.</p>
 
+        <section class="costos-filter-section" aria-label="Filtrar listado">
+            <label for="filter-materia-prima" class="costos-filter-label">Buscar</label>
+            <input type="search" id="filter-materia-prima" class="costos-filter-input" placeholder="Categoría o nombre de producto…" autocomplete="off">
+            <p class="costos-filter-count" id="materia-prima-count" aria-live="polite"></p>
+        </section>
+
         <div class="costos-calc-panel" id="panel-calculadora-equivalencia" hidden>
             <div class="costos-calc-inner">
                 <div class="costos-calc-block costos-calc-datos">

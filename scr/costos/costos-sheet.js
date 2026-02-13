@@ -247,11 +247,11 @@
             });
         };
         var catIdx = -1;
+        var idxIdMateriaPrima = -1;
         for (var i = 0; i < headers.length; i++) {
-            if (String(headers[i] != null ? headers[i] : "").trim().toLowerCase() === "categoria") {
-                catIdx = i;
-                break;
-            }
+            var hTrim = String(headers[i] != null ? headers[i] : "").trim().toLowerCase().replace(/\s/g, "");
+            if (hTrim === "categoria") catIdx = i;
+            if (hTrim === "idmateria-prima" || hTrim === "idmateriaprima") idxIdMateriaPrima = i;
         }
         var groups = [];
         var groupMap = {};
@@ -288,6 +288,7 @@
             return "Actualizado hace " + n + " d\u00edas";
         }
         var cardsHtml = "";
+        var recordsForEdit = [];
         groupOrder.forEach(function (catLabel) {
             var g = groups[groupMap[catLabel]];
             cardsHtml += "<div class=\"costos-cat-title\">" + escapeHtml(g.label) + "</div>";
@@ -316,6 +317,14 @@
                     extraParts.push("<div class=\"costos-extra-item\"><span class=\"costos-extra-label\">" + escapeHtml(labels[ex]) + "</span> <b>" + escapeHtml(val) + "</b></div>");
                 }
                 var extraHtml = "<div class=\"costos-extra-info\">" + extraParts.join("") + "</div>";
+                var idRegistro = idxIdMateriaPrima >= 0 && row[idxIdMateriaPrima] != null ? String(row[idxIdMateriaPrima]).trim() : "";
+                recordsForEdit.push({
+                    id: idRegistro,
+                    headers: headers.slice(),
+                    row: row.slice()
+                });
+                var priceBlock = (precio ? "<div class=\"costos-card-price\">" + escapeHtml(precio) + "</div>" : "") +
+                    "<a href=\"#\" class=\"costos-card-edit-btn\" title=\"Editar precio / registro\" aria-label=\"Editar registro\"><i class=\"fa-solid fa-pen\" aria-hidden=\"true\"></i></a>";
                 cardsHtml += "<div class=\"costos-card\">" +
                     "<div class=\"costos-card-main\">" +
                     "<div class=\"costos-card-left-wrap\">" +
@@ -325,14 +334,14 @@
                     "</div>" +
                     "</div>" +
                     "<div class=\"costos-card-presentacion-row\">" +
-                    (presentacion ? "<div class=\"costos-card-presentacion\">" + escapeHtml(presentacion) + "</div>" : "") +
+                    (regText ? "<span class=\"costos-card-days " + escapeHtml(diasClass) + "\">" + escapeHtml(regText) + "</span>" : "") +
                     (precioAnterior ? "<span class=\"costos-card-old-price\">Ant: " + escapeHtml(precioAnterior) + "</span>" : "") +
                     "</div>" +
                     "</div>" +
                     "<div class=\"costos-card-price-side\">" +
                     "<div class=\"costos-card-price-row\">" +
-                    (precio ? "<div class=\"costos-card-price\">" + escapeHtml(precio) + "</div>" : "") +
-                    (regText ? "<span class=\"costos-card-days " + escapeHtml(diasClass) + "\">" + escapeHtml(regText) + "</span>" : "") +
+                    "<div class=\"costos-card-price-wrap\">" + priceBlock + "</div>" +
+                    (presentacion ? "<div class=\"costos-card-presentacion\">" + escapeHtml(presentacion) + "</div>" : "") +
                     "</div>" +
                     "</div>" +
                     "</div>" +
@@ -344,6 +353,24 @@
         var leyenda = buildDiasLeyenda(config);
         container.innerHTML = "<div class=\"costos-cards-wrap\">" + cardsHtml + "</div>" + leyenda;
         container.classList.remove("costos-datos-message");
+        container.querySelectorAll(".costos-card-edit-btn").forEach(function (btn, idx) {
+            var rec = recordsForEdit[idx];
+            if (rec) {
+                btn.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    try {
+                        sessionStorage.setItem("costosEditRecord", JSON.stringify({
+                            id: rec.id,
+                            headers: rec.headers,
+                            row: rec.row
+                        }));
+                        window.location.href = "editar-materia-prima.html" + (rec.id ? "?id=" + encodeURIComponent(rec.id) : "");
+                    } catch (err) {
+                        window.location.href = "editar-materia-prima.html" + (rec.id ? "?id=" + encodeURIComponent(rec.id) : "");
+                    }
+                });
+            }
+        });
         container.querySelectorAll(".costos-expand-btn").forEach(function (btn) {
             btn.addEventListener("click", function () {
                 var extra = btn.nextElementSibling;
@@ -361,6 +388,65 @@
                 }
             });
         });
+        var filterInput = document.getElementById("filter-materia-prima");
+        if (filterInput) {
+            function applyFilterMateria() {
+                var wrap = container.querySelector(".costos-cards-wrap");
+                if (!wrap) return;
+                var query = (filterInput.value || "").trim();
+                var words = query.toLowerCase().split(/\s+/).filter(Boolean);
+                var totalCards = wrap.querySelectorAll(".costos-card").length;
+                var children = wrap.children;
+                var i = 0;
+                while (i < children.length) {
+                    var el = children[i];
+                    if (el.classList.contains("costos-cat-title")) {
+                        var categoryText = (el.textContent || "").trim().toLowerCase();
+                        var group = [el];
+                        i++;
+                        while (i < children.length && !children[i].classList.contains("costos-cat-title")) {
+                            group.push(children[i]);
+                            i++;
+                        }
+                        group.forEach(function (node) {
+                            if (node.classList.contains("costos-cat-title")) {
+                                return;
+                            }
+                            if (node.classList.contains("costos-card")) {
+                                var nameEl = node.querySelector(".costos-card-name");
+                                var nameText = nameEl ? (nameEl.textContent || "").trim().toLowerCase() : "";
+                                var cardMatches = words.length === 0 || words.every(function (word) {
+                                    return categoryText.indexOf(word) !== -1 || nameText.indexOf(word) !== -1;
+                                });
+                                node.style.display = cardMatches ? "" : "none";
+                            }
+                        });
+                        var anyCardVisible = group.some(function (node) {
+                            return node.classList.contains("costos-card") && node.style.display !== "none";
+                        });
+                        el.style.display = (words.length === 0 || anyCardVisible) ? "" : "none";
+                    } else {
+                        i++;
+                    }
+                }
+                var visibleCards = [].slice.call(wrap.querySelectorAll(".costos-card")).filter(function (c) { return c.style.display !== "none"; }).length;
+                var countEl = document.getElementById("materia-prima-count");
+                if (countEl) {
+                    if (totalCards === 0) {
+                        countEl.textContent = "";
+                    } else if (words.length === 0) {
+                        countEl.textContent = totalCards === 1 ? "1 producto" : totalCards + " productos";
+                    } else {
+                        countEl.textContent = visibleCards === 1
+                            ? "Mostrando 1 de " + totalCards + " productos"
+                            : "Mostrando " + visibleCards + " de " + totalCards + " productos";
+                    }
+                }
+            }
+            filterInput.addEventListener("input", applyFilterMateria);
+            filterInput.addEventListener("search", applyFilterMateria);
+            applyFilterMateria();
+        }
     }
 
     /** Leyenda de referencia para Días actualiz. (umbrales desde config.diasActualizacion). */
