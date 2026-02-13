@@ -348,7 +348,19 @@
                             method: "POST",
                             body: formBody
                         })
-                            .then(function (res) { return res.json(); })
+                            .then(function (res) { return res.text(); })
+                            .then(function (text) {
+                                var json;
+                                try {
+                                    json = JSON.parse(text);
+                                } catch (e) {
+                                    if (text && (text.trim().indexOf("<!DOCTYPE") === 0 || text.trim().indexOf("<html") === 0)) {
+                                        throw new Error("El servidor respondió con una página HTML en lugar de JSON. Revisá que el proyecto de Apps Script tenga doPost y doGet desplegados como aplicación web (Implementar → Nueva implementación).");
+                                    }
+                                    throw new Error("Respuesta no válida del servidor: " + (text ? text.substring(0, 80) + "…" : "vacía"));
+                                }
+                                return json;
+                            })
                             .then(function (json) {
                                 if (saveBtn) {
                                     saveBtn.disabled = false;
