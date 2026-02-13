@@ -79,6 +79,25 @@ var CONFIG = {
     filterColumns: ['Categoria', 'Nombre-Producto', 'Presentacion-Tipo', 'Marca', 'Habilitado', 'idpacking'],
     requiredOnCreate: ['Nombre-Producto'],
     dateUpdatedColumn: 'Fecha-Actualizada-Al'
+  },
+
+  /** Hoja Combos – listas para combos – ?sheet=combos */
+  combos: {
+    sheetName: 'COMBOS',
+    gid: 0,
+    headers: ['TIPO-UNIDAD-MEDIDA', 'CONVERTIR-UNIDAD-MEDIDA', 'TIPO-PRESENTACION'],
+    idColumn: 'TIPO-UNIDAD-MEDIDA',
+    filterColumns: ['TIPO-UNIDAD-MEDIDA', 'CONVERTIR-UNIDAD-MEDIDA', 'TIPO-PRESENTACION']
+  },
+
+  /** Hoja Equivalencias – unidades y factores para conversión – ?sheet=equivalencias
+   * Columnas: Categoria, Unidad, Factor, Alias, Tipo, Notas. Ver docs/EQUIVALENCIAS_SHEET.md */
+  equivalencias: {
+    sheetName: 'EQUIVALENCIAS',
+    gid: 0,
+    headers: ['Categoria', 'Unidad', 'Factor', 'Alias', 'Tipo', 'Notas'],
+    idColumn: 'Unidad',
+    filterColumns: ['Categoria', 'Unidad', 'Tipo']
   }
 
   // Para agregar otra hoja, copiá un bloque (p.ej. packing), cambiá la clave y sheetName:

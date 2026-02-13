@@ -258,15 +258,35 @@
             });
         };
         var catIdx = -1;
+        var marcaIdx = -1;
+        var lugarIdx = -1;
+        var idxPresUnid = -1;
+        var idxPresTipo = -1;
+        var idxTipoUnidadMedida = -1;
         var idxIdMateriaPrima = -1;
         for (var i = 0; i < headers.length; i++) {
             var hTrim = String(headers[i] != null ? headers[i] : "").trim().toLowerCase().replace(/\s/g, "");
-            if (hTrim === "categoria") catIdx = i;
+            if (hTrim === "categoria" || hTrim === "categoría") catIdx = i;
+            if (hTrim === "marca") marcaIdx = i;
+            if (hTrim === "lugar") lugarIdx = i;
+            if (hTrim === "presentacion-unidad") idxPresUnid = i;
+            if (hTrim === "presentacion-tipo") idxPresTipo = i;
+            if (hTrim === "tipo-unidad-medida") idxTipoUnidadMedida = i;
             if (hTrim === "idmateria-prima" || hTrim === "idmateriaprima") idxIdMateriaPrima = i;
         }
         var groups = [];
         var groupMap = {};
         var groupOrder = [];
+        var marcaSet = {};
+        var marcaOrder = [];
+        var lugarSet = {};
+        var lugarOrder = [];
+        var unidadPresSet = {};
+        var unidadPresOrder = [];
+        var tipoPresSet = {};
+        var tipoPresOrder = [];
+        var tipoUnidadMedidaSet = {};
+        var tipoUnidadMedidaOrder = [];
         rows.forEach(function (row) {
             var catVal = catIdx >= 0 && row[catIdx] != null ? String(row[catIdx]).trim() : "";
             if (!catVal) catVal = "Sin categoría";
@@ -276,10 +296,55 @@
                 groups.push({ label: catVal, rows: [] });
             }
             groups[groupMap[catVal]].rows.push(row);
+            if (marcaIdx >= 0) {
+                var mVal = row[marcaIdx] != null ? String(row[marcaIdx]).trim() : "";
+                if (!marcaSet[mVal]) { marcaSet[mVal] = true; marcaOrder.push(mVal || "—"); }
+            }
+            if (lugarIdx >= 0) {
+                var lVal = row[lugarIdx] != null ? String(row[lugarIdx]).trim() : "";
+                if (!lugarSet[lVal]) { lugarSet[lVal] = true; lugarOrder.push(lVal || "—"); }
+            }
+            if (idxPresUnid >= 0) {
+                var uVal = row[idxPresUnid] != null ? String(row[idxPresUnid]).trim() : "";
+                if (!unidadPresSet[uVal]) { unidadPresSet[uVal] = true; unidadPresOrder.push(uVal || "—"); }
+            }
+            if (idxPresTipo >= 0) {
+                var tVal = row[idxPresTipo] != null ? String(row[idxPresTipo]).trim() : "";
+                if (!tipoPresSet[tVal]) { tipoPresSet[tVal] = true; tipoPresOrder.push(tVal || "—"); }
+            }
+            if (idxTipoUnidadMedida >= 0) {
+                var tumVal = row[idxTipoUnidadMedida] != null ? String(row[idxTipoUnidadMedida]).trim() : "";
+                if (!tipoUnidadMedidaSet[tumVal]) { tipoUnidadMedidaSet[tumVal] = true; tipoUnidadMedidaOrder.push(tumVal || "—"); }
+            }
         });
         groupOrder.sort(function (a, b) {
             if (a === "Sin categoría") return 1;
             if (b === "Sin categoría") return -1;
+            return a.localeCompare(b);
+        });
+        marcaOrder.sort(function (a, b) {
+            if (a === "—") return 1;
+            if (b === "—") return -1;
+            return a.localeCompare(b);
+        });
+        lugarOrder.sort(function (a, b) {
+            if (a === "—") return 1;
+            if (b === "—") return -1;
+            return a.localeCompare(b);
+        });
+        unidadPresOrder.sort(function (a, b) {
+            if (a === "—") return 1;
+            if (b === "—") return -1;
+            return a.localeCompare(b);
+        });
+        tipoPresOrder.sort(function (a, b) {
+            if (a === "—") return 1;
+            if (b === "—") return -1;
+            return a.localeCompare(b);
+        });
+        tipoUnidadMedidaOrder.sort(function (a, b) {
+            if (a === "—") return 1;
+            if (b === "—") return -1;
             return a.localeCompare(b);
         });
         var idxProducto = -1, idxPresentacion = -1, idxPrecio = -1, idxPrecioAnterior = -1, idxDias = -1;
@@ -394,6 +459,11 @@
                             row: rec.row
                         }));
                         sessionStorage.setItem("costosDistinctCategorias", JSON.stringify(groupOrder));
+                        sessionStorage.setItem("costosDistinctMarcas", JSON.stringify(marcaOrder));
+                        sessionStorage.setItem("costosDistinctLugares", JSON.stringify(lugarOrder));
+                        sessionStorage.setItem("costosDistinctUnidadPresentacion", JSON.stringify(unidadPresOrder));
+                        sessionStorage.setItem("costosDistinctTipoPresentacion", JSON.stringify(tipoPresOrder));
+                        sessionStorage.setItem("costosDistinctTipoUnidadMedida", JSON.stringify(tipoUnidadMedidaOrder));
                         window.location.href = "editar-materia-prima.html" + (rec.id ? "?id=" + encodeURIComponent(rec.id) : "");
                     } catch (err) {
                         window.location.href = "editar-materia-prima.html" + (rec.id ? "?id=" + encodeURIComponent(rec.id) : "");
@@ -599,13 +669,51 @@
         var csvUrl = isMateria ? urlMateria : urlPacking;
 
         if (appsScriptUrl) {
+            var loadCombos = isMateria ? fetch(appsScriptUrl + "?action=list&sheet=combos&limit=5000", { cache: "no-store" })
+                .then(function (res) { return res.json(); })
+                .then(function (json) {
+                    if (!json || !json.success || !json.data) return;
+                    var headers = json.data.headers || [];
+                    var rows = json.data.rows || [];
+                    function normCol(h) {
+                        return String(h != null ? h : "").trim().toLowerCase().replace(/\s+/g, "-").replace(/-+/g, "-");
+                    }
+                    function findColKey(normName) {
+                        for (var ci = 0; ci < headers.length; ci++) {
+                            if (normCol(headers[ci]) === normName) return String(headers[ci] != null ? headers[ci] : "").trim();
+                        }
+                        return headers.length > 0 ? String(headers[0]).trim() : null;
+                    }
+                    function distinctValues(colKey) {
+                        var vals = [];
+                        rows.forEach(function (row) {
+                            var v = (row && colKey && row[colKey] != null) ? String(row[colKey]).trim() : "";
+                            if (v && vals.indexOf(v) === -1) vals.push(v);
+                        });
+                        return vals;
+                    }
+                    try {
+                        var keyUnidad = findColKey("tipo-unidad-medida");
+                        if (keyUnidad) sessionStorage.setItem("costosCombosUnidadPresentacion", JSON.stringify(distinctValues(keyUnidad)));
+                        var keyConvertir = findColKey("convertir-unidad-medida");
+                        if (keyConvertir) sessionStorage.setItem("costosCombosConvertirUnidadMedida", JSON.stringify(distinctValues(keyConvertir)));
+                        var keyTipoPres = findColKey("tipo-presentacion");
+                        if (keyTipoPres) sessionStorage.setItem("costosCombosTipoPresentacion", JSON.stringify(distinctValues(keyTipoPres)));
+                    } catch (e) {}
+                })
+                .catch(function () {}) : Promise.resolve();
             loadFromApi(sheetKey, container)
                 .then(function (data) {
+                    if (isMateria && data.headers && data.headers.length) {
+                        try {
+                            sessionStorage.setItem("costosMateriaHeaders", JSON.stringify(data.headers));
+                        } catch (e) {}
+                    }
                     if (!data.headers.length && !data.rows.length) {
                         showMessage(container, "<p class=\"costos-placeholder\">La hoja no tiene datos.</p>");
                         return;
                     }
-                    applyMateriaOrPackingTable(container, data, isMateria);
+                    return loadCombos.then(function () { applyMateriaOrPackingTable(container, data, isMateria); });
                 })
                 .catch(function () {
                     if (csvUrl) {
@@ -649,6 +757,216 @@
             });
     }
 
+    /** Conversiones universales de unidades (1 KG = 1000 g, 1 L = 1000 cc, 1 m = 100 cm, 1 docena = 12 unidad). */
+    window.COSTOS_EQUIVALENCIA = (function () {
+        var categorias = {
+            masa: { gramos: 1, g: 1, kg: 1000, kilo: 1000, kilos: 1000 },
+            volumen: { cc: 1, litro: 1000, l: 1000, litros: 1000, centimetrocubico: 1, centimetroscubico: 1 },
+            longitud: { centimetro: 1, centimetros: 1, cm: 1, centímetro: 1, centímetros: 1, metro: 100, metros: 100, m: 100 },
+            conteo: { unidad: 1, unidades: 1, elemento: 1, elementos: 1, pieza: 1, piezas: 1, docena: 12, docenas: 12 }
+        };
+        function normalizar(val) {
+            if (val == null || typeof val !== "string") return "";
+            var s = String(val).trim().toLowerCase().replace(/\s*\[[^\]]*\]\s*/g, "").replace(/\s+/g, "");
+            try {
+                s = s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            } catch (e) {
+                s = s.replace(/ó/g, "o").replace(/í/g, "i").replace(/á/g, "a").replace(/é/g, "e").replace(/ú/g, "u");
+            }
+            return s;
+        }
+        function getCategoria(unidadNorm) {
+            var c, keys;
+            for (c in categorias) {
+                if (categorias.hasOwnProperty(c) && categorias[c][unidadNorm] != null) return c;
+            }
+            return null;
+        }
+        function getFactor(cat, unidadNorm) {
+            if (!cat || !categorias[cat]) return NaN;
+            var f = categorias[cat][unidadNorm];
+            return f != null ? f : NaN;
+        }
+        /** Convierte cantidad de unidadOrigen a unidadDestino dentro de la misma categoría.
+         * Ej: 10 docena → unidad: 10 * 12 / 1 = 120; 1 kg → gramos: 1 * 1000 / 1 = 1000. */
+        function convert(cantidad, unidadOrigen, unidadDestino) {
+            var q = parseFloat(String(cantidad).replace(",", "."));
+            if (isNaN(q) || q < 0) return NaN;
+            var u = normalizar(unidadOrigen);
+            var d = normalizar(unidadDestino);
+            if (!u || !d) return q;
+            var catOrigen = getCategoria(u);
+            var catDestino = getCategoria(d);
+            if (!catOrigen || !catDestino || catOrigen !== catDestino) return q;
+            var factorOrigen = getFactor(catOrigen, u);
+            var factorDestino = getFactor(catDestino, d);
+            if (isNaN(factorOrigen) || isNaN(factorDestino) || factorDestino === 0) return q;
+            return q * factorOrigen / factorDestino;
+        }
+        /** Igual que convert pero devuelve { value, debug } para la sección de debug. */
+        function convertWithDebug(cantidad, unidadOrigen, unidadDestino) {
+            var q = parseFloat(String(cantidad).replace(",", "."));
+            var u = (unidadOrigen != null && unidadOrigen !== "") ? normalizar(unidadOrigen) : "";
+            var d = (unidadDestino != null && unidadDestino !== "") ? normalizar(unidadDestino) : "";
+            var catOrigen = u ? getCategoria(u) : null;
+            var catDestino = d ? getCategoria(d) : null;
+            var factorOrigen = catOrigen && u ? getFactor(catOrigen, u) : NaN;
+            var factorDestino = catDestino && d ? getFactor(catDestino, d) : NaN;
+            var mismaCategoria = catOrigen && catDestino && catOrigen === catDestino;
+            var resultado = q;
+            var formula = "—";
+            if (!isNaN(q) && q >= 0 && u && d && mismaCategoria && !isNaN(factorOrigen) && !isNaN(factorDestino) && factorDestino !== 0) {
+                resultado = q * factorOrigen / factorDestino;
+                formula = q + " × " + factorOrigen + " / " + factorDestino + " = " + resultado;
+            }
+            return {
+                value: resultado,
+                debug: {
+                    cantidad: q,
+                    unidadOrigen: String(unidadOrigen != null ? unidadOrigen : ""),
+                    unidadDestino: String(unidadDestino != null ? unidadDestino : ""),
+                    normalizadoOrigen: u,
+                    normalizadoDestino: d,
+                    categoria: catOrigen || catDestino || "—",
+                    factorOrigen: factorOrigen,
+                    factorDestino: factorDestino,
+                    mismaCategoria: mismaCategoria,
+                    formula: formula,
+                    resultado: resultado
+                }
+            };
+        }
+        /** Construye categorias desde filas del sheet (Categoria, Unidad, Factor, Alias). Mezcla con defaults. */
+        function setCategoriasFromRows(rows) {
+            if (!rows || !Array.isArray(rows) || rows.length === 0) return;
+            var cat, factor, unidadNorm, aliasStr, list, i, j;
+            for (i = 0; i < rows.length; i++) {
+                var row = rows[i];
+                if (row && typeof row === "object") {
+                    cat = String(row.Categoria != null ? row.Categoria : "").trim().toLowerCase().replace(/\s+/g, "");
+                    if (!cat) continue;
+                    factor = parseFloat(String(row.Factor != null ? row.Factor : "").replace(",", "."));
+                    if (isNaN(factor) || factor <= 0) continue;
+                    if (!categorias[cat]) categorias[cat] = {};
+                    unidadNorm = normalizar(row.Unidad);
+                    if (unidadNorm) categorias[cat][unidadNorm] = factor;
+                    aliasStr = String(row.Alias != null ? row.Alias : "").trim();
+                    if (aliasStr) {
+                        list = aliasStr.split(",");
+                        for (j = 0; j < list.length; j++) {
+                            unidadNorm = normalizar(list[j].trim());
+                            if (unidadNorm) categorias[cat][unidadNorm] = factor;
+                        }
+                    }
+                }
+            }
+        }
+        return { convert: convert, convertWithDebug: convertWithDebug, normalizar: normalizar, categorias: categorias, setCategoriasFromRows: setCategoriasFromRows };
+    })();
+
+    (function loadEquivalenciasFromSheet() {
+        var url = (window.APP_CONFIG && window.APP_CONFIG.appsScriptUrl) ? String(window.APP_CONFIG.appsScriptUrl).trim() : "";
+        if (!url || !window.COSTOS_EQUIVALENCIA || !window.COSTOS_EQUIVALENCIA.setCategoriasFromRows) return;
+        fetch(url + "?action=list&sheet=equivalencias&limit=500", { cache: "no-store" })
+            .then(function (res) { return res.json(); })
+            .then(function (json) {
+                if (json && json.success && json.data && json.data.rows && json.data.rows.length) {
+                    window.COSTOS_EQUIVALENCIA.setCategoriasFromRows(json.data.rows);
+                }
+            })
+            .catch(function () {});
+    })();
+
     run(containerPacking);
     run(containerMateria);
+
+    var btnNuevaMateria = document.getElementById("btn-nueva-materia-prima");
+    if (btnNuevaMateria) {
+        btnNuevaMateria.addEventListener("click", function (e) {
+            e.preventDefault();
+            var appsScriptUrl = (window.APP_CONFIG && window.APP_CONFIG.appsScriptUrl) ? String(window.APP_CONFIG.appsScriptUrl).trim() : "";
+            function goToCreate(headers) {
+                if (!headers || !headers.length) {
+                    alert("No se pudieron obtener las columnas. Revisá la conexión con la hoja.");
+                    return;
+                }
+                var row = headers.map(function () { return ""; });
+                try {
+                    sessionStorage.setItem("costosCreateRecord", JSON.stringify({ headers: headers, row: row }));
+                    window.location.href = "editar-materia-prima.html?create=1";
+                } catch (err) {
+                    alert("Error al preparar el formulario.");
+                }
+            }
+            try {
+                var stored = sessionStorage.getItem("costosMateriaHeaders");
+                if (stored) {
+                    var headers = JSON.parse(stored);
+                    goToCreate(Array.isArray(headers) ? headers : null);
+                    return;
+                }
+            } catch (e) {}
+            if (!appsScriptUrl) {
+                alert("Configurá appsScriptUrl en config.js para poder crear registros.");
+                return;
+            }
+            btnNuevaMateria.classList.add("costos-btn-loading");
+            var origContent = btnNuevaMateria.innerHTML;
+            btnNuevaMateria.innerHTML = "<i class=\"fa-solid fa-spinner fa-spin\" aria-hidden=\"true\"></i> <span>Cargando…</span>";
+            var fetchCombos = fetch(appsScriptUrl + "?action=list&sheet=combos&limit=5000", { cache: "no-store" })
+                .then(function (res) { return res.json(); })
+                .then(function (json) {
+                    if (!json || !json.success || !json.data) return;
+                    var headers = json.data.headers || [];
+                    var rows = json.data.rows || [];
+                    function normCol(h) {
+                        return String(h != null ? h : "").trim().toLowerCase().replace(/\s+/g, "-").replace(/-+/g, "-");
+                    }
+                    function findColKey(normName) {
+                        for (var ci = 0; ci < headers.length; ci++) {
+                            if (normCol(headers[ci]) === normName) return String(headers[ci] != null ? headers[ci] : "").trim();
+                        }
+                        return headers.length > 0 ? String(headers[0]).trim() : null;
+                    }
+                    function distinctValues(colKey) {
+                        var vals = [];
+                        rows.forEach(function (row) {
+                            var v = (row && colKey && row[colKey] != null) ? String(row[colKey]).trim() : "";
+                            if (v && vals.indexOf(v) === -1) vals.push(v);
+                        });
+                        return vals;
+                    }
+                    try {
+                        var keyUnidad = findColKey("tipo-unidad-medida");
+                        if (keyUnidad) sessionStorage.setItem("costosCombosUnidadPresentacion", JSON.stringify(distinctValues(keyUnidad)));
+                        var keyConvertir = findColKey("convertir-unidad-medida");
+                        if (keyConvertir) sessionStorage.setItem("costosCombosConvertirUnidadMedida", JSON.stringify(distinctValues(keyConvertir)));
+                        var keyTipoPres = findColKey("tipo-presentacion");
+                        if (keyTipoPres) sessionStorage.setItem("costosCombosTipoPresentacion", JSON.stringify(distinctValues(keyTipoPres)));
+                    } catch (e) {}
+                })
+                .catch(function () {});
+            fetch(appsScriptUrl + "?action=list&sheet=materiaPrima", { cache: "no-store" })
+                .then(function (res) { return res.json(); })
+                .then(function (json) {
+                    return Promise.all([Promise.resolve(json), fetchCombos]);
+                })
+                .then(function (arr) {
+                    var json = arr[0];
+                    btnNuevaMateria.classList.remove("costos-btn-loading");
+                    btnNuevaMateria.innerHTML = origContent;
+                    if (!json || !json.success || !json.data || !json.data.headers) {
+                        goToCreate(null);
+                        return;
+                    }
+                    var headers = (json.data.headers || []).map(function (h) { return String(h != null ? h : "").trim(); });
+                    goToCreate(headers);
+                })
+                .catch(function (err) {
+                    btnNuevaMateria.classList.remove("costos-btn-loading");
+                    btnNuevaMateria.innerHTML = origContent;
+                    alert("Error al cargar: " + (err.message || "Revisá appsScriptUrl."));
+                });
+        });
+    }
 })();
