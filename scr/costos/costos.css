@@ -606,6 +606,38 @@ body.costos-page {
     pointer-events: none;
 }
 
+/* Debug equivalencia (visible si config.costos.debugEquivalencia === true) */
+.costos-debug-equivalencia {
+    margin-top: 2rem;
+    padding: 1rem 1.25rem;
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.85rem;
+}
+.costos-debug-title {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--muted);
+    margin: 0 0 0.75rem 0;
+    letter-spacing: 0.02em;
+}
+.costos-debug-content {
+    margin: 0;
+    padding: 0.75rem 1rem;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, monospace;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: var(--logo-dark);
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-x: auto;
+}
+
 /* Página Editar — móvil: diseño y visibilidad */
 @media (max-width: 768px) {
     .costos-edit-form {

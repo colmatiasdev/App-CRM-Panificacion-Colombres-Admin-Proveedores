@@ -762,12 +762,18 @@
         var categorias = {
             masa: { gramos: 1, g: 1, kg: 1000, kilo: 1000, kilos: 1000 },
             volumen: { cc: 1, litro: 1000, l: 1000, litros: 1000, centimetrocubico: 1, centimetroscubico: 1 },
-            longitud: { centimetro: 1, cm: 1, centímetro: 1, metro: 100, metros: 100, m: 100 },
-            conteo: { unidad: 1, unidades: 1, docena: 12, docenas: 12 }
+            longitud: { centimetro: 1, centimetros: 1, cm: 1, centímetro: 1, centímetros: 1, metro: 100, metros: 100, m: 100 },
+            conteo: { unidad: 1, unidades: 1, elemento: 1, elementos: 1, pieza: 1, piezas: 1, docena: 12, docenas: 12 }
         };
         function normalizar(val) {
             if (val == null || typeof val !== "string") return "";
-            return String(val).trim().toLowerCase().replace(/\s+/g, "").replace(/ó/g, "o").replace(/í/g, "i");
+            var s = String(val).trim().toLowerCase().replace(/\s*\[[^\]]*\]\s*/g, "").replace(/\s+/g, "");
+            try {
+                s = s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            } catch (e) {
+                s = s.replace(/ó/g, "o").replace(/í/g, "i").replace(/á/g, "a").replace(/é/g, "e").replace(/ú/g, "u");
+            }
+            return s;
         }
         function getCategoria(unidadNorm) {
             var c, keys;
@@ -781,6 +787,8 @@
             var f = categorias[cat][unidadNorm];
             return f != null ? f : NaN;
         }
+        /** Convierte cantidad de unidadOrigen a unidadDestino dentro de la misma categoría.
+         * Ej: 10 docena → unidad: 10 * 12 / 1 = 120; 1 kg → gramos: 1 * 1000 / 1 = 1000. */
         function convert(cantidad, unidadOrigen, unidadDestino) {
             var q = parseFloat(String(cantidad).replace(",", "."));
             if (isNaN(q) || q < 0) return NaN;
@@ -795,7 +803,78 @@
             if (isNaN(factorOrigen) || isNaN(factorDestino) || factorDestino === 0) return q;
             return q * factorOrigen / factorDestino;
         }
-        return { convert: convert, normalizar: normalizar, categorias: categorias };
+        /** Igual que convert pero devuelve { value, debug } para la sección de debug. */
+        function convertWithDebug(cantidad, unidadOrigen, unidadDestino) {
+            var q = parseFloat(String(cantidad).replace(",", "."));
+            var u = (unidadOrigen != null && unidadOrigen !== "") ? normalizar(unidadOrigen) : "";
+            var d = (unidadDestino != null && unidadDestino !== "") ? normalizar(unidadDestino) : "";
+            var catOrigen = u ? getCategoria(u) : null;
+            var catDestino = d ? getCategoria(d) : null;
+            var factorOrigen = catOrigen && u ? getFactor(catOrigen, u) : NaN;
+            var factorDestino = catDestino && d ? getFactor(catDestino, d) : NaN;
+            var mismaCategoria = catOrigen && catDestino && catOrigen === catDestino;
+            var resultado = q;
+            var formula = "—";
+            if (!isNaN(q) && q >= 0 && u && d && mismaCategoria && !isNaN(factorOrigen) && !isNaN(factorDestino) && factorDestino !== 0) {
+                resultado = q * factorOrigen / factorDestino;
+                formula = q + " × " + factorOrigen + " / " + factorDestino + " = " + resultado;
+            }
+            return {
+                value: resultado,
+                debug: {
+                    cantidad: q,
+                    unidadOrigen: String(unidadOrigen != null ? unidadOrigen : ""),
+                    unidadDestino: String(unidadDestino != null ? unidadDestino : ""),
+                    normalizadoOrigen: u,
+                    normalizadoDestino: d,
+                    categoria: catOrigen || catDestino || "—",
+                    factorOrigen: factorOrigen,
+                    factorDestino: factorDestino,
+                    mismaCategoria: mismaCategoria,
+                    formula: formula,
+                    resultado: resultado
+                }
+            };
+        }
+        /** Construye categorias desde filas del sheet (Categoria, Unidad, Factor, Alias). Mezcla con defaults. */
+        function setCategoriasFromRows(rows) {
+            if (!rows || !Array.isArray(rows) || rows.length === 0) return;
+            var cat, factor, unidadNorm, aliasStr, list, i, j;
+            for (i = 0; i < rows.length; i++) {
+                var row = rows[i];
+                if (row && typeof row === "object") {
+                    cat = String(row.Categoria != null ? row.Categoria : "").trim().toLowerCase().replace(/\s+/g, "");
+                    if (!cat) continue;
+                    factor = parseFloat(String(row.Factor != null ? row.Factor : "").replace(",", "."));
+                    if (isNaN(factor) || factor <= 0) continue;
+                    if (!categorias[cat]) categorias[cat] = {};
+                    unidadNorm = normalizar(row.Unidad);
+                    if (unidadNorm) categorias[cat][unidadNorm] = factor;
+                    aliasStr = String(row.Alias != null ? row.Alias : "").trim();
+                    if (aliasStr) {
+                        list = aliasStr.split(",");
+                        for (j = 0; j < list.length; j++) {
+                            unidadNorm = normalizar(list[j].trim());
+                            if (unidadNorm) categorias[cat][unidadNorm] = factor;
+                        }
+                    }
+                }
+            }
+        }
+        return { convert: convert, convertWithDebug: convertWithDebug, normalizar: normalizar, categorias: categorias, setCategoriasFromRows: setCategoriasFromRows };
+    })();
+
+    (function loadEquivalenciasFromSheet() {
+        var url = (window.APP_CONFIG && window.APP_CONFIG.appsScriptUrl) ? String(window.APP_CONFIG.appsScriptUrl).trim() : "";
+        if (!url || !window.COSTOS_EQUIVALENCIA || !window.COSTOS_EQUIVALENCIA.setCategoriasFromRows) return;
+        fetch(url + "?action=list&sheet=equivalencias&limit=500", { cache: "no-store" })
+            .then(function (res) { return res.json(); })
+            .then(function (json) {
+                if (json && json.success && json.data && json.data.rows && json.data.rows.length) {
+                    window.COSTOS_EQUIVALENCIA.setCategoriasFromRows(json.data.rows);
+                }
+            })
+            .catch(function () {});
     })();
 
     run(containerPacking);

@@ -94,6 +94,10 @@
         <div id="datos-materia-prima" class="costos-datos">
             <p class="costos-loading">Cargando datos…</p>
         </div>
+        <section id="costos-debug-equivalencia" class="costos-debug-equivalencia" aria-label="Debug equivalencia" style="display:none;">
+            <h2 class="costos-debug-title">Debug — Cálculo de equivalencia</h2>
+            <pre id="costos-debug-equivalencia-content" class="costos-debug-content"></pre>
+        </section>
     </main>
     <script src="costos-sheet.js"></script>
     <script>
@@ -105,6 +109,11 @@
     var presentacion = document.getElementById("calc-presentacion");
     var destino = document.getElementById("calc-destino");
     var resultado = document.getElementById("calc-resultado");
+    var debugSection = document.getElementById("costos-debug-equivalencia");
+    var debugContent = document.getElementById("costos-debug-equivalencia-content");
+    if (window.APP_CONFIG && window.APP_CONFIG.costos && window.APP_CONFIG.costos.debugEquivalencia && debugSection) {
+        debugSection.style.display = "block";
+    }
 
     function nombreUnidad(val) {
         return { kg: "KG", gramos: "g", litro: "L", cc: "cc", metro: "m", centimetro: "cm", docena: "docena", unidad: "unidad" }[val] || val;
@@ -116,12 +125,30 @@
         var d = destino.value;
         if (q <= 0 || !resultado) {
             if (resultado) resultado.textContent = "—";
+            if (debugContent && debugSection && debugSection.style.display !== "none") {
+                debugContent.textContent = "Cantidad ≤ 0 o sin resultado. Ingresá una cantidad para ver el cálculo.";
+            }
             return;
         }
-        var equiv = window.COSTOS_EQUIVALENCIA && window.COSTOS_EQUIVALENCIA.convert ? window.COSTOS_EQUIVALENCIA.convert(q, u, d) : q;
+        var equiv = q;
+        if (window.COSTOS_EQUIVALENCIA && window.COSTOS_EQUIVALENCIA.convert) {
+            equiv = window.COSTOS_EQUIVALENCIA.convert(q, u, d);
+        }
         var resNum = typeof equiv === "number" && !isNaN(equiv) ? equiv : q;
         var resUnidad = resNum.toLocaleString("es-AR") + " " + nombreUnidad(d);
         resultado.textContent = q + " " + nombreUnidad(u) + " [" + p + "] equivale a " + resUnidad;
+        if (debugContent && debugSection && debugSection.style.display !== "none" && window.COSTOS_EQUIVALENCIA && window.COSTOS_EQUIVALENCIA.convertWithDebug) {
+            var out = window.COSTOS_EQUIVALENCIA.convertWithDebug(q, u, d);
+            var db = out.debug;
+            debugContent.textContent = "Cantidad (origen): " + db.cantidad + "\n" +
+                "Unidad de medida (origen): \"" + db.unidadOrigen + "\" → normalizado: \"" + db.normalizadoOrigen + "\"\n" +
+                "Convertir a (destino): \"" + db.unidadDestino + "\" → normalizado: \"" + db.normalizadoDestino + "\"\n" +
+                "Categoría: " + db.categoria + "\n" +
+                "Factor origen: " + db.factorOrigen + " | Factor destino: " + db.factorDestino + "\n" +
+                "Misma categoría: " + db.mismaCategoria + "\n" +
+                "Fórmula: " + db.formula + "\n" +
+                "Resultado: " + db.resultado;
+        }
     }
 
     if (btn && panel) {

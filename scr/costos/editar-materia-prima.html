@@ -26,9 +26,17 @@
                 </div>
             </form>
         </div>
+        <section id="costos-debug-equivalencia" class="costos-debug-equivalencia" aria-label="Debug equivalencia" style="display:none;">
+            <h2 class="costos-debug-title">Debug — Cálculo de equivalencia</h2>
+            <pre id="costos-debug-equivalencia-content" class="costos-debug-content"></pre>
+        </section>
     </main>
     <script>
         (function () {
+            if (window.APP_CONFIG && window.APP_CONFIG.costos && window.APP_CONFIG.costos.debugEquivalencia) {
+                var s = document.getElementById("costos-debug-equivalencia");
+                if (s) s.style.display = "block";
+            }
             function normHeader(s) {
                 return String(s != null ? s : "").trim().toLowerCase().replace(/\s+/g, " ").replace(/-/g, " ");
             }
@@ -325,10 +333,16 @@
                                     var optsUnid = [];
                                     try {
                                         var stCombosUnid = sessionStorage.getItem("costosCombosUnidadPresentacion");
-                                        if (stCombosUnid) optsUnid = JSON.parse(stCombosUnid);
-                                        if (!Array.isArray(optsUnid) || optsUnid.length === 0) {
+                                        if (stCombosUnid != null && stCombosUnid !== "") {
+                                            var parsed = JSON.parse(stCombosUnid);
+                                            optsUnid = Array.isArray(parsed) ? parsed : [];
+                                        }
+                                        if (optsUnid.length === 0) {
                                             var stUnid = sessionStorage.getItem("costosDistinctUnidadPresentacion");
-                                            if (stUnid) optsUnid = JSON.parse(stUnid);
+                                            if (stUnid) {
+                                                var parsedUnid = JSON.parse(stUnid);
+                                                optsUnid = Array.isArray(parsedUnid) ? parsedUnid : [];
+                                            }
                                         }
                                     } catch (e) {}
                                     if (!Array.isArray(optsUnid)) optsUnid = [];
@@ -390,10 +404,16 @@
                                     var optsTipo = [];
                                     try {
                                         var stCombosTipo = sessionStorage.getItem("costosCombosTipoPresentacion");
-                                        if (stCombosTipo) optsTipo = JSON.parse(stCombosTipo);
-                                        if (!Array.isArray(optsTipo) || optsTipo.length === 0) {
+                                        if (stCombosTipo != null && stCombosTipo !== "") {
+                                            var parsedTipo = JSON.parse(stCombosTipo);
+                                            optsTipo = Array.isArray(parsedTipo) ? parsedTipo : [];
+                                        }
+                                        if (optsTipo.length === 0) {
                                             var stTipo = sessionStorage.getItem("costosDistinctTipoPresentacion");
-                                            if (stTipo) optsTipo = JSON.parse(stTipo);
+                                            if (stTipo) {
+                                                var parsedTipoFallback = JSON.parse(stTipo);
+                                                optsTipo = Array.isArray(parsedTipoFallback) ? parsedTipoFallback : [];
+                                            }
                                         }
                                     } catch (e) {}
                                     if (!Array.isArray(optsTipo)) optsTipo = [];
@@ -854,10 +874,16 @@
                                         var optsTum = [];
                                         try {
                                             var storedCombosTum = sessionStorage.getItem("costosCombosConvertirUnidadMedida");
-                                            if (storedCombosTum) optsTum = JSON.parse(storedCombosTum);
-                                            if (!Array.isArray(optsTum) || optsTum.length === 0) {
+                                            if (storedCombosTum != null && storedCombosTum !== "") {
+                                                var parsedTum = JSON.parse(storedCombosTum);
+                                                optsTum = Array.isArray(parsedTum) ? parsedTum : [];
+                                            }
+                                            if (optsTum.length === 0) {
                                                 var storedTum = sessionStorage.getItem("costosDistinctTipoUnidadMedida");
-                                                if (storedTum) optsTum = JSON.parse(storedTum);
+                                                if (storedTum) {
+                                                    var parsedTumFallback = JSON.parse(storedTum);
+                                                    optsTum = Array.isArray(parsedTumFallback) ? parsedTumFallback : [];
+                                                }
                                             }
                                         } catch (e) {}
                                         if (!Array.isArray(optsTum)) optsTum = [];
@@ -1313,7 +1339,7 @@
                             } else {
                                 u = row[idxPresUnid] != null ? String(row[idxPresUnid]).trim() : "";
                             }
-                            var fieldTum = formEl.querySelector(".costos-edit-field[data-field=\"tipo-unidad-medida\"]");
+                            var fieldTum = formEl.querySelector(".costos-edit-field[data-field=\"equivalencia-tipo-unidad-medida\"]") || formEl.querySelector(".costos-edit-field[data-field=\"tipo-unidad-medida\"]");
                             var wrapTum = fieldTum ? fieldTum.querySelector(".costos-edit-tipo-unidad-medida-wrap") : null;
                             var selTum = wrapTum ? wrapTum.querySelector("select.costos-edit-select-tipo-unidad-medida") : null;
                             var hidTum = wrapTum ? wrapTum.querySelector("input[type=hidden].costos-edit-input") : null;
@@ -1329,7 +1355,9 @@
                             } else {
                                 d = "";
                             }
-                            var valor = calcularEquivalenciaValor(q, u, d);
+                            var uNorm = (window.COSTOS_EQUIVALENCIA && window.COSTOS_EQUIVALENCIA.normalizar) ? window.COSTOS_EQUIVALENCIA.normalizar(u) : u;
+                            var dNorm = (window.COSTOS_EQUIVALENCIA && window.COSTOS_EQUIVALENCIA.normalizar) ? window.COSTOS_EQUIVALENCIA.normalizar(d) : d;
+                            var valor = calcularEquivalenciaValor(q, uNorm, dNorm);
                             if (!isNaN(valor)) {
                                 var entero = Math.round(valor);
                                 cantidadSpan.textContent = String(entero);
@@ -1337,6 +1365,20 @@
                             } else {
                                 cantidadSpan.textContent = "—";
                                 hiddenEquiv.value = "";
+                            }
+                            var debugSection = document.getElementById("costos-debug-equivalencia");
+                            var debugContent = debugSection ? document.getElementById("costos-debug-equivalencia-content") : null;
+                            if (debugSection && debugSection.style.display !== "none" && debugContent && window.COSTOS_EQUIVALENCIA && window.COSTOS_EQUIVALENCIA.convertWithDebug) {
+                                var out = window.COSTOS_EQUIVALENCIA.convertWithDebug(q, uNorm, dNorm);
+                                var db = out.debug;
+                                debugContent.textContent = "Cantidad (origen): " + db.cantidad + "\n" +
+                                    "Unidad presentación (origen): \"" + db.unidadOrigen + "\" → normalizado: \"" + db.normalizadoOrigen + "\"\n" +
+                                    "Convertir a (destino): \"" + db.unidadDestino + "\" → normalizado: \"" + db.normalizadoDestino + "\"\n" +
+                                    "Categoría: " + db.categoria + "\n" +
+                                    "Factor origen: " + db.factorOrigen + " | Factor destino: " + db.factorDestino + "\n" +
+                                    "Misma categoría: " + db.mismaCategoria + "\n" +
+                                    "Fórmula: " + db.formula + "\n" +
+                                    "Resultado (equivalencia): " + db.resultado;
                             }
                         }
                         formEl.addEventListener("input", function (e) {
@@ -1349,7 +1391,7 @@
                         });
                         formEl.addEventListener("click", function (e) {
                             var t = e.target;
-                            if (t.closest && t.closest(".costos-edit-field[data-field=\"tipo-unidad-medida\"]") && t.classList && t.classList.contains("costos-edit-value-close-btn")) {
+                            if (t.closest && (t.closest(".costos-edit-field[data-field=\"tipo-unidad-medida\"]") || t.closest(".costos-edit-field[data-field=\"equivalencia-tipo-unidad-medida\"]")) && t.classList && t.classList.contains("costos-edit-value-close-btn")) {
                                 setTimeout(updateEquivalencia, 0);
                             }
                         });
