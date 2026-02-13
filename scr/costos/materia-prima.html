@@ -16,6 +16,11 @@
     <main class="costos-main">
         <div class="costos-title-row">
             <h1 class="costos-title">Materia prima</h1>
+            <a href="#" id="btn-nueva-materia-prima" class="costos-calc-btn costos-btn-nueva" role="button">
+                <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                <span class="costos-calc-btn-text-long">Nueva materia prima</span>
+                <span class="costos-calc-btn-text-short">Nueva</span>
+            </a>
             <button type="button" class="costos-calc-btn" id="btn-calculadora-equivalencia" aria-expanded="false">
                 <i class="fa-solid fa-calculator" aria-hidden="true"></i>
                 <span class="costos-calc-btn-text-long">Calculadora de Equivalencia</span>
@@ -41,10 +46,13 @@
                         <label for="calc-unidad" class="costos-calc-label">Unidad de medida</label>
                         <select id="calc-unidad" class="costos-calc-select">
                             <option value="kg">KG</option>
-                            <option value="litro">Litro</option>
-                            <option value="unidad">Unidad</option>
                             <option value="gramos">Gramos</option>
+                            <option value="litro">Litro</option>
                             <option value="cc">CC</option>
+                            <option value="metro">Metro</option>
+                            <option value="centimetro">Centímetro</option>
+                            <option value="docena">Docena</option>
+                            <option value="unidad">Unidad</option>
                         </select>
                     </div>
                     <div class="costos-calc-field">
@@ -66,15 +74,20 @@
                     <label for="calc-destino" class="costos-calc-label">Convertir a</label>
                     <select id="calc-destino" class="costos-calc-select">
                         <option value="gramos">Gramos</option>
-                        <option value="cc">Centímetros cúbico</option>
+                        <option value="kg">KG</option>
+                        <option value="cc">CC</option>
+                        <option value="litro">Litro</option>
+                        <option value="centimetro">Centímetro</option>
+                        <option value="metro">Metro</option>
                         <option value="unidad">Unidad</option>
+                        <option value="docena">Docena</option>
                     </select>
                 </div>
                 <div class="costos-calc-block costos-calc-resultado-block">
                     <span class="costos-calc-label">Resultado</span>
                     <output id="calc-resultado" class="costos-calc-resultado" for="calc-cantidad calc-unidad calc-destino">—</output>
                 </div>
-                <p class="costos-calc-note">Conversiones ilustrativas: 1 KG = 1000 g, 1 L = 1000 cc. La presentación es referencial.</p>
+                <p class="costos-calc-note">Conversiones: 1 KG = 1000 g · 1 L = 1000 cc · 1 m = 100 cm · 1 docena = 12 unidad. La presentación es referencial.</p>
             </div>
         </div>
 
@@ -94,7 +107,7 @@
     var resultado = document.getElementById("calc-resultado");
 
     function nombreUnidad(val) {
-        return { kg: "KG", litro: "L", unidad: "unidad", gramos: "g", cc: "cc" }[val] || val;
+        return { kg: "KG", gramos: "g", litro: "L", cc: "cc", metro: "m", centimetro: "cm", docena: "docena", unidad: "unidad" }[val] || val;
     }
     function calcularEquivalencia() {
         var q = parseFloat(cantidad.value) || 0;
@@ -105,22 +118,9 @@
             if (resultado) resultado.textContent = "—";
             return;
         }
-        var resNum = q;
-        var resUnidad = "";
-        if (d === "gramos") {
-            if (u === "kg") resNum = q * 1000;
-            else if (u === "gramos") resNum = q;
-            else resNum = q;
-            resUnidad = resNum.toLocaleString("es-AR") + " g";
-        } else if (d === "cc") {
-            if (u === "litro") resNum = q * 1000;
-            else if (u === "cc") resNum = q;
-            else resNum = q;
-            resUnidad = resNum.toLocaleString("es-AR") + " cc";
-        } else {
-            resNum = q;
-            resUnidad = resNum.toLocaleString("es-AR") + " unidad";
-        }
+        var equiv = window.COSTOS_EQUIVALENCIA && window.COSTOS_EQUIVALENCIA.convert ? window.COSTOS_EQUIVALENCIA.convert(q, u, d) : q;
+        var resNum = typeof equiv === "number" && !isNaN(equiv) ? equiv : q;
+        var resUnidad = resNum.toLocaleString("es-AR") + " " + nombreUnidad(d);
         resultado.textContent = q + " " + nombreUnidad(u) + " [" + p + "] equivale a " + resUnidad;
     }
 

@@ -106,6 +106,19 @@ body.costos-page {
     background: var(--logo-teal);
     color: #fff;
 }
+.costos-btn-nueva {
+    background: var(--logo-orange);
+    color: #fff;
+    text-decoration: none;
+}
+.costos-btn-nueva:hover {
+    background: var(--logo-orange-dark, #c2410c);
+    color: #fff;
+}
+.costos-btn-nueva.costos-btn-loading {
+    pointer-events: none;
+    opacity: 0.9;
+}
 .costos-calc-panel {
     margin-bottom: 24px;
     background: var(--surface);
@@ -210,6 +223,75 @@ body.costos-page {
 }
 .costos-edit-field:last-of-type {
     margin-bottom: 0;
+}
+.costos-edit-seccion-presentacion-equivalencia {
+    margin: 14px 0 20px 0;
+    padding: 16px 18px;
+    background: rgba(234, 88, 12, 0.04);
+    border: 1px solid rgba(234, 88, 12, 0.2);
+    border-radius: 12px;
+}
+.costos-edit-seccion-presentacion-equivalencia .costos-edit-field-presentacion {
+    margin-bottom: 16px;
+}
+.costos-edit-seccion-presentacion-equivalencia .costos-edit-section-equivalencia {
+    margin-top: 4px;
+    margin-bottom: 0;
+}
+.costos-edit-section-equivalencia {
+    background: rgba(234, 88, 12, 0.05);
+    border-left: 3px solid rgba(234, 88, 12, 0.3);
+    border-radius: 0 10px 10px 0;
+    padding: 14px 16px 14px 18px;
+    margin: 12px 0 18px 0;
+}
+.costos-edit-section-equivalencia .costos-edit-field {
+    margin-bottom: 12px;
+}
+.costos-edit-section-equivalencia .costos-edit-field:last-child {
+    margin-bottom: 0;
+}
+/* Bloque informativo: Equivalencia + Convertido a (solo lectura) */
+.costos-edit-section-equivalencia .costos-edit-field-informativo {
+    margin-bottom: 0;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(234, 88, 12, 0.12);
+}
+.costos-edit-section-equivalencia .costos-edit-field-informativo:first-of-type {
+    border-radius: 8px 8px 0 0;
+    padding-bottom: 8px;
+}
+.costos-edit-section-equivalencia .costos-edit-field-informativo:last-of-type {
+    border-radius: 0 0 8px 8px;
+    margin-bottom: 14px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(234, 88, 12, 0.08);
+}
+.costos-edit-section-equivalencia .costos-edit-field-informativo:only-of-type {
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+}
+.costos-edit-section-equivalencia .costos-edit-field-informativo .costos-edit-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+}
+.costos-edit-section-equivalencia .costos-edit-field-informativo .costos-edit-label-desc {
+    font-size: 0.65rem;
+    font-style: normal;
+    color: var(--muted);
+}
+.costos-edit-section-equivalencia .costos-edit-field-informativo .costos-edit-value {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--logo-dark);
+}
+.costos-edit-section-equivalencia .costos-edit-field-informativo .costos-edit-value-cell {
+    min-height: 1.5rem;
+    padding: 2px 0;
 }
 .costos-edit-field.is-textarea {
     flex-direction: column;
@@ -324,6 +406,24 @@ body.costos-page {
 .costos-edit-presentacion-close-row .costos-edit-value-close-btn {
     margin-left: auto;
 }
+.costos-edit-presentacion-leyenda-wrap {
+    grid-column: 1 / -1;
+    padding: 8px 10px;
+    margin-bottom: 4px;
+    background: #fff;
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+.costos-edit-presentacion-leyenda-label {
+    color: var(--muted);
+    font-weight: 600;
+    margin-right: 6px;
+}
+.costos-edit-presentacion-leyenda-value {
+    color: var(--logo-dark);
+    font-weight: 500;
+}
 .costos-edit-presentacion-label {
     font-size: 0.8rem;
     font-weight: 600;
@@ -331,6 +431,34 @@ body.costos-page {
 }
 .costos-edit-presentacion-inputs .costos-edit-input {
     min-width: 0;
+}
+.costos-edit-presentacion-combo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+.costos-edit-presentacion-combo .costos-edit-select-presentacion {
+    flex: 1;
+    min-width: 120px;
+    padding: 8px 10px;
+    font-size: 1rem;
+    border: 2px solid var(--logo-orange);
+    border-radius: 8px;
+    font-family: inherit;
+    background: #fff;
+}
+.costos-edit-presentacion-combo .costos-edit-select-presentacion:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.2);
+}
+.costos-edit-presentacion-combo .costos-edit-input-otra-presentacion {
+    flex: 1;
+    min-width: 120px;
+    padding: 8px 10px;
+    border: 2px solid var(--logo-orange);
+    border-radius: 8px;
 }
 .costos-edit-field.is-editable .costos-edit-value {
     display: none;
@@ -407,6 +535,36 @@ body.costos-page {
 }
 .costos-edit-marca-wrap .costos-edit-input-otra-marca,
 .costos-edit-lugar-wrap .costos-edit-input-otra-lugar {
+    flex: 1;
+    min-width: 140px;
+    padding: 10px 12px;
+    font-size: 1rem;
+    border: 2px solid var(--logo-orange);
+    border-radius: 8px;
+}
+.costos-edit-tipo-unidad-medida-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 120px;
+}
+.costos-edit-tipo-unidad-medida-wrap .costos-edit-select-tipo-unidad-medida {
+    flex: 1;
+    min-width: 140px;
+    padding: 10px 12px;
+    font-size: 1rem;
+    border: 2px solid var(--logo-orange);
+    border-radius: 8px;
+    font-family: inherit;
+    background: #fff;
+}
+.costos-edit-tipo-unidad-medida-wrap .costos-edit-select-tipo-unidad-medida:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.2);
+}
+.costos-edit-tipo-unidad-medida-wrap .costos-edit-input-otra-tipo-unidad-medida {
     flex: 1;
     min-width: 140px;
     padding: 10px 12px;

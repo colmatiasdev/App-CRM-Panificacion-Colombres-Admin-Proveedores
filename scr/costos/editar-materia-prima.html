@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="costos.css">
     <script src="../../config.js"></script>
+    <script src="costos-sheet.js"></script>
 </head>
 <body class="costos-page">
     <a href="materia-prima.html" class="costos-back"><span class="costos-back-arrow">←</span> Volver a Materia prima</a>
@@ -21,7 +22,7 @@
             <form id="costos-edit-form" class="costos-edit-form" style="display:none;">
                 <div id="edit-fields"></div>
                 <div class="costos-edit-actions">
-                    <button type="submit" class="costos-edit-btn-save"><i class="fa-solid fa-check" aria-hidden="true"></i> Guardar cambios</button>
+                    <button type="submit" class="costos-edit-btn-save" id="costos-edit-btn-save"><i class="fa-solid fa-check" aria-hidden="true"></i> Guardar cambios</button>
                 </div>
             </form>
         </div>
@@ -88,20 +89,34 @@
                     || n === "fecha actualizada al" || n === "fecha actualizada";
             }
 
-            var raw = sessionStorage.getItem("costosEditRecord");
             var params = new URLSearchParams(window.location.search);
+            var isCreateMode = params.get("create") === "1";
+            var raw = isCreateMode ? sessionStorage.getItem("costosCreateRecord") : sessionStorage.getItem("costosEditRecord");
             var idFromUrl = params.get("id") || "";
 
             var noDataEl = document.getElementById("edit-no-data");
             var formEl = document.getElementById("costos-edit-form");
             var fieldsContainer = document.getElementById("edit-fields");
+            var titleEl = document.querySelector("main .costos-title");
+            var introEl = document.querySelector("main .costos-intro");
 
             if (!raw) {
                 noDataEl.style.display = "block";
+                noDataEl.textContent = isCreateMode
+                    ? "No se pudo cargar el formulario. Volvé a Materia prima y usá el botón «Nueva materia prima»."
+                    : "No hay datos del registro. Volvé a Materia prima y abrí «Editar» en una tarjeta.";
                 formEl.style.display = "none";
             } else {
                 try {
                     var data = JSON.parse(raw);
+                    data.id = data.id || "";
+                    if (isCreateMode) {
+                        if (titleEl) titleEl.textContent = "Crear materia prima";
+                        if (introEl) introEl.textContent = "Completá los datos del nuevo registro. El nombre del producto es obligatorio.";
+                        try { document.title = "Crear materia prima - Panificación Colombres"; } catch (e) {}
+                        var saveBtn = formEl.querySelector(".costos-edit-btn-save");
+                        if (saveBtn) saveBtn.innerHTML = "<i class=\"fa-solid fa-plus\" aria-hidden=\"true\"></i> Crear registro";
+                    }
                     var headers = data.headers || [];
                     var row = data.row || [];
                     var record = {};
@@ -161,6 +176,12 @@
                         var hTrimL = String(headers[l] != null ? headers[l] : "").trim().toLowerCase().replace(/\s/g, "");
                         if (hNormL === "lugar" || hTrimL === "lugar") { lugarColIdx = l; break; }
                     }
+                    var tipoUnidadMedidaColIdx = -1;
+                    for (var tum = 0; tum < headers.length; tum++) {
+                        var hNormTum = normHeaderForCompare(headers[tum]);
+                        var hTrimTum = String(headers[tum] != null ? headers[tum] : "").trim().toLowerCase().replace(/\s/g, "");
+                        if (hNormTum === "tipo unidad medida" || hTrimTum === "tipo-unidad-medida") { tipoUnidadMedidaColIdx = tum; break; }
+                    }
                     var categoriasForDatalist = [];
                     try {
                         var storedCat = sessionStorage.getItem("costosDistinctCategorias");
@@ -180,6 +201,8 @@
                         }
                     }
                     var categoriasState = { list: categoriasForDatalist };
+                    var sectionEquivalenciaWraps = [];
+                    var observacionesWrapCollected = null;
                     var marcasForDatalist = [];
                     try {
                         var storedMarca = sessionStorage.getItem("costosDistinctMarcas");
@@ -199,6 +222,7 @@
                         if (currentLugar) { lugaresForDatalist = [currentLugar]; try { sessionStorage.setItem("costosDistinctLugares", JSON.stringify(lugaresForDatalist)); } catch (e) {} }
                     }
                     var presentationRowAdded = false;
+                    var presentationWrapCollected = null;
                     headers.forEach(function (headerName, i) {
                         var key = String(headerName != null ? headerName : "").trim();
                         var nameNorm = normHeader(headerName);
@@ -212,6 +236,7 @@
                                 var presStr = buildPresentacionStr(cantVal, unidVal, tipoVal);
                                 var wrapPres = document.createElement("div");
                                 wrapPres.className = "costos-edit-field costos-edit-field-presentacion";
+                                wrapPres.setAttribute("data-field", "presentacion");
                                 var labelPres = document.createElement("span");
                                 labelPres.className = "costos-edit-label";
                                 labelPres.textContent = "PRESENTACIÓN";
@@ -230,21 +255,36 @@
                                 valueCellPres.appendChild(editBtnPres);
                                 editBtnPres.addEventListener("click", function () {
                                     var block = wrapPres.querySelector(".costos-edit-presentacion-inputs");
+                                    var form = wrapPres.closest("form");
+                                    function openTipoUnidadMedidaSiCerrado() {
+                                        if (!form) return;
+                                        var fieldTum = form.querySelector(".costos-edit-field[data-field=\"tipo-unidad-medida\"]");
+                                        var editBtnTum = fieldTum ? fieldTum.querySelector(".costos-edit-value-edit-btn") : null;
+                                        if (editBtnTum && fieldTum && !fieldTum.querySelector(".costos-edit-tipo-unidad-medida-wrap")) editBtnTum.click();
+                                    }
+                                    function cerrarTipoUnidadMedidaSiAbierto() {
+                                        if (!form) return;
+                                        var fieldTum = form.querySelector(".costos-edit-field[data-field=\"tipo-unidad-medida\"]");
+                                        var closeBtnTum = fieldTum ? fieldTum.querySelector(".costos-edit-value-close-btn") : null;
+                                        if (closeBtnTum) closeBtnTum.click();
+                                    }
                                     if (block) {
                                         if (block.style.display !== "none") {
+                                            cerrarTipoUnidadMedidaSiAbierto();
                                             block.style.display = "none";
                                             valueSpanPres.style.display = "";
                                             editBtnPres.style.display = "";
                                             var inpC = block.querySelector(".costos-edit-input[data-header-index=\"" + idxPresCant + "\"]");
-                                            var inpU = block.querySelector(".costos-edit-input[data-header-index=\"" + idxPresUnid + "\"]");
-                                            var inpT = block.querySelector(".costos-edit-input[data-header-index=\"" + idxPresTipo + "\"]");
-                                            if (inpC && inpU && inpT) valueSpanPres.textContent = buildPresentacionStr(inpC.value, inpU.value, inpT.value);
+                                            var inpU = block.querySelector("input[type=hidden][data-header-index=\"" + idxPresUnid + "\"]");
+                                            var inpT = block.querySelector("input[type=hidden][data-header-index=\"" + idxPresTipo + "\"]");
+                                            if (inpC) valueSpanPres.textContent = buildPresentacionStr(inpC.value, inpU ? inpU.value : "", inpT ? inpT.value : "");
                                         } else {
                                             block.style.display = "";
                                             valueSpanPres.style.display = "none";
                                             editBtnPres.style.display = "none";
                                             var firstInp = block.querySelector(".costos-edit-input");
                                             if (firstInp) firstInp.focus();
+                                            setTimeout(openTipoUnidadMedidaSiCerrado, 0);
                                         }
                                         return;
                                     }
@@ -260,6 +300,16 @@
                                     closeBtnPres.innerHTML = "<i class=\"fa-solid fa-xmark\" aria-hidden=\"true\"></i>";
                                     closeRow.appendChild(closeBtnPres);
                                     blockIn.appendChild(closeRow);
+                                    var leyendaWrap = document.createElement("div");
+                                    leyendaWrap.className = "costos-edit-presentacion-leyenda-wrap";
+                                    var leyendaLabel = document.createElement("span");
+                                    leyendaLabel.className = "costos-edit-presentacion-leyenda-label";
+                                    leyendaLabel.textContent = "Vista previa leyenda: ";
+                                    var leyendaSpan = document.createElement("span");
+                                    leyendaSpan.className = "costos-edit-presentacion-leyenda-value";
+                                    leyendaWrap.appendChild(leyendaLabel);
+                                    leyendaWrap.appendChild(leyendaSpan);
+                                    blockIn.appendChild(leyendaWrap);
                                     var lblC = document.createElement("label");
                                     lblC.className = "costos-edit-presentacion-label";
                                     lblC.textContent = "Cantidad en paquete";
@@ -272,40 +322,178 @@
                                     var lblU = document.createElement("label");
                                     lblU.className = "costos-edit-presentacion-label";
                                     lblU.textContent = "Unidad";
-                                    var inpUnid = document.createElement("input");
-                                    inpUnid.type = "text";
-                                    inpUnid.className = "costos-edit-input";
-                                    inpUnid.setAttribute("data-header-index", String(idxPresUnid));
-                                    inpUnid.value = record[keyPresUnid] || "";
-                                    inpUnid.placeholder = "Ej: Kg, L";
+                                    var optsUnid = [];
+                                    try {
+                                        var stCombosUnid = sessionStorage.getItem("costosCombosUnidadPresentacion");
+                                        if (stCombosUnid) optsUnid = JSON.parse(stCombosUnid);
+                                        if (!Array.isArray(optsUnid) || optsUnid.length === 0) {
+                                            var stUnid = sessionStorage.getItem("costosDistinctUnidadPresentacion");
+                                            if (stUnid) optsUnid = JSON.parse(stUnid);
+                                        }
+                                    } catch (e) {}
+                                    if (!Array.isArray(optsUnid)) optsUnid = [];
+                                    optsUnid = optsUnid.slice();
+                                    var curUnid = record[keyPresUnid] != null ? String(record[keyPresUnid]).trim() : "";
+                                    if (curUnid && optsUnid.indexOf(curUnid) === -1) optsUnid.unshift(curUnid);
+                                    optsUnid = optsUnid.filter(function (v) { return v != null && String(v).trim() !== ""; });
+                                    if (optsUnid.length === 0) optsUnid = ["—"];
+                                    var wrapUnid = document.createElement("div");
+                                    wrapUnid.className = "costos-edit-presentacion-combo";
+                                    var selUnid = document.createElement("select");
+                                    selUnid.className = "costos-edit-select-presentacion";
+                                    optsUnid.forEach(function (v) {
+                                        var o = document.createElement("option");
+                                        o.value = String(v).trim();
+                                        o.textContent = o.value;
+                                        if (o.value === curUnid) o.selected = true;
+                                        selUnid.appendChild(o);
+                                    });
+                                    var optUnidNueva = document.createElement("option");
+                                    optUnidNueva.value = "__nueva__";
+                                    optUnidNueva.textContent = "— Agregar otra —";
+                                    selUnid.appendChild(optUnidNueva);
+                                    var inpUnidOtra = document.createElement("input");
+                                    inpUnidOtra.type = "text";
+                                    inpUnidOtra.className = "costos-edit-input costos-edit-input-otra-presentacion";
+                                    inpUnidOtra.style.display = "none";
+                                    inpUnidOtra.placeholder = "Escribí la unidad";
+                                    var hiddenUnid = document.createElement("input");
+                                    hiddenUnid.type = "hidden";
+                                    hiddenUnid.className = "costos-edit-input";
+                                    hiddenUnid.setAttribute("data-header-index", String(idxPresUnid));
+                                    hiddenUnid.value = curUnid || "";
+                                    function syncHiddenUnid() {
+                                        hiddenUnid.value = selUnid.value === "__nueva__" ? (inpUnidOtra.value || "").trim() : selUnid.value;
+                                    }
+                                    selUnid.addEventListener("change", function () {
+                                        if (selUnid.value === "__nueva__") {
+                                            inpUnidOtra.style.display = "";
+                                            inpUnidOtra.value = curUnid && optsUnid.indexOf(curUnid) === -1 ? curUnid : "";
+                                            inpUnidOtra.focus();
+                                        } else { inpUnidOtra.style.display = "none"; inpUnidOtra.value = ""; }
+                                        syncHiddenUnid();
+                                    });
+                                    inpUnidOtra.addEventListener("input", function () {
+                                        if (selUnid.value === "__nueva__") selUnid.options[selUnid.selectedIndex].text = inpUnidOtra.value || "— Agregar otra —";
+                                        syncHiddenUnid();
+                                    });
+                                    inpUnidOtra.addEventListener("blur", function () {
+                                        if (selUnid.value === "__nueva__" && inpUnidOtra.value.trim()) optUnidNueva.textContent = inpUnidOtra.value.trim();
+                                        syncHiddenUnid();
+                                    });
+                                    wrapUnid.appendChild(selUnid);
+                                    wrapUnid.appendChild(inpUnidOtra);
+                                    wrapUnid.appendChild(hiddenUnid);
                                     var lblT = document.createElement("label");
                                     lblT.className = "costos-edit-presentacion-label";
                                     lblT.textContent = "Tipo presentación";
-                                    var inpTipo = document.createElement("input");
-                                    inpTipo.type = "text";
-                                    inpTipo.className = "costos-edit-input";
-                                    inpTipo.setAttribute("data-header-index", String(idxPresTipo));
-                                    inpTipo.value = record[keyPresTipo] || "";
-                                    inpTipo.placeholder = "Ej: Paquete, Bolsa";
+                                    var optsTipo = [];
+                                    try {
+                                        var stCombosTipo = sessionStorage.getItem("costosCombosTipoPresentacion");
+                                        if (stCombosTipo) optsTipo = JSON.parse(stCombosTipo);
+                                        if (!Array.isArray(optsTipo) || optsTipo.length === 0) {
+                                            var stTipo = sessionStorage.getItem("costosDistinctTipoPresentacion");
+                                            if (stTipo) optsTipo = JSON.parse(stTipo);
+                                        }
+                                    } catch (e) {}
+                                    if (!Array.isArray(optsTipo)) optsTipo = [];
+                                    optsTipo = optsTipo.slice();
+                                    var curTipo = record[keyPresTipo] != null ? String(record[keyPresTipo]).trim() : "";
+                                    if (curTipo && optsTipo.indexOf(curTipo) === -1) optsTipo.unshift(curTipo);
+                                    optsTipo = optsTipo.filter(function (v) { return v != null && String(v).trim() !== ""; });
+                                    if (optsTipo.length === 0) optsTipo = ["—"];
+                                    var wrapTipo = document.createElement("div");
+                                    wrapTipo.className = "costos-edit-presentacion-combo";
+                                    var selTipo = document.createElement("select");
+                                    selTipo.className = "costos-edit-select-presentacion";
+                                    optsTipo.forEach(function (v) {
+                                        var o = document.createElement("option");
+                                        o.value = String(v).trim();
+                                        o.textContent = o.value;
+                                        if (o.value === curTipo) o.selected = true;
+                                        selTipo.appendChild(o);
+                                    });
+                                    var optTipoNueva = document.createElement("option");
+                                    optTipoNueva.value = "__nueva__";
+                                    optTipoNueva.textContent = "— Agregar otra —";
+                                    selTipo.appendChild(optTipoNueva);
+                                    var inpTipoOtra = document.createElement("input");
+                                    inpTipoOtra.type = "text";
+                                    inpTipoOtra.className = "costos-edit-input costos-edit-input-otra-presentacion";
+                                    inpTipoOtra.style.display = "none";
+                                    inpTipoOtra.placeholder = "Escribí el tipo";
+                                    var hiddenTipo = document.createElement("input");
+                                    hiddenTipo.type = "hidden";
+                                    hiddenTipo.className = "costos-edit-input";
+                                    hiddenTipo.setAttribute("data-header-index", String(idxPresTipo));
+                                    hiddenTipo.value = curTipo || "";
+                                    function syncHiddenTipo() {
+                                        hiddenTipo.value = selTipo.value === "__nueva__" ? (inpTipoOtra.value || "").trim() : selTipo.value;
+                                    }
+                                    selTipo.addEventListener("change", function () {
+                                        if (selTipo.value === "__nueva__") {
+                                            inpTipoOtra.style.display = "";
+                                            inpTipoOtra.value = curTipo && optsTipo.indexOf(curTipo) === -1 ? curTipo : "";
+                                            inpTipoOtra.focus();
+                                        } else { inpTipoOtra.style.display = "none"; inpTipoOtra.value = ""; }
+                                        syncHiddenTipo();
+                                    });
+                                    inpTipoOtra.addEventListener("input", function () {
+                                        if (selTipo.value === "__nueva__") selTipo.options[selTipo.selectedIndex].text = inpTipoOtra.value || "— Agregar otra —";
+                                        syncHiddenTipo();
+                                    });
+                                    inpTipoOtra.addEventListener("blur", function () {
+                                        if (selTipo.value === "__nueva__" && inpTipoOtra.value.trim()) optTipoNueva.textContent = inpTipoOtra.value.trim();
+                                        syncHiddenTipo();
+                                    });
+                                    wrapTipo.appendChild(selTipo);
+                                    wrapTipo.appendChild(inpTipoOtra);
+                                    wrapTipo.appendChild(hiddenTipo);
+                                    function getUnidVal() {
+                                        return selUnid.value === "__nueva__" ? (inpUnidOtra.value || "").trim() : (selUnid.value || "");
+                                    }
+                                    function getTipoVal() {
+                                        return selTipo.value === "__nueva__" ? (inpTipoOtra.value || "").trim() : (selTipo.value || "");
+                                    }
                                     function updatePresLabel() {
-                                        valueSpanPres.textContent = buildPresentacionStr(inpCant.value, inpUnid.value, inpTipo.value);
+                                        syncHiddenUnid();
+                                        syncHiddenTipo();
+                                        valueSpanPres.textContent = buildPresentacionStr(inpCant.value, hiddenUnid.value, hiddenTipo.value);
+                                        leyendaSpan.textContent = buildPresentacionStr(inpCant.value, getUnidVal(), getTipoVal()) || "—";
                                     }
                                     inpCant.addEventListener("input", updatePresLabel);
                                     inpCant.addEventListener("change", updatePresLabel);
-                                    inpUnid.addEventListener("input", updatePresLabel);
-                                    inpUnid.addEventListener("change", updatePresLabel);
-                                    inpTipo.addEventListener("input", updatePresLabel);
-                                    inpTipo.addEventListener("change", updatePresLabel);
+                                    selUnid.addEventListener("change", function () { syncHiddenUnid(); updatePresLabel(); });
+                                    inpUnidOtra.addEventListener("input", updatePresLabel);
+                                    inpUnidOtra.addEventListener("change", function () { syncHiddenUnid(); updatePresLabel(); });
+                                    selTipo.addEventListener("change", function () { syncHiddenTipo(); updatePresLabel(); });
+                                    inpTipoOtra.addEventListener("input", updatePresLabel);
+                                    inpTipoOtra.addEventListener("change", function () { syncHiddenTipo(); updatePresLabel(); });
+                                    updatePresLabel();
                                     blockIn.appendChild(lblC);
                                     blockIn.appendChild(inpCant);
                                     blockIn.appendChild(lblU);
-                                    blockIn.appendChild(inpUnid);
+                                    blockIn.appendChild(wrapUnid);
                                     blockIn.appendChild(lblT);
-                                    blockIn.appendChild(inpTipo);
+                                    blockIn.appendChild(wrapTipo);
                                     closeBtnPres.addEventListener("click", function () {
+                                        var form = wrapPres.closest("form");
+                                        var fieldTum = form ? form.querySelector(".costos-edit-field[data-field=\"tipo-unidad-medida\"]") : null;
+                                        var closeBtnTum = fieldTum ? fieldTum.querySelector(".costos-edit-value-close-btn") : null;
+                                        if (closeBtnTum) closeBtnTum.click();
                                         inpCant.value = record[keyPresCant] || "";
-                                        inpUnid.value = record[keyPresUnid] || "";
-                                        inpTipo.value = record[keyPresTipo] || "";
+                                        hiddenUnid.value = record[keyPresUnid] || "";
+                                        hiddenTipo.value = record[keyPresTipo] || "";
+                                        selUnid.value = (optsUnid.indexOf(record[keyPresUnid] || "") >= 0) ? (record[keyPresUnid] || "") : "__nueva__";
+                                        if (selUnid.value === "__nueva__") {
+                                            inpUnidOtra.style.display = "";
+                                            inpUnidOtra.value = record[keyPresUnid] || "";
+                                        } else { inpUnidOtra.style.display = "none"; inpUnidOtra.value = ""; }
+                                        selTipo.value = (optsTipo.indexOf(record[keyPresTipo] || "") >= 0) ? (record[keyPresTipo] || "") : "__nueva__";
+                                        if (selTipo.value === "__nueva__") {
+                                            inpTipoOtra.style.display = "";
+                                            inpTipoOtra.value = record[keyPresTipo] || "";
+                                        } else { inpTipoOtra.style.display = "none"; inpTipoOtra.value = ""; }
                                         valueSpanPres.textContent = buildPresentacionStr(record[keyPresCant], record[keyPresUnid], record[keyPresTipo]);
                                         blockIn.style.display = "none";
                                         valueSpanPres.style.display = "";
@@ -315,10 +503,11 @@
                                     valueSpanPres.style.display = "none";
                                     editBtnPres.style.display = "none";
                                     inpCant.focus();
+                                    setTimeout(openTipoUnidadMedidaSiCerrado, 0);
                                 });
                                 wrapPres.appendChild(labelPres);
                                 wrapPres.appendChild(valueCellPres);
-                                fieldsContainer.appendChild(wrapPres);
+                                presentationWrapCollected = wrapPres;
                                 presentationRowAdded = true;
                             }
                             return;
@@ -339,10 +528,25 @@
                         wrap.className = "costos-edit-field" + (editable ? " is-editable" : "") + (isObservaciones ? " is-textarea" : "");
                         wrap.setAttribute("data-header-index", String(i));
                         if (nameNorm === "cantidad unidad medida" || nameNorm === "cantidad-unidad-medida") wrap.setAttribute("data-field", "cantidad-unidad-medida");
+                        if (nameNorm === "tipo unidad medida" || nameNorm === "tipo-unidad-medida") wrap.setAttribute("data-field", "tipo-unidad-medida");
                         if (nameNorm === "precio anterior") wrap.setAttribute("data-field", "precio-anterior");
                         if (nameNorm === "precio costo x unidad" || nameNorm === "precio-costo-x-unidad") wrap.setAttribute("data-field", "precio-costo-x-unidad");
-                        if (nameNorm === "equivalencia unidad medida" || nameNorm === "equivalencia-unidad-medida") wrap.setAttribute("data-field", "equivalencia-unidad-medida");
+                        if (nameNorm === "equivalencia unidad medida" || nameNorm === "equivalencia-unidad-medida") {
+                            wrap.setAttribute("data-field", "equivalencia-unidad-medida");
+                            wrap.classList.add("costos-edit-field-informativo");
+                        }
+                        if (nameNorm === "equivalencia tipo unidad medida" || nameNorm === "equivalencia-tipo-unidad-medida") {
+                            wrap.setAttribute("data-field", "equivalencia-tipo-unidad-medida");
+                            wrap.classList.add("costos-edit-field-informativo");
+                        }
                         if (nameNorm === "precio equivalencia x unidad" || nameNorm === "precio-equivalencia-x-unidad") wrap.setAttribute("data-field", "precio-equivalencia-x-unidad");
+                        if (isObservaciones) wrap.setAttribute("data-field", "observaciones");
+                        var isEquivalenciaSection = nameNorm === "cantidad unidad medida" || nameNorm === "cantidad-unidad-medida"
+                            || nameNorm === "tipo unidad medida" || nameNorm === "tipo-unidad-medida"
+                            || nameNorm === "equivalencia unidad medida" || nameNorm === "equivalencia-unidad-medida"
+                            || nameNorm === "equivalencia tipo unidad medida" || nameNorm === "equivalencia-tipo-unidad-medida"
+                            || nameNorm === "precio costo x unidad" || nameNorm === "precio-costo-x-unidad"
+                            || nameNorm === "precio equivalencia x unidad" || nameNorm === "precio-equivalencia-x-unidad";
 
                         var labelWrap = document.createElement("span");
                         labelWrap.className = "costos-edit-label" + (isCalculatedField(nameNorm) ? " costos-edit-label-calc" : "");
@@ -353,13 +557,17 @@
                             : (nameNorm === "presentacion unidad" || nameNorm === "presentacion-unidad")
                             ? "Unidad de medida de la cantidad del paquete (Kg, L, unidad, etc.)"
                             : (nameNorm === "equivalencia unidad medida" || nameNorm === "equivalencia-unidad-medida")
-                            ? "Equivalencia (resultado de la calculadora de presentación según tipo de unidad de medida)"
+                            ? "Equivalencia (resultado calculado según presentación y unidad de medida)"
+                            : (nameNorm === "equivalencia tipo unidad medida" || nameNorm === "equivalencia-tipo-unidad-medida")
+                            ? "Convertido a"
                             : (nameNorm === "tipo unidad medida" || nameNorm === "tipo-unidad-medida")
-                            ? "Tipo de unidad de medida (Gramos, Kg, L, etc.)"
+                            ? "Convertir A (Gramos, Litro, Unidad, etc.)"
                             : (nameNorm === "cantidad unidad medida" || nameNorm === "cantidad-unidad-medida")
                             ? "Cantidad unidad de medida (resultado de equivalencia: cantidad y unidad del paquete convertidas al tipo de unidad de medida; valor entero)"
                             : (nameNorm === "precio costo x unidad" || nameNorm === "precio-costo-x-unidad")
                             ? "Precio costo por unidad (Precio anterior ÷ Cantidad unidad de medida)"
+                            : (nameNorm === "precio equivalencia x unidad" || nameNorm === "precio-equivalencia-x-unidad")
+                            ? "Precio equivalencia por unidad (valor usado para realizar el costo de la receta)"
                             : (key || "—");
                         var parenIdx = labelText.indexOf(" (");
                         if (parenIdx >= 0) {
@@ -408,7 +616,9 @@
                         var valueCell = document.createElement("div");
                         valueCell.className = "costos-edit-value-cell";
                         valueCell.appendChild(valueSpan);
-                        if (!editable && !isObservaciones && !isCalculatedField(nameNorm)) {
+                        var sinBotonEditarEquiv = nameNorm === "equivalencia unidad medida" || nameNorm === "equivalencia-unidad-medida"
+                            || nameNorm === "equivalencia tipo unidad medida" || nameNorm === "equivalencia-tipo-unidad-medida";
+                        if (!editable && !isObservaciones && !isCalculatedField(nameNorm) && !sinBotonEditarEquiv) {
                             var editIcon = document.createElement("button");
                             editIcon.type = "button";
                             editIcon.className = "costos-edit-value-edit-btn";
@@ -416,13 +626,13 @@
                             editIcon.setAttribute("aria-label", "Editar campo");
                             editIcon.innerHTML = "<i class=\"fa-solid fa-pen\" aria-hidden=\"true\"></i>";
                             valueCell.appendChild(editIcon);
-                            (function (w, cell, span, idx, rawVal, isCategoriaField, isMarcaField, isLugarField, form, categoriasStateRef) {
+                            (function (w, cell, span, idx, rawVal, isCategoriaField, isMarcaField, isLugarField, isTipoUnidadMedidaField, form, categoriasStateRef) {
                                 function removeDatalistCategoria() {
                                     var dl = document.getElementById("costos-datalist-categoria");
                                     if (dl) dl.parentNode.removeChild(dl);
                                 }
                                 editIcon.addEventListener("click", function () {
-                                    var wrapCombo = cell.querySelector(".costos-edit-categoria-wrap, .costos-edit-marca-wrap, .costos-edit-lugar-wrap");
+                                    var wrapCombo = cell.querySelector(".costos-edit-categoria-wrap, .costos-edit-marca-wrap, .costos-edit-lugar-wrap, .costos-edit-tipo-unidad-medida-wrap");
                                     var dyn = w.querySelector(".costos-edit-input-dynamic");
                                     if (wrapCombo) {
                                         var hidden = wrapCombo.querySelector("input[type=hidden].costos-edit-input");
@@ -640,6 +850,72 @@
                                         cell.insertBefore(wrapLugar, span);
                                         var elementToRemove = wrapLugar;
                                         var elementToFocus = selL;
+                                    } else if (isTipoUnidadMedidaField && form) {
+                                        var optsTum = [];
+                                        try {
+                                            var storedCombosTum = sessionStorage.getItem("costosCombosConvertirUnidadMedida");
+                                            if (storedCombosTum) optsTum = JSON.parse(storedCombosTum);
+                                            if (!Array.isArray(optsTum) || optsTum.length === 0) {
+                                                var storedTum = sessionStorage.getItem("costosDistinctTipoUnidadMedida");
+                                                if (storedTum) optsTum = JSON.parse(storedTum);
+                                            }
+                                        } catch (e) {}
+                                        if (!Array.isArray(optsTum)) optsTum = [];
+                                        optsTum = optsTum.slice();
+                                        var currentValTum = rawVal != null ? String(rawVal).trim() : "";
+                                        if (currentValTum && optsTum.indexOf(currentValTum) === -1) optsTum.unshift(currentValTum);
+                                        optsTum = optsTum.filter(function (v) { return v != null && String(v).trim() !== ""; });
+                                        if (optsTum.length === 0) optsTum = ["—"];
+                                        var wrapTum = document.createElement("div");
+                                        wrapTum.className = "costos-edit-tipo-unidad-medida-wrap costos-edit-combo-wrap";
+                                        var selTum = document.createElement("select");
+                                        selTum.className = "costos-edit-input-dynamic costos-edit-select-tipo-unidad-medida";
+                                        optsTum.forEach(function (v) {
+                                            var opt = document.createElement("option");
+                                            opt.value = String(v).trim();
+                                            opt.textContent = opt.value;
+                                            if (opt.value === currentValTum) opt.selected = true;
+                                            selTum.appendChild(opt);
+                                        });
+                                        var optNuevaTum = document.createElement("option");
+                                        optNuevaTum.value = "__nueva__";
+                                        optNuevaTum.textContent = "— Agregar otra —";
+                                        selTum.appendChild(optNuevaTum);
+                                        wrapTum.appendChild(selTum);
+                                        inp = document.createElement("input");
+                                        inp.type = "text";
+                                        inp.className = "costos-edit-input-dynamic costos-edit-input-otra-tipo-unidad-medida";
+                                        inp.style.display = "none";
+                                        inp.placeholder = "Escribí la unidad (ej: Gramos, Litro)";
+                                        wrapTum.appendChild(inp);
+                                        var hiddenValTum = document.createElement("input");
+                                        hiddenValTum.type = "hidden";
+                                        hiddenValTum.className = "costos-edit-input";
+                                        hiddenValTum.setAttribute("data-header-index", String(idx));
+                                        hiddenValTum.value = currentValTum || "";
+                                        wrapTum.appendChild(hiddenValTum);
+                                        function syncHiddenTum() {
+                                            hiddenValTum.value = selTum.value === "__nueva__" ? (inp.value || "").trim() : selTum.value;
+                                        }
+                                        selTum.addEventListener("change", function () {
+                                            if (selTum.value === "__nueva__") {
+                                                inp.style.display = "";
+                                                inp.value = currentValTum && optsTum.indexOf(currentValTum) === -1 ? currentValTum : "";
+                                                inp.focus();
+                                            } else { inp.style.display = "none"; inp.value = ""; }
+                                            syncHiddenTum();
+                                        });
+                                        inp.addEventListener("input", function () {
+                                            if (selTum.value === "__nueva__") selTum.options[selTum.selectedIndex].text = inp.value || "— Agregar otra —";
+                                            syncHiddenTum();
+                                        });
+                                        inp.addEventListener("blur", function () {
+                                            if (selTum.value === "__nueva__" && inp.value.trim()) optNuevaTum.textContent = inp.value.trim();
+                                            syncHiddenTum();
+                                        });
+                                        cell.insertBefore(wrapTum, span);
+                                        var elementToRemove = wrapTum;
+                                        var elementToFocus = selTum;
                                     } else {
                                         inp = document.createElement("input");
                                         inp.type = "text";
@@ -660,6 +936,21 @@
                                     closeBtn.innerHTML = "<i class=\"fa-solid fa-xmark\" aria-hidden=\"true\"></i>";
                                     cell.appendChild(closeBtn);
                                     closeBtn.addEventListener("click", function () {
+                                        if (isTipoUnidadMedidaField && form) {
+                                            var presWrap = form.querySelector("[data-field=\"presentacion\"]");
+                                            var blockIn = presWrap ? presWrap.querySelector(".costos-edit-presentacion-inputs") : null;
+                                            if (blockIn && blockIn.style.display !== "none") {
+                                                var valueSpanPres = presWrap.querySelector(".costos-edit-value-presentacion");
+                                                var editBtnPres = presWrap.querySelector(".costos-edit-value-edit-btn");
+                                                var inpC = blockIn.querySelector("input.costos-edit-input[type=text][data-header-index]");
+                                                var hiddens = blockIn.querySelectorAll("input[type=hidden].costos-edit-input");
+                                                var inpU = hiddens[0], inpT = hiddens[1];
+                                                if (valueSpanPres) valueSpanPres.textContent = (inpC && inpU && inpT) ? buildPresentacionStr(inpC.value, inpU.value, inpT.value) : (valueSpanPres.textContent || "—");
+                                                blockIn.style.display = "none";
+                                                if (valueSpanPres) valueSpanPres.style.display = "";
+                                                if (editBtnPres) editBtnPres.style.display = "";
+                                            }
+                                        }
                                         span.style.display = "";
                                         if (elementToRemove.parentNode) elementToRemove.parentNode.removeChild(elementToRemove);
                                         removeDatalistCategoria();
@@ -667,8 +958,18 @@
                                         editIcon.style.display = "";
                                     });
                                     if (elementToFocus) elementToFocus.focus();
+                                    if (isTipoUnidadMedidaField && form) {
+                                        setTimeout(function () {
+                                            var presWrap = form.querySelector("[data-field=\"presentacion\"]");
+                                            var blockIn = presWrap ? presWrap.querySelector(".costos-edit-presentacion-inputs") : null;
+                                            if (presWrap && (!blockIn || blockIn.style.display === "none")) {
+                                                var editBtnPres = presWrap.querySelector(".costos-edit-value-edit-btn");
+                                                if (editBtnPres) editBtnPres.click();
+                                            }
+                                        }, 0);
+                                    }
                                 });
-                            })(wrap, valueCell, valueSpan, i, value, i === categoriaColIdx, i === marcaColIdx, i === lugarColIdx, formEl, categoriasState);
+                            })(wrap, valueCell, valueSpan, i, value, i === categoriaColIdx, i === marcaColIdx, i === lugarColIdx, i === tipoUnidadMedidaColIdx, formEl, categoriasState);
                         }
                         wrap.appendChild(label);
                         wrap.appendChild(valueCell);
@@ -701,8 +1002,75 @@
                             wrap.appendChild(textarea);
                         }
 
-                        fieldsContainer.appendChild(wrap);
+                        if (isEquivalenciaSection) {
+                            sectionEquivalenciaWraps.push(wrap);
+                        } else if (isObservaciones) {
+                            observacionesWrapCollected = wrap;
+                        } else {
+                            fieldsContainer.appendChild(wrap);
+                        }
                     });
+                    var presentacionEquivalenciaWrapper = null;
+                    if (presentationWrapCollected) {
+                        presentacionEquivalenciaWrapper = document.createElement("div");
+                        presentacionEquivalenciaWrapper.className = "costos-edit-seccion-presentacion-equivalencia";
+                        presentacionEquivalenciaWrapper.appendChild(presentationWrapCollected);
+                    }
+                    if (sectionEquivalenciaWraps.length > 0) {
+                        var tipoWrap = null;
+                        var cantidadWrap = null;
+                        var restWraps = [];
+                        sectionEquivalenciaWraps.forEach(function (w) {
+                            var df = w.getAttribute("data-field");
+                            if (df === "tipo-unidad-medida") tipoWrap = w;
+                            else if (df === "cantidad-unidad-medida") cantidadWrap = w;
+                            else restWraps.push(w);
+                        });
+                        var orderedSection = [];
+                        if (tipoWrap) orderedSection.push(tipoWrap);
+                        if (cantidadWrap) orderedSection.push(cantidadWrap);
+                        orderedSection = orderedSection.concat(restWraps);
+                        var sectionEquivalenciaContainer = document.createElement("div");
+                        sectionEquivalenciaContainer.className = "costos-edit-section-equivalencia";
+                        orderedSection.forEach(function (w) { sectionEquivalenciaContainer.appendChild(w); });
+                        if (presentacionEquivalenciaWrapper) {
+                            presentacionEquivalenciaWrapper.appendChild(sectionEquivalenciaContainer);
+                            var precioAnteriorWrap = fieldsContainer.querySelector("[data-field=\"precio-anterior\"]");
+                            if (precioAnteriorWrap && precioAnteriorWrap.nextSibling) {
+                                fieldsContainer.insertBefore(presentacionEquivalenciaWrapper, precioAnteriorWrap.nextSibling);
+                            } else if (precioAnteriorWrap) {
+                                fieldsContainer.appendChild(presentacionEquivalenciaWrapper);
+                            } else {
+                                fieldsContainer.appendChild(presentacionEquivalenciaWrapper);
+                            }
+                        } else {
+                            var presentacionWrap = fieldsContainer.querySelector("[data-field=\"presentacion\"]");
+                            if (presentacionWrap && presentacionWrap.nextSibling) {
+                                fieldsContainer.insertBefore(sectionEquivalenciaContainer, presentacionWrap.nextSibling);
+                            } else if (presentacionWrap) {
+                                fieldsContainer.appendChild(sectionEquivalenciaContainer);
+                            } else {
+                                var precioAnteriorWrap = fieldsContainer.querySelector("[data-field=\"precio-anterior\"]");
+                                if (precioAnteriorWrap && precioAnteriorWrap.nextSibling) {
+                                    fieldsContainer.insertBefore(sectionEquivalenciaContainer, precioAnteriorWrap.nextSibling);
+                                } else {
+                                    fieldsContainer.appendChild(sectionEquivalenciaContainer);
+                                }
+                            }
+                        }
+                    } else if (presentacionEquivalenciaWrapper) {
+                        var precioAnteriorWrap = fieldsContainer.querySelector("[data-field=\"precio-anterior\"]");
+                        if (precioAnteriorWrap && precioAnteriorWrap.nextSibling) {
+                            fieldsContainer.insertBefore(presentacionEquivalenciaWrapper, precioAnteriorWrap.nextSibling);
+                        } else if (precioAnteriorWrap) {
+                            fieldsContainer.appendChild(presentacionEquivalenciaWrapper);
+                        } else {
+                            fieldsContainer.appendChild(presentacionEquivalenciaWrapper);
+                        }
+                    }
+                    if (observacionesWrapCollected) {
+                        fieldsContainer.appendChild(observacionesWrapCollected);
+                    }
 
                     (function () {
                         var appsScriptUrl = (typeof APP_CONFIG !== "undefined" && APP_CONFIG.appsScriptUrl) ? APP_CONFIG.appsScriptUrl : "";
@@ -787,6 +1155,63 @@
                                     });
                                     try { sessionStorage.setItem("costosDistinctLugares", JSON.stringify(allLugares)); } catch (err) {}
                                 }
+                                var unidadPresKey = null;
+                                var tipoPresKey = null;
+                                for (var ui = 0; ui < apiHeaders.length; ui++) {
+                                    var uh = String(apiHeaders[ui] != null ? apiHeaders[ui] : "").trim().toLowerCase().replace(/\s/g, "");
+                                    if (uh === "presentacion-unidad") unidadPresKey = apiHeaders[ui];
+                                    if (uh === "presentacion-tipo") tipoPresKey = apiHeaders[ui];
+                                }
+                                if (unidadPresKey) {
+                                    var seenUP = {};
+                                    var allUnid = [];
+                                    apiRows.forEach(function (row) {
+                                        var v = row[unidadPresKey] != null ? String(row[unidadPresKey]).trim() : "";
+                                        if (!v) v = "—";
+                                        if (!seenUP[v]) { seenUP[v] = true; allUnid.push(v); }
+                                    });
+                                    allUnid.sort(function (a, b) {
+                                        if (a === "—") return 1;
+                                        if (b === "—") return -1;
+                                        return a.localeCompare(b);
+                                    });
+                                    try { sessionStorage.setItem("costosDistinctUnidadPresentacion", JSON.stringify(allUnid)); } catch (err) {}
+                                }
+                                if (tipoPresKey) {
+                                    var seenTP = {};
+                                    var allTipo = [];
+                                    apiRows.forEach(function (row) {
+                                        var v = row[tipoPresKey] != null ? String(row[tipoPresKey]).trim() : "";
+                                        if (!v) v = "—";
+                                        if (!seenTP[v]) { seenTP[v] = true; allTipo.push(v); }
+                                    });
+                                    allTipo.sort(function (a, b) {
+                                        if (a === "—") return 1;
+                                        if (b === "—") return -1;
+                                        return a.localeCompare(b);
+                                    });
+                                    try { sessionStorage.setItem("costosDistinctTipoPresentacion", JSON.stringify(allTipo)); } catch (err) {}
+                                }
+                                var tipoUnidadMedidaKey = null;
+                                for (var tumi = 0; tumi < apiHeaders.length; tumi++) {
+                                    var tumh = String(apiHeaders[tumi] != null ? apiHeaders[tumi] : "").trim().toLowerCase().replace(/\s/g, "");
+                                    if (tumh === "tipo-unidad-medida") tipoUnidadMedidaKey = apiHeaders[tumi];
+                                }
+                                if (tipoUnidadMedidaKey) {
+                                    var seenTum = {};
+                                    var allTum = [];
+                                    apiRows.forEach(function (row) {
+                                        var v = row[tipoUnidadMedidaKey] != null ? String(row[tipoUnidadMedidaKey]).trim() : "";
+                                        if (!v) v = "—";
+                                        if (!seenTum[v]) { seenTum[v] = true; allTum.push(v); }
+                                    });
+                                    allTum.sort(function (a, b) {
+                                        if (a === "—") return 1;
+                                        if (b === "—") return -1;
+                                        return a.localeCompare(b);
+                                    });
+                                    try { sessionStorage.setItem("costosDistinctTipoUnidadMedida", JSON.stringify(allTum)); } catch (err) {}
+                                }
                             })
                             .catch(function () {});
                     })();
@@ -842,6 +1267,96 @@
                     })();
 
                     (function () {
+                        var idxPresCant = -1, idxPresUnid = -1, idxCantidadUnidadMedida = -1, idxTipoUnidadMedida = -1;
+                        for (var eq = 0; eq < headers.length; eq++) {
+                            var nEq = normHeader(headers[eq]);
+                            if (nEq === "presentacion cantidad medida" || nEq === "presentacion-cantidad-medida") idxPresCant = eq;
+                            if (nEq === "presentacion unidad" || nEq === "presentacion-unidad") idxPresUnid = eq;
+                            if (nEq === "cantidad unidad medida" || nEq === "cantidad-unidad-medida") idxCantidadUnidadMedida = eq;
+                            if (nEq === "tipo unidad medida" || nEq === "tipo-unidad-medida") idxTipoUnidadMedida = eq;
+                        }
+                        var cantidadField = formEl.querySelector(".costos-edit-field[data-field=\"cantidad-unidad-medida\"]");
+                        if (!cantidadField || idxPresCant < 0 || idxPresUnid < 0 || idxCantidadUnidadMedida < 0) return;
+                        var cantidadSpan = cantidadField.querySelector(".costos-edit-value");
+                        if (!cantidadSpan) return;
+                        var hiddenEquiv = cantidadField.querySelector("input[type=hidden].costos-edit-input[data-header-index]");
+                        if (!hiddenEquiv) {
+                            hiddenEquiv = document.createElement("input");
+                            hiddenEquiv.type = "hidden";
+                            hiddenEquiv.className = "costos-edit-input";
+                            hiddenEquiv.setAttribute("data-header-index", String(idxCantidadUnidadMedida));
+                            cantidadField.querySelector(".costos-edit-value-cell").appendChild(hiddenEquiv);
+                        }
+                        function calcularEquivalenciaValor(cantidad, unidadOrigen, unidadDestino) {
+                            if (window.COSTOS_EQUIVALENCIA && window.COSTOS_EQUIVALENCIA.convert) {
+                                return window.COSTOS_EQUIVALENCIA.convert(cantidad, unidadOrigen, unidadDestino);
+                            }
+                            var q = parseFloat(String(cantidad).replace(",", "."));
+                            if (isNaN(q) || q < 0) return NaN;
+                            return q;
+                        }
+                        function updateEquivalencia() {
+                            var q = 0, u = "", d = "";
+                            var presWrap = formEl.querySelector("[data-field=\"presentacion\"]");
+                            var inpCant = presWrap ? presWrap.querySelector("input.costos-edit-input[data-header-index=\"" + idxPresCant + "\"]") : null;
+                            if (inpCant) {
+                                q = parseFloat(inpCant.value) || 0;
+                            } else {
+                                q = parseFloat(row[idxPresCant]) || 0;
+                            }
+                            var selUnid = presWrap ? presWrap.querySelector(".costos-edit-presentacion-combo select.costos-edit-select-presentacion") : null;
+                            var hidUnid = presWrap ? presWrap.querySelector("input[type=hidden][data-header-index=\"" + idxPresUnid + "\"]") : null;
+                            if (selUnid && selUnid.value && selUnid.value !== "__nueva__") {
+                                u = selUnid.value;
+                            } else if (hidUnid) {
+                                u = hidUnid.value;
+                            } else {
+                                u = row[idxPresUnid] != null ? String(row[idxPresUnid]).trim() : "";
+                            }
+                            var fieldTum = formEl.querySelector(".costos-edit-field[data-field=\"tipo-unidad-medida\"]");
+                            var wrapTum = fieldTum ? fieldTum.querySelector(".costos-edit-tipo-unidad-medida-wrap") : null;
+                            var selTum = wrapTum ? wrapTum.querySelector("select.costos-edit-select-tipo-unidad-medida") : null;
+                            var hidTum = wrapTum ? wrapTum.querySelector("input[type=hidden].costos-edit-input") : null;
+                            var spanTum = fieldTum ? fieldTum.querySelector(".costos-edit-value-cell .costos-edit-value") : null;
+                            if (selTum && selTum.value && selTum.value !== "__nueva__") {
+                                d = selTum.value;
+                            } else if (hidTum && hidTum.value) {
+                                d = hidTum.value;
+                            } else if (spanTum && spanTum.textContent) {
+                                d = String(spanTum.textContent).trim();
+                            } else if (idxTipoUnidadMedida >= 0 && row[idxTipoUnidadMedida] != null) {
+                                d = String(row[idxTipoUnidadMedida]).trim();
+                            } else {
+                                d = "";
+                            }
+                            var valor = calcularEquivalenciaValor(q, u, d);
+                            if (!isNaN(valor)) {
+                                var entero = Math.round(valor);
+                                cantidadSpan.textContent = String(entero);
+                                hiddenEquiv.value = String(entero);
+                            } else {
+                                cantidadSpan.textContent = "—";
+                                hiddenEquiv.value = "";
+                            }
+                        }
+                        formEl.addEventListener("input", function (e) {
+                            var t = e.target;
+                            if (t.closest && (t.closest("[data-field=\"presentacion\"]") || t.closest(".costos-edit-tipo-unidad-medida-wrap"))) updateEquivalencia();
+                        });
+                        formEl.addEventListener("change", function (e) {
+                            var t = e.target;
+                            if (t.closest && (t.closest("[data-field=\"presentacion\"]") || t.closest(".costos-edit-tipo-unidad-medida-wrap"))) updateEquivalencia();
+                        });
+                        formEl.addEventListener("click", function (e) {
+                            var t = e.target;
+                            if (t.closest && t.closest(".costos-edit-field[data-field=\"tipo-unidad-medida\"]") && t.classList && t.classList.contains("costos-edit-value-close-btn")) {
+                                setTimeout(updateEquivalencia, 0);
+                            }
+                        });
+                        updateEquivalencia();
+                    })();
+
+                    (function () {
                         var saveBtn = formEl.querySelector(".costos-edit-btn-save");
                         var precioInput = formEl.querySelector(".costos-edit-input[placeholder=\"Ingrese el precio actual\"]");
                         if (!saveBtn || !precioInput) return;
@@ -856,7 +1371,7 @@
                     formEl.addEventListener("submit", function (e) {
                         e.preventDefault();
                         var precioActualInput = formEl.querySelector(".costos-edit-input[placeholder=\"Ingrese el precio actual\"]");
-                        if (precioActualInput && !(precioActualInput.value || "").trim()) {
+                        if (!isCreateMode && precioActualInput && !(precioActualInput.value || "").trim()) {
                             alert("El precio actual es obligatorio. Ingresá un valor antes de guardar.");
                             precioActualInput.focus();
                             return;
@@ -872,20 +1387,36 @@
                         if (fechaActualizadaIdx >= 0 && fechaActualizadaIdx < newRow.length) {
                             newRow[fechaActualizadaIdx] = getTodayDate();
                         }
-                        try {
-                            sessionStorage.setItem("costosEditRecord", JSON.stringify({
-                                id: data.id,
-                                headers: data.headers,
-                                row: newRow
-                            }));
-                        } catch (err) {}
+                        if (isCreateMode) {
+                            var nombreProductoIdx = -1;
+                            for (var ni = 0; ni < headers.length; ni++) {
+                                var hn = String(headers[ni] != null ? headers[ni] : "").trim().toLowerCase().replace(/\s/g, "").replace(/-/g, "");
+                                if (hn === "nombreproducto" || hn === "nombre-producto") { nombreProductoIdx = ni; break; }
+                            }
+                            if (nombreProductoIdx >= 0 && !(newRow[nombreProductoIdx] || "").trim()) {
+                                alert("El nombre del producto es obligatorio.");
+                                var nombreInput = formEl.querySelector("input[data-header-index=\"" + nombreProductoIdx + "\"]");
+                                if (nombreInput) nombreInput.focus();
+                                return;
+                            }
+                        } else {
+                            try {
+                                sessionStorage.setItem("costosEditRecord", JSON.stringify({
+                                    id: data.id,
+                                    headers: data.headers,
+                                    row: newRow
+                                }));
+                            } catch (err) {}
+                        }
                         var appsScriptUrl = (window.APP_CONFIG && window.APP_CONFIG.appsScriptUrl) ? String(window.APP_CONFIG.appsScriptUrl).trim() : "";
                         if (!appsScriptUrl) {
                             alert("No está configurada la URL de la API (appsScriptUrl en config.js). Los cambios quedaron guardados solo en esta sesión.");
                             return;
                         }
                         var headers = data.headers || [];
-                        var body = { action: "update", sheet: "materiaPrima", id: data.id || "" };
+                        var body = isCreateMode
+                            ? { action: "create", sheet: "materiaPrima" }
+                            : { action: "update", sheet: "materiaPrima", id: data.id || "" };
                         for (var h = 0; h < headers.length; h++) {
                             var headerName = String(headers[h] != null ? headers[h] : "").trim();
                             if (headerName) body[headerName] = newRow[h] != null ? newRow[h] : "";
@@ -923,7 +1454,12 @@
                                     saveBtn.innerHTML = btnText;
                                 }
                                 if (json && json.success) {
-                                    alert("Cambios guardados en la hoja correctamente.");
+                                    if (isCreateMode) {
+                                        try { sessionStorage.removeItem("costosCreateRecord"); } catch (e) {}
+                                        alert("Registro creado en la hoja correctamente.");
+                                    } else {
+                                        alert("Cambios guardados en la hoja correctamente.");
+                                    }
                                     window.location.href = "materia-prima.html";
                                 } else {
                                     alert("Error al guardar en la hoja: " + (json && json.error ? json.error : "Respuesta inválida"));

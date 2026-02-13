@@ -79,6 +79,15 @@ var CONFIG = {
     filterColumns: ['Categoria', 'Nombre-Producto', 'Presentacion-Tipo', 'Marca', 'Habilitado', 'idpacking'],
     requiredOnCreate: ['Nombre-Producto'],
     dateUpdatedColumn: 'Fecha-Actualizada-Al'
+  },
+
+  /** Hoja Combos – listas para combos – ?sheet=combos */
+  combos: {
+    sheetName: 'COMBOS',
+    gid: 0,
+    headers: ['TIPO-UNIDAD-MEDIDA', 'CONVERTIR-UNIDAD-MEDIDA', 'TIPO-PRESENTACION'],
+    idColumn: 'TIPO-UNIDAD-MEDIDA',
+    filterColumns: ['TIPO-UNIDAD-MEDIDA', 'CONVERTIR-UNIDAD-MEDIDA', 'TIPO-PRESENTACION']
   }
 
   // Para agregar otra hoja, copiá un bloque (p.ej. packing), cambiá la clave y sheetName:

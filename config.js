@@ -12,7 +12,7 @@ window.APP_CONFIG = {
     },
 
     /** Apps Script desplegado – ABM (list, get, search, create, update, delete). Ver docs/APPS_SCRIPT_ABM_README.md */
-    appsScriptUrl: "https://script.google.com/macros/s/AKfycbxuT9WJO4wSnVn8KxNpRPqgi8DDO1kOZmv9gGNq-PoBnXTBBYftrskJDGrWUA-WCsv0ww/exec",
+    appsScriptUrl: "https://script.google.com/macros/s/AKfycbwr79fQDY5r1aXRC4u9mxKw4lTJoH63lSOBL2MzEGkZgs9-JuFEpoCO2srYCvOdZG2O1g/exec",
 
     /** Google Sheets – URLs públicas CSV por módulo. Ver docs/CONFIGURAR_GOOGLE_SHEETS.md */
     /** Packing: costos de empaque, envases, etiquetas. */
