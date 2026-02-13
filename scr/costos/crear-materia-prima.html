@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Editar materia prima - Panificación Colombres</title>
+    <title>Crear materia prima - Panificación Colombres</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -15,14 +15,14 @@
 <body class="costos-page">
     <a href="materia-prima.html" class="costos-back"><span class="costos-back-arrow">←</span> Volver a Materia prima</a>
     <main class="costos-main">
-        <h1 class="costos-title">Editar registro</h1>
-        <p class="costos-intro">Datos del registro. Modifique el precio y guarde cuando termine.</p>
+        <h1 class="costos-title">Crear materia prima</h1>
+        <p class="costos-intro">Completá los datos del nuevo registro. El nombre del producto es obligatorio.</p>
         <div id="edit-form-container" class="costos-datos">
-            <p id="edit-no-data" class="costos-placeholder" style="display:none;">No hay datos del registro. Volvé a Materia prima y abrí «Editar» en una tarjeta.</p>
+            <p id="edit-no-data" class="costos-placeholder" style="display:none;">No se pudo cargar el formulario. Volvé a Materia prima y usá el botón «Nueva materia prima».</p>
             <form id="costos-edit-form" class="costos-edit-form" style="display:none;">
                 <div id="edit-fields"></div>
                 <div class="costos-edit-actions">
-                    <button type="submit" class="costos-edit-btn-save" id="costos-edit-btn-save"><i class="fa-solid fa-check" aria-hidden="true"></i> Guardar cambios</button>
+                    <button type="submit" class="costos-edit-btn-save" id="costos-edit-btn-save"><i class="fa-solid fa-plus" aria-hidden="true"></i> Crear registro</button>
                 </div>
             </form>
         </div>
@@ -115,10 +115,9 @@
                     || n === "fecha actualizada al" || n === "fecha actualizada";
             }
 
-            var params = new URLSearchParams(window.location.search);
-            var isCreateMode = params.get("create") === "1";
-            var raw = isCreateMode ? sessionStorage.getItem("costosCreateRecord") : sessionStorage.getItem("costosEditRecord");
-            var idFromUrl = params.get("id") || "";
+            var isCreateMode = true;
+            var raw = sessionStorage.getItem("costosCreateRecord");
+            var idFromUrl = "";
 
             var noDataEl = document.getElementById("edit-no-data");
             var formEl = document.getElementById("costos-edit-form");
@@ -128,21 +127,12 @@
 
             if (!raw) {
                 noDataEl.style.display = "block";
-                noDataEl.textContent = isCreateMode
-                    ? "No se pudo cargar el formulario. Volvé a Materia prima y usá el botón «Nueva materia prima»."
-                    : "No hay datos del registro. Volvé a Materia prima y abrí «Editar» en una tarjeta.";
+                noDataEl.textContent = "No se pudo cargar el formulario. Volvé a Materia prima y usá el botón «Nueva materia prima».";
                 formEl.style.display = "none";
             } else {
                 try {
                     var data = JSON.parse(raw);
                     data.id = data.id || "";
-                    if (isCreateMode) {
-                        if (titleEl) titleEl.textContent = "Crear materia prima";
-                        if (introEl) introEl.textContent = "Completá los datos del nuevo registro. El nombre del producto es obligatorio.";
-                        try { document.title = "Crear materia prima - Panificación Colombres"; } catch (e) {}
-                        var saveBtn = formEl.querySelector(".costos-edit-btn-save");
-                        if (saveBtn) saveBtn.innerHTML = "<i class=\"fa-solid fa-plus\" aria-hidden=\"true\"></i> Crear registro";
-                    }
                     var headers = data.headers || [];
                     var row = data.row || [];
                     var record = {};
@@ -154,6 +144,7 @@
 
                     noDataEl.style.display = "none";
                     formEl.style.display = "block";
+                    formEl.classList.add("costos-form-create");
 
                     fieldsContainer.innerHTML = "";
                     var fechaActualizadaIdx = -1;
@@ -571,11 +562,11 @@
                         if (nameNorm === "precio costo x unidad" || nameNorm === "precio-costo-x-unidad") wrap.setAttribute("data-field", "precio-costo-x-unidad");
                         if (nameNorm === "equivalencia unidad medida" || nameNorm === "equivalencia-unidad-medida") {
                             wrap.setAttribute("data-field", "equivalencia-unidad-medida");
-                            wrap.classList.add("costos-edit-field-informativo");
+                            if (!isCreateMode) wrap.classList.add("costos-edit-field-informativo");
                         }
                         if (nameNorm === "equivalencia tipo unidad medida" || nameNorm === "equivalencia-tipo-unidad-medida") {
                             wrap.setAttribute("data-field", "equivalencia-tipo-unidad-medida");
-                            wrap.classList.add("costos-edit-field-informativo");
+                            if (!isCreateMode) wrap.classList.add("costos-edit-field-informativo");
                         }
                         if (nameNorm === "precio equivalencia x unidad" || nameNorm === "precio-equivalencia-x-unidad") wrap.setAttribute("data-field", "precio-equivalencia-x-unidad");
                         if (isObservaciones) wrap.setAttribute("data-field", "observaciones");
@@ -654,12 +645,24 @@
                         var valueCell = document.createElement("div");
                         valueCell.className = "costos-edit-value-cell";
                         valueCell.appendChild(valueSpan);
-                        var sinBotonEditarEquiv = nameNorm === "equivalencia unidad medida" || nameNorm === "equivalencia-unidad-medida"
-                            || nameNorm === "equivalencia tipo unidad medida" || nameNorm === "equivalencia-tipo-unidad-medida";
+                        var sinBotonEditarEquiv = (nameNorm === "equivalencia unidad medida" || nameNorm === "equivalencia-unidad-medida")
+                            || ((nameNorm === "equivalencia tipo unidad medida" || nameNorm === "equivalencia-tipo-unidad-medida") && !isCreateMode);
+                        if (isCreateMode && (nameNorm === "equivalencia unidad medida" || nameNorm === "equivalencia-unidad-medida")) {
+                            valueSpan.style.display = "none";
+                            var inpEquiv = document.createElement("input");
+                            inpEquiv.type = "number";
+                            inpEquiv.min = "0";
+                            inpEquiv.step = "1";
+                            inpEquiv.className = "costos-edit-input";
+                            inpEquiv.setAttribute("data-header-index", String(i));
+                            inpEquiv.placeholder = "Ej: 1000";
+                            inpEquiv.value = (value != null && String(value).trim() !== "") ? String(value).trim() : "";
+                            valueCell.appendChild(inpEquiv);
+                        }
                         if (!editable && !isObservaciones && !isCalculatedField(nameNorm) && !sinBotonEditarEquiv) {
                             var editIcon = document.createElement("button");
                             editIcon.type = "button";
-                            editIcon.className = "costos-edit-value-edit-btn";
+                            editIcon.className = "costos-edit-value-edit-btn costos-edit-value-edit-btn-hidden-in-create";
                             editIcon.setAttribute("title", "Editar este campo");
                             editIcon.setAttribute("aria-label", "Editar campo");
                             editIcon.innerHTML = "<i class=\"fa-solid fa-pen\" aria-hidden=\"true\"></i>";
@@ -1013,7 +1016,7 @@
                                         }, 0);
                                     }
                                 });
-                            })(wrap, valueCell, valueSpan, i, value, i === categoriaColIdx, i === marcaColIdx, i === lugarColIdx, i === tipoUnidadMedidaColIdx, formEl, categoriasState);
+                            })(wrap, valueCell, valueSpan, i, value, i === categoriaColIdx, i === marcaColIdx, i === lugarColIdx, i === tipoUnidadMedidaColIdx || (isCreateMode && (nameNorm === "equivalencia tipo unidad medida" || nameNorm === "equivalencia-tipo-unidad-medida")), formEl, categoriasState);
                         }
                         wrap.appendChild(label);
                         wrap.appendChild(valueCell);
@@ -1114,6 +1117,11 @@
                     }
                     if (observacionesWrapCollected) {
                         fieldsContainer.appendChild(observacionesWrapCollected);
+                    }
+                    if (isCreateMode) {
+                        formEl.querySelectorAll(".costos-edit-value-edit-btn").forEach(function (btn) {
+                            btn.click();
+                        });
                     }
 
                     (function () {
@@ -1272,6 +1280,7 @@
                         var precioAnteriorSpan = precioAnteriorField ? precioAnteriorField.querySelector(".costos-edit-value") : null;
                         var precioCostoSpan = precioCostoField.querySelector(".costos-edit-value");
                         var equivalenciaSpan = equivalenciaField ? equivalenciaField.querySelector(".costos-edit-value") : null;
+                        var equivalenciaInput = isCreateMode && equivalenciaField ? equivalenciaField.querySelector("input.costos-edit-input[data-header-index]") : null;
                         var precioEquivalenciaSpan = precioEquivalenciaField ? precioEquivalenciaField.querySelector(".costos-edit-value") : null;
                         if (!cantidadSpan || !precioCostoSpan) return;
                         function parsePrecioFromDisplay(str) {
@@ -1279,22 +1288,34 @@
                             var s = String(str).trim().replace(/\$\s?/g, "").replace(/\./g, "").replace(",", ".");
                             return parseFloat(s);
                         }
+                        function getCantidadStr() {
+                            if (isCreateMode && equivalenciaInput && (equivalenciaInput.value || "").trim() !== "") {
+                                return (equivalenciaInput.value || "").trim();
+                            }
+                            return (cantidadSpan.textContent || "").replace(/\s/g, "").trim();
+                        }
+                        function getEquivStr() {
+                            if (isCreateMode && equivalenciaInput) {
+                                return (equivalenciaInput.value || "").trim();
+                            }
+                            return (equivalenciaSpan && equivalenciaSpan.textContent ? equivalenciaSpan.textContent : "").replace(/\s/g, "").trim();
+                        }
                         function updatePrecioCosto() {
                             var precioStr = (precioActualInput.value || "").trim();
                             var precio = parseFloat(precioStr.replace(",", "."));
                             if (isNaN(precio) && precioAnteriorSpan) {
                                 precio = parsePrecioFromDisplay(precioAnteriorSpan.textContent);
                             }
-                            var cantidadStr = (cantidadSpan.textContent || "").replace(/\s/g, "").trim();
+                            var cantidadStr = getCantidadStr();
                             var cantidad = parseFloat(cantidadStr.replace(/\./g, "").replace(",", "."));
                             if (isNaN(cantidad)) cantidad = parseFloat(cantidadStr.replace(",", "."));
-                            var equivStr = (equivalenciaSpan && equivalenciaSpan.textContent ? equivalenciaSpan.textContent : "").replace(/\s/g, "").trim();
+                            var equivStr = getEquivStr();
                             var equiv = parseFloat(equivStr.replace(/\./g, "").replace(",", "."));
                             if (isNaN(equiv)) equiv = parseFloat(equivStr.replace(",", "."));
                             if (!isNaN(precio) && !isNaN(cantidad) && cantidad !== 0) {
                                 var result = roundToDecimals(precio / cantidad, 4);
                                 precioCostoSpan.textContent = formatMonedaArg(result, 4);
-                                if (equivalenciaSpan && precioEquivalenciaSpan) {
+                                if (precioEquivalenciaSpan) {
                                     if (!isNaN(equiv) && equiv !== 0) {
                                         var resultEquiv = roundToDecimals(result / equiv, 4);
                                         precioEquivalenciaSpan.textContent = formatMonedaArg(resultEquiv, 4);
@@ -1325,7 +1346,11 @@
                         }
                         precioActualInput.addEventListener("input", updatePrecioCosto);
                         precioActualInput.addEventListener("change", updatePrecioCosto);
-                        // En edición no se ejecuta updatePrecioCosto al cargar: se respetan los valores guardados (precio-costo-x-unidad, precio-equivalencia-x-unidad). El cálculo solo corre cuando el usuario cambia el precio actual.
+                        if (isCreateMode && equivalenciaInput) {
+                            equivalenciaInput.addEventListener("input", updatePrecioCosto);
+                            equivalenciaInput.addEventListener("change", updatePrecioCosto);
+                        }
+                        updatePrecioCosto();
                     })();
 
                     (function () {
@@ -1349,7 +1374,6 @@
                             hiddenEquiv.setAttribute("data-header-index", String(idxCantidadUnidadMedida));
                             cantidadField.querySelector(".costos-edit-value-cell").appendChild(hiddenEquiv);
                         }
-                        hiddenEquiv.value = (row[idxCantidadUnidadMedida] != null ? String(row[idxCantidadUnidadMedida]).trim() : "");
                         function calcularEquivalenciaValor(cantidad, unidadOrigen, unidadDestino) {
                             if (window.COSTOS_EQUIVALENCIA && window.COSTOS_EQUIVALENCIA.convert) {
                                 return window.COSTOS_EQUIVALENCIA.convert(cantidad, unidadOrigen, unidadDestino);
@@ -1415,13 +1439,16 @@
                                 cantidadSpan.textContent = "—";
                                 hiddenEquiv.value = "";
                             }
-                            var equivalenciaFieldEdit = formEl.querySelector(".costos-edit-field[data-field=\"equivalencia-unidad-medida\"]");
-                            var equivalenciaSpanEdit = equivalenciaFieldEdit ? equivalenciaFieldEdit.querySelector(".costos-edit-value") : null;
-                            if (equivalenciaSpanEdit) {
-                                if (!isNaN(valor) && !(out && !mismaCat && u && d)) {
-                                    equivalenciaSpanEdit.textContent = String(Math.round(valor));
-                                } else {
-                                    equivalenciaSpanEdit.textContent = "—";
+                            if (isCreateMode) {
+                                var equivalenciaField = formEl.querySelector(".costos-edit-field[data-field=\"equivalencia-unidad-medida\"]");
+                                var equivalenciaInputCreate = equivalenciaField ? equivalenciaField.querySelector("input.costos-edit-input[data-header-index]") : null;
+                                if (equivalenciaInputCreate) {
+                                    if (!isNaN(valor) && !(out && !mismaCat && u && d)) {
+                                        equivalenciaInputCreate.value = String(Math.round(valor));
+                                    } else {
+                                        equivalenciaInputCreate.value = "";
+                                    }
+                                    equivalenciaInputCreate.dispatchEvent(new Event("input", { bubbles: true }));
                                 }
                             }
                             var leyenda = fieldTum ? fieldTum.querySelector(".costos-edit-equivalencia-leyenda") : null;
@@ -1474,7 +1501,7 @@
                                 setTimeout(updateEquivalencia, 0);
                             }
                         });
-                        // En edición no se ejecuta updateEquivalencia al cargar: se respetan los datos guardados en la hoja (columnas cantidad-unidad-medida, equivalencia-unidad-medida). El cálculo solo corre cuando el usuario cambia presentación o "Convertir A".
+                        updateEquivalencia();
                     })();
 
                     (function () {

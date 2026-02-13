@@ -895,7 +895,7 @@
                 var row = headers.map(function () { return ""; });
                 try {
                     sessionStorage.setItem("costosCreateRecord", JSON.stringify({ headers: headers, row: row }));
-                    window.location.href = "editar-materia-prima.html?create=1";
+                    window.location.href = "crear-materia-prima.html";
                 } catch (err) {
                     alert("Error al preparar el formulario.");
                 }

@@ -638,6 +638,14 @@ body.costos-page {
     overflow-x: auto;
 }
 
+/* Crear materia prima: ocultar botón Editar, botón Cerrar (X) y mostrar inputs directamente */
+.costos-edit-value-edit-btn-hidden-in-create {
+    display: none !important;
+}
+.costos-form-create .costos-edit-value-close-btn {
+    display: none !important;
+}
+
 /* Leyenda cuando "Convertir A" no es de la misma categoría que la unidad origen */
 .costos-edit-equivalencia-leyenda {
     margin: 0.5rem 0 0 0;
