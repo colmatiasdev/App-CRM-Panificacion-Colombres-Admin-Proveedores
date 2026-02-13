@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { background: #fafafa; padding: 15px; font-family: system-ui; }
+        h2 { font-size: 0.9rem; color: #666; margin-top: 30px; }
+        .item { background: #fff; padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .name-box { flex: 1; }
+        .name-box b { font-size: 1.1rem; color: #222; }
+        .name-box span { font-size: 0.75rem; color: #999; display: block; }
+        .price-box { text-align: right; min-width: 110px; }
+        .p-now { font-size: 1.25rem; font-weight: 800; }
+        .p-trend { font-size: 0.75rem; font-weight: 700; }
+        .p-reg { font-size: 0.6rem; color: #ea580c; display: block; font-weight: bold; }
+        .exp-btn { font-size: 1.2rem; cursor: pointer; color: #ddd; margin-left: 10px; }
+        .drawer { display: none; background: #fdfdfd; padding: 15px; font-size: 0.75rem; border: 1px solid #eee; border-top: 0; }
+        .drawer.show { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    </style>
+</head>
+<body>
+    <h2>PASTELERÍA ARTESANAL</h2>
+    <div class="item">
+        <div class="name-box">
+            <b>Bizcochos Grasa</b>
+            <span>Paquete x 250g fraccionado</span>
+        </div>
+        <div class="price-box">
+            <div class="p-now">$850</div>
+            <div class="p-trend" style="color:green">Ant: $900 ▼</div>
+            <span class="p-reg">REG. 4 DÍAS</span>
+        </div>
+        <div class="exp-btn" onclick="this.parentElement.nextElementSibling.classList.toggle('show')">⋮</div>
+    </div>
+    <div class="drawer">
+        <div>EQ: <b>Kg</b><br>COSTO UNID: <b>$2.400</b></div>
+        <div>EQ UNID: <b>250g</b><br>FECHA ACT: <b>Ayer</b></div>
+    </div>
+</body>
+</html>

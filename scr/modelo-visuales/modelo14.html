@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { background: #f8fafc; font-family: sans-serif; padding: 15px; }
+        .cat-box { background: #ea580c; color: white; display: inline-block; padding: 5px 15px; border-radius: 10px 10px 0 0; font-weight: bold; font-size: 0.8rem; }
+        .list-container { background: white; border-radius: 0 15px 15px 15px; padding: 10px; margin-bottom: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        .item { display: flex; justify-content: space-between; padding: 15px; border-radius: 12px; transition: 0.2s; }
+        .item:nth-child(even) { background: #fff7ed; }
+        .name { font-weight: 800; color: #334155; font-size: 1rem; }
+        .price { font-size: 1.1rem; font-weight: 800; color: #ea580c; }
+        .days { font-size: 0.65rem; color: #94a3b8; font-weight: bold; }
+        .right { text-align: right; }
+    </style>
+</head>
+<body>
+    <div class="cat-box">PANES ESPECIALES</div>
+    <div class="list-container">
+        <div class="item">
+            <div><div class="name">Pan de Queso</div><div class="days">Elaboración propia</div></div>
+            <div class="right"><div class="price">$1.500</div><div class="days">3 DÍAS REG.</div></div>
+        </div>
+        <div class="item">
+            <div><div class="name">Pan Integral</div><div class="days">Con semillas</div></div>
+            <div class="right"><div class="price">$1.300</div><div class="days">1 DÍA REG.</div></div>
+        </div>
+    </div>
+</body>
+</html>

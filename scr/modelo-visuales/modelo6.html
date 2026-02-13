@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --orange: #ea580c; }
+        body { font-family: 'Inter', sans-serif; background: #fff; padding: 15px; color: #1a1a1a; }
+        .category { font-size: 0.75rem; font-weight: 800; color: #999; text-transform: uppercase; letter-spacing: 1.5px; margin: 30px 0 15px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .item-row { padding: 12px 0; border-bottom: 1px solid #f9f9f9; }
+        .main-flex { display: flex; justify-content: space-between; align-items: flex-start; }
+        .name { font-weight: 700; font-size: 1.05rem; display: block; }
+        .presentation { font-size: 0.8rem; color: #666; margin-top: 2px; }
+        .price-group { text-align: right; }
+        .old-price { font-size: 0.7rem; color: #bbb; text-decoration: line-through; display: block; margin-bottom: -2px; }
+        .price-now { font-size: 1.15rem; font-weight: 800; color: #000; }
+        .trend-up { color: #dc2626; font-size: 0.8rem; }
+        .trend-down { color: #16a34a; font-size: 0.8rem; }
+        .days { font-size: 0.65rem; color: var(--orange); font-weight: 600; display: block; }
+        .details-btn { font-size: 0.7rem; color: var(--orange); cursor: pointer; margin-top: 8px; display: inline-block; border: 1px solid #fed7aa; padding: 2px 8px; border-radius: 4px; }
+        .info-box { display: none; grid-template-columns: 1fr 1fr; gap: 10px; background: #fff7ed; padding: 12px; border-radius: 8px; margin-top: 10px; font-size: 0.75rem; border: 1px solid #ffedd5; }
+        .info-box.show { display: grid; }
+    </style>
+</head>
+<body>
+    <div class="category">Materia Prima</div>
+    <div class="item-row">
+        <div class="main-flex">
+            <div>
+                <span class="name">Harina 000</span>
+                <span class="presentation">Bolsa de papel x 25kg</span>
+            </div>
+            <div class="price-group">
+                <span class="old-price">$17.500</span>
+                <span class="price-now">$18.900 <i class="fa-solid fa-arrow-trend-up trend-up"></i></span>
+                <span class="days">Reg. 2 días</span>
+            </div>
+        </div>
+        <div class="details-btn" onclick="this.nextElementSibling.classList.toggle('show')"><i class="fa-solid fa-plus"></i> Ficha Técnica</div>
+        <div class="info-box">
+            <div>Eq. Unidad: <b>Kg</b></div>
+            <div>Costo x Unid: <b>$756</b></div>
+            <div>Eq. x Unid: <b>1000g</b></div>
+            <div>Últ. Act: <b>12/02/26</b></div>
+        </div>
+    </div>
+    </body>
+</html>

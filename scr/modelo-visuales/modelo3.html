@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { background: #fff; padding: 20px; font-family: monospace; }
+        .cat-group { border-top: 2px solid #000; padding-top: 10px; margin-bottom: 40px; }
+        .cat-name { font-weight: 900; background: #000; color: #fff; padding: 2px 8px; display: inline-block; margin-bottom: 15px; }
+        .item { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 12px 0; }
+        .item-left { flex-grow: 1; }
+        .item-right { text-align: right; min-width: 100px; }
+        .name { font-weight: bold; font-size: 1rem; }
+        .price { font-size: 1.1rem; font-weight: 900; }
+        .diff { font-size: 0.7rem; color: red; }
+        .plus-btn { cursor: pointer; border: 1px solid #ccc; padding: 0 4px; display: inline-block; margin-top: 5px; }
+        .extra { display: none; font-size: 0.7rem; background: #f3f4f6; padding: 10px; margin-top: 5px; }
+        .extra.open { display: block; }
+    </style>
+</head>
+<body>
+    <div class="cat-group">
+        <div class="cat-name">PACKING</div>
+        <div class="item">
+            <div class="item-left">
+                <div class="name">Bolsas Camiseta <span class="diff">▲</span></div>
+                <div class="plus-btn" onclick="this.parentElement.nextElementSibling.nextElementSibling.classList.toggle('open')">[+] INFO</div>
+            </div>
+            <div class="item-right">
+                <div class="price">$5.200</div>
+                <div style="font-size:0.6rem">Reg: 8 días</div>
+            </div>
+        </div>
+        <div class="extra">
+            TIPO: Paquete | COSTO: $52 | EQ: 100u | ACT: 05/02/26
+        </div>
+    </div>
+</body>
+</html>

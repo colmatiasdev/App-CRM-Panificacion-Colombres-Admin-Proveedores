@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { background: #fff; font-family: 'Inter', sans-serif; padding: 15px; }
+        .cat-head { background: #f8fafc; padding: 10px; font-weight: 800; font-size: 0.8rem; color: #475569; margin: 20px 0 10px; border-radius: 6px; }
+        .card { padding: 15px 5px; border-bottom: 1px solid #f1f5f9; }
+        .main-info { display: flex; justify-content: space-between; align-items: flex-start; }
+        .product-name { font-weight: 800; font-size: 1.05rem; }
+        .product-desc { font-size: 0.75rem; color: #94a3b8; display: block; margin-top: 2px; }
+        .price-info { text-align: right; }
+        .price-current { font-size: 1.2rem; font-weight: 900; color: #1e293b; display: block; }
+        .price-diff { font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+        .diff-up { background: #fee2e2; color: #ef4444; }
+        .diff-down { background: #dcfce7; color: #16a34a; }
+        .reg-days { font-size: 0.65rem; color: #64748b; font-weight: 500; display: block; margin-top: 3px; }
+        .btn-plus { margin-top: 10px; font-size: 0.7rem; font-weight: bold; color: #ea580c; cursor: pointer; text-decoration: underline; }
+        .details-panel { display: none; margin-top: 12px; background: #f8fafc; border-radius: 10px; padding: 15px; border: 1px solid #e2e8f0; }
+        .details-panel.active { display: block; }
+        .grid-info { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 0.7rem; }
+    </style>
+</head>
+<body>
+    <div class="cat-head">INSUMOS VARIOS</div>
+    <div class="card">
+        <div class="main-info">
+            <div>
+                <span class="product-name">Levadura Fresca</span>
+                <span class="product-desc">Caja x 10kg (Bloques 500g)</span>
+            </div>
+            <div class="price-info">
+                <span class="price-current">$12.400</span>
+                <span class="price-diff diff-up">+$800 ▲</span>
+                <span class="reg-days">Actualizado hace 8 días</span>
+            </div>
+        </div>
+        <div class="btn-plus" onclick="this.nextElementSibling.classList.toggle('active')">MOSTRAR COSTOS POR UNIDAD</div>
+        <div class="details-panel">
+            <div class="grid-info">
+                <div>Tipo Unidad: <b>Kg</b><br>Costo x Unidad: <b>$1.240</b></div>
+                <div>Equivalencia: <b>500g</b><br>Última Fecha: <b>04/02/26</b></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

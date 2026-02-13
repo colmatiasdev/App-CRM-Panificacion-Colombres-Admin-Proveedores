@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { background: #fff; font-family: 'Inter', sans-serif; padding: 15px; }
+        .cat-group { margin-bottom: 40px; }
+        .cat-header { font-weight: 900; border-left: 5px solid #000; padding-left: 10px; margin-bottom: 20px; }
+        .card { border: 1px solid #eee; border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; position: relative; }
+        .left h4 { margin: 0; font-size: 1.1rem; }
+        .left p { margin: 4px 0; font-size: 0.75rem; color: #888; }
+        .right { text-align: right; }
+        .p-current { font-size: 1.4rem; font-weight: 900; color: #ea580c; display: block; }
+        .p-compare { font-size: 0.7rem; font-weight: bold; }
+        .up { color: red; } .down { color: green; }
+        .plus { position: absolute; bottom: 8px; left: 16px; font-size: 0.65rem; text-decoration: underline; cursor: pointer; color: #bbb; }
+        .info { display: none; font-size: 0.7rem; background: #000; color: #fff; padding: 10px; border-radius: 8px; margin-top: 5px; width: 100%; box-sizing: border-box; }
+        .info.active { display: block; }
+    </style>
+</head>
+<body>
+    <div class="cat-group">
+        <div class="cat-header">PACKING</div>
+        <div style="display:flex; flex-direction:column">
+            <div class="card">
+                <div class="left">
+                    <h4>Bolsas de Arranque</h4>
+                    <p>Rollo x 500 unidades</p>
+                </div>
+                <div class="right">
+                    <span class="p-current">$3.500</span>
+                    <span class="p-compare up">Ant: $3.200 ▲</span>
+                    <div style="font-size:0.6rem; color:#ccc">Reg: 12 días</div>
+                </div>
+                <span class="plus" onclick="this.parentElement.nextElementSibling.classList.toggle('active')">VER DETALLES COSTO</span>
+            </div>
+            <div class="info">
+                UNIDAD: Rollo | COSTO X U: $7.00 | EQ: 500u | ACT: 01/02/26
+            </div>
+        </div>
+    </div>
+</body>
+</html>

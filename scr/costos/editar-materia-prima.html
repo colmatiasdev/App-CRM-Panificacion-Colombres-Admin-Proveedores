@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Editar materia prima - Panificación Colombres</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="costos.css">
+</head>
+<body class="costos-page">
+    <a href="materia-prima.html" class="costos-back"><span class="costos-back-arrow">←</span> Volver a Materia prima</a>
+    <main class="costos-main">
+        <h1 class="costos-title">Editar registro</h1>
+        <p class="costos-intro">Datos del registro. Modifique el precio y guarde cuando termine.</p>
+        <div id="edit-form-container" class="costos-datos">
+            <p id="edit-no-data" class="costos-placeholder" style="display:none;">No hay datos del registro. Volvé a Materia prima y abrí «Editar» en una tarjeta.</p>
+            <form id="costos-edit-form" class="costos-edit-form" style="display:none;">
+                <div id="edit-fields"></div>
+                <div class="costos-edit-actions">
+                    <button type="submit" class="costos-edit-btn-save"><i class="fa-solid fa-check" aria-hidden="true"></i> Guardar cambios</button>
+                </div>
+            </form>
+        </div>
+    </main>
+    <script>
+        (function () {
+            function normHeader(s) {
+                return String(s != null ? s : "").trim().toLowerCase().replace(/\s+/g, " ").replace(/-/g, " ");
+            }
+            function isPrecioEditable(nameNorm) {
+                var n = (nameNorm || "").trim();
+                return n === "precio" || n === "precio actual";
+            }
+            function isPrecioAnteriorColumn(nameNorm) {
+                var n = (nameNorm || "").trim();
+                return n === "precio anterior";
+            }
+            function isObservacionesColumn(nameNorm) {
+                var n = (nameNorm || "").trim();
+                return n === "observaciones";
+            }
+            function isFechaActualizadaColumn(nameNorm) {
+                var n = (nameNorm || "").trim();
+                return n === "fecha actualizada al" || n === "fecha actualizada";
+            }
+            function getTodayDate() {
+                var d = new Date();
+                var day = d.getDate();
+                var month = d.getMonth() + 1;
+                var year = d.getFullYear();
+                return (day < 10 ? "0" : "") + day + "/" + (month < 10 ? "0" : "") + month + "/" + year;
+            }
+            function formatMonedaArg(val) {
+                if (val == null || String(val).trim() === "") return "—";
+                var s = String(val).trim().replace(",", ".");
+                var n = parseFloat(s);
+                if (isNaN(n)) return String(val);
+                var parts = n.toFixed(2).split(".");
+                var intPart = parts[0];
+                var decPart = parts[1];
+                var withDots = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                return "$ " + withDots + "," + decPart;
+            }
+            function isPrecioDisplayField(nameNorm) {
+                var n = (nameNorm || "").trim();
+                return n === "precio anterior" || n === "precio costo x unidad" || n === "precio-costo-x-unidad"
+                    || n === "precio equivalencia x unidad" || n === "precio-equivalencia-x-unidad"
+                    || n === "precio" || n === "precio actual";
+            }
+            function isCalculatedField(nameNorm) {
+                var n = (nameNorm || "").trim();
+                return n === "cantidad unidad medida" || n === "cantidad-unidad-medida"
+                    || n === "precio costo x unidad" || n === "precio-costo-x-unidad"
+                    || n === "precio equivalencia x unidad" || n === "precio-equivalencia-x-unidad"
+                    || n === "precio anterior"
+                    || n === "fecha actualizada al" || n === "fecha actualizada";
+            }
+
+            var raw = sessionStorage.getItem("costosEditRecord");
+            var params = new URLSearchParams(window.location.search);
+            var idFromUrl = params.get("id") || "";
+
+            var noDataEl = document.getElementById("edit-no-data");
+            var formEl = document.getElementById("costos-edit-form");
+            var fieldsContainer = document.getElementById("edit-fields");
+
+            if (!raw) {
+                noDataEl.style.display = "block";
+                formEl.style.display = "none";
+            } else {
+                try {
+                    var data = JSON.parse(raw);
+                    var headers = data.headers || [];
+                    var row = data.row || [];
+                    var record = {};
+                    for (var i = 0; i < headers.length; i++) {
+                        var key = String(headers[i] != null ? headers[i] : "").trim();
+                        var val = row[i];
+                        record[key] = val != null ? String(val).trim() : "";
+                    }
+
+                    noDataEl.style.display = "none";
+                    formEl.style.display = "block";
+
+                    fieldsContainer.innerHTML = "";
+                    var fechaActualizadaIdx = -1;
+                    var precioActualKey = "";
+                    for (var j = 0; j < headers.length; j++) {
+                        if (isPrecioEditable(normHeader(headers[j]))) {
+                            precioActualKey = String(headers[j] != null ? headers[j] : "").trim();
+                            break;
+                        }
+                    }
+                    headers.forEach(function (headerName, i) {
+                        var key = String(headerName != null ? headerName : "").trim();
+                        var nameNorm = normHeader(headerName);
+                        if (nameNorm === "habilitado") return;
+                        if (nameNorm === "idmateria prima" || nameNorm === "idmateria-prima") return;
+
+                        var value = record[key] || "";
+                        if (isFechaActualizadaColumn(nameNorm)) {
+                            value = getTodayDate();
+                            fechaActualizadaIdx = i;
+                        }
+                        if (isPrecioAnteriorColumn(nameNorm) && precioActualKey) {
+                            value = record[precioActualKey] || value;
+                        }
+                        var editable = isPrecioEditable(nameNorm);
+                        var isObservaciones = isObservacionesColumn(nameNorm);
+
+                        var wrap = document.createElement("div");
+                        wrap.className = "costos-edit-field" + (editable ? " is-editable" : "") + (isObservaciones ? " is-textarea" : "");
+                        if (nameNorm === "cantidad unidad medida" || nameNorm === "cantidad-unidad-medida") wrap.setAttribute("data-field", "cantidad-unidad-medida");
+                        if (nameNorm === "precio anterior") wrap.setAttribute("data-field", "precio-anterior");
+                        if (nameNorm === "precio costo x unidad" || nameNorm === "precio-costo-x-unidad") wrap.setAttribute("data-field", "precio-costo-x-unidad");
+                        if (nameNorm === "equivalencia unidad medida" || nameNorm === "equivalencia-unidad-medida") wrap.setAttribute("data-field", "equivalencia-unidad-medida");
+                        if (nameNorm === "precio equivalencia x unidad" || nameNorm === "precio-equivalencia-x-unidad") wrap.setAttribute("data-field", "precio-equivalencia-x-unidad");
+
+                        var labelWrap = document.createElement("span");
+                        labelWrap.className = "costos-edit-label" + (isCalculatedField(nameNorm) ? " costos-edit-label-calc" : "");
+                        var labelText = (nameNorm === "presentacion tipo" || nameNorm === "presentacion-tipo")
+                            ? "Tipo de presentación (envoltorio del producto)"
+                            : (nameNorm === "presentacion cantidad medida" || nameNorm === "presentacion-cantidad-medida")
+                            ? "Cantidad que viene en el paquete del producto"
+                            : (nameNorm === "presentacion unidad" || nameNorm === "presentacion-unidad")
+                            ? "Unidad de medida de la cantidad del paquete (Kg, L, unidad, etc.)"
+                            : (nameNorm === "equivalencia unidad medida" || nameNorm === "equivalencia-unidad-medida")
+                            ? "Equivalencia (resultado de la calculadora de presentación según tipo de unidad de medida)"
+                            : (nameNorm === "tipo unidad medida" || nameNorm === "tipo-unidad-medida")
+                            ? "Tipo de unidad de medida (Gramos, Kg, L, etc.)"
+                            : (nameNorm === "cantidad unidad medida" || nameNorm === "cantidad-unidad-medida")
+                            ? "Cantidad unidad de medida (resultado de equivalencia: cantidad y unidad del paquete convertidas al tipo de unidad de medida; valor entero)"
+                            : (nameNorm === "precio costo x unidad" || nameNorm === "precio-costo-x-unidad")
+                            ? "Precio costo por unidad (Precio anterior ÷ Cantidad unidad de medida)"
+                            : (key || "—");
+                        var parenIdx = labelText.indexOf(" (");
+                        if (parenIdx >= 0) {
+                            var mainText = labelText.substring(0, parenIdx);
+                            var descText = labelText.substring(parenIdx + 1);
+                            var mainSpan = document.createElement("span");
+                            mainSpan.className = "costos-edit-label-main";
+                            mainSpan.textContent = mainText;
+                            labelWrap.appendChild(mainSpan);
+                            if (isCalculatedField(nameNorm)) {
+                                var calcIcon = document.createElement("span");
+                                calcIcon.className = "costos-edit-calc-icon";
+                                calcIcon.setAttribute("title", "Campo calculado o con operación matemática");
+                                calcIcon.setAttribute("aria-label", "Campo calculado");
+                                calcIcon.innerHTML = "<i class=\"fa-solid fa-calculator\" aria-hidden=\"true\"></i>";
+                                labelWrap.appendChild(calcIcon);
+                            }
+                            var descSpan = document.createElement("span");
+                            descSpan.className = "costos-edit-label-desc";
+                            descSpan.textContent = descText;
+                            labelWrap.appendChild(descSpan);
+                        } else {
+                            labelWrap.textContent = labelText;
+                            if (isCalculatedField(nameNorm)) {
+                                var calcIconEnd = document.createElement("span");
+                                calcIconEnd.className = "costos-edit-calc-icon";
+                                calcIconEnd.setAttribute("title", "Campo calculado o con operación matemática");
+                                calcIconEnd.setAttribute("aria-label", "Campo calculado");
+                                calcIconEnd.innerHTML = "<i class=\"fa-solid fa-calculator\" aria-hidden=\"true\"></i>";
+                                labelWrap.appendChild(calcIconEnd);
+                            }
+                        }
+                        var label = labelWrap;
+
+                        var displayValue = value || "—";
+                        if (nameNorm === "cantidad unidad medida" || nameNorm === "cantidad-unidad-medida") {
+                            var num = parseFloat(String(value).replace(",", "."));
+                            if (!isNaN(num)) displayValue = String(Math.round(num));
+                        } else if (isPrecioDisplayField(nameNorm)) {
+                            displayValue = formatMonedaArg(value);
+                        }
+                        var valueSpan = document.createElement("span");
+                        valueSpan.className = "costos-edit-value";
+                        valueSpan.textContent = displayValue;
+
+                        wrap.appendChild(label);
+                        wrap.appendChild(valueSpan);
+
+                        if (editable) {
+                            var input = document.createElement("input");
+                            input.type = "text";
+                            input.className = "costos-edit-input";
+                            input.name = "field_" + i;
+                            input.setAttribute("data-header-index", String(i));
+                            if (isPrecioEditable(nameNorm)) {
+                                input.value = "";
+                                input.placeholder = "Ingrese el precio actual";
+                            } else {
+                                input.value = value;
+                                input.placeholder = "Ej: 18800,00";
+                            }
+                            wrap.appendChild(input);
+                        } else if (isObservaciones) {
+                            var textarea = document.createElement("textarea");
+                            textarea.className = "costos-edit-input costos-edit-textarea";
+                            textarea.name = "field_" + i;
+                            textarea.setAttribute("data-header-index", String(i));
+                            textarea.value = value;
+                            textarea.placeholder = "Cargar observaciones…";
+                            textarea.rows = 4;
+                            wrap.appendChild(textarea);
+                        }
+
+                        fieldsContainer.appendChild(wrap);
+                    });
+
+                    (function () {
+                        var precioActualInput = formEl.querySelector(".costos-edit-input[placeholder=\"Ingrese el precio actual\"]");
+                        var cantidadField = formEl.querySelector(".costos-edit-field[data-field=\"cantidad-unidad-medida\"]");
+                        var precioAnteriorField = formEl.querySelector(".costos-edit-field[data-field=\"precio-anterior\"]");
+                        var precioCostoField = formEl.querySelector(".costos-edit-field[data-field=\"precio-costo-x-unidad\"]");
+                        var equivalenciaField = formEl.querySelector(".costos-edit-field[data-field=\"equivalencia-unidad-medida\"]");
+                        var precioEquivalenciaField = formEl.querySelector(".costos-edit-field[data-field=\"precio-equivalencia-x-unidad\"]");
+                        if (!precioActualInput || !cantidadField || !precioCostoField) return;
+                        var cantidadSpan = cantidadField.querySelector(".costos-edit-value");
+                        var precioAnteriorSpan = precioAnteriorField ? precioAnteriorField.querySelector(".costos-edit-value") : null;
+                        var precioCostoSpan = precioCostoField.querySelector(".costos-edit-value");
+                        var equivalenciaSpan = equivalenciaField ? equivalenciaField.querySelector(".costos-edit-value") : null;
+                        var precioEquivalenciaSpan = precioEquivalenciaField ? precioEquivalenciaField.querySelector(".costos-edit-value") : null;
+                        if (!cantidadSpan || !precioCostoSpan) return;
+                        function parsePrecioFromDisplay(str) {
+                            if (!str || !String(str).trim()) return NaN;
+                            var s = String(str).trim().replace(/\$\s?/g, "").replace(/\./g, "").replace(",", ".");
+                            return parseFloat(s);
+                        }
+                        function updatePrecioCosto() {
+                            var precioStr = (precioActualInput.value || "").trim();
+                            var precio = parseFloat(precioStr.replace(",", "."));
+                            if (isNaN(precio) && precioAnteriorSpan) {
+                                precio = parsePrecioFromDisplay(precioAnteriorSpan.textContent);
+                            }
+                            var cantidadStr = (cantidadSpan.textContent || "").replace(/\s/g, "").trim();
+                            var cantidad = parseFloat(cantidadStr.replace(/\./g, "").replace(",", "."));
+                            if (isNaN(cantidad)) cantidad = parseFloat(cantidadStr.replace(",", "."));
+                            if (!isNaN(precio) && !isNaN(cantidad) && cantidad !== 0) {
+                                var result = precio / cantidad;
+                                precioCostoSpan.textContent = formatMonedaArg(result);
+                                if (equivalenciaSpan && precioEquivalenciaSpan) {
+                                    var equivStr = (equivalenciaSpan.textContent || "").replace(/\s/g, "").trim();
+                                    var equiv = parseFloat(equivStr.replace(",", "."));
+                                    if (!isNaN(equiv) && equiv !== 0) {
+                                        precioEquivalenciaSpan.textContent = formatMonedaArg(result / equiv);
+                                    } else {
+                                        precioEquivalenciaSpan.textContent = "—";
+                                    }
+                                }
+                            } else {
+                                precioCostoSpan.textContent = "—";
+                                if (precioEquivalenciaSpan) precioEquivalenciaSpan.textContent = "—";
+                            }
+                        }
+                        precioActualInput.addEventListener("input", updatePrecioCosto);
+                        precioActualInput.addEventListener("change", updatePrecioCosto);
+                        updatePrecioCosto();
+                    })();
+
+                    formEl.addEventListener("submit", function (e) {
+                        e.preventDefault();
+                        var inputs = formEl.querySelectorAll(".costos-edit-input");
+                        var newRow = row.slice();
+                        inputs.forEach(function (input) {
+                            var idx = parseInt(input.getAttribute("data-header-index"), 10);
+                            if (!isNaN(idx) && idx >= 0 && idx < newRow.length) {
+                                newRow[idx] = input.value;
+                            }
+                        });
+                        if (fechaActualizadaIdx >= 0 && fechaActualizadaIdx < newRow.length) {
+                            newRow[fechaActualizadaIdx] = getTodayDate();
+                        }
+                        try {
+                            sessionStorage.setItem("costosEditRecord", JSON.stringify({
+                                id: data.id,
+                                headers: data.headers,
+                                row: newRow
+                            }));
+                        } catch (err) {}
+                        alert("Cambios guardados en esta sesión. Para persistir en la planilla, conecte esta página con su backend o API.");
+                    });
+                } catch (err) {
+                    noDataEl.style.display = "block";
+                    formEl.style.display = "none";
+                }
+            }
+        })();
+    </script>
+</body>
+</html>

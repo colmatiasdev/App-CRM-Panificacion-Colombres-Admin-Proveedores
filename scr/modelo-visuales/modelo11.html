@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión Panificación Colombres</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { 
+            --accent: #ea580c; 
+            --bg: #fffcf9; 
+            --text-dark: #431407;
+            --green: #16a34a;
+            --red: #dc2626;
+        }
+        body { background: var(--bg); font-family: 'Inter', system-ui, sans-serif; padding: 15px; margin: 0; color: #333; }
+        
+        /* Títulos de Categoría */
+        .cat-title { 
+            font-size: 0.85rem; 
+            font-weight: 800; 
+            color: #9a3412; 
+            text-transform: uppercase; 
+            margin: 30px 10px 12px; 
+            letter-spacing: 1.5px;
+            border-left: 4px solid var(--accent);
+            padding-left: 10px;
+        }
+
+        /* Tarjeta de Producto */
+        .card { 
+            background: white; 
+            border-radius: 20px; 
+            padding: 16px; 
+            margin-bottom: 12px; 
+            border: 1px solid #ffedd5; 
+            box-shadow: 0 4px 12px rgba(234, 88, 12, 0.05); 
+        }
+
+        .main-content {
+            display: flex; 
+            justify-content: space-between; 
+            align-items: flex-start;
+        }
+
+        /* Lado Izquierdo */
+        .product-info { flex: 1; }
+        .product-name { font-size: 1.1rem; font-weight: 800; color: var(--text-dark); margin: 0; }
+        .presentation { font-size: 0.8rem; color: #9a3412; opacity: 0.7; margin: 4px 0; font-weight: 500; }
+
+        /* Lado Derecho */
+        .price-side { text-align: right; min-width: 120px; }
+        .price-row { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+        .price { font-size: 1.35rem; font-weight: 900; color: #000; }
+        
+        .old-price-box { font-size: 0.7rem; color: #94a3b8; text-decoration: line-through; display: block; }
+        .trend-icon { font-size: 0.85rem; font-weight: bold; }
+        .trend-up { color: var(--red); }
+        .trend-down { color: var(--green); }
+
+        .reg-days { font-size: 0.65rem; color: #64748b; font-weight: 600; text-transform: uppercase; margin-top: 4px; display: block; }
+
+        /* Botón de Expansión */
+        .expand-btn {
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            color: var(--accent);
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 8px;
+            margin-top: 12px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: 0.2s;
+        }
+        .expand-btn:active { transform: scale(0.95); }
+
+        /* Ficha Técnica Extra */
+        .extra-info { 
+            display: none; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 12px; 
+            background: #fffaf5; 
+            padding: 15px; 
+            border-radius: 12px; 
+            margin-top: 12px; 
+            font-size: 0.75rem; 
+            border: 1px dashed #fed7aa; 
+        }
+        .extra-info.show { display: grid; animation: fadeIn 0.3s ease; }
+        .info-item b { display: block; color: #431407; font-size: 0.8rem; margin-top: 2px; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="cat-title">Materia Prima</div>
+    
+    <div class="card">
+        <div class="main-content">
+            <div class="product-info">
+                <h2 class="product-name">Harina 000</h2>
+                <div class="presentation">Bolsa Industrial x 25kg</div>
+            </div>
+            <div class="price-side">
+                <span class="old-price-box">Ant: $17.500</span>
+                <div class="price-row">
+                    <span class="price">$18.900</span>
+                    <i class="fa-solid fa-arrow-trend-up trend-up"></i>
+                </div>
+                <span class="reg-days">Actualizado hace 2 días</span>
+            </div>
+        </div>
+        <div class="expand-btn" onclick="toggleDetails(this)"><i class="fa-solid fa-plus"></i> VER COSTOS</div>
+        <div class="extra-info">
+            <div class="info-item">Eq. Tipo Unidad: <b>Kilogramo</b></div>
+            <div class="info-item">Precio COSTO x Unid: <b>$756.00</b></div>
+            <div class="info-item">Precio Eq. x Unid: <b>$18.900 (Bolsa)</b></div>
+            <div class="info-item">Última Fecha: <b>10/02/2026</b></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="main-content">
+            <div class="product-info">
+                <h2 class="product-name">Levadura Fresca</h2>
+                <div class="presentation">Bloque x 500g (Caja 10kg)</div>
+            </div>
+            <div class="price-side">
+                <span class="old-price-box">Ant: $9.800</span>
+                <div class="price-row">
+                    <span class="price">$9.200</span>
+                    <i class="fa-solid fa-arrow-trend-down trend-down"></i>
+                </div>
+                <span class="reg-days">Actualizado hace 5 días</span>
+            </div>
+        </div>
+        <div class="expand-btn" onclick="toggleDetails(this)"><i class="fa-solid fa-plus"></i> VER COSTOS</div>
+        <div class="extra-info">
+            <div class="info-item">Eq. Tipo Unidad: <b>Caja</b></div>
+            <div class="info-item">Precio COSTO x Unid: <b>$460.00 (x500g)</b></div>
+            <div class="info-item">Precio Eq. x Unid: <b>$9.200 (Total)</b></div>
+            <div class="info-item">Última Fecha: <b>07/02/2026</b></div>
+        </div>
+    </div>
+
+    <div class="cat-title">Panadería Diaria</div>
+    
+    <div class="card">
+        <div class="main-content">
+            <div class="product-info">
+                <h2 class="product-name">Pan de Campo</h2>
+                <div class="presentation">Unidad Horneada x 500g</div>
+            </div>
+            <div class="price-side">
+                <span class="old-price-box">Ant: $1.100</span>
+                <div class="price-row">
+                    <span class="price">$1.200</span>
+                    <i class="fa-solid fa-arrow-trend-up trend-up"></i>
+                </div>
+                <span class="reg-days">Actualizado hoy</span>
+            </div>
+        </div>
+        <div class="expand-btn" onclick="toggleDetails(this)"><i class="fa-solid fa-plus"></i> VER COSTOS</div>
+        <div class="extra-info">
+            <div class="info-item">Eq. Tipo Unidad: <b>Unidad</b></div>
+            <div class="info-item">Precio COSTO x Unid: <b>$540.00</b></div>
+            <div class="info-item">Precio Eq. x Unid: <b>$1.200</b></div>
+            <div class="info-item">Última Fecha: <b>12/02/2026</b></div>
+        </div>
+    </div>
+
+    <div class="cat-title">Packing & Envases</div>
+    
+    <div class="card">
+        <div class="main-content">
+            <div class="product-info">
+                <h2 class="product-name">Bolsas Camiseta</h2>
+                <div class="presentation">Paquete x 100 Unidades</div>
+            </div>
+            <div class="price-side">
+                <span class="old-price-box">Ant: $4.500</span>
+                <div class="price-row">
+                    <span class="price">$4.500</span>
+                    <i class="fa-solid fa-equals" style="color:#94a3b8; font-size: 0.7rem;"></i>
+                </div>
+                <span class="reg-days">Actualizado hace 12 días</span>
+            </div>
+        </div>
+        <div class="expand-btn" onclick="toggleDetails(this)"><i class="fa-solid fa-plus"></i> VER COSTOS</div>
+        <div class="extra-info">
+            <div class="info-item">Eq. Tipo Unidad: <b>Paquete</b></div>
+            <div class="info-item">Precio COSTO x Unid: <b>$45.00</b></div>
+            <div class="info-item">Precio Eq. x Unid: <b>$4.500</b></div>
+            <div class="info-item">Última Fecha: <b>01/02/2026</b></div>
+        </div>
+    </div>
+
+    <script>
+        function toggleDetails(btn) {
+            const info = btn.nextElementSibling;
+            const isVisible = info.classList.contains('show');
+            
+            // Cerrar otros si se desea (opcional)
+            // document.querySelectorAll('.extra-info').forEach(el => el.classList.remove('show'));
+            
+            if (isVisible) {
+                info.classList.remove('show');
+                btn.innerHTML = '<i class="fa-solid fa-plus"></i> VER COSTOS';
+            } else {
+                info.classList.add('show');
+                btn.innerHTML = '<i class="fa-solid fa-minus"></i> CERRAR';
+            }
+        }
+    </script>
+</body>
+</html>
