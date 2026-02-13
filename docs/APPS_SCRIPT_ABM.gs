@@ -1,12 +1,23 @@
 /**
- * APPS SCRIPT – ABM completo (list, get, search, create, update, delete, fillIds)
- * Un solo archivo: configuración + handlers. Desplegá como aplicación web.
- * Ejecutar la app como: Yo. Quién puede acceder: Cualquier usuario (o según necesites).
+ * GOOGLE APPS SCRIPT – ABM (Alta, Baja, Modificación) para varias hojas
+ * Un solo archivo: copiá y pegá todo en el editor de Apps Script.
+ *
+ * Acciones: list | get | search | create | update | delete | fillIds
+ * Parámetro sheet: materiaPrima | packing (o el nombre que agregues en CONFIG)
+ *
+ * Desplegar: Implementar → Nueva implementación → Aplicación web
+ * Ejecutar como: Yo | Quién puede acceder: Cualquier usuario (o según necesites)
  */
 
-// ——— CONFIGURACIÓN ———
+// ═══════════════════════════════════════════════════════════════════════════════
+// CONFIGURACIÓN – Una entrada por hoja del libro. Agregá más según avance el proyecto.
+// ═══════════════════════════════════════════════════════════════════════════════
+
 var CONFIG = {
+  /** ID del libro (vacío = libro donde está el script) */
   spreadsheetId: '',
+
+  /** Hoja Materia Prima – ?sheet=materiaPrima */
   materiaPrima: {
     sheetName: 'PRECIO-Materia-Prima',
     gid: 0,
@@ -37,6 +48,8 @@ var CONFIG = {
     requiredOnCreate: ['Nombre-Producto'],
     dateUpdatedColumn: 'Fecha-Actualizada-Al'
   },
+
+  /** Hoja Packing – ?sheet=packing */
   packing: {
     sheetName: 'PRECIO-Packing',
     gid: 0,
@@ -67,35 +80,30 @@ var CONFIG = {
     requiredOnCreate: ['Nombre-Producto'],
     dateUpdatedColumn: 'Fecha-Actualizada-Al'
   }
+
+  // Para agregar otra hoja, copiá un bloque (p.ej. packing), cambiá la clave y sheetName:
+  // otraHoja: { sheetName: 'PRECIO-Otra', headers: [...], idColumn: 'idotra', idPrefix: 'COSTO-XX-', ... }
 };
 
 var ACTIONS = {
   LIST: 'list',
   GET: 'get',
+  SEARCH: 'search',
   CREATE: 'create',
   UPDATE: 'update',
   DELETE: 'delete',
-  SEARCH: 'search',
   FILL_IDS: 'fillIds'
 };
 
-var SEARCH_PARAMS = {
-  sheet: 'sheet',
-  q: 'q',
-  limit: 'limit',
-  offset: 'offset',
-  sortBy: 'sortBy',
-  sortOrder: 'sortOrder'
-};
+var SEARCH_PARAMS = { sheet: 'sheet', q: 'q', limit: 'limit', offset: 'offset', sortBy: 'sortBy', sortOrder: 'sortOrder' };
 
-// ——— FUNCIONES AUXILIARES ———
+// ═══════════════════════════════════════════════════════════════════════════════
+// AUXILIARES
+// ═══════════════════════════════════════════════════════════════════════════════
+
 function jsonResponse(success, data, errorMessage) {
   return ContentService
-    .createTextOutput(JSON.stringify({
-      success: success,
-      data: data || null,
-      error: errorMessage || null
-    }))
+    .createTextOutput(JSON.stringify({ success: success, data: data || null, error: errorMessage || null }))
     .setMimeType(ContentService.MimeType.JSON);
 }
 
@@ -170,13 +178,23 @@ function searchInRows(rows, headers, filterColumns, q) {
   });
 }
 
-// ——— ENTRADA HTTP ———
+/** Obtiene la config de la hoja por parámetro sheet (materiaPrima, packing, etc.) */
+function getSheetConfig(sheetKey) {
+  var key = (sheetKey || 'materiaPrima').toLowerCase();
+  if (CONFIG[key]) return CONFIG[key];
+  return CONFIG.materiaPrima;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ENTRADA HTTP (doGet / doPost)
+// ═══════════════════════════════════════════════════════════════════════════════
+
 function doGet(e) {
   return handleRequest(e && e.parameter ? e.parameter : {});
 }
 
 function doPost(e) {
-  var params = e && e.parameter ? {} : {};
+  var params = {};
   if (e && e.parameter) {
     for (var p in e.parameter) params[p] = e.parameter[p];
   }
@@ -192,20 +210,26 @@ function doPost(e) {
   return handleRequest(params);
 }
 
-// ——— LÓGICA DE ACCIONES ———
+// ═══════════════════════════════════════════════════════════════════════════════
+// ABM: LISTAR | OBTENER UNO | BUSCAR | CREAR | MODIFICAR | ELIMINAR | RELLENAR IDs
+// ═══════════════════════════════════════════════════════════════════════════════
+
 function handleRequest(params) {
   var action = (params.action || params['action'] || '').toString().toLowerCase();
   var sheetKey = (params.sheet || params['sheet'] || 'materiaPrima').toLowerCase();
-  var configSheet = sheetKey === 'packing' ? CONFIG.packing : CONFIG.materiaPrima;
+  var configSheet = getSheetConfig(sheetKey);
   var headers = configSheet.headers;
   var sheet = getSheet(configSheet);
+
   if (!sheet) {
-    return jsonResponse(false, null, 'Hoja no encontrada');
+    return jsonResponse(false, null, 'Hoja no encontrada: ' + (configSheet.sheetName || sheetKey));
   }
+
   var data = sheet.getDataRange().getValues();
   if (data.length < 2) {
     return jsonResponse(true, { headers: configSheet.headers, rows: [] });
   }
+
   var headerRow = (data[0] || []).map(function (c) { return (c != null ? String(c) : '').trim(); });
   var numCols = headerRow.length;
   var rows = [];
@@ -219,6 +243,7 @@ function handleRequest(params) {
   }
 
   try {
+    // ─── LISTAR ───
     if (action === ACTIONS.LIST) {
       var limit = parseInt(params[SEARCH_PARAMS.limit], 10) || 500;
       var offset = parseInt(params[SEARCH_PARAMS.offset], 10) || 0;
@@ -226,6 +251,7 @@ function handleRequest(params) {
       return jsonResponse(true, { headers: headerRow, rows: list, total: rows.length });
     }
 
+    // ─── BUSCAR / FILTRAR ───
     if (action === ACTIONS.SEARCH) {
       var filters = {};
       headers.forEach(function (h) {
@@ -233,12 +259,8 @@ function handleRequest(params) {
       });
       var q = (params[SEARCH_PARAMS.q] || params.q || '').toString().trim();
       var filtered = rows;
-      if (Object.keys(filters).length > 0) {
-        filtered = filterRows(filtered, headerRow, filters);
-      }
-      if (q) {
-        filtered = searchInRows(filtered, headerRow, configSheet.filterColumns, q);
-      }
+      if (Object.keys(filters).length > 0) filtered = filterRows(filtered, headerRow, filters);
+      if (q) filtered = searchInRows(filtered, headerRow, configSheet.filterColumns, q);
       var sortBy = params[SEARCH_PARAMS.sortBy];
       if (sortBy && headerRow.indexOf(sortBy) !== -1) {
         var colIdx = headerRow.indexOf(sortBy);
@@ -255,6 +277,7 @@ function handleRequest(params) {
       return jsonResponse(true, { headers: headerRow, rows: slice, total: filtered.length });
     }
 
+    // ─── OBTENER UNO (por id) ───
     if (action === ACTIONS.GET) {
       var id = (params.id || params[configSheet.idColumn] || '').toString().trim();
       if (!id) return jsonResponse(false, null, 'Falta id');
@@ -268,6 +291,7 @@ function handleRequest(params) {
       return jsonResponse(false, null, 'No encontrado');
     }
 
+    // ─── CREAR REGISTRO ───
     if (action === ACTIONS.CREATE) {
       var newObj = {};
       headers.forEach(function (h, idx) {
@@ -290,6 +314,7 @@ function handleRequest(params) {
       return jsonResponse(true, newObj);
     }
 
+    // ─── MODIFICAR REGISTRO ───
     if (action === ACTIONS.UPDATE) {
       var idUp = (params.id || params[configSheet.idColumn] || '').toString().trim();
       if (!idUp) return jsonResponse(false, null, 'Falta id');
@@ -318,6 +343,7 @@ function handleRequest(params) {
       return jsonResponse(true, updatedObj);
     }
 
+    // ─── ELIMINAR REGISTRO ───
     if (action === ACTIONS.DELETE) {
       var idDel = (params.id || params[configSheet.idColumn] || '').toString().trim();
       if (!idDel) return jsonResponse(false, null, 'Falta id');
@@ -335,18 +361,18 @@ function handleRequest(params) {
       return jsonResponse(true, { deleted: idDel });
     }
 
+    // ─── RELLENAR IDs VACÍOS ───
     if (action === ACTIONS.FILL_IDS) {
       var idColIdxFill = headerRow.indexOf(configSheet.idColumn);
       if (idColIdxFill === -1) {
-        return jsonResponse(false, null, 'Columna "' + configSheet.idColumn + '" no encontrada en la hoja');
+        return jsonResponse(false, null, 'Columna "' + configSheet.idColumn + '" no encontrada');
       }
       var updated = 0;
       for (var f = 0; f < rows.length; f++) {
         var cellVal = rows[f][idColIdxFill];
         if (cellVal == null || String(cellVal).trim() === '') {
           var newId = generateId(configSheet.idPrefix);
-          var rowNum = f + 2;
-          sheet.getRange(rowNum, idColIdxFill + 1).setValue(newId);
+          sheet.getRange(f + 2, idColIdxFill + 1).setValue(newId);
           updated++;
         }
       }
