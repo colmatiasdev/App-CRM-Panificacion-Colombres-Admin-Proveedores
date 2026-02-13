@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { background: #fff; font-family: 'Inter', sans-serif; padding: 15px; }
+        h1 { font-size: 0.8rem; color: #ea580c; border-bottom: 1px solid #ffedd5; padding-bottom: 8px; margin: 30px 0 15px; }
+        .item-row { padding: 15px 0; border-bottom: 1px solid #fff7ed; display: flex; justify-content: space-between; }
+        .main-info { display: flex; gap: 12px; align-items: center; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; background: #ea580c; }
+        .p-title { font-weight: 700; color: #1a1a1a; display: block; }
+        .p-prev { font-size: 0.7rem; color: #999; }
+        .p-price-area { text-align: right; }
+        .p-current { font-size: 1.25rem; font-weight: 800; color: #1a1a1a; display: block; }
+        .p-days { font-size: 0.65rem; color: #ea580c; font-weight: 600; }
+        .expand-btn { color: #999; font-size: 1.2rem; cursor: pointer; transition: 0.2s; }
+        .info-panel { display: none; background: #fff7ed; border-radius: 12px; padding: 15px; margin-top: 5px; font-size: 0.75rem; border: 1px solid #fed7aa; }
+        .info-panel.visible { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    </style>
+</head>
+<body>
+    <h1>BIZCOCHOS Y GRASAS</h1>
+    <div style="display:flex; flex-direction:column">
+        <div class="item-row">
+            <div class="main-info">
+                <div class="expand-btn" onclick="this.parentElement.parentElement.nextElementSibling.classList.toggle('visible')">+</div>
+                <div>
+                    <span class="p-title">Bizcochos Salados</span>
+                    <span class="p-prev">Prev: $2.400 <i style="color:green">▼</i></span>
+                </div>
+            </div>
+            <div class="p-price-area">
+                <span class="p-current">$2.250</span>
+                <span class="p-days">REG. 4 DÍAS</span>
+            </div>
+        </div>
+        <div class="info-panel">
+            <div>Equivalencia: <b>Bolsa</b></div>
+            <div>Precio Costo: <b>$1.450</b></div>
+            <div>Eq x Unidad: <b>1kg</b></div>
+            <div>Actualizado: <b>Ayer</b></div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { background: #f8fafc; font-family: system-ui; padding: 15px; }
+        .cat-card { background: #fff; border-radius: 20px; padding: 15px; margin-bottom: 25px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .cat-name { font-weight: 900; color: #ea580c; margin-bottom: 15px; font-size: 1.2rem; }
+        .item { border-bottom: 1px solid #f1f5f9; padding: 15px 0; }
+        .top-info { display: flex; justify-content: space-between; }
+        .p-title { font-weight: 800; font-size: 1rem; color: #1e293b; }
+        .p-desc { font-size: 0.75rem; color: #64748b; }
+        .price-tag { text-align: right; background: #fff7ed; padding: 6px 10px; border-radius: 12px; border: 1px solid #ffedd5; }
+        .p-val { font-size: 1.1rem; font-weight: 900; color: #c2410c; }
+        .p-old { font-size: 0.65rem; color: #94a3b8; text-decoration: line-through; }
+        .expand-circle { width: 20px; height: 20px; background: #ea580c; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; cursor: pointer; margin-top: 10px; }
+        .extra-panel { display: none; padding: 10px; font-size: 0.7rem; color: #431407; background: #fffaf0; border-radius: 10px; margin-top: 10px; }
+        .extra-panel.open { display: block; }
+    </style>
+</head>
+<body>
+    <div class="cat-card">
+        <div class="cat-name">Panadería</div>
+        <div class="item">
+            <div class="top-info">
+                <div>
+                    <div class="p-title">Mignon Especial</div>
+                    <div class="p-desc">Bolsa x 10kg (Artesanal)</div>
+                    <div class="expand-circle" onclick="this.parentElement.parentElement.nextElementSibling.classList.toggle('open')">+</div>
+                </div>
+                <div class="price-tag">
+                    <span class="p-old">$5.200</span>
+                    <span class="p-val">$4.800 <small style="color:green; font-size:0.6rem">▼</small></span>
+                    <div style="font-size:0.6rem; font-weight:bold; color:#94a3b8">REG: 5 DÍAS</div>
+                </div>
+            </div>
+            <div class="extra-panel">
+                UNIDAD: <b>Kg</b> | COSTO: <b>$480</b> | EQ: <b>1000g</b> | FECHA: <b>Hoy</b>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

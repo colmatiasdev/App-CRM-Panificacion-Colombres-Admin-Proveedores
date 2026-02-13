@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { background: #f8fafc; font-family: system-ui; padding: 15px; }
+        .category-name { font-weight: 900; font-size: 1.4rem; color: #334155; margin-bottom: 20px; }
+        .card { background: white; border-radius: 15px; margin-bottom: 15px; overflow: hidden; border: 1px solid #e2e8f0; }
+        .card-body { padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .left h3 { margin: 0; font-size: 1.1rem; color: #1e293b; }
+        .left span { font-size: 0.7rem; color: #ef4444; font-weight: bold; }
+        .right { text-align: right; }
+        .price { font-size: 1.3rem; font-weight: 800; display: block; color: #ea580c; }
+        .days { font-size: 0.6rem; color: #94a3b8; text-transform: uppercase; }
+        .info-toggle { background: #f1f5f9; padding: 10px 15px; font-size: 0.7rem; display: none; }
+        .info-toggle.open { display: flex; justify-content: space-between; border-top: 1px solid #e2e8f0; }
+        .btn-exp { cursor: pointer; color: #ea580c; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="category-name">Facturas</div>
+    <div class="card">
+        <div class="card-body">
+            <div class="left">
+                <h3>Vigilante</h3>
+                <span><i class="fa-solid fa-arrow-up"></i> $50</span>
+            </div>
+            <div class="right">
+                <span class="price">$450</span>
+                <span class="days">Reg: 2 días</span>
+                <div class="btn-exp" onclick="this.closest('.card').querySelector('.info-toggle').classList.toggle('open')">Detalles +</div>
+            </div>
+        </div>
+        <div class="info-toggle">
+            <div>Eq: <b>Unidad</b><br>Costo: <b>$210</b></div>
+            <div style="text-align:right">Eq Unid: <b>70g</b><br>Act: <b>10/02</b></div>
+        </div>
+    </div>
+</body>
+</html>

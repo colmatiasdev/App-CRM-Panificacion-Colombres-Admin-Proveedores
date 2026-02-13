@@ -61,13 +61,193 @@ body.costos-page {
     margin: 0 auto;
 }
 
+.costos-title-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+.costos-title-row .costos-calc-btn {
+    margin-left: auto;
+}
 .costos-title {
     font-family: 'DM Serif Display', Georgia, serif;
     font-size: 2.25rem;
     font-weight: 400;
     color: var(--logo-dark);
-    margin: 0 0 12px;
+    margin: 0;
     letter-spacing: -0.02em;
+}
+.costos-calc-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--logo-teal-dark);
+    background: var(--logo-teal-light);
+    border: 1px solid var(--logo-teal);
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.2s, color 0.2s;
+}
+.costos-calc-btn-text-short {
+    display: none;
+}
+.costos-calc-btn:hover {
+    background: var(--logo-teal);
+    color: #fff;
+}
+.costos-calc-btn[aria-expanded="true"] {
+    background: var(--logo-teal);
+    color: #fff;
+}
+.costos-calc-panel {
+    margin-bottom: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    overflow: hidden;
+}
+.costos-calc-inner {
+    padding: 20px;
+}
+.costos-calc-block {
+    margin-bottom: 20px;
+}
+.costos-calc-block:last-of-type {
+    margin-bottom: 0;
+}
+.costos-calc-datos {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+.costos-calc-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.costos-calc-destino {
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+}
+.costos-calc-resultado-block {
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.costos-calc-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--logo-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.costos-calc-input {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-family: inherit;
+}
+.costos-calc-input:focus {
+    outline: none;
+    border-color: var(--logo-teal);
+    box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.2);
+}
+.costos-calc-select {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-family: inherit;
+    background: var(--surface);
+}
+.costos-calc-select:focus {
+    outline: none;
+    border-color: var(--logo-teal);
+}
+.costos-calc-resultado {
+    display: block;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--logo-teal-dark);
+    min-height: 1.5em;
+    line-height: 1.4;
+}
+.costos-calc-note {
+    margin: 16px 0 0;
+    font-size: 0.75rem;
+    color: var(--muted-light);
+    font-style: italic;
+}
+
+/* Calculadora: móvil — orden segmentado y UX táctil */
+@media (max-width: 768px) {
+    .costos-calc-inner {
+        padding: 16px;
+    }
+    .costos-calc-datos {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+    .costos-calc-block {
+        margin-bottom: 18px;
+    }
+    .costos-calc-destino,
+    .costos-calc-resultado-block {
+        padding-top: 18px;
+    }
+    .costos-calc-input,
+    .costos-calc-select {
+        padding: 14px 16px;
+        font-size: 16px;
+        min-height: 48px;
+    }
+    .costos-calc-resultado {
+        font-size: 1rem;
+        padding: 12px 0;
+    }
+    .costos-calc-btn {
+        font-size: 0.8rem;
+        padding: 7px 11px;
+    }
+}
+@media (max-width: 480px) {
+    .costos-title-row { gap: 10px; align-items: center; }
+    .costos-calc-btn {
+        font-size: 0.75rem;
+        padding: 6px 10px;
+        min-height: 36px;
+        gap: 5px;
+    }
+    .costos-calc-btn .costos-calc-btn-text-long { display: none; }
+    .costos-calc-btn .costos-calc-btn-text-short { display: inline; }
+    .costos-calc-btn i { font-size: 0.85rem; }
+    .costos-calc-inner {
+        padding: 14px;
+    }
+    .costos-calc-datos {
+        gap: 12px;
+    }
+    .costos-calc-label {
+        font-size: 0.75rem;
+    }
+    .costos-calc-input,
+    .costos-calc-select {
+        padding: 12px 14px;
+        min-height: 44px;
+    }
 }
 
 .costos-intro {
@@ -92,6 +272,171 @@ body.costos-page {
 .costos-loading {
     color: var(--muted);
     font-size: 0.9rem;
+}
+
+/* ——— Vista tarjetas (materia prima, estilo modelo11) ——— */
+.costos-cards-wrap {
+    width: 100%;
+}
+.costos-cat-title {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: #9a3412;
+    text-transform: uppercase;
+    margin: 28px 0 12px;
+    letter-spacing: 1.5px;
+    border-left: 4px solid var(--logo-orange);
+    padding-left: 10px;
+}
+.costos-cat-title:first-child {
+    margin-top: 0;
+}
+.costos-card {
+    background: var(--surface);
+    border-radius: 20px;
+    padding: 16px;
+    margin-bottom: 12px;
+    border: 1px solid #ffedd5;
+    box-shadow: 0 4px 12px rgba(234, 88, 12, 0.06);
+}
+.costos-card-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+.costos-card-info {
+    flex: 1;
+    min-width: 0;
+}
+.costos-card-name {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--logo-dark);
+    margin: 0 0 4px;
+    line-height: 1.25;
+}
+.costos-card-presentacion {
+    font-size: 0.8rem;
+    color: #9a3412;
+    opacity: 0.85;
+    font-weight: 500;
+}
+.costos-card-price-side {
+    text-align: right;
+    min-width: 100px;
+}
+.costos-card-old-price {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--muted-light);
+    text-decoration: line-through;
+    margin-bottom: 2px;
+}
+.costos-card-price {
+    font-size: 1.25rem;
+    font-weight: 900;
+    color: #000;
+}
+.costos-card-days {
+    display: block;
+    font-size: 0.65rem;
+    color: var(--muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-top: 4px;
+}
+.costos-card-days.costos-dias-amarillo {
+    background: linear-gradient(135deg, #fefce8 0%, #fef9c3 100%);
+    color: #713f12;
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-top: 6px;
+}
+.costos-card-days.costos-dias-rojo {
+    background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%);
+    color: #7f1d1d;
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-top: 6px;
+}
+.costos-card-days.costos-dias-urgente {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-top: 6px;
+}
+.costos-expand-btn {
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    color: var(--logo-orange);
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 8px;
+    margin-top: 12px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: 0.2s;
+    font-family: inherit;
+}
+.costos-expand-btn:hover {
+    background: #ffedd5;
+}
+.costos-expand-btn:active {
+    transform: scale(0.98);
+}
+.costos-extra-info {
+    display: none;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    background: #fffaf5;
+    padding: 15px;
+    border-radius: 12px;
+    margin-top: 12px;
+    font-size: 0.75rem;
+    border: 1px dashed #fed7aa;
+}
+.costos-extra-info.costos-extra-show {
+    display: grid;
+    animation: costos-extra-fade 0.3s ease;
+}
+@keyframes costos-extra-fade {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.costos-extra-item {
+    color: var(--muted);
+}
+.costos-extra-item b {
+    display: block;
+    color: var(--logo-dark);
+    font-size: 0.8rem;
+    margin-top: 2px;
+}
+@media (max-width: 480px) {
+    .costos-card-main {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .costos-card-price-side {
+        text-align: right;
+        width: 100%;
+    }
+    .costos-card-days {
+        display: block;
+        text-align: left;
+        margin-top: 6px;
+    }
+    .costos-extra-info {
+        grid-template-columns: 1fr;
+    }
 }
 
 .costos-table-wrap {

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --p: #ea580c; --bg: #ffffff; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); padding: 15px; margin: 0; }
+        .cat-section { margin-bottom: 30px; }
+        .cat-title { font-size: 0.8rem; letter-spacing: 2px; color: #999; text-transform: uppercase; border-left: 4px solid var(--p); padding-left: 10px; margin-bottom: 15px; }
+        .row { border-bottom: 1px solid #f1f1f1; padding: 15px 5px; }
+        .flex-main { display: flex; justify-content: space-between; align-items: center; }
+        .name { font-weight: 700; color: #111; font-size: 1.1rem; }
+        .trend { font-size: 0.7rem; margin-left: 5px; }
+        .up { color: #dc2626; } .down { color: #16a34a; }
+        .old-price { font-size: 0.75rem; color: #999; text-decoration: line-through; display: block; }
+        .current-price { font-size: 1.2rem; font-weight: 800; color: var(--p); }
+        .days { font-size: 0.65rem; color: #bbb; display: block; }
+        .expand-btn { background: #f8fafc; border: none; padding: 5px 10px; border-radius: 6px; cursor: pointer; color: #64748b; font-size: 0.8rem; margin-top: 8px; }
+        .extra-info { display: none; background: #fafafa; padding: 10px; border-radius: 8px; margin-top: 10px; font-size: 0.75rem; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .extra-info.show { display: grid; }
+        .extra-info b { color: #444; }
+    </style>
+</head>
+<body>
+    <div class="cat-section">
+        <div class="cat-title">Materia Prima</div>
+        <div class="row">
+            <div class="flex-main">
+                <div>
+                    <span class="name">Harina 000</span>
+                    <span class="trend up"><i class="fa-solid fa-arrow-trend-up"></i></span>
+                    <div class="old-price">Ant: $17.000</div>
+                </div>
+                <div style="text-align: right;">
+                    <span class="current-price">$18.500</span>
+                    <span class="days">hace 3 días</span>
+                </div>
+            </div>
+            <button class="expand-btn" onclick="this.nextElementSibling.classList.toggle('show')"><i class="fa-solid fa-plus"></i> Detalles</button>
+            <div class="extra-info">
+                <div>Eq. Unidad: <b>Kg</b></div>
+                <div>Costo x Unid: <b>$740</b></div>

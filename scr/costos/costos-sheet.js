@@ -137,15 +137,29 @@
             var n = (nameNorm || "").trim();
             return n === "producto" || n === "nombre" || n === "descripcion" || n === "insumo" || n === "nombre del producto" || n === "nombre producto";
         }
+        function isPrecioActualColumn(nameNorm) {
+            var n = (nameNorm || "").trim().toLowerCase().replace(/-/g, " ");
+            return n === "precio" || n === "precio actual";
+        }
+        function isPrecioAnteriorColumn(nameNorm) {
+            var n = (nameNorm || "").trim().toLowerCase().replace(/-/g, " ");
+            return n === "precio anterior";
+        }
         var fechaIdx = -1;
         var presentacionTipoIdx = -1;
+        var idxExtraEquivTipo = -1, idxExtraPrecioCosto = -1, idxExtraPrecioEq = -1;
         for (var fi = 0; fi < headers.length; fi++) {
-            if (norm(headers[fi]).replace(/-/g, " ") === "fecha actualizada al") {
+            var hNorm = norm(headers[fi]).replace(/-/g, " ");
+            var hNormHeader = normHeader(headers[fi]);
+            if (hNorm === "fecha actualizada al") {
                 fechaIdx = fi;
             }
-            if (normHeader(headers[fi]) === "presentacion-tipo") {
+            if (hNormHeader === "presentacion-tipo") {
                 presentacionTipoIdx = fi;
             }
+            if (hNorm === "equivalencia tipo unidad medida") idxExtraEquivTipo = fi;
+            if (hNorm === "precio costo x unidad") idxExtraPrecioCosto = fi;
+            if (hNorm === "precio equivalencia x unidad") idxExtraPrecioEq = fi;
         }
         var hasDiasCol = displayHeadersLogic.some(function (n) { return isDiasActualizacionColumn(n); });
         if (fechaIdx >= 0 && !hasDiasCol) {
@@ -223,7 +237,7 @@
                     var dateStr = (fechaIdx >= 0 ? String(row[fechaIdx] != null ? row[fechaIdx] : "").trim() : "");
                     text = diasDesdeFechaHastaHoy(dateStr);
                     tdClass = claseDiasActualizacion(text);
-                } else if (nameNorm === "precio") {
+                } else if (isPrecioActualColumn(nameNorm) || isPrecioAnteriorColumn(nameNorm)) {
                     text = formatoMonedaArg(raw);
                 }
                 if (isProductNameColumn(nameNorm)) {
@@ -257,29 +271,88 @@
             if (b === "Sin categoría") return -1;
             return a.localeCompare(b);
         });
-        var html = '<table class="costos-table"><thead><tr>';
-        displayHeaders.forEach(function (h, i) {
-            var thClass = isProductNameColumn(displayHeadersNorm[i]) ? ' class="costos-cell-producto"' : "";
-            html += "<th" + thClass + ">" + escapeHtml(String(h != null ? h : "").trim()) + "</th>";
-        });
-        html += "</tr></thead><tbody>";
+        var idxProducto = -1, idxPresentacion = -1, idxPrecio = -1, idxPrecioAnterior = -1, idxDias = -1;
+        for (var ii = 0; ii < displayHeadersNorm.length; ii++) {
+            if (isProductNameColumn(displayHeadersNorm[ii])) idxProducto = ii;
+            else if (displayHeadersNorm[ii] === "presentacion") idxPresentacion = ii;
+            else if (isPrecioActualColumn(displayHeadersNorm[ii])) idxPrecio = ii;
+            else if (isPrecioAnteriorColumn(displayHeadersNorm[ii])) idxPrecioAnterior = ii;
+            else if (isDiasActualizacionColumn(displayHeadersNorm[ii])) idxDias = ii;
+        }
+        function textoDiasActualizacion(diasStr) {
+            if (diasStr == null || String(diasStr).trim() === "") return "";
+            var n = parseInt(String(diasStr).trim(), 10);
+            if (isNaN(n)) return "";
+            if (n === 0) return "Actualizado hoy";
+            if (n === 1) return "Actualizado hace 1 d\u00eda";
+            return "Actualizado hace " + n + " d\u00edas";
+        }
+        var cardsHtml = "";
         groupOrder.forEach(function (catLabel) {
             var g = groups[groupMap[catLabel]];
-            html += '<tr class="costos-table-categoria"><td colspan="' + displayHeaders.length + '" data-label="Categoría">' + escapeHtml(g.label) + "</td></tr>";
+            cardsHtml += "<div class=\"costos-cat-title\">" + escapeHtml(g.label) + "</div>";
             g.rows.forEach(function (row) {
-                html += "<tr>";
-                getDisplayCells(row).forEach(function (cell, colIndex) {
-                    var headerLabel = escapeHtml(String(displayHeaders[colIndex] != null ? displayHeaders[colIndex] : "").trim());
-                    var c = cell.tdClass ? ' class="' + escapeHtml(cell.tdClass) + '"' : "";
-                    html += "<td" + c + " data-label=\"" + headerLabel + "\">" + escapeHtml(cell.text) + "</td>";
-                });
-                html += "</tr>";
+                var cells = getDisplayCells(row);
+                var nombre = idxProducto >= 0 ? (cells[idxProducto] && cells[idxProducto].text) : "";
+                var presentacion = idxPresentacion >= 0 ? (cells[idxPresentacion] && cells[idxPresentacion].text) : "";
+                var precio = idxPrecio >= 0 ? (cells[idxPrecio] && cells[idxPrecio].text) : "";
+                var precioAnterior = idxPrecioAnterior >= 0 ? (cells[idxPrecioAnterior] && cells[idxPrecioAnterior].text) : "";
+                var diasCell = idxDias >= 0 ? (cells[idxDias] && cells[idxDias]) : null;
+                var diasStr = diasCell ? diasCell.text : "";
+                var diasClass = diasCell && diasCell.tdClass ? diasCell.tdClass : "";
+                var regText = textoDiasActualizacion(diasStr);
+                var extraParts = [];
+                function extraVal(idx) {
+                    if (idx < 0) return "";
+                    var v = row[idx];
+                    return v != null ? String(v).trim() : "";
+                }
+                var labels = ["Equivalencia Tipo Unidad Medida", "Precio COSTO x Unidad", "Precio Equivalencia x Unidad", "Última Fecha Actualizada"];
+                var extraIdxs = [idxExtraEquivTipo, idxExtraPrecioCosto, idxExtraPrecioEq, fechaIdx];
+                var formatExtra = [function (s) { return s; }, formatoMonedaArg, formatoMonedaArg, function (s) { return s; }];
+                for (var ex = 0; ex < extraIdxs.length; ex++) {
+                    var val = extraVal(extraIdxs[ex]);
+                    if (ex === 1 || ex === 2) val = formatExtra[ex](val);
+                    extraParts.push("<div class=\"costos-extra-item\"><span class=\"costos-extra-label\">" + escapeHtml(labels[ex]) + "</span> <b>" + escapeHtml(val) + "</b></div>");
+                }
+                var extraHtml = "<div class=\"costos-extra-info\">" + extraParts.join("") + "</div>";
+                cardsHtml += "<div class=\"costos-card\">" +
+                    "<div class=\"costos-card-main\">" +
+                    "<div class=\"costos-card-info\">" +
+                    "<h2 class=\"costos-card-name\">" + escapeHtml(nombre) + "</h2>" +
+                    (presentacion ? "<div class=\"costos-card-presentacion\">" + escapeHtml(presentacion) + "</div>" : "") +
+                    "</div>" +
+                    "<div class=\"costos-card-price-side\">" +
+                    (precioAnterior ? "<span class=\"costos-card-old-price\">Ant: " + escapeHtml(precioAnterior) + "</span>" : "") +
+                    (precio ? "<div class=\"costos-card-price\">" + escapeHtml(precio) + "</div>" : "") +
+                    (regText ? "<span class=\"costos-card-days " + escapeHtml(diasClass) + "\">" + escapeHtml(regText) + "</span>" : "") +
+                    "</div>" +
+                    "</div>" +
+                    "<button type=\"button\" class=\"costos-expand-btn\" aria-expanded=\"false\"><i class=\"fa-solid fa-plus costos-expand-icon\"></i> <span class=\"costos-expand-text\">INFORMACION</span></button>" +
+                    extraHtml +
+                    "</div>";
             });
         });
-        html += "</tbody></table>";
         var leyenda = buildDiasLeyenda(config);
-        container.innerHTML = "<div class=\"costos-table-wrap\">" + html + "</div>" + leyenda;
+        container.innerHTML = "<div class=\"costos-cards-wrap\">" + cardsHtml + "</div>" + leyenda;
         container.classList.remove("costos-datos-message");
+        container.querySelectorAll(".costos-expand-btn").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                var extra = btn.nextElementSibling;
+                var isOpen = btn.getAttribute("aria-expanded") === "true";
+                if (isOpen) {
+                    if (extra && extra.classList.contains("costos-extra-info")) extra.classList.remove("costos-extra-show");
+                    btn.setAttribute("aria-expanded", "false");
+                    btn.querySelector(".costos-expand-icon").className = "fa-solid fa-plus costos-expand-icon";
+                    if (btn.querySelector(".costos-expand-text")) btn.querySelector(".costos-expand-text").textContent = "INFORMACION";
+                } else {
+                    if (extra && extra.classList.contains("costos-extra-info")) extra.classList.add("costos-extra-show");
+                    btn.setAttribute("aria-expanded", "true");
+                    btn.querySelector(".costos-expand-icon").className = "fa-solid fa-minus costos-expand-icon";
+                    if (btn.querySelector(".costos-expand-text")) btn.querySelector(".costos-expand-text").textContent = "OCULTAR";
+                }
+            });
+        });
     }
 
     /** Leyenda de referencia para Días actualiz. (umbrales desde config.diasActualizacion). */
