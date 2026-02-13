@@ -100,7 +100,7 @@ Todas las respuestas son JSON:
 3. **Quién puede acceder**: según necesites (solo tu org o “Cualquier usuario” para probar desde el front).
 4. Copiá la URL del despliegue y usala en el front como base para las llamadas (ej. `fetch(url + '?action=list&sheet=materiaPrima')`).
 
-**CORS y POST desde el navegador:** Las peticiones GET suelen funcionar desde cualquier origen. Para **POST** (create, update), enviá el cuerpo como **application/x-www-form-urlencoded** (por ejemplo con `URLSearchParams` en el body del `fetch`) en lugar de JSON, para reducir problemas de CORS por preflight. El script acepta tanto JSON como form-urlencoded en `doPost`.
+**CORS y POST desde el navegador:** En un proyecto solo HTML/CSS/JS (sin servidor propio), las peticiones **GET** al script suelen funcionar. Los **POST** (create, update) pueden ser bloqueados por CORS si la página se abre desde otro origen (file://, otro dominio). El front envía el cuerpo como **application/x-www-form-urlencoded**; el script acepta JSON o form-urlencoded. Para que «Guardar» funcione desde cualquier lugar, una opción es servir la app desde el mismo Apps Script (doGet devuelve el HTML de la app).
 
 ---
 
