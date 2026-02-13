@@ -31,6 +31,14 @@
             function normHeader(s) {
                 return String(s != null ? s : "").trim().toLowerCase().replace(/\s+/g, " ").replace(/-/g, " ");
             }
+            function normHeaderForCompare(s) {
+                var n = normHeader(s);
+                try {
+                    return n.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                } catch (e) {
+                    return n.replace(/[áàäâ]/gi, "a").replace(/[éèëê]/gi, "e").replace(/[íìïî]/gi, "i").replace(/[óòöô]/gi, "o").replace(/[úùüû]/gi, "u");
+                }
+            }
             function isPrecioEditable(nameNorm) {
                 var n = (nameNorm || "").trim();
                 return n === "precio" || n === "precio actual";
@@ -115,11 +123,165 @@
                             break;
                         }
                     }
+                    var idxPresCant = -1, idxPresUnid = -1, idxPresTipo = -1;
+                    var keyPresCant = "", keyPresUnid = "", keyPresTipo = "";
+                    headers.forEach(function (h, idx) {
+                        var n = normHeader(h);
+                        var k = String(h != null ? h : "").trim();
+                        if (n === "presentacion cantidad medida" || n === "presentacion-cantidad-medida") { idxPresCant = idx; keyPresCant = k; }
+                        if (n === "presentacion unidad" || n === "presentacion-unidad") { idxPresUnid = idx; keyPresUnid = k; }
+                        if (n === "presentacion tipo" || n === "presentacion-tipo") { idxPresTipo = idx; keyPresTipo = k; }
+                    });
+                    function buildPresentacionStr(cant, unid, tipo) {
+                        var s = (String(cant).trim() + " " + String(unid).trim()).trim();
+                        if (String(tipo).trim()) s += " [" + String(tipo).trim() + "]";
+                        return s || "—";
+                    }
+                    var categoriaColIdx = -1;
+                    for (var c = 0; c < headers.length; c++) {
+                        if (normHeaderForCompare(headers[c]) === "categoria") {
+                            categoriaColIdx = c;
+                            break;
+                        }
+                    }
+                    var categoriasForDatalist = [];
+                    try {
+                        var storedCat = sessionStorage.getItem("costosDistinctCategorias");
+                        if (storedCat) categoriasForDatalist = JSON.parse(storedCat);
+                    } catch (e) {}
+                    if (categoriaColIdx >= 0 && categoriasForDatalist.length === 0) {
+                        var currentCat = record[headers[categoriaColIdx]];
+                        if (currentCat != null && String(currentCat).trim() !== "") {
+                            categoriasForDatalist = [String(currentCat).trim()];
+                            sessionStorage.setItem("costosDistinctCategorias", JSON.stringify(categoriasForDatalist));
+                        }
+                    }
+                    var categoriasState = { list: categoriasForDatalist };
+                    var presentationRowAdded = false;
                     headers.forEach(function (headerName, i) {
                         var key = String(headerName != null ? headerName : "").trim();
                         var nameNorm = normHeader(headerName);
                         if (nameNorm === "habilitado") return;
                         if (nameNorm === "idmateria prima" || nameNorm === "idmateria-prima") return;
+                        if (nameNorm === "presentacion cantidad medida" || nameNorm === "presentacion-cantidad-medida" || nameNorm === "presentacion unidad" || nameNorm === "presentacion-unidad" || nameNorm === "presentacion tipo" || nameNorm === "presentacion-tipo") {
+                            if (!presentationRowAdded) {
+                                var cantVal = record[keyPresCant] || "";
+                                var unidVal = record[keyPresUnid] || "";
+                                var tipoVal = record[keyPresTipo] || "";
+                                var presStr = buildPresentacionStr(cantVal, unidVal, tipoVal);
+                                var wrapPres = document.createElement("div");
+                                wrapPres.className = "costos-edit-field costos-edit-field-presentacion";
+                                var labelPres = document.createElement("span");
+                                labelPres.className = "costos-edit-label";
+                                labelPres.textContent = "PRESENTACIÓN";
+                                var valueSpanPres = document.createElement("span");
+                                valueSpanPres.className = "costos-edit-value costos-edit-value-presentacion";
+                                valueSpanPres.textContent = presStr;
+                                var valueCellPres = document.createElement("div");
+                                valueCellPres.className = "costos-edit-value-cell";
+                                valueCellPres.appendChild(valueSpanPres);
+                                var editBtnPres = document.createElement("button");
+                                editBtnPres.type = "button";
+                                editBtnPres.className = "costos-edit-value-edit-btn";
+                                editBtnPres.setAttribute("title", "Editar presentación");
+                                editBtnPres.setAttribute("aria-label", "Editar presentación");
+                                editBtnPres.innerHTML = "<i class=\"fa-solid fa-pen\" aria-hidden=\"true\"></i>";
+                                valueCellPres.appendChild(editBtnPres);
+                                editBtnPres.addEventListener("click", function () {
+                                    var block = wrapPres.querySelector(".costos-edit-presentacion-inputs");
+                                    if (block) {
+                                        if (block.style.display !== "none") {
+                                            block.style.display = "none";
+                                            valueSpanPres.style.display = "";
+                                            editBtnPres.style.display = "";
+                                            var inpC = block.querySelector(".costos-edit-input[data-header-index=\"" + idxPresCant + "\"]");
+                                            var inpU = block.querySelector(".costos-edit-input[data-header-index=\"" + idxPresUnid + "\"]");
+                                            var inpT = block.querySelector(".costos-edit-input[data-header-index=\"" + idxPresTipo + "\"]");
+                                            if (inpC && inpU && inpT) valueSpanPres.textContent = buildPresentacionStr(inpC.value, inpU.value, inpT.value);
+                                        } else {
+                                            block.style.display = "";
+                                            valueSpanPres.style.display = "none";
+                                            editBtnPres.style.display = "none";
+                                            var firstInp = block.querySelector(".costos-edit-input");
+                                            if (firstInp) firstInp.focus();
+                                        }
+                                        return;
+                                    }
+                                    var blockIn = document.createElement("div");
+                                    blockIn.className = "costos-edit-presentacion-inputs";
+                                    var closeRow = document.createElement("div");
+                                    closeRow.className = "costos-edit-presentacion-close-row";
+                                    var closeBtnPres = document.createElement("button");
+                                    closeBtnPres.type = "button";
+                                    closeBtnPres.className = "costos-edit-value-close-btn";
+                                    closeBtnPres.setAttribute("title", "Cerrar sin guardar");
+                                    closeBtnPres.setAttribute("aria-label", "Cerrar");
+                                    closeBtnPres.innerHTML = "<i class=\"fa-solid fa-xmark\" aria-hidden=\"true\"></i>";
+                                    closeRow.appendChild(closeBtnPres);
+                                    blockIn.appendChild(closeRow);
+                                    var lblC = document.createElement("label");
+                                    lblC.className = "costos-edit-presentacion-label";
+                                    lblC.textContent = "Cantidad en paquete";
+                                    var inpCant = document.createElement("input");
+                                    inpCant.type = "text";
+                                    inpCant.className = "costos-edit-input";
+                                    inpCant.setAttribute("data-header-index", String(idxPresCant));
+                                    inpCant.value = record[keyPresCant] || "";
+                                    inpCant.placeholder = "Ej: 5";
+                                    var lblU = document.createElement("label");
+                                    lblU.className = "costos-edit-presentacion-label";
+                                    lblU.textContent = "Unidad";
+                                    var inpUnid = document.createElement("input");
+                                    inpUnid.type = "text";
+                                    inpUnid.className = "costos-edit-input";
+                                    inpUnid.setAttribute("data-header-index", String(idxPresUnid));
+                                    inpUnid.value = record[keyPresUnid] || "";
+                                    inpUnid.placeholder = "Ej: Kg, L";
+                                    var lblT = document.createElement("label");
+                                    lblT.className = "costos-edit-presentacion-label";
+                                    lblT.textContent = "Tipo presentación";
+                                    var inpTipo = document.createElement("input");
+                                    inpTipo.type = "text";
+                                    inpTipo.className = "costos-edit-input";
+                                    inpTipo.setAttribute("data-header-index", String(idxPresTipo));
+                                    inpTipo.value = record[keyPresTipo] || "";
+                                    inpTipo.placeholder = "Ej: Paquete, Bolsa";
+                                    function updatePresLabel() {
+                                        valueSpanPres.textContent = buildPresentacionStr(inpCant.value, inpUnid.value, inpTipo.value);
+                                    }
+                                    inpCant.addEventListener("input", updatePresLabel);
+                                    inpCant.addEventListener("change", updatePresLabel);
+                                    inpUnid.addEventListener("input", updatePresLabel);
+                                    inpUnid.addEventListener("change", updatePresLabel);
+                                    inpTipo.addEventListener("input", updatePresLabel);
+                                    inpTipo.addEventListener("change", updatePresLabel);
+                                    blockIn.appendChild(lblC);
+                                    blockIn.appendChild(inpCant);
+                                    blockIn.appendChild(lblU);
+                                    blockIn.appendChild(inpUnid);
+                                    blockIn.appendChild(lblT);
+                                    blockIn.appendChild(inpTipo);
+                                    closeBtnPres.addEventListener("click", function () {
+                                        inpCant.value = record[keyPresCant] || "";
+                                        inpUnid.value = record[keyPresUnid] || "";
+                                        inpTipo.value = record[keyPresTipo] || "";
+                                        valueSpanPres.textContent = buildPresentacionStr(record[keyPresCant], record[keyPresUnid], record[keyPresTipo]);
+                                        blockIn.style.display = "none";
+                                        valueSpanPres.style.display = "";
+                                        editBtnPres.style.display = "";
+                                    });
+                                    wrapPres.appendChild(blockIn);
+                                    valueSpanPres.style.display = "none";
+                                    editBtnPres.style.display = "none";
+                                    inpCant.focus();
+                                });
+                                wrapPres.appendChild(labelPres);
+                                wrapPres.appendChild(valueCellPres);
+                                fieldsContainer.appendChild(wrapPres);
+                                presentationRowAdded = true;
+                            }
+                            return;
+                        }
 
                         var value = record[key] || "";
                         if (isFechaActualizadaColumn(nameNorm)) {
@@ -134,6 +296,7 @@
 
                         var wrap = document.createElement("div");
                         wrap.className = "costos-edit-field" + (editable ? " is-editable" : "") + (isObservaciones ? " is-textarea" : "");
+                        wrap.setAttribute("data-header-index", String(i));
                         if (nameNorm === "cantidad unidad medida" || nameNorm === "cantidad-unidad-medida") wrap.setAttribute("data-field", "cantidad-unidad-medida");
                         if (nameNorm === "precio anterior") wrap.setAttribute("data-field", "precio-anterior");
                         if (nameNorm === "precio costo x unidad" || nameNorm === "precio-costo-x-unidad") wrap.setAttribute("data-field", "precio-costo-x-unidad");
@@ -201,8 +364,87 @@
                         valueSpan.className = "costos-edit-value";
                         valueSpan.textContent = displayValue;
 
+                        var valueCell = document.createElement("div");
+                        valueCell.className = "costos-edit-value-cell";
+                        valueCell.appendChild(valueSpan);
+                        if (!editable && !isObservaciones && !isCalculatedField(nameNorm)) {
+                            var editIcon = document.createElement("button");
+                            editIcon.type = "button";
+                            editIcon.className = "costos-edit-value-edit-btn";
+                            editIcon.setAttribute("title", "Editar este campo");
+                            editIcon.setAttribute("aria-label", "Editar campo");
+                            editIcon.innerHTML = "<i class=\"fa-solid fa-pen\" aria-hidden=\"true\"></i>";
+                            valueCell.appendChild(editIcon);
+                            (function (w, cell, span, idx, rawVal, isCategoriaField, form, categoriasStateRef) {
+                                function removeDatalistCategoria() {
+                                    var dl = document.getElementById("costos-datalist-categoria");
+                                    if (dl) dl.parentNode.removeChild(dl);
+                                }
+                                editIcon.addEventListener("click", function () {
+                                    var dyn = w.querySelector(".costos-edit-input-dynamic");
+                                    if (dyn) {
+                                        span.textContent = dyn.value || "—";
+                                        span.style.display = "";
+                                        dyn.parentNode.removeChild(dyn);
+                                        removeDatalistCategoria();
+                                        var closeBtn = cell.querySelector(".costos-edit-value-close-btn");
+                                        if (closeBtn) closeBtn.parentNode.removeChild(closeBtn);
+                                        editIcon.style.display = "";
+                                        return;
+                                    }
+                                    var inp = document.createElement("input");
+                                    inp.type = "text";
+                                    inp.className = "costos-edit-input costos-edit-input-dynamic";
+                                    inp.setAttribute("data-header-index", String(idx));
+                                    inp.value = rawVal != null ? String(rawVal).trim() : "";
+                                    if (isCategoriaField && form) {
+                                        var listId = "costos-datalist-categoria";
+                                        var opts = (categoriasStateRef && categoriasStateRef.list && categoriasStateRef.list.length) ? categoriasStateRef.list.slice() : [];
+                                        try {
+                                            if (opts.length === 0) {
+                                                var stored = sessionStorage.getItem("costosDistinctCategorias");
+                                                if (stored) opts = JSON.parse(stored);
+                                            }
+                                        } catch (e) {}
+                                        var currentVal = rawVal != null ? String(rawVal).trim() : "";
+                                        if (currentVal && opts.indexOf(currentVal) === -1) opts.unshift(currentVal);
+                                        if (opts.length === 0) opts.push("Sin categoría");
+                                        var dl = document.createElement("datalist");
+                                        dl.id = listId;
+                                        opts.forEach(function (v) {
+                                            if (v == null) return;
+                                            var o = document.createElement("option");
+                                            o.value = String(v).trim();
+                                            dl.appendChild(o);
+                                        });
+                                        form.appendChild(dl);
+                                        inp.setAttribute("list", listId);
+                                        inp.setAttribute("autocomplete", "list");
+                                        inp.placeholder = "Elegí una o escribí una nueva";
+                                    }
+                                    cell.insertBefore(inp, span);
+                                    span.style.display = "none";
+                                    editIcon.style.display = "none";
+                                    var closeBtn = document.createElement("button");
+                                    closeBtn.type = "button";
+                                    closeBtn.className = "costos-edit-value-close-btn";
+                                    closeBtn.setAttribute("title", "Cerrar sin guardar en este campo");
+                                    closeBtn.setAttribute("aria-label", "Cerrar");
+                                    closeBtn.innerHTML = "<i class=\"fa-solid fa-xmark\" aria-hidden=\"true\"></i>";
+                                    cell.appendChild(closeBtn);
+                                    closeBtn.addEventListener("click", function () {
+                                        span.style.display = "";
+                                        inp.parentNode.removeChild(inp);
+                                        removeDatalistCategoria();
+                                        closeBtn.parentNode.removeChild(closeBtn);
+                                        editIcon.style.display = "";
+                                    });
+                                    inp.focus();
+                                });
+                            })(wrap, valueCell, valueSpan, i, value, i === categoriaColIdx, formEl, categoriasState);
+                        }
                         wrap.appendChild(label);
-                        wrap.appendChild(valueSpan);
+                        wrap.appendChild(valueCell);
 
                         if (editable) {
                             var input = document.createElement("input");
@@ -234,6 +476,42 @@
 
                         fieldsContainer.appendChild(wrap);
                     });
+
+                    (function () {
+                        var appsScriptUrl = (typeof APP_CONFIG !== "undefined" && APP_CONFIG.appsScriptUrl) ? APP_CONFIG.appsScriptUrl : "";
+                        if (!appsScriptUrl) return;
+                        fetch(appsScriptUrl + "?action=list&sheet=materiaPrima&limit=10000", { cache: "no-store" })
+                            .then(function (res) { return res.json(); })
+                            .then(function (json) {
+                                if (!json || !json.success || !json.data) return;
+                                var apiHeaders = Array.isArray(json.data.headers) ? json.data.headers : [];
+                                var apiRows = Array.isArray(json.data.rows) ? json.data.rows : [];
+                                var catKey = null;
+                                for (var ai = 0; ai < apiHeaders.length; ai++) {
+                                    if (normHeaderForCompare(apiHeaders[ai]) === "categoria") {
+                                        catKey = String(apiHeaders[ai] != null ? apiHeaders[ai] : "").trim();
+                                        break;
+                                    }
+                                }
+                                if (!catKey) return;
+                                var seen = {};
+                                var allCats = [];
+                                apiRows.forEach(function (row) {
+                                    var v = row[catKey] != null ? String(row[catKey]).trim() : "";
+                                    if (!v) v = "Sin categoría";
+                                    if (!seen[v]) { seen[v] = true; allCats.push(v); }
+                                });
+                                if (allCats.length === 0) return;
+                                allCats.sort(function (a, b) {
+                                    if (a === "Sin categoría") return 1;
+                                    if (b === "Sin categoría") return -1;
+                                    return a.localeCompare(b);
+                                });
+                                categoriasState.list = allCats;
+                                try { sessionStorage.setItem("costosDistinctCategorias", JSON.stringify(allCats)); } catch (err) {}
+                            })
+                            .catch(function () {});
+                    })();
 
                     (function () {
                         var precioActualInput = formEl.querySelector(".costos-edit-input[placeholder=\"Ingrese el precio actual\"]");

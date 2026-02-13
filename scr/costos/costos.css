@@ -254,11 +254,83 @@ body.costos-page {
 .costos-edit-calc-icon:hover {
     color: var(--logo-teal-dark);
 }
+.costos-edit-value-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
 .costos-edit-value {
     font-size: 0.95rem;
     font-weight: 500;
     color: var(--logo-dark);
     word-break: break-word;
+}
+.costos-edit-value-edit-btn,
+.costos-edit-value-close-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    min-height: 28px;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: #f8fafc;
+    color: var(--muted);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.costos-edit-value-edit-btn:hover,
+.costos-edit-value-close-btn:hover {
+    background: #fff7ed;
+    color: var(--logo-orange);
+    border-color: #fed7aa;
+}
+.costos-edit-value-edit-btn:focus-visible,
+.costos-edit-value-close-btn:focus-visible {
+    outline: 2px solid var(--logo-teal);
+    outline-offset: 2px;
+}
+.costos-edit-input-dynamic {
+    flex: 1;
+    min-width: 120px;
+}
+.costos-edit-field-presentacion .costos-edit-value-presentacion {
+    font-weight: 600;
+    color: var(--logo-dark);
+}
+.costos-edit-presentacion-inputs {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 8px 12px;
+    margin-top: 10px;
+    padding: 12px;
+    padding-top: 8px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+.costos-edit-presentacion-close-row {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 4px;
+}
+.costos-edit-presentacion-close-row .costos-edit-value-close-btn {
+    margin-left: auto;
+}
+.costos-edit-presentacion-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--muted);
+}
+.costos-edit-presentacion-inputs .costos-edit-input {
+    min-width: 0;
 }
 .costos-edit-field.is-editable .costos-edit-value {
     display: none;
@@ -602,6 +674,16 @@ body.costos-page {
     font-size: 1.25rem;
     font-weight: 900;
     color: #000;
+}
+.costos-card-price .costos-trend-up {
+    color: #b91c1c;
+    font-size: 0.9em;
+    margin-left: 2px;
+}
+.costos-card-price .costos-trend-down {
+    color: #15803d;
+    font-size: 0.9em;
+    margin-left: 2px;
 }
 .costos-card-edit-btn {
     display: inline-flex;
