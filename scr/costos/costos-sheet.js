@@ -18,17 +18,28 @@
         "id materia prima",
         "Presentacion-Tipo",
         "OBSERVACIONES",
+        "Observaciones",
         "Cantidad Unidad Medida",
+        "Cantidad-Unidad-Medida",
         "Tipo Unidad Medida",
+        "Tipo-Unidad-Medida",
         "Equivalencia Unidad Medida",
+        "Equivalencia-Unidad-Medida",
         "Equivalencia Tipo Unidad Medida",
+        "Equivalencia-Tipo-Unidad-Medida",
         "NO",
         "Precio COSTO x Unidad",
+        "Precio-Costo-x-Unidad",
         "Precio Equivalencia x Unidad",
+        "Precio-Equivalencia-x-Unidad",
         "Fecha Actualizada Al",
         "Fecha-Actualizada-Al",
         "MARCA",
-        "LUGAR"
+        "Marca",
+        "LUGAR",
+        "Lugar",
+        "Habilitado",
+        "HABILITADO"
     ].map(function (s) { return s.trim().toLowerCase(); });
 
     function showMessage(container, html) {
@@ -134,7 +145,7 @@
             return n === "dias trascurridos actualizacion";
         }
         function isProductNameColumn(nameNorm) {
-            var n = (nameNorm || "").trim();
+            var n = (nameNorm || "").trim().toLowerCase().replace(/-/g, " ");
             return n === "producto" || n === "nombre" || n === "descripcion" || n === "insumo" || n === "nombre del producto" || n === "nombre producto";
         }
         function isPrecioActualColumn(nameNorm) {

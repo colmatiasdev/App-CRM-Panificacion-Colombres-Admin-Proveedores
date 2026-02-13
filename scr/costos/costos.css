@@ -306,6 +306,11 @@ body.costos-page {
 .costos-edit-btn-save:hover {
     opacity: 0.95;
 }
+.costos-edit-btn-save:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
 
 /* Página Editar — móvil: diseño y visibilidad */
 @media (max-width: 768px) {

@@ -12,40 +12,38 @@ var CONFIG = {
   materiaPrima: {
     sheetName: 'Materia Prima',
     gid: 0,
-    /** Encabezados en el mismo orden que las columnas A, B, C... (para leer/escribir por nombre) */
+    /** Encabezados en el mismo orden que las columnas A, B, C... de la hoja Sheet */
     headers: [
       'idmateria-prima',
       'Categoria',
-      'Nombre Producto',
-      'Presentacion Tipo',
-      'Presentacion Cantidad Medida',
-      'Presentacion Unidad',
-      'Precio',
-      'OBSERVACIONES',
-      'Cantidad Unidad Medida',
-      'Tipo Unidad Medida',
-      'Equivalencia Unidad Medida',
-      'Equivalencia Tipo Unidad Medida',
-      'HABILITADO',
-      'NO',
-      'Precio COSTO x Unidad',
-      'Precio Equivalencia x Unidad',
-      'Fecha Actualizada Al',
-      'Dias Trascurridos Actualizacion',
-      'MARCA',
-      'LUGAR',
-      'ACTUALIZAR PRECIO'
+      'Nombre-Producto',
+      'Presentacion-Tipo',
+      'Presentacion-Cantidad-Medida',
+      'Presentacion-Unidad',
+      'Precio-Actual',
+      'Precio-Anterior',
+      'Observaciones',
+      'Cantidad-Unidad-Medida',
+      'Tipo-Unidad-Medida',
+      'Equivalencia-Unidad-Medida',
+      'Equivalencia-Tipo-Unidad-Medida',
+      'Habilitado',
+      'Precio-Costo-x-Unidad',
+      'Precio-Equivalencia-x-Unidad',
+      'Fecha-Actualizada-Al',
+      'Marca',
+      'Lugar'
     ],
     /** Columna que identifica unívocamente la fila (para update/delete) */
     idColumn: 'idmateria-prima',
     /** Prefijo para generar nuevo id si no viene en create */
     idPrefix: 'COSTO-MP-',
     /** Columnas por las que se puede filtrar/buscar (nombre exacto del header) */
-    filterColumns: ['Categoria', 'Nombre Producto', 'Presentacion Tipo', 'MARCA', 'HABILITADO', 'idmateria-prima'],
+    filterColumns: ['Categoria', 'Nombre-Producto', 'Presentacion-Tipo', 'Marca', 'Habilitado', 'idmateria-prima'],
     /** Columnas obligatorias en alta (create) */
-    requiredOnCreate: ['Nombre Producto'],
+    requiredOnCreate: ['Nombre-Producto'],
     /** Columna de fecha para "actualizado" (opcional) */
-    dateUpdatedColumn: 'Fecha Actualizada Al'
+    dateUpdatedColumn: 'Fecha-Actualizada-Al'
   },
 
   /** Hoja de Packing */

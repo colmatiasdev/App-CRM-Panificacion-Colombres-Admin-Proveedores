@@ -9,12 +9,16 @@ function doGet(e) {
 }
 
 function doPost(e) {
-  var params = e && e.parameter ? e.parameter : {};
+  var params = e && e.parameter ? Object.assign({}, e.parameter) : {};
   if (e.postData && e.postData.contents) {
-    try {
-      var body = JSON.parse(e.postData.contents);
-      for (var k in body) params[k] = body[k];
-    } catch (err) {}
+    var type = (e.postData.type || '').toLowerCase();
+    if (type.indexOf('application/json') !== -1) {
+      try {
+        var body = JSON.parse(e.postData.contents);
+        for (var k in body) params[k] = body[k];
+      } catch (err) {}
+    }
+    // application/x-www-form-urlencoded: los parámetros ya vienen en e.parameter
   }
   return handleRequest(params);
 }
@@ -140,7 +144,8 @@ function handleRequest(params) {
         updatedObj[configSheet.dateUpdatedColumn] = new Date().toISOString().slice(0, 10);
       }
       var upRow = objectToRow(headerRow, updatedObj);
-      sheet.getRange(rowIndex, 1, rowIndex, upRow.length).setValues([upRow]);
+      // getRange(row, column, numRows, numColumns): 1 fila, numCols columnas
+      sheet.getRange(rowIndex, 1, 1, upRow.length).setValues([upRow]);
       return jsonResponse(true, updatedObj);
     }
 
