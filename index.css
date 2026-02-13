@@ -2,67 +2,191 @@
     --colombres-orange: #EA580C;
     --colombres-dark: #1c1917;
     --colombres-bg: #fafaf9;
+    /* Espaciado y touch en móvil */
+    --touch-min: 44px;
+    --space-mobile: 16px;
+    --space-mobile-lg: 24px;
+    --space-safe: env(safe-area-inset-left, 0);
+    --space-safe-right: env(safe-area-inset-right, 0);
+    --space-safe-bottom: env(safe-area-inset-bottom, 0);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: 20px;
 }
 
 body {
     background-color: var(--colombres-bg);
     margin: 0;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    overflow-x: hidden;
 }
 
-/* Header Compacto para Celular */
-.portada-logo {
-    background: var(--colombres-dark);
-    padding: 20px;
-    text-align: center;
-    border-radius: 0 0 30px 30px;
+/* ========== SECCIÓN COSTOS (Carga de precios) ========== */
+.section-costos,
+.info-section-mensaje {
+    padding: 24px var(--space-mobile) 32px;
+    padding-left: max(var(--space-mobile), var(--space-safe));
+    padding-right: max(var(--space-mobile), var(--space-safe-right));
+    padding-bottom: max(32px, var(--space-safe-bottom));
 }
 
-.portada-logo-img {
-    width: 60px; /* Reducido para ahorrar espacio */
-    border-radius: 50%;
+.info-container {
+    max-width: 560px;
+    margin: 0 auto;
 }
 
-.portada-logo-line2 {
+.info-header h2 {
     font-family: 'Oswald', sans-serif;
-    font-size: 1.8rem;
-    color: white;
-    margin: 5px 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--colombres-dark);
+    margin: 0 0 12px;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
 }
 
-/* Grid de Botones Inteligente */
+.info-header p {
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    color: #44403c;
+    margin: 0 0 20px;
+}
+
+.info-header p strong {
+    color: var(--colombres-orange);
+    font-weight: 700;
+}
+
+/* Botones Costos: grid adaptable */
 .costos-btns {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* Dos columnas en el mismo renglón */
+    grid-template-columns: 1fr 1fr;
     gap: 12px;
-    margin-top: 20px;
+    margin-top: 8px;
 }
 
 .costos-btn {
-    background: white;
-    color: var(--colombres-dark);
-    border: 2px solid var(--colombres-orange);
-    padding: 15px 10px;
+    min-height: var(--touch-min);
+    padding: 14px 12px;
     border-radius: 16px;
     text-decoration: none;
     font-weight: 700;
     font-size: 0.9rem;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    transition: 0.3s;
+    justify-content: center;
+    text-align: center;
+    transition: transform 0.2s, background 0.2s, color 0.2s;
+    -webkit-tap-highlight-color: transparent;
+    border: 2px solid var(--colombres-orange);
+    background: white;
+    color: var(--colombres-dark);
 }
 
-.costos-btn:active {
-    transform: scale(0.95);
+.costos-btn:hover {
     background: var(--colombres-orange);
     color: white;
 }
 
-/* Footer más discreto */
+.costos-btn:active {
+    transform: scale(0.98);
+}
+
+/* Footer con safe area */
 .index-footer {
-    padding: 30px 20px;
-    font-size: 0.8rem;
+    padding: 24px var(--space-mobile) 28px;
+    padding-left: max(var(--space-mobile), var(--space-safe));
+    padding-right: max(var(--space-mobile), var(--space-safe-right));
+    padding-bottom: max(28px, var(--space-safe-bottom));
+    font-size: 0.8125rem;
     text-align: center;
     color: #78716c;
+}
+
+.index-footer .footer-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--colombres-dark);
+    margin: 0 0 6px;
+}
+
+.index-footer .footer-meta {
+    margin: 4px 0;
+}
+
+/* ========== MÓVIL (prioridad) ========== */
+@media (max-width: 480px) {
+    .section-costos,
+    .info-section-mensaje {
+        padding-top: 20px;
+        padding-bottom: 28px;
+    }
+
+    .info-header h2 {
+        font-size: 1.35rem;
+        margin-bottom: 10px;
+    }
+
+    .info-header p {
+        font-size: 0.9rem;
+        line-height: 1.5;
+        margin-bottom: 18px;
+    }
+
+    .costos-btns {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        margin-top: 4px;
+    }
+
+    .costos-btn {
+        min-height: 48px;
+        padding: 14px 16px;
+        font-size: 0.9375rem;
+    }
+
+    .index-footer {
+        padding: 20px 16px 24px;
+        font-size: 0.75rem;
+    }
+}
+
+/* ========== TABLET / ESCRITORIO ========== */
+@media (min-width: 481px) {
+    .section-costos,
+    .info-section-mensaje {
+        padding: 32px 24px 40px;
+    }
+
+    .info-header h2 {
+        font-size: 1.65rem;
+        margin-bottom: 14px;
+    }
+
+    .info-header p {
+        font-size: 1rem;
+        margin-bottom: 24px;
+    }
+
+    .costos-btns {
+        gap: 16px;
+        margin-top: 12px;
+    }
+
+    .costos-btn {
+        min-height: 48px;
+        padding: 16px 20px;
+    }
+}
+
+@media (min-width: 600px) {
+    .info-container {
+        max-width: 580px;
+    }
 }

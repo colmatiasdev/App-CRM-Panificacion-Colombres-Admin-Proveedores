@@ -12,13 +12,23 @@ window.APP_CONFIG = {
     },
 
     /** Apps Script desplegado – ABM (list, get, search, create, update, delete). Ver docs/APPS_SCRIPT_ABM_README.md */
-    appsScriptUrl: "https://script.google.com/macros/s/AKfycbyWtJvLw-aadxZKnY9Gb6Xk5fve1wU2MQhW2cHghQulSOFFtL9VSGV7y3eoeQ8DIR-bIA/exec",
+    appsScriptUrl: "https://script.google.com/macros/s/AKfycbxFuBw5z3V1JZlmr8P4jPxfWcyjPQ-1jrcgZvKBPMGs49_YxPzuW-T_f7JFRHnF1Jtt1A/exec",
 
-    /** Google Sheets – URLs públicas CSV por módulo. Ver docs/CONFIGURAR_GOOGLE_SHEETS.md */
-    /** Packing: costos de empaque, envases, etiquetas. */
-    googleSheetPackingUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZLbiTy2vAqNDISIC-TfpvtKjJtERv-N6aIcldP6s-LQ5EI4Og-ZYGPG8qZkl3-TTh7wYF13PWQm6E/pub?gid=1565788325&single=true&output=csv",
-    /** Materia prima: precios de proveedores (insumos, harinas, etc.). */
-    googleSheetMateriaPrimaUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZLbiTy2vAqNDISIC-TfpvtKjJtERv-N6aIcldP6s-LQ5EI4Og-ZYGPG8qZkl3-TTh7wYF13PWQm6E/pub?gid=0&single=true&output=csv",
+    /**
+     * Google Sheets – Un solo documento publicado con todas las hojas.
+     * Documento: PRECIO-Materia-Prima, PRECIO-Packing, COMBOS, EQUIVALENCIAS.
+     * Las URLs CSV se arman desde baseUrl + gid de cada hoja (fallback cuando no hay Apps Script).
+     */
+    googleSheet: {
+        baseUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZLbiTy2vAqNDISIC-TfpvtKjJtERv-N6aIcldP6s-LQ5EI4Og-ZYGPG8qZkl3-TTh7wYF13PWQm6E/pub",
+        gids: {
+            materiaPrima: 0,
+            packing: 1565788325
+        }
+    },
+    /** URLs CSV por hoja (se rellenan al final del script desde googleSheet). */
+    googleSheetMateriaPrimaUrl: "",
+    googleSheetPackingUrl: "",
 
     /** Días transcurridos actualización (columna Materia prima): umbrales para colorear celdas.
      *  normal: <= limiteNormal (ej. 0–30)
@@ -42,3 +52,10 @@ window.APP_CONFIG = {
         debugEquivalencia: true
     }
 };
+(function () {
+    var gs = window.APP_CONFIG && window.APP_CONFIG.googleSheet;
+    if (gs && gs.baseUrl && gs.gids) {
+        window.APP_CONFIG.googleSheetMateriaPrimaUrl = gs.baseUrl + "?gid=" + gs.gids.materiaPrima + "&single=true&output=csv";
+        window.APP_CONFIG.googleSheetPackingUrl = gs.baseUrl + "?gid=" + gs.gids.packing + "&single=true&output=csv";
+    }
+})();
