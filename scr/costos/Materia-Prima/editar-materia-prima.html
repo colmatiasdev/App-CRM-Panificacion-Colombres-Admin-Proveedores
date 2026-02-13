@@ -551,7 +551,10 @@
                             return;
                         }
 
-                        var value = record[key] || "";
+                        var value = record[key] != null ? String(record[key]).trim() : "";
+                        if (value === "" && (nameNorm === "equivalencia unidad medida" || nameNorm === "equivalencia-unidad-medida" || nameNorm === "cantidad unidad medida" || nameNorm === "cantidad-unidad-medida") && i < row.length && row[i] != null && String(row[i]).trim() !== "") {
+                            value = String(row[i]).trim();
+                        }
                         if (isFechaActualizadaColumn(nameNorm)) {
                             value = getTodayDate();
                             fechaActualizadaIdx = i;

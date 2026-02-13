@@ -1577,7 +1577,6 @@
                             alert("No está configurada la URL de la API (appsScriptUrl en config.js). Los cambios quedaron guardados solo en esta sesión.");
                             return;
                         }
-                        var headers = data.headers || [];
                         var body = isCreateMode
                             ? { action: "create", sheet: "materiaPrima" }
                             : { action: "update", sheet: "materiaPrima", id: data.id || "" };
