@@ -4,17 +4,187 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#EA580C">
+    <!-- Base para que los enlaces se resuelvan desde la carpeta donde está index.html (raíz del proyecto) -->
+    <base href="./">
     <title>Panificación Colombres - Inicio</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Dancing+Script:wght@500;600;700&family=Oswald:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="index.css">
+    <style>
+:root {
+    /* Paleta del logo (arcos superior e inferior) */
+    --logo-red: #DC2626;
+    --logo-orange: #EA580C;
+    --logo-yellow: #F59E0B;
+    --logo-teal: #0D9488;
+    --logo-green: #22C55E;
+    --logo-blue: #0EA5E9;
+    --logo-purple: #8B5CF6;
+    --logo-dark: #1F2937;
+    --logo-white: #ffffff;
+    /* Gradientes del logo */
+    --logo-arc-warm: linear-gradient(90deg, var(--logo-red), var(--logo-orange), var(--logo-yellow));
+    --logo-arc-cool: linear-gradient(90deg, var(--logo-teal), var(--logo-green), var(--logo-blue), var(--logo-purple));
+}
+    </style>
+    <style>
+/* Portada tipo logo: misma disposición y colores del logo */
+.portada-logo {
+    position: relative;
+    min-height: 32vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 24px 40px;
+    background: var(--logo-white);
+    text-align: center;
+}
+.portada-logo-first {
+    min-height: 38vh;
+    padding-top: max(32px, env(safe-area-inset-top));
+    padding-bottom: 40px;
+}
+.portada-logo-arc {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 12px;
+    border-radius: 0 0 12px 12px;
+}
+.portada-logo-arc-top {
+    top: 0;
+    background: var(--logo-arc-warm);
+    border-radius: 0 0 12px 12px;
+}
+.portada-logo-arc-bottom {
+    bottom: 0;
+    background: var(--logo-arc-cool);
+    border-radius: 12px 12px 0 0;
+}
+.portada-logo-inner {
+    max-width: 520px;
+    margin: 0 auto;
+}
+.portada-logo-line1 {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 1.35rem;
+    font-weight: 400;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--logo-red);
+    margin: 0 0 4px;
+}
+.portada-logo-line2 {
+    font-family: 'Oswald', sans-serif;
+    font-size: 3.5rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: var(--logo-arc-cool);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin: 0 0 16px;
+}
+.portada-logo-line3 {
+    font-family: 'Dancing Script', cursive;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--logo-orange);
+    margin: 0 0 4px;
+}
+.portada-logo-line4 {
+    font-family: 'Dancing Script', cursive;
+    font-size: 1.45rem;
+    font-weight: 500;
+    color: var(--logo-teal);
+    margin: 0 0 0;
+}
+.portada-logo-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 24px;
+    min-height: 44px;
+    border-radius: 50px;
+    background: var(--logo-arc-warm);
+    color: white;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 0.04em;
+    box-shadow: 0 8px 24px rgba(220, 38, 38, 0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.portada-logo-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(234, 88, 12, 0.4);
+}
+.portada-logo-auth {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+.portada-logo-btn-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    min-height: 44px;
+    border-radius: 50px;
+    background: transparent;
+    color: var(--logo-teal);
+    border: 2px solid var(--logo-teal);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.9rem;
+    transition: background 0.2s, color 0.2s, transform 0.2s;
+}
+.portada-logo-btn-outline:hover {
+    background: var(--logo-teal);
+    color: white;
+    transform: translateY(-2px);
+}
+.portada-logo-btn-secondary {
+    background: transparent;
+    color: var(--logo-dark);
+    border: 2px solid var(--logo-dark);
+    box-shadow: none;
+}
+.portada-logo-btn-secondary:hover {
+    background: var(--logo-dark);
+    color: white;
+    box-shadow: 0 6px 20px rgba(31, 41, 55, 0.3);
+}
+@media (max-width: 600px) {
+    .portada-logo { min-height: 36vh; padding: 28px 16px 36px; }
+    .portada-logo-first { min-height: 40vh; }
+    .portada-logo-line1 { font-size: 1.1rem; letter-spacing: 0.2em; }
+    .portada-logo-line2 { font-size: 2.5rem; }
+    .portada-logo-line3 { font-size: 1.4rem; }
+    .portada-logo-line4 { font-size: 1.25rem; }
+    .portada-logo-auth { flex-direction: column; }
+}
+@media (max-width: 380px) {
+    .portada-logo { min-height: 34vh; padding: 20px 12px 28px; }
+    .portada-logo-first { min-height: 38vh; padding-top: max(24px, env(safe-area-inset-top)); }
+    .portada-logo-inner { padding: 0 4px; }
+    .portada-logo-line1 { font-size: 1rem; letter-spacing: 0.15em; }
+    .portada-logo-line2 { font-size: 2rem; }
+    .portada-logo-line3 { font-size: 1.25rem; }
+    .portada-logo-line4 { font-size: 1.1rem; }
+}
+    </style>
 </head>
 <body>
 <section class="portada-logo portada-logo-first">
     <div class="portada-logo-arc portada-logo-arc-top"></div>
     <div class="portada-logo-inner">
-        <img src="imagenes/logo/Logo 2.jpg" alt="Panificación Colombres" class="portada-logo-img">
         <p class="portada-logo-line1">PANIFICACIÓN</p>
         <h2 class="portada-logo-line2">COLOMBRES</h2>
         <p class="portada-logo-line3">Elaboración Artesanal</p>
@@ -29,8 +199,8 @@
             <h2>Carga de precios y costos</h2>
             <p>Desde aquí podés cargar los precios de los <strong>proveedores</strong> y los costos de <strong>packing</strong> para calcular el costo real de cada producto. La materia prima y el empaque se integran en un mismo flujo para definir precios de venta y márgenes.</p>
             <div class="costos-btns">
-                <a href="scr/costos/Packing/packing.html" class="portada-logo-btn costos-btn">Packing</a>
-                <a href="scr/costos/Materia-Prima/materia-prima.html" class="portada-logo-btn costos-btn">Materia prima</a>
+                <a href="scr/costos/Packing/packing.html" class="portada-logo-btn costos-btn" target="_self">Packing</a>
+                <a href="scr/costos/Materia-Prima/materia-prima.html" class="portada-logo-btn costos-btn" target="_self">Materia prima</a>
             </div>
         </div>
     </div>

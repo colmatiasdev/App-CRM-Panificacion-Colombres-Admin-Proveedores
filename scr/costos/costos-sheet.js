@@ -6,8 +6,15 @@
 (function () {
     const config = window.APP_CONFIG || {};
     const appsScriptUrl = (config.appsScriptUrl || "").trim();
-    const urlPacking = (config.googleSheetPackingUrl || "").trim();
-    const urlMateria = (config.googleSheetMateriaPrimaUrl || "").trim();
+    var gs = config.googleSheet;
+    var urlPacking = (config.googleSheetPackingUrl || "").trim();
+    var urlMateria = (config.googleSheetMateriaPrimaUrl || "").trim();
+    if (!urlPacking && gs && gs.baseUrl && gs.gids && gs.gids.packing != null) {
+        urlPacking = gs.baseUrl + "?gid=" + gs.gids.packing + "&single=true&output=csv";
+    }
+    if (!urlMateria && gs && gs.baseUrl && gs.gids && gs.gids.materiaPrima != null) {
+        urlMateria = gs.baseUrl + "?gid=" + gs.gids.materiaPrima + "&single=true&output=csv";
+    }
     const containerPacking = document.getElementById("datos-packing");
     const containerMateria = document.getElementById("datos-materia-prima");
 
@@ -710,10 +717,11 @@
         });
     }
 
-    /** Carga desde Apps Script (action=list). Devuelve { headers, rows } con rows como array de arrays. */
+    /** Carga desde Apps Script (action=list). Devuelve { headers, rows }. Timeout 12s para no quedar en "Cargando..." si falla CORS (p. ej. file://). */
     function loadFromApi(sheetKey, container) {
         var url = appsScriptUrl + "?action=list&sheet=" + sheetKey;
-        return fetch(url, { cache: "no-store" })
+        var timeoutMs = 12000;
+        var fetchPromise = fetch(url, { cache: "no-store" })
             .then(function (res) { return res.json(); })
             .then(function (json) {
                 if (!json || !json.success || !json.data) {
@@ -726,6 +734,10 @@
                 });
                 return { headers: headers, rows: rows };
             });
+        var timeoutPromise = new Promise(function (_, reject) {
+            setTimeout(function () { reject(new Error("Tiempo de espera agotado. Usá un servidor local (Live Server, etc.) para que la API funcione.")); }, timeoutMs);
+        });
+        return Promise.race([fetchPromise, timeoutPromise]);
     }
 
     function run(container) {
