@@ -149,6 +149,18 @@
                     if (categoriaColIdx < 0 && headers.length > 1) {
                         categoriaColIdx = 1;
                     }
+                    var marcaColIdx = -1;
+                    var lugarColIdx = -1;
+                    for (var m = 0; m < headers.length; m++) {
+                        var hNormM = normHeaderForCompare(headers[m]);
+                        var hTrimM = String(headers[m] != null ? headers[m] : "").trim().toLowerCase().replace(/\s/g, "");
+                        if (hNormM === "marca" || hTrimM === "marca") { marcaColIdx = m; break; }
+                    }
+                    for (var l = 0; l < headers.length; l++) {
+                        var hNormL = normHeaderForCompare(headers[l]);
+                        var hTrimL = String(headers[l] != null ? headers[l] : "").trim().toLowerCase().replace(/\s/g, "");
+                        if (hNormL === "lugar" || hTrimL === "lugar") { lugarColIdx = l; break; }
+                    }
                     var categoriasForDatalist = [];
                     try {
                         var storedCat = sessionStorage.getItem("costosDistinctCategorias");
@@ -168,6 +180,24 @@
                         }
                     }
                     var categoriasState = { list: categoriasForDatalist };
+                    var marcasForDatalist = [];
+                    try {
+                        var storedMarca = sessionStorage.getItem("costosDistinctMarcas");
+                        if (storedMarca) marcasForDatalist = JSON.parse(storedMarca);
+                    } catch (e) {}
+                    if (marcaColIdx >= 0 && marcasForDatalist.length === 0) {
+                        var currentMarca = (record[headers[marcaColIdx]] != null ? String(record[headers[marcaColIdx]]).trim() : "") || (row[marcaColIdx] != null ? String(row[marcaColIdx]).trim() : "");
+                        if (currentMarca) { marcasForDatalist = [currentMarca]; try { sessionStorage.setItem("costosDistinctMarcas", JSON.stringify(marcasForDatalist)); } catch (e) {} }
+                    }
+                    var lugaresForDatalist = [];
+                    try {
+                        var storedLugar = sessionStorage.getItem("costosDistinctLugares");
+                        if (storedLugar) lugaresForDatalist = JSON.parse(storedLugar);
+                    } catch (e) {}
+                    if (lugarColIdx >= 0 && lugaresForDatalist.length === 0) {
+                        var currentLugar = (record[headers[lugarColIdx]] != null ? String(record[headers[lugarColIdx]]).trim() : "") || (row[lugarColIdx] != null ? String(row[lugarColIdx]).trim() : "");
+                        if (currentLugar) { lugaresForDatalist = [currentLugar]; try { sessionStorage.setItem("costosDistinctLugares", JSON.stringify(lugaresForDatalist)); } catch (e) {} }
+                    }
                     var presentationRowAdded = false;
                     headers.forEach(function (headerName, i) {
                         var key = String(headerName != null ? headerName : "").trim();
@@ -386,21 +416,21 @@
                             editIcon.setAttribute("aria-label", "Editar campo");
                             editIcon.innerHTML = "<i class=\"fa-solid fa-pen\" aria-hidden=\"true\"></i>";
                             valueCell.appendChild(editIcon);
-                            (function (w, cell, span, idx, rawVal, isCategoriaField, form, categoriasStateRef) {
+                            (function (w, cell, span, idx, rawVal, isCategoriaField, isMarcaField, isLugarField, form, categoriasStateRef) {
                                 function removeDatalistCategoria() {
                                     var dl = document.getElementById("costos-datalist-categoria");
                                     if (dl) dl.parentNode.removeChild(dl);
                                 }
                                 editIcon.addEventListener("click", function () {
-                                    var wrapCat = cell.querySelector(".costos-edit-categoria-wrap");
+                                    var wrapCombo = cell.querySelector(".costos-edit-categoria-wrap, .costos-edit-marca-wrap, .costos-edit-lugar-wrap");
                                     var dyn = w.querySelector(".costos-edit-input-dynamic");
-                                    if (wrapCat) {
-                                        var hidden = wrapCat.querySelector("input[type=hidden].costos-edit-input");
+                                    if (wrapCombo) {
+                                        var hidden = wrapCombo.querySelector("input[type=hidden].costos-edit-input");
                                         var val = hidden ? hidden.value : "";
                                         if (val === "__nueva__") val = "";
                                         span.textContent = (val || "").trim() || "—";
                                         span.style.display = "";
-                                        wrapCat.parentNode.removeChild(wrapCat);
+                                        wrapCombo.parentNode.removeChild(wrapCombo);
                                         var closeBtn = cell.querySelector(".costos-edit-value-close-btn");
                                         if (closeBtn) closeBtn.parentNode.removeChild(closeBtn);
                                         editIcon.style.display = "";
@@ -486,6 +516,130 @@
                                         inp._costosValueElement = sel;
                                         var elementToRemove = wrapCat;
                                         var elementToFocus = sel;
+                                    } else if (isMarcaField && form) {
+                                        var optsM = [];
+                                        try {
+                                            var storedM = sessionStorage.getItem("costosDistinctMarcas");
+                                            if (storedM) optsM = JSON.parse(storedM);
+                                        } catch (e) {}
+                                        if (!Array.isArray(optsM) || optsM.length === 0) optsM = [];
+                                        optsM = optsM.slice();
+                                        var currentValM = rawVal != null ? String(rawVal).trim() : "";
+                                        if (currentValM && optsM.indexOf(currentValM) === -1) optsM.unshift(currentValM);
+                                        optsM = optsM.filter(function (v) { return v != null && String(v).trim() !== ""; });
+                                        if (optsM.length === 0) optsM = ["—"];
+                                        var wrapMarca = document.createElement("div");
+                                        wrapMarca.className = "costos-edit-marca-wrap costos-edit-combo-wrap";
+                                        var selM = document.createElement("select");
+                                        selM.className = "costos-edit-input-dynamic costos-edit-select-marca";
+                                        optsM.forEach(function (v) {
+                                            var opt = document.createElement("option");
+                                            opt.value = String(v).trim();
+                                            opt.textContent = opt.value;
+                                            if (opt.value === currentValM) opt.selected = true;
+                                            selM.appendChild(opt);
+                                        });
+                                        var optNuevaM = document.createElement("option");
+                                        optNuevaM.value = "__nueva__";
+                                        optNuevaM.textContent = "— Agregar otra —";
+                                        selM.appendChild(optNuevaM);
+                                        wrapMarca.appendChild(selM);
+                                        inp = document.createElement("input");
+                                        inp.type = "text";
+                                        inp.className = "costos-edit-input-dynamic costos-edit-input-otra-marca";
+                                        inp.style.display = "none";
+                                        inp.placeholder = "Escribí la nueva marca";
+                                        wrapMarca.appendChild(inp);
+                                        var hiddenValM = document.createElement("input");
+                                        hiddenValM.type = "hidden";
+                                        hiddenValM.className = "costos-edit-input";
+                                        hiddenValM.setAttribute("data-header-index", String(idx));
+                                        hiddenValM.value = currentValM || "";
+                                        wrapMarca.appendChild(hiddenValM);
+                                        function syncHiddenM() {
+                                            hiddenValM.value = selM.value === "__nueva__" ? (inp.value || "").trim() : selM.value;
+                                        }
+                                        selM.addEventListener("change", function () {
+                                            if (selM.value === "__nueva__") {
+                                                inp.style.display = "";
+                                                inp.value = currentValM && optsM.indexOf(currentValM) === -1 ? currentValM : "";
+                                                inp.focus();
+                                            } else { inp.style.display = "none"; inp.value = ""; }
+                                            syncHiddenM();
+                                        });
+                                        inp.addEventListener("input", function () {
+                                            if (selM.value === "__nueva__") selM.options[selM.selectedIndex].text = inp.value || "— Agregar otra —";
+                                            syncHiddenM();
+                                        });
+                                        inp.addEventListener("blur", function () {
+                                            if (selM.value === "__nueva__" && inp.value.trim()) optNuevaM.textContent = inp.value.trim();
+                                            syncHiddenM();
+                                        });
+                                        cell.insertBefore(wrapMarca, span);
+                                        var elementToRemove = wrapMarca;
+                                        var elementToFocus = selM;
+                                    } else if (isLugarField && form) {
+                                        var optsL = [];
+                                        try {
+                                            var storedL = sessionStorage.getItem("costosDistinctLugares");
+                                            if (storedL) optsL = JSON.parse(storedL);
+                                        } catch (e) {}
+                                        if (!Array.isArray(optsL) || optsL.length === 0) optsL = [];
+                                        optsL = optsL.slice();
+                                        var currentValL = rawVal != null ? String(rawVal).trim() : "";
+                                        if (currentValL && optsL.indexOf(currentValL) === -1) optsL.unshift(currentValL);
+                                        optsL = optsL.filter(function (v) { return v != null && String(v).trim() !== ""; });
+                                        if (optsL.length === 0) optsL = ["—"];
+                                        var wrapLugar = document.createElement("div");
+                                        wrapLugar.className = "costos-edit-lugar-wrap costos-edit-combo-wrap";
+                                        var selL = document.createElement("select");
+                                        selL.className = "costos-edit-input-dynamic costos-edit-select-lugar";
+                                        optsL.forEach(function (v) {
+                                            var opt = document.createElement("option");
+                                            opt.value = String(v).trim();
+                                            opt.textContent = opt.value;
+                                            if (opt.value === currentValL) opt.selected = true;
+                                            selL.appendChild(opt);
+                                        });
+                                        var optNuevaL = document.createElement("option");
+                                        optNuevaL.value = "__nueva__";
+                                        optNuevaL.textContent = "— Agregar otra —";
+                                        selL.appendChild(optNuevaL);
+                                        wrapLugar.appendChild(selL);
+                                        inp = document.createElement("input");
+                                        inp.type = "text";
+                                        inp.className = "costos-edit-input-dynamic costos-edit-input-otra-lugar";
+                                        inp.style.display = "none";
+                                        inp.placeholder = "Escribí el nuevo lugar";
+                                        wrapLugar.appendChild(inp);
+                                        var hiddenValL = document.createElement("input");
+                                        hiddenValL.type = "hidden";
+                                        hiddenValL.className = "costos-edit-input";
+                                        hiddenValL.setAttribute("data-header-index", String(idx));
+                                        hiddenValL.value = currentValL || "";
+                                        wrapLugar.appendChild(hiddenValL);
+                                        function syncHiddenL() {
+                                            hiddenValL.value = selL.value === "__nueva__" ? (inp.value || "").trim() : selL.value;
+                                        }
+                                        selL.addEventListener("change", function () {
+                                            if (selL.value === "__nueva__") {
+                                                inp.style.display = "";
+                                                inp.value = currentValL && optsL.indexOf(currentValL) === -1 ? currentValL : "";
+                                                inp.focus();
+                                            } else { inp.style.display = "none"; inp.value = ""; }
+                                            syncHiddenL();
+                                        });
+                                        inp.addEventListener("input", function () {
+                                            if (selL.value === "__nueva__") selL.options[selL.selectedIndex].text = inp.value || "— Agregar otra —";
+                                            syncHiddenL();
+                                        });
+                                        inp.addEventListener("blur", function () {
+                                            if (selL.value === "__nueva__" && inp.value.trim()) optNuevaL.textContent = inp.value.trim();
+                                            syncHiddenL();
+                                        });
+                                        cell.insertBefore(wrapLugar, span);
+                                        var elementToRemove = wrapLugar;
+                                        var elementToFocus = selL;
                                     } else {
                                         inp = document.createElement("input");
                                         inp.type = "text";
@@ -514,7 +668,7 @@
                                     });
                                     if (elementToFocus) elementToFocus.focus();
                                 });
-                            })(wrap, valueCell, valueSpan, i, value, i === categoriaColIdx, formEl, categoriasState);
+                            })(wrap, valueCell, valueSpan, i, value, i === categoriaColIdx, i === marcaColIdx, i === lugarColIdx, formEl, categoriasState);
                         }
                         wrap.appendChild(label);
                         wrap.appendChild(valueCell);
@@ -596,6 +750,43 @@
                                 });
                                 categoriasState.list = allCats;
                                 try { sessionStorage.setItem("costosDistinctCategorias", JSON.stringify(allCats)); } catch (err) {}
+                                var marcaKey = null;
+                                var lugarKey = null;
+                                for (var ki = 0; ki < apiHeaders.length; ki++) {
+                                    var h = String(apiHeaders[ki] != null ? apiHeaders[ki] : "").trim().toLowerCase().replace(/\s/g, "");
+                                    if (h === "marca") marcaKey = apiHeaders[ki];
+                                    if (h === "lugar") lugarKey = apiHeaders[ki];
+                                }
+                                if (marcaKey) {
+                                    var seenM = {};
+                                    var allMarcas = [];
+                                    apiRows.forEach(function (row) {
+                                        var v = row[marcaKey] != null ? String(row[marcaKey]).trim() : "";
+                                        if (!v) v = "—";
+                                        if (!seenM[v]) { seenM[v] = true; allMarcas.push(v); }
+                                    });
+                                    allMarcas.sort(function (a, b) {
+                                        if (a === "—") return 1;
+                                        if (b === "—") return -1;
+                                        return a.localeCompare(b);
+                                    });
+                                    try { sessionStorage.setItem("costosDistinctMarcas", JSON.stringify(allMarcas)); } catch (err) {}
+                                }
+                                if (lugarKey) {
+                                    var seenL = {};
+                                    var allLugares = [];
+                                    apiRows.forEach(function (row) {
+                                        var v = row[lugarKey] != null ? String(row[lugarKey]).trim() : "";
+                                        if (!v) v = "—";
+                                        if (!seenL[v]) { seenL[v] = true; allLugares.push(v); }
+                                    });
+                                    allLugares.sort(function (a, b) {
+                                        if (a === "—") return 1;
+                                        if (b === "—") return -1;
+                                        return a.localeCompare(b);
+                                    });
+                                    try { sessionStorage.setItem("costosDistinctLugares", JSON.stringify(allLugares)); } catch (err) {}
+                                }
                             })
                             .catch(function () {});
                     })();

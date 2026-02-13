@@ -258,15 +258,23 @@
             });
         };
         var catIdx = -1;
+        var marcaIdx = -1;
+        var lugarIdx = -1;
         var idxIdMateriaPrima = -1;
         for (var i = 0; i < headers.length; i++) {
             var hTrim = String(headers[i] != null ? headers[i] : "").trim().toLowerCase().replace(/\s/g, "");
-            if (hTrim === "categoria") catIdx = i;
+            if (hTrim === "categoria" || hTrim === "categoría") catIdx = i;
+            if (hTrim === "marca") marcaIdx = i;
+            if (hTrim === "lugar") lugarIdx = i;
             if (hTrim === "idmateria-prima" || hTrim === "idmateriaprima") idxIdMateriaPrima = i;
         }
         var groups = [];
         var groupMap = {};
         var groupOrder = [];
+        var marcaSet = {};
+        var marcaOrder = [];
+        var lugarSet = {};
+        var lugarOrder = [];
         rows.forEach(function (row) {
             var catVal = catIdx >= 0 && row[catIdx] != null ? String(row[catIdx]).trim() : "";
             if (!catVal) catVal = "Sin categoría";
@@ -276,10 +284,28 @@
                 groups.push({ label: catVal, rows: [] });
             }
             groups[groupMap[catVal]].rows.push(row);
+            if (marcaIdx >= 0) {
+                var mVal = row[marcaIdx] != null ? String(row[marcaIdx]).trim() : "";
+                if (!marcaSet[mVal]) { marcaSet[mVal] = true; marcaOrder.push(mVal || "—"); }
+            }
+            if (lugarIdx >= 0) {
+                var lVal = row[lugarIdx] != null ? String(row[lugarIdx]).trim() : "";
+                if (!lugarSet[lVal]) { lugarSet[lVal] = true; lugarOrder.push(lVal || "—"); }
+            }
         });
         groupOrder.sort(function (a, b) {
             if (a === "Sin categoría") return 1;
             if (b === "Sin categoría") return -1;
+            return a.localeCompare(b);
+        });
+        marcaOrder.sort(function (a, b) {
+            if (a === "—") return 1;
+            if (b === "—") return -1;
+            return a.localeCompare(b);
+        });
+        lugarOrder.sort(function (a, b) {
+            if (a === "—") return 1;
+            if (b === "—") return -1;
             return a.localeCompare(b);
         });
         var idxProducto = -1, idxPresentacion = -1, idxPrecio = -1, idxPrecioAnterior = -1, idxDias = -1;
@@ -394,6 +420,8 @@
                             row: rec.row
                         }));
                         sessionStorage.setItem("costosDistinctCategorias", JSON.stringify(groupOrder));
+                        sessionStorage.setItem("costosDistinctMarcas", JSON.stringify(marcaOrder));
+                        sessionStorage.setItem("costosDistinctLugares", JSON.stringify(lugarOrder));
                         window.location.href = "editar-materia-prima.html" + (rec.id ? "?id=" + encodeURIComponent(rec.id) : "");
                     } catch (err) {
                         window.location.href = "editar-materia-prima.html" + (rec.id ? "?id=" + encodeURIComponent(rec.id) : "");
