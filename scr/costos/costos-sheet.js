@@ -11,11 +11,12 @@
     const containerPacking = document.getElementById("datos-packing");
     const containerMateria = document.getElementById("datos-materia-prima");
 
-    /** Columnas a ocultar en la tabla de Materia prima (Categoria = fila de agrupación; id interno no se muestra). */
-    var MATERIA_PRIMA_COLUMNAS_OCULTAS = [
+    /** Columnas a ocultar en listado por categorías (Materia prima y Packing). */
+    var COSTOS_COLUMNAS_OCULTAS = [
         "Categoria",
         "idmateria-prima",
         "id materia prima",
+        "idpacking",
         "Presentacion-Tipo",
         "OBSERVACIONES",
         "Observaciones",
@@ -96,17 +97,46 @@
     }
 
     function applyMateriaOrPackingTable(container, data, isMateria) {
-        if (isMateria) {
-            showTableMateriaPrimaConCategorias(container, data.headers, data.rows);
+        if (container === containerMateria) {
+            showTableCostosConCategorias(container, data.headers, data.rows, {
+                idColumnHeaders: ["idmateria-prima", "idmateriaprima"],
+                storageKeyEdit: "costosEditRecord",
+                storageKeyCreate: "costosCreateRecord",
+                editUrl: "editar-materia-prima.html",
+                createUrl: "crear-materia-prima.html",
+                filterInputId: "filter-materia-prima",
+                countId: "materia-prima-count",
+                btnNuevaId: "btn-nueva-materia-prima"
+            });
+        } else if (container === containerPacking) {
+            showTableCostosConCategorias(container, data.headers, data.rows, {
+                idColumnHeaders: ["idpacking"],
+                storageKeyEdit: "costosEditRecordPacking",
+                storageKeyCreate: "costosCreateRecordPacking",
+                editUrl: "editar-packing.html",
+                createUrl: "crear-packing.html",
+                filterInputId: "filter-packing",
+                countId: "packing-count",
+                btnNuevaId: "btn-nueva-packing"
+            });
         } else {
             showTable(container, data.headers, data.rows);
         }
     }
 
-    /** Tabla de Materia prima: sin columna Categoria; las filas se agrupan por categoría con una fila de ancho completo por grupo. */
-    function showTableMateriaPrimaConCategorias(container, headers, rows) {
+    /** Listado por categorías (Materia prima y Packing). options: idColumnHeaders, storageKeyEdit, storageKeyCreate, editUrl, createUrl, filterInputId, countId, btnNuevaId. */
+    function showTableCostosConCategorias(container, headers, rows, options) {
         if (!container) return;
-        var hidden = MATERIA_PRIMA_COLUMNAS_OCULTAS.slice();
+        var opts = options || {};
+        var idColumnHeaders = opts.idColumnHeaders || ["idmateria-prima", "idmateriaprima"];
+        var storageKeyEdit = opts.storageKeyEdit || "costosEditRecord";
+        var storageKeyCreate = opts.storageKeyCreate || "costosCreateRecord";
+        var editUrl = opts.editUrl || "editar-materia-prima.html";
+        var createUrl = opts.createUrl || "crear-materia-prima.html";
+        var filterInputId = opts.filterInputId || "filter-materia-prima";
+        var countId = opts.countId || "materia-prima-count";
+        var btnNuevaId = opts.btnNuevaId || "btn-nueva-materia-prima";
+        var hidden = COSTOS_COLUMNAS_OCULTAS.slice();
         var filtered = filterVisibleColumns(headers, rows, hidden);
         var visibleHeaders = filtered.headers;
         var visibleIndexes = filtered.visibleIndexes || [];
@@ -263,7 +293,8 @@
         var idxPresUnid = -1;
         var idxPresTipo = -1;
         var idxTipoUnidadMedida = -1;
-        var idxIdMateriaPrima = -1;
+        var idxId = -1;
+        var idxHabilitado = -1;
         for (var i = 0; i < headers.length; i++) {
             var hTrim = String(headers[i] != null ? headers[i] : "").trim().toLowerCase().replace(/\s/g, "");
             if (hTrim === "categoria" || hTrim === "categoría") catIdx = i;
@@ -272,7 +303,8 @@
             if (hTrim === "presentacion-unidad") idxPresUnid = i;
             if (hTrim === "presentacion-tipo") idxPresTipo = i;
             if (hTrim === "tipo-unidad-medida") idxTipoUnidadMedida = i;
-            if (hTrim === "idmateria-prima" || hTrim === "idmateriaprima") idxIdMateriaPrima = i;
+            if (idColumnHeaders.indexOf(hTrim) !== -1) idxId = i;
+            if (hTrim === "habilitado") idxHabilitado = i;
         }
         var groups = [];
         var groupMap = {};
@@ -393,7 +425,7 @@
                     extraParts.push("<div class=\"costos-extra-item\"><span class=\"costos-extra-label\">" + escapeHtml(labels[ex]) + "</span> <b>" + escapeHtml(val) + "</b></div>");
                 }
                 var extraHtml = "<div class=\"costos-extra-info\">" + extraParts.join("") + "</div>";
-                var idRegistro = idxIdMateriaPrima >= 0 && row[idxIdMateriaPrima] != null ? String(row[idxIdMateriaPrima]).trim() : "";
+                var idRegistro = idxId >= 0 && row[idxId] != null ? String(row[idxId]).trim() : "";
                 recordsForEdit.push({
                     id: idRegistro,
                     headers: headers.slice(),
@@ -417,14 +449,18 @@
                         trendIcon = "<i class=\"fa-solid fa-arrow-trend-down costos-trend-down\" title=\"Baj\u00f3 el precio\" aria-hidden=\"true\"></i>";
                     }
                 }
+                var habilitadoVal = idxHabilitado >= 0 && row[idxHabilitado] != null ? String(row[idxHabilitado]).trim().toUpperCase() : "";
+                var isDeshabilitado = habilitadoVal === "NO";
+                var cardClass = "costos-card" + (isDeshabilitado ? " costos-card-deshabilitado" : "");
+                var deshabilitadoIcon = isDeshabilitado ? "<span class=\"costos-card-deshabilitado-icon\" title=\"Deshabilitado\" aria-label=\"Deshabilitado\"><i class=\"fa-solid fa-circle-slash\" aria-hidden=\"true\"></i></span>" : "";
                 var priceBlock = (precio ? "<div class=\"costos-card-price\">" + escapeHtml(precio) + (trendIcon ? " " + trendIcon : "") + "</div>" : "") +
                     "<a href=\"#\" class=\"costos-card-edit-btn\" title=\"Editar precio / registro\" aria-label=\"Editar registro\"><i class=\"fa-solid fa-pen\" aria-hidden=\"true\"></i></a>";
-                cardsHtml += "<div class=\"costos-card\">" +
+                cardsHtml += "<div class=\"" + cardClass + "\">" +
                     "<div class=\"costos-card-main\">" +
                     "<div class=\"costos-card-left-wrap\">" +
                     "<div class=\"costos-card-left\">" +
                     "<div class=\"costos-card-info\">" +
-                    "<h2 class=\"costos-card-name\">" + escapeHtml(nombre) + "</h2>" +
+                    "<h2 class=\"costos-card-name\">" + deshabilitadoIcon + escapeHtml(nombre) + "</h2>" +
                     "</div>" +
                     "</div>" +
                     "<div class=\"costos-card-presentacion-row\">" +
@@ -453,7 +489,7 @@
                 btn.addEventListener("click", function (e) {
                     e.preventDefault();
                     try {
-                        sessionStorage.setItem("costosEditRecord", JSON.stringify({
+                        sessionStorage.setItem(storageKeyEdit, JSON.stringify({
                             id: rec.id,
                             headers: rec.headers,
                             row: rec.row
@@ -464,9 +500,9 @@
                         sessionStorage.setItem("costosDistinctUnidadPresentacion", JSON.stringify(unidadPresOrder));
                         sessionStorage.setItem("costosDistinctTipoPresentacion", JSON.stringify(tipoPresOrder));
                         sessionStorage.setItem("costosDistinctTipoUnidadMedida", JSON.stringify(tipoUnidadMedidaOrder));
-                        window.location.href = "editar-materia-prima.html" + (rec.id ? "?id=" + encodeURIComponent(rec.id) : "");
+                        window.location.href = editUrl + (rec.id ? "?id=" + encodeURIComponent(rec.id) : "");
                     } catch (err) {
-                        window.location.href = "editar-materia-prima.html" + (rec.id ? "?id=" + encodeURIComponent(rec.id) : "");
+                        window.location.href = editUrl + (rec.id ? "?id=" + encodeURIComponent(rec.id) : "");
                     }
                 });
             }
@@ -488,7 +524,7 @@
                 }
             });
         });
-        var filterInput = document.getElementById("filter-materia-prima");
+        var filterInput = document.getElementById(filterInputId);
         if (filterInput) {
             function applyFilterMateria() {
                 var wrap = container.querySelector(".costos-cards-wrap");
@@ -530,7 +566,7 @@
                     }
                 }
                 var visibleCards = [].slice.call(wrap.querySelectorAll(".costos-card")).filter(function (c) { return c.style.display !== "none"; }).length;
-                var countEl = document.getElementById("materia-prima-count");
+                var countEl = document.getElementById(countId);
                 if (countEl) {
                     if (totalCards === 0) {
                         countEl.textContent = "";
@@ -543,7 +579,12 @@
                     }
                 }
             }
-            filterInput.addEventListener("input", applyFilterMateria);
+            var filterDebounceTimer = null;
+            function scheduleFilter() {
+                if (filterDebounceTimer) clearTimeout(filterDebounceTimer);
+                filterDebounceTimer = setTimeout(applyFilterMateria, 180);
+            }
+            filterInput.addEventListener("input", scheduleFilter);
             filterInput.addEventListener("search", applyFilterMateria);
             applyFilterMateria();
         }
@@ -626,7 +667,7 @@
         return "COSTO-MP-" + base + rnd;
     }
 
-    /** Completa idmateria-prima vacíos en las filas de materia prima. Primera columna = idmateria-prima. */
+    /** Completa idmateria-prima vacíos en las filas de materia prima. */
     function completarIdMateriaPrima(headers, rows) {
         var idx = -1;
         for (var i = 0; i < headers.length; i++) {
@@ -639,6 +680,32 @@
         rows.forEach(function (row, i) {
             if (row[idx] == null || String(row[idx]).trim() === "") {
                 row[idx] = generarIdMateriaPrima(i);
+            }
+        });
+    }
+
+    function generarIdPacking(seed) {
+        var base = (Date.now().toString(36) + (seed != null ? Number(seed).toString(36) : "")).slice(-6);
+        var rnd = "";
+        for (var i = 0; i < 4; i++) {
+            rnd += ALFANUM[Math.floor(Math.random() * ALFANUM.length)];
+        }
+        return "COSTO-PK-" + base + rnd;
+    }
+
+    /** Completa idpacking vacíos en las filas de packing. */
+    function completarIdPacking(headers, rows) {
+        var idx = -1;
+        for (var i = 0; i < headers.length; i++) {
+            if (String(headers[i]).trim().toLowerCase().replace(/\s/g, "") === "idpacking") {
+                idx = i;
+                break;
+            }
+        }
+        if (idx < 0) return;
+        rows.forEach(function (row, i) {
+            if (row[idx] == null || String(row[idx]).trim() === "") {
+                row[idx] = generarIdPacking(i);
             }
         });
     }
@@ -704,9 +771,13 @@
                 .catch(function () {}) : Promise.resolve();
             loadFromApi(sheetKey, container)
                 .then(function (data) {
-                    if (isMateria && data.headers && data.headers.length) {
+                    if (data.headers && data.headers.length) {
                         try {
-                            sessionStorage.setItem("costosMateriaHeaders", JSON.stringify(data.headers));
+                            if (isMateria) {
+                                sessionStorage.setItem("costosMateriaHeaders", JSON.stringify(data.headers));
+                            } else {
+                                sessionStorage.setItem("costosPackingHeaders", JSON.stringify(data.headers));
+                            }
                         } catch (e) {}
                     }
                     if (!data.headers.length && !data.rows.length) {
@@ -746,6 +817,8 @@
                 }
                 if (isMateria) {
                     completarIdMateriaPrima(data.headers, data.rows);
+                } else {
+                    completarIdPacking(data.headers, data.rows);
                 }
                 applyMateriaOrPackingTable(container, data, isMateria);
             })
@@ -893,9 +966,16 @@
                     return;
                 }
                 var row = headers.map(function () { return ""; });
+                for (var hi = 0; hi < headers.length; hi++) {
+                    var h = String(headers[hi] != null ? headers[hi] : "").trim().toLowerCase().replace(/\s/g, "").replace(/-/g, "");
+                    if (h === "habilitado") {
+                        row[hi] = "SI";
+                        break;
+                    }
+                }
                 try {
                     sessionStorage.setItem("costosCreateRecord", JSON.stringify({ headers: headers, row: row }));
-                    window.location.href = "editar-materia-prima.html?create=1";
+                    window.location.href = "crear-materia-prima.html";
                 } catch (err) {
                     alert("Error al preparar el formulario.");
                 }
@@ -967,6 +1047,103 @@
                 .catch(function (err) {
                     btnNuevaMateria.classList.remove("costos-btn-loading");
                     btnNuevaMateria.innerHTML = origContent;
+                    alert("Error al cargar: " + (err.message || "Revisá appsScriptUrl."));
+                });
+        });
+    }
+
+    var btnNuevaPacking = document.getElementById("btn-nueva-packing");
+    if (btnNuevaPacking) {
+        btnNuevaPacking.addEventListener("click", function (e) {
+            e.preventDefault();
+            var appsScriptUrl = (window.APP_CONFIG && window.APP_CONFIG.appsScriptUrl) ? String(window.APP_CONFIG.appsScriptUrl).trim() : "";
+            function goToCreate(headers) {
+                if (!headers || !headers.length) {
+                    alert("No se pudieron obtener las columnas. Revisá la conexión con la hoja.");
+                    return;
+                }
+                var row = headers.map(function () { return ""; });
+                for (var hi = 0; hi < headers.length; hi++) {
+                    var h = String(headers[hi] != null ? headers[hi] : "").trim().toLowerCase().replace(/\s/g, "").replace(/-/g, "");
+                    if (h === "habilitado") {
+                        row[hi] = "SI";
+                        break;
+                    }
+                }
+                try {
+                    sessionStorage.setItem("costosCreateRecordPacking", JSON.stringify({ headers: headers, row: row }));
+                    window.location.href = "crear-packing.html";
+                } catch (err) {
+                    alert("Error al preparar el formulario.");
+                }
+            }
+            try {
+                var stored = sessionStorage.getItem("costosPackingHeaders");
+                if (stored) {
+                    var headers = JSON.parse(stored);
+                    goToCreate(Array.isArray(headers) ? headers : null);
+                    return;
+                }
+            } catch (e) {}
+            if (!appsScriptUrl) {
+                alert("Configurá appsScriptUrl en config.js para poder crear registros.");
+                return;
+            }
+            btnNuevaPacking.classList.add("costos-btn-loading");
+            var origContent = btnNuevaPacking.innerHTML;
+            btnNuevaPacking.innerHTML = "<i class=\"fa-solid fa-spinner fa-spin\" aria-hidden=\"true\"></i> <span>Cargando…</span>";
+            var fetchCombos = fetch(appsScriptUrl + "?action=list&sheet=combos&limit=5000", { cache: "no-store" })
+                .then(function (res) { return res.json(); })
+                .then(function (json) {
+                    if (!json || !json.success || !json.data) return;
+                    var headers = json.data.headers || [];
+                    var rows = json.data.rows || [];
+                    function normCol(h) {
+                        return String(h != null ? h : "").trim().toLowerCase().replace(/\s+/g, "-").replace(/-+/g, "-");
+                    }
+                    function findColKey(normName) {
+                        for (var ci = 0; ci < headers.length; ci++) {
+                            if (normCol(headers[ci]) === normName) return String(headers[ci] != null ? headers[ci] : "").trim();
+                        }
+                        return headers.length > 0 ? String(headers[0]).trim() : null;
+                    }
+                    function distinctValues(colKey) {
+                        var vals = [];
+                        rows.forEach(function (row) {
+                            var v = (row && colKey && row[colKey] != null) ? String(row[colKey]).trim() : "";
+                            if (v && vals.indexOf(v) === -1) vals.push(v);
+                        });
+                        return vals;
+                    }
+                    try {
+                        var keyUnidad = findColKey("tipo-unidad-medida");
+                        if (keyUnidad) sessionStorage.setItem("costosCombosUnidadPresentacion", JSON.stringify(distinctValues(keyUnidad)));
+                        var keyConvertir = findColKey("convertir-unidad-medida");
+                        if (keyConvertir) sessionStorage.setItem("costosCombosConvertirUnidadMedida", JSON.stringify(distinctValues(keyConvertir)));
+                        var keyTipoPres = findColKey("tipo-presentacion");
+                        if (keyTipoPres) sessionStorage.setItem("costosCombosTipoPresentacion", JSON.stringify(distinctValues(keyTipoPres)));
+                    } catch (e) {}
+                })
+                .catch(function () {});
+            fetch(appsScriptUrl + "?action=list&sheet=packing", { cache: "no-store" })
+                .then(function (res) { return res.json(); })
+                .then(function (json) {
+                    return Promise.all([Promise.resolve(json), fetchCombos]);
+                })
+                .then(function (arr) {
+                    var json = arr[0];
+                    btnNuevaPacking.classList.remove("costos-btn-loading");
+                    btnNuevaPacking.innerHTML = origContent;
+                    if (!json || !json.success || !json.data || !json.data.headers) {
+                        goToCreate(null);
+                        return;
+                    }
+                    var headers = (json.data.headers || []).map(function (h) { return String(h != null ? h : "").trim(); });
+                    goToCreate(headers);
+                })
+                .catch(function (err) {
+                    btnNuevaPacking.classList.remove("costos-btn-loading");
+                    btnNuevaPacking.innerHTML = origContent;
                     alert("Error al cargar: " + (err.message || "Revisá appsScriptUrl."));
                 });
         });

@@ -30,12 +30,18 @@
             <h2 class="costos-debug-title">Debug — Cálculo de equivalencia</h2>
             <pre id="costos-debug-equivalencia-content" class="costos-debug-content"></pre>
         </section>
+        <section id="costos-debug-precio" class="costos-debug-equivalencia" aria-label="Debug precio costo y equivalencia" style="display:none;">
+            <h2 class="costos-debug-title">Debug — Precio Costo y Equivalencia por unidad</h2>
+            <pre id="costos-debug-precio-content" class="costos-debug-content"></pre>
+        </section>
     </main>
     <script>
         (function () {
             if (window.APP_CONFIG && window.APP_CONFIG.costos && window.APP_CONFIG.costos.debugEquivalencia) {
                 var s = document.getElementById("costos-debug-equivalencia");
                 if (s) s.style.display = "block";
+                var sPrecio = document.getElementById("costos-debug-precio");
+                if (sPrecio) sPrecio.style.display = "block";
             }
             function normHeader(s) {
                 return String(s != null ? s : "").trim().toLowerCase().replace(/\s+/g, " ").replace(/-/g, " ");
@@ -71,16 +77,28 @@
                 var year = d.getFullYear();
                 return (day < 10 ? "0" : "") + day + "/" + (month < 10 ? "0" : "") + month + "/" + year;
             }
-            function formatMonedaArg(val) {
+            function formatMonedaArg(val, decimals) {
                 if (val == null || String(val).trim() === "") return "—";
                 var s = String(val).trim().replace(",", ".");
                 var n = parseFloat(s);
                 if (isNaN(n)) return String(val);
-                var parts = n.toFixed(2).split(".");
+                var d = (decimals != null && decimals >= 0) ? Math.min(decimals, 10) : 2;
+                var parts = n.toFixed(d).split(".");
                 var intPart = parts[0];
                 var decPart = parts[1];
                 var withDots = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
                 return "$ " + withDots + "," + decPart;
+            }
+            function roundToDecimals(num, decimals) {
+                if (decimals == null || decimals < 0) decimals = 2;
+                var factor = Math.pow(10, decimals);
+                return Math.round(num * factor) / factor;
+            }
+            function precioDisplayToNumericString(str) {
+                if (!str || String(str).trim() === "" || String(str).trim() === "—") return "";
+                var s = String(str).trim().replace(/\$\s?/g, "").replace(/\s/g, "").replace(/\./g, "").replace(",", ".");
+                var n = parseFloat(s);
+                return isNaN(n) ? "" : String(n);
             }
             function isPrecioDisplayField(nameNorm) {
                 var n = (nameNorm || "").trim();
@@ -533,7 +551,10 @@
                             return;
                         }
 
-                        var value = record[key] || "";
+                        var value = record[key] != null ? String(record[key]).trim() : "";
+                        if (value === "" && (nameNorm === "equivalencia unidad medida" || nameNorm === "equivalencia-unidad-medida" || nameNorm === "cantidad unidad medida" || nameNorm === "cantidad-unidad-medida") && i < row.length && row[i] != null && String(row[i]).trim() !== "") {
+                            value = String(row[i]).trim();
+                        }
                         if (isFechaActualizadaColumn(nameNorm)) {
                             value = getTodayDate();
                             fechaActualizadaIdx = i;
@@ -1270,14 +1291,16 @@
                             var cantidadStr = (cantidadSpan.textContent || "").replace(/\s/g, "").trim();
                             var cantidad = parseFloat(cantidadStr.replace(/\./g, "").replace(",", "."));
                             if (isNaN(cantidad)) cantidad = parseFloat(cantidadStr.replace(",", "."));
+                            var equivStr = (equivalenciaSpan && equivalenciaSpan.textContent ? equivalenciaSpan.textContent : "").replace(/\s/g, "").trim();
+                            var equiv = parseFloat(equivStr.replace(/\./g, "").replace(",", "."));
+                            if (isNaN(equiv)) equiv = parseFloat(equivStr.replace(",", "."));
                             if (!isNaN(precio) && !isNaN(cantidad) && cantidad !== 0) {
-                                var result = precio / cantidad;
-                                precioCostoSpan.textContent = formatMonedaArg(result);
+                                var result = roundToDecimals(precio / cantidad, 4);
+                                precioCostoSpan.textContent = formatMonedaArg(result, 4);
                                 if (equivalenciaSpan && precioEquivalenciaSpan) {
-                                    var equivStr = (equivalenciaSpan.textContent || "").replace(/\s/g, "").trim();
-                                    var equiv = parseFloat(equivStr.replace(",", "."));
                                     if (!isNaN(equiv) && equiv !== 0) {
-                                        precioEquivalenciaSpan.textContent = formatMonedaArg(result / equiv);
+                                        var resultEquiv = roundToDecimals(result / equiv, 4);
+                                        precioEquivalenciaSpan.textContent = formatMonedaArg(resultEquiv, 4);
                                     } else {
                                         precioEquivalenciaSpan.textContent = "—";
                                     }
@@ -1286,10 +1309,26 @@
                                 precioCostoSpan.textContent = "—";
                                 if (precioEquivalenciaSpan) precioEquivalenciaSpan.textContent = "—";
                             }
+                            var debugPrecioSection = document.getElementById("costos-debug-precio");
+                            var debugPrecioContent = debugPrecioSection ? document.getElementById("costos-debug-precio-content") : null;
+                            if (window.APP_CONFIG && window.APP_CONFIG.costos && window.APP_CONFIG.costos.debugEquivalencia && debugPrecioContent) {
+                                var precioOrig = (precioActualInput.value || "").trim();
+                                var usedPrecioAnterior = (precioOrig === "" || isNaN(parseFloat(precioStr.replace(",", ".")))) && precioAnteriorSpan;
+                                var linePrecio = "Precio (valor usado): " + (precioOrig || "(vacío)") + (usedPrecioAnterior ? " → parseado desde Precio anterior: " + precioAnteriorSpan.textContent : "") + " → número: " + (isNaN(precio) ? "NaN" : String(precio));
+                                var lineCant = "Cantidad (unidad de medida): " + cantidadStr + " → número: " + (isNaN(cantidad) ? "NaN" : String(cantidad));
+                                var lineEquiv = "Equivalencia: " + equivStr + " → número: " + (isNaN(equiv) ? "NaN" : String(equiv));
+                                var lineFormula1 = "Fórmula: Precio Costo por unidad = Precio ÷ Cantidad";
+                                var lineFormula2 = "Fórmula: Precio Equivalencia por unidad = Precio Costo ÷ Equivalencia";
+                                var resultNum = !isNaN(precio) && !isNaN(cantidad) && cantidad !== 0 ? roundToDecimals(precio / cantidad, 4) : NaN;
+                                var resultEquivNum = (!isNaN(resultNum) && !isNaN(equiv) && equiv !== 0) ? roundToDecimals(resultNum / equiv, 4) : NaN;
+                                var lineR1 = "Resultado Precio Costo por unidad: " + (isNaN(resultNum) ? "—" : formatMonedaArg(resultNum, 4) + " (" + resultNum + ")");
+                                var lineR2 = "Resultado Precio Equivalencia por unidad: " + (isNaN(resultEquivNum) ? "—" : formatMonedaArg(resultEquivNum, 4) + " (" + resultEquivNum + ")");
+                                debugPrecioContent.textContent = linePrecio + "\n" + lineCant + "\n" + lineEquiv + "\n\n" + lineFormula1 + "\n" + lineFormula2 + "\n\n" + lineR1 + "\n" + lineR2;
+                            }
                         }
                         precioActualInput.addEventListener("input", updatePrecioCosto);
                         precioActualInput.addEventListener("change", updatePrecioCosto);
-                        updatePrecioCosto();
+                        // En edición no se ejecuta updatePrecioCosto al cargar: se respetan los valores guardados (precio-costo-x-unidad, precio-equivalencia-x-unidad). El cálculo solo corre cuando el usuario cambia el precio actual.
                     })();
 
                     (function () {
@@ -1313,6 +1352,7 @@
                             hiddenEquiv.setAttribute("data-header-index", String(idxCantidadUnidadMedida));
                             cantidadField.querySelector(".costos-edit-value-cell").appendChild(hiddenEquiv);
                         }
+                        hiddenEquiv.value = (row[idxCantidadUnidadMedida] != null ? String(row[idxCantidadUnidadMedida]).trim() : "");
                         function calcularEquivalenciaValor(cantidad, unidadOrigen, unidadDestino) {
                             if (window.COSTOS_EQUIVALENCIA && window.COSTOS_EQUIVALENCIA.convert) {
                                 return window.COSTOS_EQUIVALENCIA.convert(cantidad, unidadOrigen, unidadDestino);
@@ -1378,6 +1418,15 @@
                                 cantidadSpan.textContent = "—";
                                 hiddenEquiv.value = "";
                             }
+                            var equivalenciaFieldEdit = formEl.querySelector(".costos-edit-field[data-field=\"equivalencia-unidad-medida\"]");
+                            var equivalenciaSpanEdit = equivalenciaFieldEdit ? equivalenciaFieldEdit.querySelector(".costos-edit-value") : null;
+                            if (equivalenciaSpanEdit) {
+                                if (!isNaN(valor) && !(out && !mismaCat && u && d)) {
+                                    equivalenciaSpanEdit.textContent = String(Math.round(valor));
+                                } else {
+                                    equivalenciaSpanEdit.textContent = "—";
+                                }
+                            }
                             var leyenda = fieldTum ? fieldTum.querySelector(".costos-edit-equivalencia-leyenda") : null;
                             if (!leyenda && fieldTum) {
                                 leyenda = document.createElement("p");
@@ -1428,7 +1477,7 @@
                                 setTimeout(updateEquivalencia, 0);
                             }
                         });
-                        updateEquivalencia();
+                        // En edición no se ejecuta updateEquivalencia al cargar: se respetan los datos guardados en la hoja (columnas cantidad-unidad-medida, equivalencia-unidad-medida). El cálculo solo corre cuando el usuario cambia presentación o "Convertir A".
                     })();
 
                     (function () {
@@ -1459,6 +1508,22 @@
                                 newRow[idx] = input.value;
                             }
                         });
+                        var precioCostoWrap = formEl.querySelector(".costos-edit-field[data-field=\"precio-costo-x-unidad\"]");
+                        var precioEquivWrap = formEl.querySelector(".costos-edit-field[data-field=\"precio-equivalencia-x-unidad\"]");
+                        if (precioCostoWrap) {
+                            var idxCosto = parseInt(precioCostoWrap.getAttribute("data-header-index"), 10);
+                            var spanCosto = precioCostoWrap.querySelector(".costos-edit-value");
+                            if (!isNaN(idxCosto) && idxCosto >= 0 && idxCosto < newRow.length && spanCosto) {
+                                newRow[idxCosto] = precioDisplayToNumericString(spanCosto.textContent);
+                            }
+                        }
+                        if (precioEquivWrap) {
+                            var idxEquiv = parseInt(precioEquivWrap.getAttribute("data-header-index"), 10);
+                            var spanEquiv = precioEquivWrap.querySelector(".costos-edit-value");
+                            if (!isNaN(idxEquiv) && idxEquiv >= 0 && idxEquiv < newRow.length && spanEquiv) {
+                                newRow[idxEquiv] = precioDisplayToNumericString(spanEquiv.textContent);
+                            }
+                        }
                         if (fechaActualizadaIdx >= 0 && fechaActualizadaIdx < newRow.length) {
                             newRow[fechaActualizadaIdx] = getTodayDate();
                         }

@@ -638,6 +638,14 @@ body.costos-page {
     overflow-x: auto;
 }
 
+/* Crear materia prima: ocultar botón Editar, botón Cerrar (X) y mostrar inputs directamente */
+.costos-edit-value-edit-btn-hidden-in-create {
+    display: none !important;
+}
+.costos-form-create .costos-edit-value-close-btn {
+    display: none !important;
+}
+
 /* Leyenda cuando "Convertir A" no es de la misma categoría que la unidad origen */
 .costos-edit-equivalencia-leyenda {
     margin: 0.5rem 0 0 0;
@@ -721,6 +729,18 @@ body.costos-page {
         padding: 14px 20px;
         border-radius: 12px;
     }
+    .costos-edit-value-edit-btn,
+    .costos-edit-value-close-btn {
+        min-width: 44px;
+        min-height: 44px;
+        width: 44px;
+        height: 44px;
+    }
+    .costos-edit-presentacion-combo .costos-edit-select-presentacion,
+    .costos-edit-categoria-wrap .costos-edit-select-categoria,
+    .costos-edit-tipo-unidad-medida-wrap .costos-edit-select-tipo-unidad-medida {
+        min-height: 44px;
+    }
     .costos-main .costos-title {
         font-size: 1.5rem;
     }
@@ -764,13 +784,13 @@ body.costos-page {
     .costos-title-row { gap: 10px; align-items: center; }
     .costos-calc-btn {
         font-size: 0.75rem;
-        padding: 6px 10px;
-        min-height: 36px;
-        gap: 5px;
+        padding: 10px 14px;
+        min-height: 44px;
+        gap: 6px;
     }
     .costos-calc-btn .costos-calc-btn-text-long { display: none; }
     .costos-calc-btn .costos-calc-btn-text-short { display: inline; }
-    .costos-calc-btn i { font-size: 0.85rem; }
+    .costos-calc-btn i { font-size: 0.9rem; }
     .costos-calc-inner {
         padding: 14px;
     }
@@ -871,6 +891,23 @@ body.costos-page {
     margin-bottom: 12px;
     border: 1px solid #ffedd5;
     box-shadow: 0 4px 12px rgba(234, 88, 12, 0.06);
+}
+.costos-card-deshabilitado {
+    opacity: 0.82;
+    border-left: 3px solid #94a3b8;
+    background: linear-gradient(to right, rgba(148, 163, 184, 0.06), var(--surface));
+}
+.costos-card-deshabilitado .costos-card-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.costos-card-deshabilitado-icon {
+    display: inline-flex;
+    align-items: center;
+    color: #94a3b8;
+    font-size: 0.95em;
+    flex-shrink: 0;
 }
 .costos-card-main {
     display: flex;
@@ -1108,11 +1145,13 @@ body.costos-page {
         gap: 6px;
     }
     .costos-card-edit-btn {
-        width: 28px;
-        height: 28px;
-        min-width: 28px;
-        min-height: 28px;
-        font-size: 0.75rem;
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        min-height: 44px;
+        font-size: 0.9rem;
+        justify-content: center;
+        align-items: center;
     }
     .costos-card-price-row .costos-card-price {
         text-align: right;
@@ -1136,8 +1175,10 @@ body.costos-page {
         font-size: 0.5rem;
     }
     .costos-expand-btn {
-        font-size: 0.65rem;
-        padding: 5px 10px;
+        font-size: 0.7rem;
+        padding: 10px 14px;
+        min-height: 44px;
+        align-items: center;
     }
     .costos-extra-info {
         grid-template-columns: 1fr;
@@ -1405,6 +1446,19 @@ body.costos-page {
         padding-left: max(10px, calc(10px + var(--safe-left)));
         padding-right: max(10px, calc(10px + var(--safe-right)));
         padding-bottom: max(24px, calc(24px + var(--safe-bottom)));
+    }
+    .costos-title-row {
+        gap: 12px;
+    }
+    .costos-calc-btn {
+        min-height: 44px;
+        padding: 10px 14px;
+    }
+    .costos-calc-btn-text-long {
+        display: none;
+    }
+    .costos-calc-btn-text-short {
+        display: inline;
     }
     .costos-back {
         margin-bottom: 20px;

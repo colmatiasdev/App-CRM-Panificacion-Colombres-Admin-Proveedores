@@ -219,10 +219,23 @@ function doPost(e) {
   }
   if (e.postData && e.postData.contents) {
     var type = (e.postData.type || '').toLowerCase();
+    var raw = e.postData.contents;
     if (type.indexOf('application/json') !== -1) {
       try {
-        var body = JSON.parse(e.postData.contents);
+        var body = JSON.parse(raw);
         for (var k in body) params[k] = body[k];
+      } catch (err) {}
+    } else if (type.indexOf('application/x-www-form-urlencoded') !== -1 || (raw && raw.indexOf('=') !== -1 && raw.indexOf('{') === -1)) {
+      try {
+        var pairs = raw.split('&');
+        for (var i = 0; i < pairs.length; i++) {
+          var parts = pairs[i].split('=');
+          if (parts.length >= 1 && parts[0]) {
+            var key = decodeURIComponent(parts[0].replace(/\+/g, ' '));
+            var val = parts.length >= 2 ? decodeURIComponent((parts.slice(1).join('=')).replace(/\+/g, ' ')) : '';
+            params[key] = val;
+          }
+        }
       } catch (err) {}
     }
   }
