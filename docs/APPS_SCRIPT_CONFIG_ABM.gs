@@ -10,7 +10,7 @@ var CONFIG = {
   
   /** Hoja de Materia Prima */
   materiaPrima: {
-    sheetName: 'Materia Prima',
+    sheetName: 'PRECIO-Materia-Prima',
     gid: 0,
     /** Encabezados en el mismo orden que las columnas A, B, C... de la hoja Sheet */
     headers: [
@@ -46,26 +46,36 @@ var CONFIG = {
     dateUpdatedColumn: 'Fecha-Actualizada-Al'
   },
 
-  /** Hoja de Packing */
+  /** Hoja de Packing (misma estructura de columnas que Materia Prima) */
   packing: {
-    sheetName: 'Packing',
-    gid: 1565788325,
-    /** Ajustá los headers según las columnas reales de tu hoja Packing */
+    sheetName: 'PRECIO-Packing',
+    gid: 0,
     headers: [
       'idpacking',
-      'Nombre',
-      'Tipo',
-      'Unidad',
-      'Costo unitario',
+      'Categoria',
+      'Nombre-Producto',
+      'Presentacion-Tipo',
+      'Presentacion-Cantidad-Medida',
+      'Presentacion-Unidad',
+      'Precio-Actual',
+      'Precio-Anterior',
       'Observaciones',
-      'HABILITADO',
-      'Fecha Actualizada Al'
+      'Cantidad-Unidad-Medida',
+      'Tipo-Unidad-Medida',
+      'Equivalencia-Unidad-Medida',
+      'Equivalencia-Tipo-Unidad-Medida',
+      'Habilitado',
+      'Precio-Costo-x-Unidad',
+      'Precio-Equivalencia-x-Unidad',
+      'Fecha-Actualizada-Al',
+      'Marca',
+      'Lugar'
     ],
     idColumn: 'idpacking',
     idPrefix: 'COSTO-PK-',
-    filterColumns: ['Nombre', 'Tipo', 'HABILITADO', 'idpacking'],
-    requiredOnCreate: ['Nombre'],
-    dateUpdatedColumn: 'Fecha Actualizada Al'
+    filterColumns: ['Categoria', 'Nombre-Producto', 'Presentacion-Tipo', 'Marca', 'Habilitado', 'idpacking'],
+    requiredOnCreate: ['Nombre-Producto'],
+    dateUpdatedColumn: 'Fecha-Actualizada-Al'
   }
 };
 
@@ -111,21 +121,20 @@ function getSpreadsheet() {
   return SpreadsheetApp.getActiveSpreadsheet();
 }
 
-/** Obtiene la hoja por gid (prioridad) o por nombre */
+/** Obtiene la hoja por nombre (prioridad) o por gid. Así se puede tener varias hojas en el libro. */
 function getSheet(configSheet) {
   var ss = getSpreadsheet();
+  if (configSheet.sheetName) {
+    var byName = ss.getSheetByName(configSheet.sheetName);
+    if (byName) return byName;
+  }
   var sheets = ss.getSheets();
-  var sheet = null;
   for (var i = 0; i < sheets.length; i++) {
     if (sheets[i].getSheetId() === configSheet.gid) {
-      sheet = sheets[i];
-      break;
+      return sheets[i];
     }
   }
-  if (!sheet && configSheet.sheetName) {
-    sheet = ss.getSheetByName(configSheet.sheetName);
-  }
-  return sheet;
+  return null;
 }
 
 /** Convierte fila del sheet a objeto { header: value }. values puede ser array o tener menos elementos que headers. */
