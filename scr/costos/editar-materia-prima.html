@@ -139,21 +139,32 @@
                     }
                     var categoriaColIdx = -1;
                     for (var c = 0; c < headers.length; c++) {
-                        if (normHeaderForCompare(headers[c]) === "categoria") {
+                        var hNorm = normHeaderForCompare(headers[c]);
+                        var hTrim = String(headers[c] != null ? headers[c] : "").trim().toLowerCase().replace(/\s/g, "");
+                        if (hNorm === "categoria" || hTrim === "categoria" || hTrim === "categoría") {
                             categoriaColIdx = c;
                             break;
                         }
+                    }
+                    if (categoriaColIdx < 0 && headers.length > 1) {
+                        categoriaColIdx = 1;
                     }
                     var categoriasForDatalist = [];
                     try {
                         var storedCat = sessionStorage.getItem("costosDistinctCategorias");
                         if (storedCat) categoriasForDatalist = JSON.parse(storedCat);
                     } catch (e) {}
-                    if (categoriaColIdx >= 0 && categoriasForDatalist.length === 0) {
-                        var currentCat = record[headers[categoriaColIdx]];
-                        if (currentCat != null && String(currentCat).trim() !== "") {
-                            categoriasForDatalist = [String(currentCat).trim()];
-                            sessionStorage.setItem("costosDistinctCategorias", JSON.stringify(categoriasForDatalist));
+                    var currentCatVal = "";
+                    if (categoriaColIdx >= 0) {
+                        currentCatVal = record[headers[categoriaColIdx]];
+                        if (currentCatVal == null || String(currentCatVal).trim() === "") {
+                            currentCatVal = (row[categoriaColIdx] != null ? String(row[categoriaColIdx]).trim() : "") || "";
+                        } else {
+                            currentCatVal = String(currentCatVal).trim();
+                        }
+                        if (categoriasForDatalist.length === 0 && currentCatVal) {
+                            categoriasForDatalist = [currentCatVal];
+                            try { sessionStorage.setItem("costosDistinctCategorias", JSON.stringify(categoriasForDatalist)); } catch (e) {}
                         }
                     }
                     var categoriasState = { list: categoriasForDatalist };
@@ -381,7 +392,20 @@
                                     if (dl) dl.parentNode.removeChild(dl);
                                 }
                                 editIcon.addEventListener("click", function () {
+                                    var wrapCat = cell.querySelector(".costos-edit-categoria-wrap");
                                     var dyn = w.querySelector(".costos-edit-input-dynamic");
+                                    if (wrapCat) {
+                                        var hidden = wrapCat.querySelector("input[type=hidden].costos-edit-input");
+                                        var val = hidden ? hidden.value : "";
+                                        if (val === "__nueva__") val = "";
+                                        span.textContent = (val || "").trim() || "—";
+                                        span.style.display = "";
+                                        wrapCat.parentNode.removeChild(wrapCat);
+                                        var closeBtn = cell.querySelector(".costos-edit-value-close-btn");
+                                        if (closeBtn) closeBtn.parentNode.removeChild(closeBtn);
+                                        editIcon.style.display = "";
+                                        return;
+                                    }
                                     if (dyn) {
                                         span.textContent = dyn.value || "—";
                                         span.style.display = "";
@@ -392,37 +416,86 @@
                                         editIcon.style.display = "";
                                         return;
                                     }
-                                    var inp = document.createElement("input");
-                                    inp.type = "text";
-                                    inp.className = "costos-edit-input costos-edit-input-dynamic";
-                                    inp.setAttribute("data-header-index", String(idx));
-                                    inp.value = rawVal != null ? String(rawVal).trim() : "";
+                                    var inp;
                                     if (isCategoriaField && form) {
-                                        var listId = "costos-datalist-categoria";
-                                        var opts = (categoriasStateRef && categoriasStateRef.list && categoriasStateRef.list.length) ? categoriasStateRef.list.slice() : [];
+                                        var opts = [];
                                         try {
-                                            if (opts.length === 0) {
-                                                var stored = sessionStorage.getItem("costosDistinctCategorias");
-                                                if (stored) opts = JSON.parse(stored);
-                                            }
+                                            var stored = sessionStorage.getItem("costosDistinctCategorias");
+                                            if (stored) opts = JSON.parse(stored);
                                         } catch (e) {}
+                                        if (!Array.isArray(opts) || opts.length === 0) {
+                                            opts = (categoriasStateRef && categoriasStateRef.list && categoriasStateRef.list.length) ? categoriasStateRef.list.slice() : [];
+                                        } else {
+                                            opts = opts.slice();
+                                        }
                                         var currentVal = rawVal != null ? String(rawVal).trim() : "";
                                         if (currentVal && opts.indexOf(currentVal) === -1) opts.unshift(currentVal);
-                                        if (opts.length === 0) opts.push("Sin categoría");
-                                        var dl = document.createElement("datalist");
-                                        dl.id = listId;
+                                        opts = opts.filter(function (v) { return v != null && String(v).trim() !== ""; });
+                                        if (opts.length === 0) opts = ["Sin categoría"];
+                                        var wrapCat = document.createElement("div");
+                                        wrapCat.className = "costos-edit-categoria-wrap";
+                                        var sel = document.createElement("select");
+                                        sel.className = "costos-edit-input-dynamic costos-edit-select-categoria";
                                         opts.forEach(function (v) {
-                                            if (v == null) return;
-                                            var o = document.createElement("option");
-                                            o.value = String(v).trim();
-                                            dl.appendChild(o);
+                                            var opt = document.createElement("option");
+                                            opt.value = String(v).trim();
+                                            opt.textContent = opt.value;
+                                            if (opt.value === currentVal) opt.selected = true;
+                                            sel.appendChild(opt);
                                         });
-                                        form.appendChild(dl);
-                                        inp.setAttribute("list", listId);
-                                        inp.setAttribute("autocomplete", "list");
-                                        inp.placeholder = "Elegí una o escribí una nueva";
+                                        var optNueva = document.createElement("option");
+                                        optNueva.value = "__nueva__";
+                                        optNueva.textContent = "— Agregar otra —";
+                                        sel.appendChild(optNueva);
+                                        wrapCat.appendChild(sel);
+                                        inp = document.createElement("input");
+                                        inp.type = "text";
+                                        inp.className = "costos-edit-input-dynamic costos-edit-input-otra-categoria";
+                                        inp.style.display = "none";
+                                        inp.placeholder = "Escribí la nueva categoría";
+                                        wrapCat.appendChild(inp);
+                                        var hiddenVal = document.createElement("input");
+                                        hiddenVal.type = "hidden";
+                                        hiddenVal.className = "costos-edit-input";
+                                        hiddenVal.setAttribute("data-header-index", String(idx));
+                                        hiddenVal.value = currentVal || "";
+                                        wrapCat.appendChild(hiddenVal);
+                                        function syncHidden() {
+                                            hiddenVal.value = sel.value === "__nueva__" ? (inp.value || "").trim() : sel.value;
+                                        }
+                                        sel.addEventListener("change", function () {
+                                            if (sel.value === "__nueva__") {
+                                                inp.style.display = "";
+                                                inp.value = currentVal && opts.indexOf(currentVal) === -1 ? currentVal : "";
+                                                inp.focus();
+                                            } else {
+                                                inp.style.display = "none";
+                                                inp.value = "";
+                                            }
+                                            syncHidden();
+                                        });
+                                        inp.addEventListener("input", function () {
+                                            if (sel.value === "__nueva__") sel.options[sel.selectedIndex].text = inp.value || "— Agregar otra —";
+                                            syncHidden();
+                                        });
+                                        inp.addEventListener("blur", function () {
+                                            if (sel.value === "__nueva__" && inp.value.trim()) optNueva.textContent = inp.value.trim();
+                                            syncHidden();
+                                        });
+                                        cell.insertBefore(wrapCat, span);
+                                        inp._costosValueElement = sel;
+                                        var elementToRemove = wrapCat;
+                                        var elementToFocus = sel;
+                                    } else {
+                                        inp = document.createElement("input");
+                                        inp.type = "text";
+                                        inp.className = "costos-edit-input costos-edit-input-dynamic";
+                                        inp.setAttribute("data-header-index", String(idx));
+                                        inp.value = rawVal != null ? String(rawVal).trim() : "";
+                                        cell.insertBefore(inp, span);
+                                        var elementToRemove = inp;
+                                        var elementToFocus = inp;
                                     }
-                                    cell.insertBefore(inp, span);
                                     span.style.display = "none";
                                     editIcon.style.display = "none";
                                     var closeBtn = document.createElement("button");
@@ -434,12 +507,12 @@
                                     cell.appendChild(closeBtn);
                                     closeBtn.addEventListener("click", function () {
                                         span.style.display = "";
-                                        inp.parentNode.removeChild(inp);
+                                        if (elementToRemove.parentNode) elementToRemove.parentNode.removeChild(elementToRemove);
                                         removeDatalistCategoria();
                                         closeBtn.parentNode.removeChild(closeBtn);
                                         editIcon.style.display = "";
                                     });
-                                    inp.focus();
+                                    if (elementToFocus) elementToFocus.focus();
                                 });
                             })(wrap, valueCell, valueSpan, i, value, i === categoriaColIdx, formEl, categoriasState);
                         }
@@ -487,17 +560,31 @@
                                 var apiHeaders = Array.isArray(json.data.headers) ? json.data.headers : [];
                                 var apiRows = Array.isArray(json.data.rows) ? json.data.rows : [];
                                 var catKey = null;
+                                var catIdxApi = -1;
                                 for (var ai = 0; ai < apiHeaders.length; ai++) {
-                                    if (normHeaderForCompare(apiHeaders[ai]) === "categoria") {
-                                        catKey = String(apiHeaders[ai] != null ? apiHeaders[ai] : "").trim();
+                                    var ah = String(apiHeaders[ai] != null ? apiHeaders[ai] : "").trim();
+                                    var ahNorm = normHeaderForCompare(ah);
+                                    var ahTrim = ah.toLowerCase().replace(/\s/g, "");
+                                    if (ahNorm === "categoria" || ahTrim === "categoria" || ahTrim === "categoría") {
+                                        catKey = ah;
+                                        catIdxApi = ai;
                                         break;
                                     }
+                                }
+                                if (!catKey && apiHeaders.length > 1) {
+                                    catKey = apiHeaders[1];
+                                    catIdxApi = 1;
                                 }
                                 if (!catKey) return;
                                 var seen = {};
                                 var allCats = [];
                                 apiRows.forEach(function (row) {
-                                    var v = row[catKey] != null ? String(row[catKey]).trim() : "";
+                                    var v = "";
+                                    if (row[catKey] != null && String(row[catKey]).trim() !== "") {
+                                        v = String(row[catKey]).trim();
+                                    } else if (catIdxApi >= 0 && Array.isArray(row) && row[catIdxApi] != null) {
+                                        v = String(row[catIdxApi]).trim();
+                                    }
                                     if (!v) v = "Sin categoría";
                                     if (!seen[v]) { seen[v] = true; allCats.push(v); }
                                 });

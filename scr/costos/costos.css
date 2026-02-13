@@ -350,6 +350,36 @@ body.costos-page {
     outline: none;
     box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.2);
 }
+.costos-edit-categoria-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 120px;
+}
+.costos-edit-categoria-wrap .costos-edit-select-categoria {
+    flex: 1;
+    min-width: 140px;
+    padding: 10px 12px;
+    font-size: 1rem;
+    border: 2px solid var(--logo-orange);
+    border-radius: 8px;
+    font-family: inherit;
+    background: #fff;
+}
+.costos-edit-categoria-wrap .costos-edit-select-categoria:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.2);
+}
+.costos-edit-categoria-wrap .costos-edit-input-otra-categoria {
+    flex: 1;
+    min-width: 140px;
+    padding: 10px 12px;
+    font-size: 1rem;
+    border: 2px solid var(--logo-orange);
+    border-radius: 8px;
+}
 .costos-edit-textarea {
     min-height: 100px;
     resize: vertical;
