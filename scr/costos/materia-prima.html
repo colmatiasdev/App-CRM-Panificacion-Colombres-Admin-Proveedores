@@ -140,14 +140,20 @@
         if (debugContent && debugSection && debugSection.style.display !== "none" && window.COSTOS_EQUIVALENCIA && window.COSTOS_EQUIVALENCIA.convertWithDebug) {
             var out = window.COSTOS_EQUIVALENCIA.convertWithDebug(q, u, d);
             var db = out.debug;
-            debugContent.textContent = "Cantidad (origen): " + db.cantidad + "\n" +
-                "Unidad de medida (origen): \"" + db.unidadOrigen + "\" → normalizado: \"" + db.normalizadoOrigen + "\"\n" +
-                "Convertir a (destino): \"" + db.unidadDestino + "\" → normalizado: \"" + db.normalizadoDestino + "\"\n" +
-                "Categoría: " + db.categoria + "\n" +
-                "Factor origen: " + db.factorOrigen + " | Factor destino: " + db.factorDestino + "\n" +
-                "Misma categoría: " + db.mismaCategoria + "\n" +
-                "Fórmula: " + db.formula + "\n" +
-                "Resultado: " + db.resultado;
+            var catOrigenStr = db.categoriaOrigen != null ? db.categoriaOrigen : db.categoria;
+            var catDestinoStr = db.categoriaDestino != null ? db.categoriaDestino : db.categoria;
+            var formulaLine = db.mismaCategoria
+                ? "Fórmula (valores): " + db.formula + "\n\nR = Resultado (equivalencia): " + db.resultado
+                : "Fórmula no aplicada: origen y destino son de distinta categoría (" + catOrigenStr + " ≠ " + catDestinoStr + ").\nR = C (sin convertir) = " + db.resultado;
+            debugContent.textContent =
+                "C = Cantidad (origen): " + db.cantidad + "\n" +
+                "UP-Origen = Unidad presentación (origen): \"" + db.unidadOrigen + "\" → normalizado: \"" + db.normalizadoOrigen + "\"\n" +
+                "UD-Destino = Unidad destino (Convertir a): \"" + db.unidadDestino + "\" → normalizado: \"" + db.normalizadoDestino + "\"\n" +
+                "Cat-Origen = Categoría origen: " + catOrigenStr + " | Cat-Destino = Categoría destino: " + catDestinoStr + "\n" +
+                "FO = Factor origen: " + db.factorOrigen + " | FD = Factor destino: " + db.factorDestino + "\n" +
+                "Misma categoría: " + db.mismaCategoria + "\n\n" +
+                "Fórmula (cuando misma categoría): R = C × FO / FD\n" +
+                formulaLine;
         }
     }
 

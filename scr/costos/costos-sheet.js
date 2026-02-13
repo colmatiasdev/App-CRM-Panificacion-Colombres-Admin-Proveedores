@@ -828,6 +828,8 @@
                     normalizadoOrigen: u,
                     normalizadoDestino: d,
                     categoria: catOrigen || catDestino || "—",
+                    categoriaOrigen: catOrigen || "—",
+                    categoriaDestino: catDestino || "—",
                     factorOrigen: factorOrigen,
                     factorDestino: factorDestino,
                     mismaCategoria: mismaCategoria,
@@ -836,26 +838,26 @@
                 }
             };
         }
-        /** Construye categorias desde filas del sheet (Categoria, Unidad, Factor, Alias). Mezcla con defaults. */
+        /** Construye categorias desde filas del sheet (Categoria, Unidad, Factor, Alias). Solo agrega claves nuevas, no sobrescribe las por defecto. */
         function setCategoriasFromRows(rows) {
             if (!rows || !Array.isArray(rows) || rows.length === 0) return;
             var cat, factor, unidadNorm, aliasStr, list, i, j;
             for (i = 0; i < rows.length; i++) {
                 var row = rows[i];
                 if (row && typeof row === "object") {
-                    cat = String(row.Categoria != null ? row.Categoria : "").trim().toLowerCase().replace(/\s+/g, "");
+                    cat = String((row.Categoria != null ? row.Categoria : row.categoria != null ? row.categoria : "") || "").trim().toLowerCase().replace(/\s+/g, "");
                     if (!cat) continue;
-                    factor = parseFloat(String(row.Factor != null ? row.Factor : "").replace(",", "."));
+                    factor = parseFloat(String((row.Factor != null ? row.Factor : row.factor != null ? row.factor : "") || "").replace(",", "."));
                     if (isNaN(factor) || factor <= 0) continue;
                     if (!categorias[cat]) categorias[cat] = {};
-                    unidadNorm = normalizar(row.Unidad);
-                    if (unidadNorm) categorias[cat][unidadNorm] = factor;
-                    aliasStr = String(row.Alias != null ? row.Alias : "").trim();
+                    unidadNorm = normalizar((row.Unidad != null ? row.Unidad : row.unidad != null ? row.unidad : "") || "");
+                    if (unidadNorm && categorias[cat][unidadNorm] === undefined) categorias[cat][unidadNorm] = factor;
+                    aliasStr = String((row.Alias != null ? row.Alias : row.alias != null ? row.alias : "") || "").trim();
                     if (aliasStr) {
                         list = aliasStr.split(",");
                         for (j = 0; j < list.length; j++) {
                             unidadNorm = normalizar(list[j].trim());
-                            if (unidadNorm) categorias[cat][unidadNorm] = factor;
+                            if (unidadNorm && categorias[cat][unidadNorm] === undefined) categorias[cat][unidadNorm] = factor;
                         }
                     }
                 }

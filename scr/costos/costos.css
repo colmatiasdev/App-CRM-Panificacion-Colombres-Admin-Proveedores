@@ -638,6 +638,22 @@ body.costos-page {
     overflow-x: auto;
 }
 
+/* Leyenda cuando "Convertir A" no es de la misma categoría que la unidad origen */
+.costos-edit-equivalencia-leyenda {
+    margin: 0.5rem 0 0 0;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+    line-height: 1.35;
+    color: #b45309;
+    background: #fffbeb;
+    border: 1px solid #f59e0b;
+    border-radius: 6px;
+    display: none;
+}
+.costos-edit-equivalencia-leyenda.costos-edit-equivalencia-leyenda-visible {
+    display: block;
+}
+
 /* Página Editar — móvil: diseño y visibilidad */
 @media (max-width: 768px) {
     .costos-edit-form {
