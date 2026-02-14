@@ -109,8 +109,10 @@
                 idColumnHeaders: ["idmateria-prima", "idmateriaprima"],
                 storageKeyEdit: "costosEditRecord",
                 storageKeyCreate: "costosCreateRecord",
+                storageKeyVisualizar: "costosVisualizarRecord",
                 editUrl: "editar-materia-prima.html",
                 createUrl: "crear-materia-prima.html",
+                visualizarUrl: "visualizar-materia-prima.html",
                 editBtnLabel: "Editar Materia Prima",
                 filterInputId: "filter-materia-prima",
                 filterDiasSelectId: "filter-materia-prima-dias",
@@ -122,8 +124,10 @@
                 idColumnHeaders: ["idpacking"],
                 storageKeyEdit: "costosEditRecordPacking",
                 storageKeyCreate: "costosCreateRecordPacking",
+                storageKeyVisualizar: "costosVisualizarRecordPacking",
                 editUrl: "editar-packing.html",
                 createUrl: "crear-packing.html",
+                visualizarUrl: "visualizar-packing.html",
                 editBtnLabel: "Editar Packing",
                 filterInputId: "filter-packing",
                 filterDiasSelectId: "filter-packing-dias",
@@ -145,6 +149,8 @@
         var storageKeyCreate = opts.storageKeyCreate || "costosCreateRecord";
         var editUrl = opts.editUrl || "editar-materia-prima.html";
         var createUrl = opts.createUrl || "crear-materia-prima.html";
+        var visualizarUrl = opts.visualizarUrl || "visualizar-materia-prima.html";
+        var storageKeyVisualizar = opts.storageKeyVisualizar || "costosVisualizarRecord";
         var editBtnLabel = opts.editBtnLabel || "Editar producto";
         var filterInputId = opts.filterInputId || "filter-materia-prima";
         var filterDiasSelectId = opts.filterDiasSelectId || null;
@@ -491,7 +497,8 @@
                 var diasEstado = (diasClass === "costos-dias-amarillo") ? "amarillo" : (diasClass === "costos-dias-rojo") ? "rojo" : (diasClass === "costos-dias-urgente") ? "urgente" : "normal";
                 var rawPrecioVal = idxPrecioActualCol >= 0 ? String(row[idxPrecioActualCol] != null ? row[idxPrecioActualCol] : "").trim() : "";
                 var priceContent = (precio ? "<div class=\"costos-card-price\">" + escapeHtml(precio) + (trendIcon ? " " + trendIcon : "") + "</div>" : "");
-                var priceBlock = "<div class=\"costos-card-price-wrap\">" + priceContent + "</div>";
+                var visualizarPrecioBtn = "<a href=\"#\" class=\"costos-card-visualizar-precio-btn\" title=\"Editar solo precio\" aria-label=\"Editar solo precio\"><i class=\"fa-solid fa-pen\" aria-hidden=\"true\"></i></a>";
+                var priceBlock = "<div class=\"costos-card-price-wrap\">" + priceContent + visualizarPrecioBtn + "</div>";
                 var editBtnHtml = "<a href=\"#\" class=\"costos-card-edit-btn\" title=\"" + escapeHtml(editBtnLabel) + "\" aria-label=\"" + escapeHtml(editBtnLabel) + "\"><i class=\"fa-solid fa-pen\" aria-hidden=\"true\"></i> " + escapeHtml(editBtnLabel) + "</a>";
                 var extraHtmlWithEdit = "<div class=\"costos-extra-info\">" + extraParts.join("") + "<div class=\"costos-extra-actions\">" + editBtnHtml + "</div></div>";
                 cardsHtml += "<div class=\"" + cardClass + "\" data-dias-estado=\"" + escapeHtml(diasEstado) + "\">" +
@@ -522,6 +529,25 @@
         var leyenda = buildDiasLeyenda(config);
         container.innerHTML = "<div class=\"costos-cards-wrap\">" + cardsHtml + "</div>" + leyenda;
         container.classList.remove("costos-datos-message");
+        container.querySelectorAll(".costos-card-visualizar-precio-btn").forEach(function (btn, idx) {
+            var rec = recordsForEdit[idx];
+            if (rec) {
+                btn.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    try {
+                        sessionStorage.setItem(storageKeyVisualizar, JSON.stringify({
+                            id: rec.id,
+                            headers: rec.headers,
+                            row: rec.row
+                        }));
+                        window.location.href = visualizarUrl + (rec.id ? "?id=" + encodeURIComponent(rec.id) : "");
+                    } catch (err) {
+                        window.location.href = visualizarUrl + (rec.id ? "?id=" + encodeURIComponent(rec.id) : "");
+                    }
+                });
+            }
+        });
         container.querySelectorAll(".costos-card-edit-btn").forEach(function (btn, idx) {
             var rec = recordsForEdit[idx];
             if (rec) {

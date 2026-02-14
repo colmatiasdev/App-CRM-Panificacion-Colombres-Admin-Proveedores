@@ -1228,6 +1228,33 @@ body.costos-page {
     font-size: 0.9em;
     margin-left: 2px;
 }
+.costos-card-visualizar-precio-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    min-height: 28px;
+    padding: 0;
+    border: 1px solid #fed7aa;
+    border-radius: 6px;
+    background: #fff7ed;
+    color: var(--logo-orange);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    flex-shrink: 0;
+    text-decoration: none;
+}
+.costos-card-visualizar-precio-btn:hover {
+    background: #ffedd5;
+    color: var(--logo-dark);
+}
+.costos-card-visualizar-precio-btn:focus-visible {
+    outline: 2px solid var(--logo-orange);
+    outline-offset: 2px;
+}
 .costos-card-edit-btn {
     display: inline-flex;
     align-items: center;
