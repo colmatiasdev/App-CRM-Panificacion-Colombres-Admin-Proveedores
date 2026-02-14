@@ -56,6 +56,40 @@ body.costos-page {
 }
 .costos-back-arrow { font-size: 1.1rem; }
 
+/* Navegación rápida entre módulos */
+.costos-nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    margin-bottom: 20px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+}
+.costos-nav-link {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--logo-teal);
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    transition: background 0.2s, color 0.2s;
+    -webkit-tap-highlight-color: transparent;
+}
+.costos-nav-link:hover {
+    background: var(--logo-teal-light);
+    color: var(--logo-teal-dark);
+    text-decoration: none;
+}
+.costos-nav-link.is-active {
+    background: var(--logo-teal);
+    color: #fff;
+}
+@media (max-width: 480px) {
+    .costos-nav { gap: 6px 10px; margin-bottom: 16px; padding: 8px 0; }
+    .costos-nav-link { font-size: 0.8125rem; padding: 8px 10px; min-height: 44px; display: inline-flex; align-items: center; }
+}
+
 .costos-main {
     max-width: 720px;
     margin: 0 auto;
