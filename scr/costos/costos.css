@@ -258,6 +258,15 @@ body.costos-page {
 .costos-edit-field:last-of-type {
     margin-bottom: 0;
 }
+.costos-edit-seccion-titulo {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--logo-dark);
+    margin: 0 0 12px 0;
+    padding-bottom: 8px;
+    border-bottom: 2px solid rgba(234, 88, 12, 0.25);
+    letter-spacing: 0.02em;
+}
 .costos-edit-seccion-presentacion-equivalencia {
     margin: 14px 0 20px 0;
     padding: 16px 18px;
@@ -265,12 +274,37 @@ body.costos-page {
     border: 1px solid rgba(234, 88, 12, 0.2);
     border-radius: 12px;
 }
+.costos-edit-seccion-presentacion-equivalencia .costos-edit-seccion-titulo {
+    border-bottom-color: rgba(234, 88, 12, 0.35);
+}
 .costos-edit-seccion-presentacion-equivalencia .costos-edit-field-presentacion {
     margin-bottom: 16px;
 }
 .costos-edit-seccion-presentacion-equivalencia .costos-edit-section-equivalencia {
     margin-top: 4px;
     margin-bottom: 0;
+}
+.costos-edit-seccion-precios-costo {
+    margin: 18px 0 22px 0;
+    padding: 16px 18px;
+    background: rgba(13, 148, 136, 0.05);
+    border: 1px solid rgba(13, 148, 136, 0.22);
+    border-radius: 12px;
+}
+.costos-edit-seccion-precios-costo .costos-edit-seccion-titulo {
+    border-bottom: 2px solid rgba(13, 148, 136, 0.35);
+    color: var(--logo-dark);
+}
+.costos-edit-seccion-precios-costo .costos-edit-field {
+    margin-bottom: 12px;
+}
+.costos-edit-seccion-precios-costo .costos-edit-field:last-child {
+    margin-bottom: 0;
+}
+.costos-edit-seccion-precios-costo .costos-edit-field-informativo .costos-edit-value {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--logo-dark);
 }
 .costos-edit-section-equivalencia {
     background: rgba(234, 88, 12, 0.05);

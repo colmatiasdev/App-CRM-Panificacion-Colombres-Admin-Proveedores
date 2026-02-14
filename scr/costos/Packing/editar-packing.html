@@ -99,6 +99,20 @@
                 var factor = Math.pow(10, decimals);
                 return Math.round(num * factor) / factor;
             }
+            function formatMonedaArgHasta4Dec(val) {
+                if (val == null || String(val).trim() === "") return "—";
+                var s = String(val).trim().replace(",", ".");
+                var n = parseFloat(s);
+                if (isNaN(n)) return String(val);
+                n = roundToDecimals(n, 4);
+                var fixed = n.toFixed(4);
+                var parts = fixed.split(".");
+                var intPart = parts[0];
+                var decPart = (parts[1] || "").replace(/0+$/, "");
+                var withDots = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                if (decPart === "") return "$ " + withDots;
+                return "$ " + withDots + "," + decPart;
+            }
             function precioDisplayToNumericString(str) {
                 if (!str || String(str).trim() === "" || String(str).trim() === "—") return "";
                 var s = String(str).trim().replace(/\$\s?/g, "").replace(/\s/g, "").replace(/\./g, "").replace(",", ".");
@@ -233,6 +247,7 @@
                     }
                     var categoriasState = { list: categoriasForDatalist };
                     var sectionEquivalenciaWraps = [];
+                    var precioCostoWraps = [];
                     var observacionesWrapCollected = null;
                     var marcasForDatalist = [];
                     try {
@@ -579,11 +594,9 @@
                         if (nameNorm === "precio costo x unidad" || nameNorm === "precio-costo-x-unidad") wrap.setAttribute("data-field", "precio-costo-x-unidad");
                         if (nameNorm === "equivalencia unidad medida" || nameNorm === "equivalencia-unidad-medida") {
                             wrap.setAttribute("data-field", "equivalencia-unidad-medida");
-                            wrap.classList.add("costos-edit-field-informativo");
                         }
                         if (nameNorm === "equivalencia tipo unidad medida" || nameNorm === "equivalencia-tipo-unidad-medida") {
                             wrap.setAttribute("data-field", "equivalencia-tipo-unidad-medida");
-                            wrap.classList.add("costos-edit-field-informativo");
                         }
                         if (nameNorm === "precio equivalencia x unidad" || nameNorm === "precio-equivalencia-x-unidad") wrap.setAttribute("data-field", "precio-equivalencia-x-unidad");
                         if (isObservaciones) wrap.setAttribute("data-field", "observaciones");
@@ -595,7 +608,7 @@
                             || nameNorm === "precio equivalencia x unidad" || nameNorm === "precio-equivalencia-x-unidad";
 
                         var labelWrap = document.createElement("span");
-                        labelWrap.className = "costos-edit-label" + (isCalculatedField(nameNorm) ? " costos-edit-label-calc" : "");
+                        labelWrap.className = "costos-edit-label" + (isCalculatedField(nameNorm) && nameNorm !== "cantidad unidad medida" && nameNorm !== "cantidad-unidad-medida" ? " costos-edit-label-calc" : "");
                         var labelText = (nameNorm === "presentacion tipo" || nameNorm === "presentacion-tipo")
                             ? "Tipo de presentación (envoltorio del producto)"
                             : (nameNorm === "presentacion cantidad medida" || nameNorm === "presentacion-cantidad-medida")
@@ -603,7 +616,7 @@
                             : (nameNorm === "presentacion unidad" || nameNorm === "presentacion-unidad")
                             ? "Unidad de medida de la cantidad del paquete (Kg, L, unidad, etc.)"
                             : (nameNorm === "equivalencia unidad medida" || nameNorm === "equivalencia-unidad-medida")
-                            ? "Equivalencia (resultado calculado según presentación y unidad de medida)"
+                            ? "Factor de Equivalencia ( El valor a mostrar, indica como se compone cada unidad por Factor [Resultado de Equivalencia] )"
                             : (nameNorm === "equivalencia tipo unidad medida" || nameNorm === "equivalencia-tipo-unidad-medida")
                             ? "Convertido a"
                             : (nameNorm === "tipo unidad medida" || nameNorm === "tipo-unidad-medida")
@@ -1113,7 +1126,12 @@
                         }
 
                         if (isEquivalenciaSection) {
-                            sectionEquivalenciaWraps.push(wrap);
+                            var df = wrap.getAttribute("data-field");
+                            if (df === "precio-costo-x-unidad" || df === "precio-equivalencia-x-unidad") {
+                                precioCostoWraps.push(wrap);
+                            } else {
+                                sectionEquivalenciaWraps.push(wrap);
+                            }
                         } else if (isObservaciones) {
                             observacionesWrapCollected = wrap;
                         } else {
@@ -1127,6 +1145,10 @@
                         presentacionEquivalenciaWrapper.appendChild(presentationWrapCollected);
                     }
                     if (sectionEquivalenciaWraps.length > 0) {
+                        var tituloEquivalencia = document.createElement("h3");
+                        tituloEquivalencia.className = "costos-edit-seccion-titulo";
+                        tituloEquivalencia.textContent = "Cálculo de Equivalencia";
+                        tituloEquivalencia.setAttribute("id", "costos-seccion-equivalencia-titulo");
                         var tipoWrap = null;
                         var cantidadWrap = null;
                         var restWraps = [];
@@ -1144,6 +1166,7 @@
                         sectionEquivalenciaContainer.className = "costos-edit-section-equivalencia";
                         orderedSection.forEach(function (w) { sectionEquivalenciaContainer.appendChild(w); });
                         if (presentacionEquivalenciaWrapper) {
+                            presentacionEquivalenciaWrapper.appendChild(tituloEquivalencia);
                             presentacionEquivalenciaWrapper.appendChild(sectionEquivalenciaContainer);
                             var precioAnteriorWrap = fieldsContainer.querySelector("[data-field=\"precio-anterior\"]");
                             if (precioAnteriorWrap && precioAnteriorWrap.nextSibling) {
@@ -1154,17 +1177,21 @@
                                 fieldsContainer.appendChild(presentacionEquivalenciaWrapper);
                             }
                         } else {
+                            var wrapperSinPresentacion = document.createElement("div");
+                            wrapperSinPresentacion.className = "costos-edit-seccion-presentacion-equivalencia";
+                            wrapperSinPresentacion.appendChild(tituloEquivalencia);
+                            wrapperSinPresentacion.appendChild(sectionEquivalenciaContainer);
                             var presentacionWrap = fieldsContainer.querySelector("[data-field=\"presentacion\"]");
                             if (presentacionWrap && presentacionWrap.nextSibling) {
-                                fieldsContainer.insertBefore(sectionEquivalenciaContainer, presentacionWrap.nextSibling);
+                                fieldsContainer.insertBefore(wrapperSinPresentacion, presentacionWrap.nextSibling);
                             } else if (presentacionWrap) {
-                                fieldsContainer.appendChild(sectionEquivalenciaContainer);
+                                fieldsContainer.appendChild(wrapperSinPresentacion);
                             } else {
                                 var precioAnteriorWrap = fieldsContainer.querySelector("[data-field=\"precio-anterior\"]");
                                 if (precioAnteriorWrap && precioAnteriorWrap.nextSibling) {
-                                    fieldsContainer.insertBefore(sectionEquivalenciaContainer, precioAnteriorWrap.nextSibling);
+                                    fieldsContainer.insertBefore(wrapperSinPresentacion, precioAnteriorWrap.nextSibling);
                                 } else {
-                                    fieldsContainer.appendChild(sectionEquivalenciaContainer);
+                                    fieldsContainer.appendChild(wrapperSinPresentacion);
                                 }
                             }
                         }
@@ -1176,6 +1203,27 @@
                             fieldsContainer.appendChild(presentacionEquivalenciaWrapper);
                         } else {
                             fieldsContainer.appendChild(presentacionEquivalenciaWrapper);
+                        }
+                    }
+                    if (precioCostoWraps.length > 0) {
+                        var seccionPreciosCosto = document.createElement("div");
+                        seccionPreciosCosto.className = "costos-edit-seccion-precios-costo";
+                        var tituloPreciosCosto = document.createElement("h3");
+                        tituloPreciosCosto.className = "costos-edit-seccion-titulo";
+                        tituloPreciosCosto.textContent = "Precios de Costo";
+                        tituloPreciosCosto.setAttribute("id", "costos-seccion-precios-costo-titulo");
+                        seccionPreciosCosto.appendChild(tituloPreciosCosto);
+                        precioCostoWraps.forEach(function (w) { seccionPreciosCosto.appendChild(w); });
+                        var refEquiv = fieldsContainer.querySelector(".costos-edit-seccion-presentacion-equivalencia");
+                        if (refEquiv) {
+                            refEquiv.insertAdjacentElement("afterend", seccionPreciosCosto);
+                        } else {
+                            var precioAnteriorWrap = fieldsContainer.querySelector("[data-field=\"precio-anterior\"]");
+                            if (precioAnteriorWrap && precioAnteriorWrap.nextSibling) {
+                                fieldsContainer.insertBefore(seccionPreciosCosto, precioAnteriorWrap.nextSibling);
+                            } else {
+                                fieldsContainer.appendChild(seccionPreciosCosto);
+                            }
                         }
                     }
                     if (observacionesWrapCollected) {
@@ -1336,6 +1384,12 @@
                         if (!precioActualInput || !cantidadField || !precioCostoField) return;
                         var cantidadSpan = cantidadField.querySelector(".costos-edit-value");
                         var precioAnteriorSpan = precioAnteriorField ? precioAnteriorField.querySelector(".costos-edit-value") : null;
+                        var precioAnteriorCell = precioAnteriorField ? precioAnteriorField.querySelector(".costos-edit-value-cell") : null;
+                        function getPrecioAnteriorText() {
+                            if (precioAnteriorSpan && precioAnteriorSpan.textContent) return String(precioAnteriorSpan.textContent).trim();
+                            if (precioAnteriorCell && precioAnteriorCell.textContent) return String(precioAnteriorCell.textContent).trim();
+                            return "";
+                        }
                         var precioCostoSpan = precioCostoField.querySelector(".costos-edit-value");
                         var equivalenciaSpan = equivalenciaField ? equivalenciaField.querySelector(".costos-edit-value") : null;
                         var precioEquivalenciaSpan = precioEquivalenciaField ? precioEquivalenciaField.querySelector(".costos-edit-value") : null;
@@ -1348,8 +1402,9 @@
                         function updatePrecioCosto() {
                             var precioStr = (precioActualInput.value || "").trim();
                             var precio = parseFloat(precioStr.replace(",", "."));
-                            if (isNaN(precio) && precioAnteriorSpan) {
-                                precio = parsePrecioFromDisplay(precioAnteriorSpan.textContent);
+                            if (isNaN(precio)) {
+                                var textoAnterior = getPrecioAnteriorText();
+                                if (textoAnterior) precio = parsePrecioFromDisplay(textoAnterior);
                             }
                             var cantidadStr = (cantidadSpan.textContent || "").replace(/\s/g, "").trim();
                             var cantidad = parseFloat(cantidadStr.replace(/\./g, "").replace(",", "."));
@@ -1359,11 +1414,11 @@
                             if (isNaN(equiv)) equiv = parseFloat(equivStr.replace(",", "."));
                             if (!isNaN(precio) && !isNaN(cantidad) && cantidad !== 0) {
                                 var result = roundToDecimals(precio / cantidad, 4);
-                                precioCostoSpan.textContent = formatMonedaArg(result, 4);
+                                precioCostoSpan.textContent = formatMonedaArgHasta4Dec(result);
                                 if (equivalenciaSpan && precioEquivalenciaSpan) {
                                     if (!isNaN(equiv) && equiv !== 0) {
                                         var resultEquiv = roundToDecimals(result / equiv, 4);
-                                        precioEquivalenciaSpan.textContent = formatMonedaArg(resultEquiv, 4);
+                                        precioEquivalenciaSpan.textContent = formatMonedaArgHasta4Dec(resultEquiv);
                                     } else {
                                         precioEquivalenciaSpan.textContent = "—";
                                     }
@@ -1377,22 +1432,23 @@
                             if (window.APP_CONFIG && window.APP_CONFIG.costos && window.APP_CONFIG.costos.debugEquivalencia && debugPrecioContent) {
                                 function escP(s) { var x = String(s == null ? "" : s); return x.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
                                 var precioOrig = (precioActualInput.value || "").trim();
-                                var usedPrecioAnterior = (precioOrig === "" || isNaN(parseFloat(precioStr.replace(",", ".")))) && precioAnteriorSpan;
+                                var usedPrecioAnterior = (precioOrig === "" || isNaN(parseFloat(precioStr.replace(",", ".")))) && getPrecioAnteriorText();
                                 var resultNum = !isNaN(precio) && !isNaN(cantidad) && cantidad !== 0 ? roundToDecimals(precio / cantidad, 4) : NaN;
                                 var resultEquivNum = (!isNaN(resultNum) && !isNaN(equiv) && equiv !== 0) ? roundToDecimals(resultNum / equiv, 4) : NaN;
-                                var linePrecio = "<span class=\"costos-debug-var-p\">P</span> = Precio Actual: <span class=\"costos-debug-var-p\">" + escP(precioOrig || "(vacío)") + "</span>" + (usedPrecioAnterior ? " → parseado desde Precio Actual: <span class=\"costos-debug-var-p\">" + escP(precioAnteriorSpan ? precioAnteriorSpan.textContent : "") + "</span>" : "") + " → número: <span class=\"costos-debug-var-p\">" + escP(isNaN(precio) ? "NaN" : String(precio)) + "</span>";
+                                var linePrecio = "<span class=\"costos-debug-var-p\">P</span> = Precio Actual: <span class=\"costos-debug-var-p\">" + escP(precioOrig || "(vacío)") + "</span>" + (usedPrecioAnterior ? " → parseado desde Precio Anterior: <span class=\"costos-debug-var-p\">" + escP(usedPrecioAnterior) + "</span>" : "") + " → número: <span class=\"costos-debug-var-p\">" + escP(isNaN(precio) ? "NaN" : String(precio)) + "</span>";
                                 var lineCant = "<span class=\"costos-debug-var-c\">C</span> = Resultado de Equivalencia: <span class=\"costos-debug-var-c\">" + escP(cantidadStr) + "</span> → número: <span class=\"costos-debug-var-c\">" + escP(isNaN(cantidad) ? "NaN" : String(cantidad)) + "</span>";
                                 var lineEquiv = "<span class=\"costos-debug-var-e\">E</span> = Equivalencia: <span class=\"costos-debug-var-e\">" + escP(equivStr) + "</span> → número: <span class=\"costos-debug-var-e\">" + escP(isNaN(equiv) ? "NaN" : String(equiv)) + "</span>";
                                 var lineFormula1 = "Fórmula A: <span class=\"costos-debug-var-r1\">Precio Costo</span> por unidad = <span class=\"costos-debug-var-p\">P</span> ÷ <span class=\"costos-debug-var-c\">C</span> (C = Resultado de Equivalencia)";
                                 var lineFormula2 = "Fórmula B: <span class=\"costos-debug-var-r2\">Precio Equivalencia</span> por unidad = <span class=\"costos-debug-var-r1\">Precio Costo</span> ÷ <span class=\"costos-debug-var-e\">E</span>";
-                                var lineR1 = "Resultado <span class=\"costos-debug-var-r1\">Precio Costo</span> por unidad: <span class=\"costos-debug-var-r1\">" + escP(isNaN(resultNum) ? "—" : formatMonedaArg(resultNum, 4) + " (" + resultNum + ")") + "</span>";
-                                var lineR2 = "Resultado <span class=\"costos-debug-var-r2\">Precio Equivalencia</span> por unidad: <span class=\"costos-debug-var-r2\">" + escP(isNaN(resultEquivNum) ? "—" : formatMonedaArg(resultEquivNum, 4) + " (" + resultEquivNum + ")") + "</span>";
+                                var lineR1 = "Resultado <span class=\"costos-debug-var-r1\">Precio Costo</span> por unidad: <span class=\"costos-debug-var-r1\">" + escP(isNaN(resultNum) ? "—" : formatMonedaArgHasta4Dec(resultNum) + " (" + resultNum + ")") + "</span>";
+                                var lineR2 = "Resultado <span class=\"costos-debug-var-r2\">Precio Equivalencia</span> por unidad: <span class=\"costos-debug-var-r2\">" + escP(isNaN(resultEquivNum) ? "—" : formatMonedaArgHasta4Dec(resultEquivNum) + " (" + resultEquivNum + ")") + "</span>";
                                 debugPrecioContent.innerHTML = linePrecio + "\n" + lineCant + "\n" + lineEquiv + "\n\n" + lineFormula1 + "\n" + lineFormula2 + "\n\n" + lineR1 + "\n" + lineR2;
                             }
                         }
                         precioActualInput.addEventListener("input", updatePrecioCosto);
                         precioActualInput.addEventListener("change", updatePrecioCosto);
-                        // En edición no se ejecuta updatePrecioCosto al cargar: se respetan los valores guardados (precio-costo-x-unidad, precio-equivalencia-x-unidad). El cálculo solo corre cuando el usuario cambia el precio actual.
+                        // Al cargar: si Precio Actual está vacío, calcular Precio de Costo (y Precio equivalencia) con Precio Anterior para mejor UX.
+                        updatePrecioCosto();
                     })();
 
                     (function () {
@@ -1658,7 +1714,7 @@
                                     } else {
                                         alert("Cambios guardados en la hoja correctamente.");
                                     }
-                                    window.location.href = "packing.html";
+                                    window.location.replace("packing.html");
                                 } else {
                                     alert("Error al guardar en la hoja: " + (json && json.error ? json.error : "Respuesta inválida"));
                                 }
