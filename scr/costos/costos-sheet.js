@@ -139,6 +139,7 @@
     function showTableCostosConCategorias(container, headers, rows, options) {
         if (!container) return;
         var opts = options || {};
+        var isMateria = container === containerMateria;
         var idColumnHeaders = opts.idColumnHeaders || ["idmateria-prima", "idmateriaprima"];
         var storageKeyEdit = opts.storageKeyEdit || "costosEditRecord";
         var storageKeyCreate = opts.storageKeyCreate || "costosCreateRecord";
@@ -418,6 +419,18 @@
             if (n === 1) return "Actualizado hace 1 d\u00eda";
             return "Actualizado hace " + n + " d\u00edas";
         }
+        var idxPrecioActualCol = -1;
+        var precioActualHeaderName = "";
+        for (var qi = 0; qi < headers.length; qi++) {
+            var hn = String(headers[qi] != null ? headers[qi] : "").trim().toLowerCase().replace(/\s/g, "").replace(/-/g, "");
+            if (hn === "precioactual") {
+                idxPrecioActualCol = qi;
+                precioActualHeaderName = String(headers[qi] != null ? headers[qi] : "").trim();
+                break;
+            }
+        }
+        var sheetKey = isMateria ? "materiaPrima" : "packing";
+        var appsScriptUrlForUpdate = (window.APP_CONFIG && window.APP_CONFIG.appsScriptUrl) ? String(window.APP_CONFIG.appsScriptUrl).trim() : "";
         var cardsHtml = "";
         var recordsForEdit = [];
         groupOrder.forEach(function (catLabel) {
@@ -476,7 +489,9 @@
                 var cardClass = "costos-card" + (isDeshabilitado ? " costos-card-deshabilitado" : "");
                 var deshabilitadoIcon = isDeshabilitado ? "<span class=\"costos-card-deshabilitado-icon\" title=\"Deshabilitado\" aria-label=\"Deshabilitado\"><i class=\"fa-solid fa-circle-slash\" aria-hidden=\"true\"></i></span>" : "";
                 var diasEstado = (diasClass === "costos-dias-amarillo") ? "amarillo" : (diasClass === "costos-dias-rojo") ? "rojo" : (diasClass === "costos-dias-urgente") ? "urgente" : "normal";
-                var priceBlock = (precio ? "<div class=\"costos-card-price\">" + escapeHtml(precio) + (trendIcon ? " " + trendIcon : "") + "</div>" : "");
+                var rawPrecioVal = idxPrecioActualCol >= 0 ? String(row[idxPrecioActualCol] != null ? row[idxPrecioActualCol] : "").trim() : "";
+                var priceContent = (precio ? "<div class=\"costos-card-price\">" + escapeHtml(precio) + (trendIcon ? " " + trendIcon : "") + "</div>" : "");
+                var priceBlock = "<div class=\"costos-card-price-wrap\">" + priceContent + "</div>";
                 var editBtnHtml = "<a href=\"#\" class=\"costos-card-edit-btn\" title=\"" + escapeHtml(editBtnLabel) + "\" aria-label=\"" + escapeHtml(editBtnLabel) + "\"><i class=\"fa-solid fa-pen\" aria-hidden=\"true\"></i> " + escapeHtml(editBtnLabel) + "</a>";
                 var extraHtmlWithEdit = "<div class=\"costos-extra-info\">" + extraParts.join("") + "<div class=\"costos-extra-actions\">" + editBtnHtml + "</div></div>";
                 cardsHtml += "<div class=\"" + cardClass + "\" data-dias-estado=\"" + escapeHtml(diasEstado) + "\">" +
@@ -494,7 +509,7 @@
                     "</div>" +
                     "<div class=\"costos-card-price-side\">" +
                     "<div class=\"costos-card-price-row\">" +
-                    "<div class=\"costos-card-price-wrap\">" + priceBlock + "</div>" +
+                    priceBlock +
                     (presentacion ? "<div class=\"costos-card-presentacion\">" + escapeHtml(presentacion) + "</div>" : "") +
                     "</div>" +
                     "</div>" +
@@ -823,9 +838,10 @@
                     }
                     return loadCombos.then(function () { applyMateriaOrPackingTable(container, data, isMateria); });
                 })
-                .catch(function () {
+                .catch(function (err) {
+                    var errMsg = (err && err.message) ? err.message : "";
                     if (csvUrl) {
-                        loadFromCsv(csvUrl, container, isMateria);
+                        loadFromCsv(csvUrl, container, isMateria, errMsg);
                     } else {
                         showMessage(container, "<p class=\"costos-placeholder\">No se pudieron cargar los datos. Revisá appsScriptUrl en config.js.</p>");
                     }
@@ -843,9 +859,12 @@
         loadFromCsv(csvUrl, container, isMateria);
     }
 
-    function loadFromCsv(sheetUrl, container, isMateria) {
-        fetch(sheetUrl, { cache: "no-store" })
-            .then(function (res) { return res.text(); })
+    function loadFromCsv(sheetUrl, container, isMateria, apiErrorMsg) {
+        fetch(sheetUrl, { cache: "no-store", mode: "cors" })
+            .then(function (res) {
+                if (!res.ok) throw new Error("CSV: " + res.status + " " + res.statusText);
+                return res.text();
+            })
             .then(function (text) {
                 var data = parseCsv(text);
                 if (data.headers.length === 0 && data.rows.length === 0) {
@@ -859,10 +878,12 @@
                 }
                 applyMateriaOrPackingTable(container, data, isMateria);
             })
-            .catch(function () {
+            .catch(function (err) {
+                var csvErr = (err && err.message) ? err.message : "";
+                var detalle = [apiErrorMsg, csvErr].filter(Boolean).join(" — ") || "Error de red o CORS.";
                 showMessage(
                     container,
-                    '<p class="costos-placeholder">No se pudieron cargar los datos. Revisá la URL en config.js.</p>'
+                    '<p class="costos-placeholder">No se pudieron cargar los datos. Revisá la URL en config.js.</p><p class="costos-placeholder costos-placeholder-small">Detalle: ' + escapeHtml(detalle) + '</p>'
                 );
             });
     }
@@ -1053,8 +1074,15 @@
             .catch(function () {});
     })();
 
-    run(containerPacking);
-    run(containerMateria);
+    function initCostosLoad() {
+        run(containerPacking);
+        run(containerMateria);
+    }
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initCostosLoad);
+    } else {
+        initCostosLoad();
+    }
 
     var btnNuevaMateria = document.getElementById("btn-nueva-materia-prima");
     if (btnNuevaMateria) {
