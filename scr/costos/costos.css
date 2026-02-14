@@ -527,6 +527,22 @@ body.costos-page {
     font-weight: 600;
     color: var(--logo-dark);
 }
+.costos-edit-presentacion-inputs-inline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 16px;
+}
+.costos-edit-presentacion-inputs-inline .costos-edit-presentacion-label {
+    margin: 0;
+}
+.costos-edit-presentacion-inputs-inline .costos-edit-input {
+    min-width: 80px;
+    max-width: 120px;
+}
+.costos-edit-presentacion-inputs-inline .costos-edit-select-presentacion {
+    min-width: 140px;
+}
 .costos-edit-presentacion-inputs {
     display: grid;
     grid-template-columns: auto 1fr;
