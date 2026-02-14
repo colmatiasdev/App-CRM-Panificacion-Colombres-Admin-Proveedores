@@ -17,8 +17,8 @@
         <a href="../../../index.html#costos" class="costos-nav-link">Inicio</a>
         <a href="packing.html" class="costos-nav-link is-active">Packing</a>
         <a href="../Materia-Prima/materia-prima.html" class="costos-nav-link">Materia prima</a>
+        <a href="../Calculadora/calculadora-equivalencia.html" class="costos-nav-link">Calculadora</a>
     </nav>
-    <a href="packing.html" class="costos-back"><span class="costos-back-arrow">←</span> Volver a Packing</a>
     <main class="costos-main">
         <h1 class="costos-title">Editar registro</h1>
         <p class="costos-intro">Datos del registro. Modifique el precio y guarde cuando termine.</p>
@@ -607,11 +607,11 @@
                             : (nameNorm === "equivalencia tipo unidad medida" || nameNorm === "equivalencia-tipo-unidad-medida")
                             ? "Convertido a"
                             : (nameNorm === "tipo unidad medida" || nameNorm === "tipo-unidad-medida")
-                            ? "Convertir A (Gramos, Litro, Unidad, etc.)"
+                            ? "Convertir A (Gramos, CC, Unidades, Centimetros, Paquetes, etc.)"
                             : (nameNorm === "cantidad unidad medida" || nameNorm === "cantidad-unidad-medida")
-                            ? "Cantidad unidad de medida (resultado de equivalencia: cantidad y unidad del paquete convertidas al tipo de unidad de medida; valor entero)"
+                            ? "Resultado de Equivalencia (Cantidad ingresada y Seleccion del Tipo de Unidad)"
                             : (nameNorm === "precio costo x unidad" || nameNorm === "precio-costo-x-unidad")
-                            ? "Precio costo por unidad (Precio anterior ÷ Cantidad unidad de medida)"
+                            ? "Precio de Costo por unidad (Precio Actual ÷ Resultado de Equivalencia)"
                             : (nameNorm === "precio equivalencia x unidad" || nameNorm === "precio-equivalencia-x-unidad")
                             ? "Precio equivalencia por unidad (valor usado para realizar el costo de la receta)"
                             : (key || "—");
@@ -662,7 +662,65 @@
                         var valueCell = document.createElement("div");
                         valueCell.className = "costos-edit-value-cell";
                         valueCell.appendChild(valueSpan);
-                        var sinBotonEditarEquiv = nameNorm === "equivalencia unidad medida" || nameNorm === "equivalencia-unidad-medida"
+                        if (nameNorm === "cantidad unidad medida" || nameNorm === "cantidad-unidad-medida") {
+                            valueCell.removeChild(valueSpan);
+                            var wrapCantidadEdit = document.createElement("div");
+                            wrapCantidadEdit.className = "costos-edit-equivalencia-from-table";
+                            var iconCantidadEdit = document.createElement("span");
+                            iconCantidadEdit.className = "costos-edit-equivalencia-icon";
+                            iconCantidadEdit.setAttribute("title", "Resultado calculado: cantidad y unidad del paquete convertidas al tipo de unidad de medida");
+                            iconCantidadEdit.setAttribute("aria-hidden", "true");
+                            iconCantidadEdit.innerHTML = "<i class=\"fa-solid fa-calculator\" aria-hidden=\"true\"></i>";
+                            wrapCantidadEdit.appendChild(iconCantidadEdit);
+                            valueSpan.className = "costos-edit-value costos-edit-value-cantidad-display";
+                            wrapCantidadEdit.appendChild(valueSpan);
+                            valueCell.appendChild(wrapCantidadEdit);
+                        }
+                        if (nameNorm === "tipo unidad medida" || nameNorm === "tipo-unidad-medida") {
+                            valueCell.removeChild(valueSpan);
+                            var wrapConvertirEdit = document.createElement("div");
+                            wrapConvertirEdit.className = "costos-edit-convertir-from-table";
+                            var iconConvertirEdit = document.createElement("span");
+                            iconConvertirEdit.className = "costos-edit-equivalencia-icon";
+                            iconConvertirEdit.setAttribute("title", "Valor de la tabla EQUIVALENCIAS (Convertir-UnidadMedida) según la unidad de presentación");
+                            iconConvertirEdit.setAttribute("aria-hidden", "true");
+                            iconConvertirEdit.innerHTML = "<i class=\"fa-solid fa-calculator\" aria-hidden=\"true\"></i>";
+                            wrapConvertirEdit.appendChild(iconConvertirEdit);
+                            valueSpan.className = "costos-edit-value costos-edit-value-convertir-display";
+                            wrapConvertirEdit.appendChild(valueSpan);
+                            valueCell.appendChild(wrapConvertirEdit);
+                        }
+                        if (nameNorm === "equivalencia unidad medida" || nameNorm === "equivalencia-unidad-medida") {
+                            valueCell.removeChild(valueSpan);
+                            var wrapEquivEdit = document.createElement("div");
+                            wrapEquivEdit.className = "costos-edit-equivalencia-from-table";
+                            var iconEquivEdit = document.createElement("span");
+                            iconEquivEdit.className = "costos-edit-equivalencia-icon";
+                            iconEquivEdit.setAttribute("title", "Valor de la tabla EQUIVALENCIAS (Factor-Unidad-Equivalencia) según la unidad de presentación");
+                            iconEquivEdit.setAttribute("aria-hidden", "true");
+                            iconEquivEdit.innerHTML = "<i class=\"fa-solid fa-calculator\" aria-hidden=\"true\"></i>";
+                            wrapEquivEdit.appendChild(iconEquivEdit);
+                            valueSpan.className = "costos-edit-value costos-edit-value-equivalencia-display";
+                            wrapEquivEdit.appendChild(valueSpan);
+                            valueCell.appendChild(wrapEquivEdit);
+                        }
+                        if (nameNorm === "equivalencia tipo unidad medida" || nameNorm === "equivalencia-tipo-unidad-medida") {
+                            valueCell.removeChild(valueSpan);
+                            var wrapConvEdit = document.createElement("div");
+                            wrapConvEdit.className = "costos-edit-convertido-from-table";
+                            var iconConvEdit = document.createElement("span");
+                            iconConvEdit.className = "costos-edit-equivalencia-icon";
+                            iconConvEdit.setAttribute("title", "Valor de la tabla EQUIVALENCIAS (Convertido-UnidadMedida) según la unidad de presentación");
+                            iconConvEdit.setAttribute("aria-hidden", "true");
+                            iconConvEdit.innerHTML = "<i class=\"fa-solid fa-calculator\" aria-hidden=\"true\"></i>";
+                            wrapConvEdit.appendChild(iconConvEdit);
+                            valueSpan.className = "costos-edit-value costos-edit-value-convertido-display";
+                            wrapConvEdit.appendChild(valueSpan);
+                            valueCell.appendChild(wrapConvEdit);
+                        }
+                        var sinBotonEditarEquiv = nameNorm === "cantidad unidad medida" || nameNorm === "cantidad-unidad-medida"
+                            || nameNorm === "tipo unidad medida" || nameNorm === "tipo-unidad-medida"
+                            || nameNorm === "equivalencia unidad medida" || nameNorm === "equivalencia-unidad-medida"
                             || nameNorm === "equivalencia tipo unidad medida" || nameNorm === "equivalencia-tipo-unidad-medida";
                         if (!editable && !isObservaciones && !isCalculatedField(nameNorm) && !sinBotonEditarEquiv) {
                             var editIcon = document.createElement("button");
@@ -1317,18 +1375,19 @@
                             var debugPrecioSection = document.getElementById("costos-debug-precio");
                             var debugPrecioContent = debugPrecioSection ? document.getElementById("costos-debug-precio-content") : null;
                             if (window.APP_CONFIG && window.APP_CONFIG.costos && window.APP_CONFIG.costos.debugEquivalencia && debugPrecioContent) {
+                                function escP(s) { var x = String(s == null ? "" : s); return x.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
                                 var precioOrig = (precioActualInput.value || "").trim();
                                 var usedPrecioAnterior = (precioOrig === "" || isNaN(parseFloat(precioStr.replace(",", ".")))) && precioAnteriorSpan;
-                                var linePrecio = "Precio (valor usado): " + (precioOrig || "(vacío)") + (usedPrecioAnterior ? " → parseado desde Precio anterior: " + precioAnteriorSpan.textContent : "") + " → número: " + (isNaN(precio) ? "NaN" : String(precio));
-                                var lineCant = "Cantidad (unidad de medida): " + cantidadStr + " → número: " + (isNaN(cantidad) ? "NaN" : String(cantidad));
-                                var lineEquiv = "Equivalencia: " + equivStr + " → número: " + (isNaN(equiv) ? "NaN" : String(equiv));
-                                var lineFormula1 = "Fórmula: Precio Costo por unidad = Precio ÷ Cantidad";
-                                var lineFormula2 = "Fórmula: Precio Equivalencia por unidad = Precio Costo ÷ Equivalencia";
                                 var resultNum = !isNaN(precio) && !isNaN(cantidad) && cantidad !== 0 ? roundToDecimals(precio / cantidad, 4) : NaN;
                                 var resultEquivNum = (!isNaN(resultNum) && !isNaN(equiv) && equiv !== 0) ? roundToDecimals(resultNum / equiv, 4) : NaN;
-                                var lineR1 = "Resultado Precio Costo por unidad: " + (isNaN(resultNum) ? "—" : formatMonedaArg(resultNum, 4) + " (" + resultNum + ")");
-                                var lineR2 = "Resultado Precio Equivalencia por unidad: " + (isNaN(resultEquivNum) ? "—" : formatMonedaArg(resultEquivNum, 4) + " (" + resultEquivNum + ")");
-                                debugPrecioContent.textContent = linePrecio + "\n" + lineCant + "\n" + lineEquiv + "\n\n" + lineFormula1 + "\n" + lineFormula2 + "\n\n" + lineR1 + "\n" + lineR2;
+                                var linePrecio = "<span class=\"costos-debug-var-p\">P</span> = Precio Actual: <span class=\"costos-debug-var-p\">" + escP(precioOrig || "(vacío)") + "</span>" + (usedPrecioAnterior ? " → parseado desde Precio Actual: <span class=\"costos-debug-var-p\">" + escP(precioAnteriorSpan ? precioAnteriorSpan.textContent : "") + "</span>" : "") + " → número: <span class=\"costos-debug-var-p\">" + escP(isNaN(precio) ? "NaN" : String(precio)) + "</span>";
+                                var lineCant = "<span class=\"costos-debug-var-c\">C</span> = Resultado de Equivalencia: <span class=\"costos-debug-var-c\">" + escP(cantidadStr) + "</span> → número: <span class=\"costos-debug-var-c\">" + escP(isNaN(cantidad) ? "NaN" : String(cantidad)) + "</span>";
+                                var lineEquiv = "<span class=\"costos-debug-var-e\">E</span> = Equivalencia: <span class=\"costos-debug-var-e\">" + escP(equivStr) + "</span> → número: <span class=\"costos-debug-var-e\">" + escP(isNaN(equiv) ? "NaN" : String(equiv)) + "</span>";
+                                var lineFormula1 = "Fórmula A: <span class=\"costos-debug-var-r1\">Precio Costo</span> por unidad = <span class=\"costos-debug-var-p\">P</span> ÷ <span class=\"costos-debug-var-c\">C</span> (C = Resultado de Equivalencia)";
+                                var lineFormula2 = "Fórmula B: <span class=\"costos-debug-var-r2\">Precio Equivalencia</span> por unidad = <span class=\"costos-debug-var-r1\">Precio Costo</span> ÷ <span class=\"costos-debug-var-e\">E</span>";
+                                var lineR1 = "Resultado <span class=\"costos-debug-var-r1\">Precio Costo</span> por unidad: <span class=\"costos-debug-var-r1\">" + escP(isNaN(resultNum) ? "—" : formatMonedaArg(resultNum, 4) + " (" + resultNum + ")") + "</span>";
+                                var lineR2 = "Resultado <span class=\"costos-debug-var-r2\">Precio Equivalencia</span> por unidad: <span class=\"costos-debug-var-r2\">" + escP(isNaN(resultEquivNum) ? "—" : formatMonedaArg(resultEquivNum, 4) + " (" + resultEquivNum + ")") + "</span>";
+                                debugPrecioContent.innerHTML = linePrecio + "\n" + lineCant + "\n" + lineEquiv + "\n\n" + lineFormula1 + "\n" + lineFormula2 + "\n\n" + lineR1 + "\n" + lineR2;
                             }
                         }
                         precioActualInput.addEventListener("input", updatePrecioCosto);
@@ -1384,29 +1443,11 @@
                             } else {
                                 u = row[idxPresUnid] != null ? String(row[idxPresUnid]).trim() : "";
                             }
-                            var sectionEquiv = formEl.querySelector(".costos-edit-seccion-presentacion-equivalencia .costos-edit-section-equivalencia");
-                            var selTum = sectionEquiv ? sectionEquiv.querySelector("select.costos-edit-select-tipo-unidad-medida") : null;
-                            if (!selTum) {
-                                var fieldAux = formEl.querySelector(".costos-edit-field[data-field=\"equivalencia-tipo-unidad-medida\"]") || formEl.querySelector(".costos-edit-field[data-field=\"tipo-unidad-medida\"]");
-                                var wrapAux = fieldAux ? fieldAux.querySelector(".costos-edit-tipo-unidad-medida-wrap") : null;
-                                selTum = wrapAux ? wrapAux.querySelector("select.costos-edit-select-tipo-unidad-medida") : null;
-                            }
-                            var fieldTum = (selTum && selTum.closest) ? selTum.closest(".costos-edit-field") : null;
-                            if (!fieldTum) fieldTum = formEl.querySelector(".costos-edit-field[data-field=\"equivalencia-tipo-unidad-medida\"]") || formEl.querySelector(".costos-edit-field[data-field=\"tipo-unidad-medida\"]");
-                            var wrapTum = fieldTum ? fieldTum.querySelector(".costos-edit-tipo-unidad-medida-wrap") : null;
-                            var hidTum = wrapTum ? wrapTum.querySelector("input[type=hidden].costos-edit-input") : null;
-                            var spanTum = fieldTum ? fieldTum.querySelector(".costos-edit-value-cell .costos-edit-value") : null;
-                            if (selTum && selTum.value && selTum.value !== "__nueva__") {
-                                d = selTum.value;
-                            } else if (hidTum && hidTum.value) {
-                                d = hidTum.value;
-                            } else if (spanTum && spanTum.textContent) {
-                                d = String(spanTum.textContent).trim();
-                            } else if (idxTipoUnidadMedida >= 0 && row[idxTipoUnidadMedida] != null) {
-                                d = String(row[idxTipoUnidadMedida]).trim();
-                            } else {
-                                d = "";
-                            }
+                            var fieldTum = formEl.querySelector(".costos-edit-field[data-field=\"equivalencia-tipo-unidad-medida\"]");
+                            var factorEquivFromTable = (u && window.COSTOS_EQUIVALENCIA && window.COSTOS_EQUIVALENCIA.getFactorUnidadEquivalenciaForUnidad) ? window.COSTOS_EQUIVALENCIA.getFactorUnidadEquivalenciaForUnidad(u) : null;
+                            var convertidoFromTable = (u && window.COSTOS_EQUIVALENCIA && window.COSTOS_EQUIVALENCIA.getConvertidoUnidadMedidaForUnidad) ? window.COSTOS_EQUIVALENCIA.getConvertidoUnidadMedidaForUnidad(u) : null;
+                            var convertirFromTable = (u && window.COSTOS_EQUIVALENCIA && window.COSTOS_EQUIVALENCIA.getConvertirUnidadMedidaForUnidad) ? window.COSTOS_EQUIVALENCIA.getConvertirUnidadMedidaForUnidad(u) : null;
+                            d = (convertidoFromTable != null && String(convertidoFromTable).trim() !== "") ? String(convertidoFromTable).trim() : "";
                             var uNorm = (window.COSTOS_EQUIVALENCIA && window.COSTOS_EQUIVALENCIA.normalizar) ? window.COSTOS_EQUIVALENCIA.normalizar(u) : u;
                             var dNorm = (window.COSTOS_EQUIVALENCIA && window.COSTOS_EQUIVALENCIA.normalizar) ? window.COSTOS_EQUIVALENCIA.normalizar(d) : d;
                             var out = (window.COSTOS_EQUIVALENCIA && window.COSTOS_EQUIVALENCIA.convertWithDebug) ? window.COSTOS_EQUIVALENCIA.convertWithDebug(q, uNorm, dNorm) : null;
@@ -1423,15 +1464,20 @@
                                 cantidadSpan.textContent = "—";
                                 hiddenEquiv.value = "";
                             }
+                            var convertirFieldEdit = formEl.querySelector(".costos-edit-field[data-field=\"tipo-unidad-medida\"]");
+                            var convertirSpanEdit = convertirFieldEdit ? convertirFieldEdit.querySelector(".costos-edit-value-convertir-display, .costos-edit-value") : null;
+                            if (convertirSpanEdit) convertirSpanEdit.textContent = (convertirFromTable != null && String(convertirFromTable).trim() !== "") ? String(convertirFromTable).trim() : "—";
                             var equivalenciaFieldEdit = formEl.querySelector(".costos-edit-field[data-field=\"equivalencia-unidad-medida\"]");
-                            var equivalenciaSpanEdit = equivalenciaFieldEdit ? equivalenciaFieldEdit.querySelector(".costos-edit-value") : null;
+                            var equivalenciaSpanEdit = equivalenciaFieldEdit ? equivalenciaFieldEdit.querySelector(".costos-edit-equivalencia-from-table .costos-edit-value") : null;
                             if (equivalenciaSpanEdit) {
-                                if (!isNaN(valor) && !(out && !mismaCat && u && d)) {
-                                    equivalenciaSpanEdit.textContent = String(Math.round(valor));
+                                if (factorEquivFromTable != null && !isNaN(factorEquivFromTable)) {
+                                    equivalenciaSpanEdit.textContent = String(Number(factorEquivFromTable));
                                 } else {
                                     equivalenciaSpanEdit.textContent = "—";
                                 }
                             }
+                            var convertidoSpanEdit = fieldTum ? fieldTum.querySelector(".costos-edit-value-convertido-display, .costos-edit-value") : null;
+                            if (convertidoSpanEdit) convertidoSpanEdit.textContent = (d != null && String(d).trim() !== "") ? String(d).trim() : "—";
                             var leyenda = fieldTum ? fieldTum.querySelector(".costos-edit-equivalencia-leyenda") : null;
                             if (!leyenda && fieldTum) {
                                 leyenda = document.createElement("p");
@@ -1450,22 +1496,28 @@
                             }
                             var debugSection = document.getElementById("costos-debug-equivalencia");
                             var debugContent = debugSection ? document.getElementById("costos-debug-equivalencia-content") : null;
-                            if (debugSection && debugSection.style.display !== "none" && debugContent && out) {
-                                var db = out.debug;
-                                var catOrigenStr = db.categoriaOrigen != null ? db.categoriaOrigen : db.categoria;
-                                var catDestinoStr = db.categoriaDestino != null ? db.categoriaDestino : db.categoria;
-                                var formulaLine = db.mismaCategoria
-                                    ? "Fórmula (valores): " + db.formula + "\n\nR = Resultado (equivalencia): " + db.resultado
-                                    : "Fórmula no aplicada: origen y destino son de distinta categoría (" + catOrigenStr + " ≠ " + catDestinoStr + ").\nR = C (sin convertir) = " + db.resultado;
-                                debugContent.textContent =
-                                    "C = Cantidad (origen): " + db.cantidad + "\n" +
-                                    "UP-Origen = Unidad presentación (origen): \"" + db.unidadOrigen + "\" → normalizado: \"" + db.normalizadoOrigen + "\"\n" +
-                                    "UD-Destino = Unidad destino (Convertir a): \"" + db.unidadDestino + "\" → normalizado: \"" + db.normalizadoDestino + "\"\n" +
-                                    "Cat-Origen = Categoría origen: " + catOrigenStr + " | Cat-Destino = Categoría destino: " + catDestinoStr + "\n" +
-                                    "FO = Factor origen: " + db.factorOrigen + " | FD = Factor destino: " + db.factorDestino + "\n" +
-                                    "Misma categoría: " + db.mismaCategoria + "\n\n" +
-                                    "Fórmula (cuando misma categoría): R = C × FO / FD\n" +
-                                    formulaLine;
+                            if (debugSection && debugSection.style.display !== "none" && debugContent) {
+                                function esc(s) { var x = String(s == null ? "" : s); return x.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+                                var debugHtml = "";
+                                if (out) {
+                                    var db = out.debug;
+                                    var catOrigenStr = db.categoriaOrigen != null ? db.categoriaOrigen : db.categoria;
+                                    var catDestinoStr = db.categoriaDestino != null ? db.categoriaDestino : db.categoria;
+                                    var formulaLineHtml = db.mismaCategoria
+                                        ? "Fórmula (valores): <span class=\"costos-debug-var-c\">" + esc(db.cantidad) + "</span> × <span class=\"costos-debug-var-fo\">" + esc(db.factorOrigen) + "</span> / <span class=\"costos-debug-var-fd\">" + esc(db.factorDestino) + "</span> = <span class=\"costos-debug-var-r\">" + esc(db.resultado) + "</span>\n\n<span class=\"costos-debug-var-r\">R</span> = Resultado (equivalencia): <span class=\"costos-debug-var-r\">" + esc(db.resultado) + "</span>"
+                                        : "Fórmula no aplicada: origen y destino son de distinta categoría (" + esc(catOrigenStr) + " ≠ " + esc(catDestinoStr) + ").\n<span class=\"costos-debug-var-r\">R</span> = C (sin convertir) = <span class=\"costos-debug-var-r\">" + esc(db.resultado) + "</span>";
+                                    debugHtml =
+                                        "<span class=\"costos-debug-var-c\">C</span> = Cantidad (origen): <span class=\"costos-debug-var-c\">" + esc(db.cantidad) + "</span>\n" +
+                                        "UP-Origen = Unidad presentación (origen): \"" + esc(db.unidadOrigen) + "\" → normalizado: \"" + esc(db.normalizadoOrigen) + "\"\n" +
+                                        "UD-Destino = Unidad destino (Convertir a): \"" + esc(db.unidadDestino) + "\" → normalizado: \"" + esc(db.normalizadoDestino) + "\"\n" +
+                                        "Cat-Origen = Categoría origen: " + esc(catOrigenStr) + " | Cat-Destino = Categoría destino: " + esc(catDestinoStr) + "\n" +
+                                        "<span class=\"costos-debug-var-fo\">FO</span> = Factor origen: <span class=\"costos-debug-var-fo\">" + esc(db.factorOrigen) + "</span> | <span class=\"costos-debug-var-fd\">FD</span> = Factor destino: <span class=\"costos-debug-var-fd\">" + esc(db.factorDestino) + "</span>\n" +
+                                        "Misma categoría: " + esc(db.mismaCategoria) + "\n\n" +
+                                        "Fórmula (cuando misma categoría): <span class=\"costos-debug-var-r\">R</span> = <span class=\"costos-debug-var-c\">C</span> × <span class=\"costos-debug-var-fo\">FO</span> / <span class=\"costos-debug-var-fd\">FD</span>\n" +
+                                        formulaLineHtml;
+                                }
+                                debugHtml += "\n\nDesde hoja EQUIVALENCIAS (según unidad de presentación \"" + esc(u) + "\"):\nConvertir-UnidadMedida: " + esc(convertirFromTable != null && String(convertirFromTable).trim() !== "" ? String(convertirFromTable).trim() : "— (no encontrado)") + "\nFactor-Unidad-Equivalencia: " + (factorEquivFromTable != null && !isNaN(factorEquivFromTable) ? esc(String(factorEquivFromTable)) : "— (no encontrado)") + "\nConvertido-UnidadMedida: " + esc(convertidoFromTable != null && String(convertidoFromTable).trim() !== "" ? String(convertidoFromTable).trim() : "— (no encontrado)");
+                                debugContent.innerHTML = debugHtml;
                             }
                         }
                         formEl.addEventListener("input", function (e) {
@@ -1482,6 +1534,7 @@
                                 setTimeout(updateEquivalencia, 0);
                             }
                         });
+                        window.addEventListener("costos-equivalencias-loaded", function () { updateEquivalencia(); });
                         // En edición no se ejecuta updateEquivalencia al cargar: se respetan los datos guardados en la hoja (columnas cantidad-unidad-medida, equivalencia-unidad-medida). El cálculo solo corre cuando el usuario cambia presentación o "Convertir A".
                     })();
 
