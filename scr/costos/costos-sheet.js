@@ -111,7 +111,9 @@
                 storageKeyCreate: "costosCreateRecord",
                 editUrl: "editar-materia-prima.html",
                 createUrl: "crear-materia-prima.html",
+                editBtnLabel: "Editar Materia Prima",
                 filterInputId: "filter-materia-prima",
+                filterDiasSelectId: "filter-materia-prima-dias",
                 countId: "materia-prima-count",
                 btnNuevaId: "btn-nueva-materia-prima"
             });
@@ -122,7 +124,9 @@
                 storageKeyCreate: "costosCreateRecordPacking",
                 editUrl: "editar-packing.html",
                 createUrl: "crear-packing.html",
+                editBtnLabel: "Editar Packing",
                 filterInputId: "filter-packing",
+                filterDiasSelectId: "filter-packing-dias",
                 countId: "packing-count",
                 btnNuevaId: "btn-nueva-packing"
             });
@@ -140,7 +144,9 @@
         var storageKeyCreate = opts.storageKeyCreate || "costosCreateRecord";
         var editUrl = opts.editUrl || "editar-materia-prima.html";
         var createUrl = opts.createUrl || "crear-materia-prima.html";
+        var editBtnLabel = opts.editBtnLabel || "Editar producto";
         var filterInputId = opts.filterInputId || "filter-materia-prima";
+        var filterDiasSelectId = opts.filterDiasSelectId || null;
         var countId = opts.countId || "materia-prima-count";
         var btnNuevaId = opts.btnNuevaId || "btn-nueva-materia-prima";
         var hidden = COSTOS_COLUMNAS_OCULTAS.slice();
@@ -226,6 +232,16 @@
             var decPart = parts[1];
             var withDots = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
             return "$ " + withDots + "," + decPart;
+        }
+        /** Formatea una fecha (ISO o similar) a solo día/mes/año (dd/mm/yyyy). */
+        function formatSoloFechaDMA(dateStr) {
+            if (dateStr == null || String(dateStr).trim() === "") return "";
+            var d = new Date(String(dateStr).trim());
+            if (isNaN(d.getTime())) return String(dateStr).trim();
+            var day = d.getDate();
+            var month = d.getMonth() + 1;
+            var year = d.getFullYear();
+            return (day < 10 ? "0" : "") + day + "/" + (month < 10 ? "0" : "") + month + "/" + year;
         }
         function diasDesdeFechaHastaHoy(dateStr) {
             if (dateStr == null || String(dateStr).trim() === "") return "";
@@ -425,13 +441,12 @@
                 }
                 var labels = ["Equivalencia Tipo Unidad Medida", "Precio COSTO x Unidad", "Precio Equivalencia x Unidad", "Última Fecha Actualizada"];
                 var extraIdxs = [idxExtraEquivTipo, idxExtraPrecioCosto, idxExtraPrecioEq, fechaIdx];
-                var formatExtra = [function (s) { return s; }, formatoMonedaArg, formatoMonedaArg, function (s) { return s; }];
+                var formatExtra = [function (s) { return s; }, formatoMonedaArg, formatoMonedaArg, formatSoloFechaDMA];
                 for (var ex = 0; ex < extraIdxs.length; ex++) {
                     var val = extraVal(extraIdxs[ex]);
-                    if (ex === 1 || ex === 2) val = formatExtra[ex](val);
+                    if (ex === 1 || ex === 2 || ex === 3) val = formatExtra[ex](val);
                     extraParts.push("<div class=\"costos-extra-item\"><span class=\"costos-extra-label\">" + escapeHtml(labels[ex]) + "</span> <b>" + escapeHtml(val) + "</b></div>");
                 }
-                var extraHtml = "<div class=\"costos-extra-info\">" + extraParts.join("") + "</div>";
                 var idRegistro = idxId >= 0 && row[idxId] != null ? String(row[idxId]).trim() : "";
                 recordsForEdit.push({
                     id: idRegistro,
@@ -460,9 +475,11 @@
                 var isDeshabilitado = habilitadoVal === "NO";
                 var cardClass = "costos-card" + (isDeshabilitado ? " costos-card-deshabilitado" : "");
                 var deshabilitadoIcon = isDeshabilitado ? "<span class=\"costos-card-deshabilitado-icon\" title=\"Deshabilitado\" aria-label=\"Deshabilitado\"><i class=\"fa-solid fa-circle-slash\" aria-hidden=\"true\"></i></span>" : "";
-                var priceBlock = (precio ? "<div class=\"costos-card-price\">" + escapeHtml(precio) + (trendIcon ? " " + trendIcon : "") + "</div>" : "") +
-                    "<a href=\"#\" class=\"costos-card-edit-btn\" title=\"Editar precio / registro\" aria-label=\"Editar registro\"><i class=\"fa-solid fa-pen\" aria-hidden=\"true\"></i></a>";
-                cardsHtml += "<div class=\"" + cardClass + "\">" +
+                var diasEstado = (diasClass === "costos-dias-amarillo") ? "amarillo" : (diasClass === "costos-dias-rojo") ? "rojo" : (diasClass === "costos-dias-urgente") ? "urgente" : "normal";
+                var priceBlock = (precio ? "<div class=\"costos-card-price\">" + escapeHtml(precio) + (trendIcon ? " " + trendIcon : "") + "</div>" : "");
+                var editBtnHtml = "<a href=\"#\" class=\"costos-card-edit-btn\" title=\"" + escapeHtml(editBtnLabel) + "\" aria-label=\"" + escapeHtml(editBtnLabel) + "\"><i class=\"fa-solid fa-pen\" aria-hidden=\"true\"></i> " + escapeHtml(editBtnLabel) + "</a>";
+                var extraHtmlWithEdit = "<div class=\"costos-extra-info\">" + extraParts.join("") + "<div class=\"costos-extra-actions\">" + editBtnHtml + "</div></div>";
+                cardsHtml += "<div class=\"" + cardClass + "\" data-dias-estado=\"" + escapeHtml(diasEstado) + "\">" +
                     "<div class=\"costos-card-main\">" +
                     "<div class=\"costos-card-left-wrap\">" +
                     "<div class=\"costos-card-left\">" +
@@ -483,7 +500,7 @@
                     "</div>" +
                     "</div>" +
                     "<button type=\"button\" class=\"costos-expand-btn\" aria-expanded=\"false\"><i class=\"fa-solid fa-plus costos-expand-icon\"></i> <span class=\"costos-expand-text\">INFORMACION</span></button>" +
-                    extraHtml +
+                    extraHtmlWithEdit +
                     "</div>";
             });
         });
@@ -532,12 +549,14 @@
             });
         });
         var filterInput = document.getElementById(filterInputId);
+        var filterDiasSelect = filterDiasSelectId ? document.getElementById(filterDiasSelectId) : null;
         if (filterInput) {
             function applyFilterMateria() {
                 var wrap = container.querySelector(".costos-cards-wrap");
                 if (!wrap) return;
                 var query = (filterInput.value || "").trim();
                 var words = query.toLowerCase().split(/\s+/).filter(Boolean);
+                var diasFilter = (filterDiasSelect && filterDiasSelect.value) ? filterDiasSelect.value.trim() : "";
                 var totalCards = wrap.querySelectorAll(".costos-card").length;
                 var children = wrap.children;
                 var i = 0;
@@ -558,9 +577,12 @@
                             if (node.classList.contains("costos-card")) {
                                 var nameEl = node.querySelector(".costos-card-name");
                                 var nameText = nameEl ? (nameEl.textContent || "").trim().toLowerCase() : "";
-                                var cardMatches = words.length === 0 || words.every(function (word) {
+                                var textMatches = words.length === 0 || words.every(function (word) {
                                     return categoryText.indexOf(word) !== -1 || nameText.indexOf(word) !== -1;
                                 });
+                                var cardDias = node.getAttribute("data-dias-estado") || "normal";
+                                var diasMatches = diasFilter === "" || cardDias === diasFilter;
+                                var cardMatches = textMatches && diasMatches;
                                 node.style.display = cardMatches ? "" : "none";
                             }
                         });
@@ -577,7 +599,7 @@
                 if (countEl) {
                     if (totalCards === 0) {
                         countEl.textContent = "";
-                    } else if (words.length === 0) {
+                    } else if (words.length === 0 && diasFilter === "") {
                         countEl.textContent = totalCards === 1 ? "1 producto" : totalCards + " productos";
                     } else {
                         countEl.textContent = visibleCards === 1
@@ -593,6 +615,9 @@
             }
             filterInput.addEventListener("input", scheduleFilter);
             filterInput.addEventListener("search", applyFilterMateria);
+            if (filterDiasSelect) {
+                filterDiasSelect.addEventListener("change", applyFilterMateria);
+            }
             applyFilterMateria();
         }
     }
@@ -844,6 +869,8 @@
 
     /** Conversiones universales de unidades (1 KG = 1000 g, 1 L = 1000 cc, 1 m = 100 cm, 1 docena = 12 unidad). */
     window.COSTOS_EQUIVALENCIA = (function () {
+        /** Mapa por unidad normalizada → { factorEquivalencia, convertidoUnidadMedida } desde la hoja EQUIVALENCIAS (columnas Factor-Unidad-Equivalencia, Convertido-UnidadMedida). */
+        var equivalenciaRowByUnidad = {};
         var categorias = {
             masa: { gramos: 1, g: 1, kg: 1000, kilo: 1000, kilos: 1000 },
             volumen: { cc: 1, litro: 1000, l: 1000, litros: 1000, centimetrocubico: 1, centimetroscubico: 1 },
@@ -923,32 +950,93 @@
                 }
             };
         }
-        /** Construye categorias desde filas del sheet (Categoria, Unidad, Factor, Alias). Solo agrega claves nuevas, no sobrescribe las por defecto. */
+        /** Construye categorias desde filas del sheet (Categoria, Unidad, Factor, Factor-Unidad-Equivalencia, Convertido-UnidadMedida, Alias). Solo agrega claves nuevas; además llena equivalenciaRowByUnidad. */
         function setCategoriasFromRows(rows) {
             if (!rows || !Array.isArray(rows) || rows.length === 0) return;
             var cat, factor, unidadNorm, aliasStr, list, i, j;
+            equivalenciaRowByUnidad = {};
             for (i = 0; i < rows.length; i++) {
                 var row = rows[i];
                 if (row && typeof row === "object") {
                     cat = String((row.Categoria != null ? row.Categoria : row.categoria != null ? row.categoria : "") || "").trim().toLowerCase().replace(/\s+/g, "");
                     if (!cat) continue;
-                    factor = parseFloat(String((row.Factor != null ? row.Factor : row.factor != null ? row.factor : "") || "").replace(",", "."));
+                    var factorVal = (row.Factor != null ? row.Factor : row.factor != null ? row.factor : null);
+                    if (factorVal == null && row["Factor-Unidad-Equivalencia"] != null) factorVal = row["Factor-Unidad-Equivalencia"];
+                    if (factorVal == null && row["factor-unidad-equivalencia"] != null) factorVal = row["factor-unidad-equivalencia"];
+                    factor = parseFloat(String(factorVal || "").replace(",", "."));
                     if (isNaN(factor) || factor <= 0) continue;
                     if (!categorias[cat]) categorias[cat] = {};
+                    var factorEquivVal = (row["Factor-Unidad-Equivalencia"] != null ? row["Factor-Unidad-Equivalencia"] : row["factor-unidad-equivalencia"]);
+                    var factorEquiv = factorEquivVal != null ? parseFloat(String(factorEquivVal).replace(",", ".")) : factor;
+                    if (isNaN(factorEquiv)) factorEquiv = factor;
+                    var convertido = String((row["Convertido-UnidadMedida"] != null ? row["Convertido-UnidadMedida"] : row["convertido-unidadmedida"] != null ? row["convertido-unidadmedida"] : "") || "").trim();
+                    var convertir = String((row["Convertir-UnidadMedida"] != null ? row["Convertir-UnidadMedida"] : row["convertir-unidadmedida"] != null ? row["convertir-unidadmedida"] : "") || "").trim();
+                    var rowData = { factorEquivalencia: factorEquiv, convertidoUnidadMedida: convertido, convertirUnidadMedida: convertir };
                     unidadNorm = normalizar((row.Unidad != null ? row.Unidad : row.unidad != null ? row.unidad : "") || "");
-                    if (unidadNorm && categorias[cat][unidadNorm] === undefined) categorias[cat][unidadNorm] = factor;
+                    if (unidadNorm) {
+                        if (categorias[cat][unidadNorm] === undefined) categorias[cat][unidadNorm] = factor;
+                        equivalenciaRowByUnidad[unidadNorm] = rowData;
+                    }
                     aliasStr = String((row.Alias != null ? row.Alias : row.alias != null ? row.alias : "") || "").trim();
                     if (aliasStr) {
                         list = aliasStr.split(",");
                         for (j = 0; j < list.length; j++) {
                             unidadNorm = normalizar(list[j].trim());
                             if (unidadNorm && categorias[cat][unidadNorm] === undefined) categorias[cat][unidadNorm] = factor;
+                            if (unidadNorm) equivalenciaRowByUnidad[unidadNorm] = rowData;
                         }
                     }
                 }
             }
         }
-        return { convert: convert, convertWithDebug: convertWithDebug, normalizar: normalizar, categorias: categorias, setCategoriasFromRows: setCategoriasFromRows };
+        /** Devuelve el Factor de la hoja EQUIVALENCIAS para la unidad indicada (p. ej. "kg", "gramos"). Busca en todas las categorías. */
+        function getFactorForUnidad(unidadDisplay) {
+            if (unidadDisplay == null || String(unidadDisplay).trim() === "") return null;
+            var u = normalizar(String(unidadDisplay).trim());
+            if (!u) return null;
+            var c;
+            for (c in categorias) {
+                if (categorias.hasOwnProperty(c) && categorias[c][u] != null) {
+                    return categorias[c][u];
+                }
+            }
+            return null;
+        }
+        /** Devuelve el valor de la columna Factor-Unidad-Equivalencia para la unidad de presentación indicada. */
+        function getFactorUnidadEquivalenciaForUnidad(unidadDisplay) {
+            if (unidadDisplay == null || String(unidadDisplay).trim() === "") return null;
+            var u = normalizar(String(unidadDisplay).trim());
+            if (!u || !equivalenciaRowByUnidad[u]) return null;
+            var val = equivalenciaRowByUnidad[u].factorEquivalencia;
+            return val != null && !isNaN(val) ? val : null;
+        }
+        /** Devuelve el valor de la columna Convertido-UnidadMedida para la unidad de presentación indicada. */
+        function getConvertidoUnidadMedidaForUnidad(unidadDisplay) {
+            if (unidadDisplay == null || String(unidadDisplay).trim() === "") return null;
+            var u = normalizar(String(unidadDisplay).trim());
+            if (!u || !equivalenciaRowByUnidad[u]) return null;
+            var val = equivalenciaRowByUnidad[u].convertidoUnidadMedida;
+            return val != null && String(val).trim() !== "" ? String(val).trim() : null;
+        }
+        /** Devuelve el valor de la columna Convertir-UnidadMedida para la unidad de presentación indicada. */
+        function getConvertirUnidadMedidaForUnidad(unidadDisplay) {
+            if (unidadDisplay == null || String(unidadDisplay).trim() === "") return null;
+            var u = normalizar(String(unidadDisplay).trim());
+            if (!u || !equivalenciaRowByUnidad[u]) return null;
+            var val = equivalenciaRowByUnidad[u].convertirUnidadMedida;
+            return val != null && String(val).trim() !== "" ? String(val).trim() : null;
+        }
+        return {
+            convert: convert,
+            convertWithDebug: convertWithDebug,
+            normalizar: normalizar,
+            categorias: categorias,
+            setCategoriasFromRows: setCategoriasFromRows,
+            getFactorForUnidad: getFactorForUnidad,
+            getFactorUnidadEquivalenciaForUnidad: getFactorUnidadEquivalenciaForUnidad,
+            getConvertidoUnidadMedidaForUnidad: getConvertidoUnidadMedidaForUnidad,
+            getConvertirUnidadMedidaForUnidad: getConvertirUnidadMedidaForUnidad
+        };
     })();
 
     (function loadEquivalenciasFromSheet() {
@@ -959,6 +1047,7 @@
             .then(function (json) {
                 if (json && json.success && json.data && json.data.rows && json.data.rows.length) {
                     window.COSTOS_EQUIVALENCIA.setCategoriasFromRows(json.data.rows);
+                    try { window.dispatchEvent(new CustomEvent("costos-equivalencias-loaded")); } catch (e) {}
                 }
             })
             .catch(function () {});

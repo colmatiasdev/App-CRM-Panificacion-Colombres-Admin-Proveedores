@@ -14,16 +14,18 @@ Estructura:
 ```
 scr/costos/
 ├── costos.css          ← estilos de todas las páginas costos
-├── costos-sheet.js     ← lógica compartida (listado, crear, editar, API)
+├── costos-sheet.js     ← lógica compartida (listado, crear, editar, API, COSTOS_EQUIVALENCIA)
 ├── README.md
 ├── Packing/
 │   ├── packing.html
 │   ├── crear-packing.html
 │   └── editar-packing.html
-└── Materia-Prima/
-    ├── materia-prima.html
-    ├── crear-materia-prima.html
-    └── editar-materia-prima.html
+├── Materia-Prima/
+│   ├── materia-prima.html
+│   ├── crear-materia-prima.html
+│   └── editar-materia-prima.html
+└── Calculadora/
+    └── calculadora-equivalencia.html   ← módulo Calculadora de equivalencia
 ```
 
 ## Rutas que debe usar cada HTML
@@ -46,10 +48,11 @@ Desde **cualquier archivo** dentro de `scr/costos/Packing/` o `scr/costos/Materi
 Todas las páginas de costos incluyen una barra `.costos-nav` con enlaces a:
 
 - **Inicio** → `../../../index.html#costos`
-- **Packing** → desde Packing: `packing.html`; desde Materia-Prima: `../Packing/packing.html`
-- **Materia prima** → desde Materia-Prima: `materia-prima.html`; desde Packing: `../Materia-Prima/materia-prima.html`
+- **Packing** → desde Packing: `packing.html`; desde otras: `../Packing/packing.html`
+- **Materia prima** → desde Materia-Prima: `materia-prima.html`; desde otras: `../Materia-Prima/materia-prima.html`
+- **Calculadora** → desde Calculadora: `calculadora-equivalencia.html`; desde otras: `../Calculadora/calculadora-equivalencia.html`
 
-Así se puede saltar entre módulos sin volver al inicio.
+Así se puede saltar entre módulos sin volver al inicio. La **Calculadora de equivalencia** es un módulo propio para convertir cantidades entre unidades (masa, volumen, longitud, conteo).
 
 ## Añadir un nuevo módulo
 

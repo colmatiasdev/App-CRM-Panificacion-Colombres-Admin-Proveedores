@@ -91,11 +91,11 @@ var CONFIG = {
   },
 
   /** Hoja Equivalencias – unidades y factores para conversión – ?sheet=equivalencias
-   * Columnas: Categoria, Unidad, Factor, Alias, Tipo, Notas. Ver docs/EQUIVALENCIAS_SHEET.md */
+   * Columnas: Categoria, Unidad, Factor, Convertir-UnidadMedida, Factor-Unidad-Equivalencia, Convertido-UnidadMedida, Alias, Tipo, Notas. Ver docs/EQUIVALENCIAS_SHEET.md */
   equivalencias: {
     sheetName: 'EQUIVALENCIAS',
     gid: 0,
-    headers: ['Categoria', 'Unidad', 'Factor', 'Alias', 'Tipo', 'Notas'],
+    headers: ['Categoria', 'Unidad', 'Factor', 'Convertir-UnidadMedida', 'Factor-Unidad-Equivalencia', 'Convertido-UnidadMedida', 'Alias', 'Tipo', 'Notas'],
     idColumn: 'Unidad',
     filterColumns: ['Categoria', 'Unidad', 'Tipo']
   }

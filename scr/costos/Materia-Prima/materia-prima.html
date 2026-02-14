@@ -16,8 +16,8 @@
         <a href="../../../index.html#costos" class="costos-nav-link">Inicio</a>
         <a href="../Packing/packing.html" class="costos-nav-link">Packing</a>
         <a href="materia-prima.html" class="costos-nav-link is-active">Materia prima</a>
+        <a href="../Calculadora/calculadora-equivalencia.html" class="costos-nav-link">Calculadora</a>
     </nav>
-    <a href="../../../index.html#costos" class="costos-back"><span class="costos-back-arrow">←</span> Volver al inicio</a>
     <main class="costos-main">
         <div class="costos-title-row">
             <h1 class="costos-title">Materia prima</h1>
@@ -26,75 +26,22 @@
                 <span class="costos-calc-btn-text-long">Nueva materia prima</span>
                 <span class="costos-calc-btn-text-short">Nueva</span>
             </a>
-            <button type="button" class="costos-calc-btn" id="btn-calculadora-equivalencia" aria-expanded="false">
-                <i class="fa-solid fa-calculator" aria-hidden="true"></i>
-                <span class="costos-calc-btn-text-long">Calculadora de Equivalencia</span>
-                <span class="costos-calc-btn-text-short">Equivalencias</span>
-            </button>
         </div>
         <p class="costos-intro">Módulo para cargar los precios de los proveedores (harina, levadura, insumos) y utilizarlos en el cálculo del costo de los productos.</p>
 
         <section class="costos-filter-section" aria-label="Filtrar listado">
             <label for="filter-materia-prima" class="costos-filter-label">Buscar</label>
             <input type="search" id="filter-materia-prima" class="costos-filter-input" placeholder="Categoría o nombre de producto…" autocomplete="off">
+            <label for="filter-materia-prima-dias" class="costos-filter-label costos-filter-label-dias">Filtro</label>
+            <select id="filter-materia-prima-dias" class="costos-filter-select" aria-label="Filtrar por estado de actualización">
+                <option value="">TODOS</option>
+                <option value="normal">Normal (0-30)</option>
+                <option value="amarillo">Atención (31-60)</option>
+                <option value="rojo">Revisar (61-100)</option>
+                <option value="urgente">Urgente (+ 100)</option>
+            </select>
             <p class="costos-filter-count" id="materia-prima-count" aria-live="polite"></p>
         </section>
-
-        <div class="costos-calc-panel" id="panel-calculadora-equivalencia" hidden>
-            <div class="costos-calc-inner">
-                <div class="costos-calc-block costos-calc-datos">
-                    <div class="costos-calc-field">
-                        <label for="calc-cantidad" class="costos-calc-label">Cantidad</label>
-                        <input type="number" id="calc-cantidad" class="costos-calc-input" min="0" step="any" placeholder="Ej: 1" value="1">
-                    </div>
-                    <div class="costos-calc-field">
-                        <label for="calc-unidad" class="costos-calc-label">Unidad de medida</label>
-                        <select id="calc-unidad" class="costos-calc-select">
-                            <option value="kg">KG</option>
-                            <option value="gramos">Gramos</option>
-                            <option value="litro">Litro</option>
-                            <option value="cc">CC</option>
-                            <option value="metro">Metro</option>
-                            <option value="centimetro">Centímetro</option>
-                            <option value="docena">Docena</option>
-                            <option value="unidad">Unidad</option>
-                        </select>
-                    </div>
-                    <div class="costos-calc-field">
-                        <label for="calc-presentacion" class="costos-calc-label">Presentación</label>
-                        <select id="calc-presentacion" class="costos-calc-select">
-                            <option value="Bidon">Bidon</option>
-                            <option value="Bolsa">Bolsa</option>
-                            <option value="Paquete">Paquete</option>
-                            <option value="Cajon">Cajon</option>
-                            <option value="Caja">Caja</option>
-                            <option value="Pote">Pote</option>
-                            <option value="Pilon">Pilon</option>
-                            <option value="Molde">Molde</option>
-                            <option value="Pieza">Pieza</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="costos-calc-block costos-calc-destino">
-                    <label for="calc-destino" class="costos-calc-label">Convertir a</label>
-                    <select id="calc-destino" class="costos-calc-select">
-                        <option value="gramos">Gramos</option>
-                        <option value="kg">KG</option>
-                        <option value="cc">CC</option>
-                        <option value="litro">Litro</option>
-                        <option value="centimetro">Centímetro</option>
-                        <option value="metro">Metro</option>
-                        <option value="unidad">Unidad</option>
-                        <option value="docena">Docena</option>
-                    </select>
-                </div>
-                <div class="costos-calc-block costos-calc-resultado-block">
-                    <span class="costos-calc-label">Resultado</span>
-                    <output id="calc-resultado" class="costos-calc-resultado" for="calc-cantidad calc-unidad calc-destino">—</output>
-                </div>
-                <p class="costos-calc-note">Conversiones: 1 KG = 1000 g · 1 L = 1000 cc · 1 m = 100 cm · 1 docena = 12 unidad. La presentación es referencial.</p>
-            </div>
-        </div>
 
         <div id="datos-materia-prima" class="costos-datos">
             <p class="costos-loading">Cargando datos…</p>
@@ -105,81 +52,5 @@
         </section>
     </main>
     <script src="../costos-sheet.js"></script>
-    <script>
-(function () {
-    var btn = document.getElementById("btn-calculadora-equivalencia");
-    var panel = document.getElementById("panel-calculadora-equivalencia");
-    var cantidad = document.getElementById("calc-cantidad");
-    var unidad = document.getElementById("calc-unidad");
-    var presentacion = document.getElementById("calc-presentacion");
-    var destino = document.getElementById("calc-destino");
-    var resultado = document.getElementById("calc-resultado");
-    var debugSection = document.getElementById("costos-debug-equivalencia");
-    var debugContent = document.getElementById("costos-debug-equivalencia-content");
-    if (window.APP_CONFIG && window.APP_CONFIG.costos && window.APP_CONFIG.costos.debugEquivalencia && debugSection) {
-        debugSection.style.display = "block";
-    }
-
-    function nombreUnidad(val) {
-        return { kg: "KG", gramos: "g", litro: "L", cc: "cc", metro: "m", centimetro: "cm", docena: "docena", unidad: "unidad" }[val] || val;
-    }
-    function calcularEquivalencia() {
-        var q = parseFloat(cantidad.value) || 0;
-        var u = unidad.value;
-        var p = presentacion.value;
-        var d = destino.value;
-        if (q <= 0 || !resultado) {
-            if (resultado) resultado.textContent = "—";
-            if (debugContent && debugSection && debugSection.style.display !== "none") {
-                debugContent.textContent = "Cantidad ≤ 0 o sin resultado. Ingresá una cantidad para ver el cálculo.";
-            }
-            return;
-        }
-        var equiv = q;
-        if (window.COSTOS_EQUIVALENCIA && window.COSTOS_EQUIVALENCIA.convert) {
-            equiv = window.COSTOS_EQUIVALENCIA.convert(q, u, d);
-        }
-        var resNum = typeof equiv === "number" && !isNaN(equiv) ? equiv : q;
-        var resUnidad = resNum.toLocaleString("es-AR") + " " + nombreUnidad(d);
-        resultado.textContent = q + " " + nombreUnidad(u) + " [" + p + "] equivale a " + resUnidad;
-        if (debugContent && debugSection && debugSection.style.display !== "none" && window.COSTOS_EQUIVALENCIA && window.COSTOS_EQUIVALENCIA.convertWithDebug) {
-            var out = window.COSTOS_EQUIVALENCIA.convertWithDebug(q, u, d);
-            var db = out.debug;
-            var catOrigenStr = db.categoriaOrigen != null ? db.categoriaOrigen : db.categoria;
-            var catDestinoStr = db.categoriaDestino != null ? db.categoriaDestino : db.categoria;
-            var formulaLine = db.mismaCategoria
-                ? "Fórmula (valores): " + db.formula + "\n\nR = Resultado (equivalencia): " + db.resultado
-                : "Fórmula no aplicada: origen y destino son de distinta categoría (" + catOrigenStr + " ≠ " + catDestinoStr + ").\nR = C (sin convertir) = " + db.resultado;
-            debugContent.textContent =
-                "C = Cantidad (origen): " + db.cantidad + "\n" +
-                "UP-Origen = Unidad presentación (origen): \"" + db.unidadOrigen + "\" → normalizado: \"" + db.normalizadoOrigen + "\"\n" +
-                "UD-Destino = Unidad destino (Convertir a): \"" + db.unidadDestino + "\" → normalizado: \"" + db.normalizadoDestino + "\"\n" +
-                "Cat-Origen = Categoría origen: " + catOrigenStr + " | Cat-Destino = Categoría destino: " + catDestinoStr + "\n" +
-                "FO = Factor origen: " + db.factorOrigen + " | FD = Factor destino: " + db.factorDestino + "\n" +
-                "Misma categoría: " + db.mismaCategoria + "\n\n" +
-                "Fórmula (cuando misma categoría): R = C × FO / FD\n" +
-                formulaLine;
-        }
-    }
-
-    if (btn && panel) {
-        btn.addEventListener("click", function () {
-            var open = panel.getAttribute("hidden") === null;
-            if (open) {
-                panel.setAttribute("hidden", "");
-                btn.setAttribute("aria-expanded", "false");
-            } else {
-                panel.removeAttribute("hidden");
-                btn.setAttribute("aria-expanded", "true");
-                calcularEquivalencia();
-            }
-        });
-    }
-    [cantidad, unidad, presentacion, destino].forEach(function (el) {
-        if (el) el.addEventListener("input", calcularEquivalencia);
-        if (el) el.addEventListener("change", calcularEquivalencia);
-    });
-})();
-    </script>
 </body>
 </html>

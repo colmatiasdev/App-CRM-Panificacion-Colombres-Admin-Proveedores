@@ -258,6 +258,15 @@ body.costos-page {
 .costos-edit-field:last-of-type {
     margin-bottom: 0;
 }
+.costos-edit-seccion-titulo {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--logo-dark);
+    margin: 0 0 12px 0;
+    padding-bottom: 8px;
+    border-bottom: 2px solid rgba(234, 88, 12, 0.25);
+    letter-spacing: 0.02em;
+}
 .costos-edit-seccion-presentacion-equivalencia {
     margin: 14px 0 20px 0;
     padding: 16px 18px;
@@ -265,12 +274,37 @@ body.costos-page {
     border: 1px solid rgba(234, 88, 12, 0.2);
     border-radius: 12px;
 }
+.costos-edit-seccion-presentacion-equivalencia .costos-edit-seccion-titulo {
+    border-bottom-color: rgba(234, 88, 12, 0.35);
+}
 .costos-edit-seccion-presentacion-equivalencia .costos-edit-field-presentacion {
     margin-bottom: 16px;
 }
 .costos-edit-seccion-presentacion-equivalencia .costos-edit-section-equivalencia {
     margin-top: 4px;
     margin-bottom: 0;
+}
+.costos-edit-seccion-precios-costo {
+    margin: 18px 0 22px 0;
+    padding: 16px 18px;
+    background: rgba(13, 148, 136, 0.05);
+    border: 1px solid rgba(13, 148, 136, 0.22);
+    border-radius: 12px;
+}
+.costos-edit-seccion-precios-costo .costos-edit-seccion-titulo {
+    border-bottom: 2px solid rgba(13, 148, 136, 0.35);
+    color: var(--logo-dark);
+}
+.costos-edit-seccion-precios-costo .costos-edit-field {
+    margin-bottom: 12px;
+}
+.costos-edit-seccion-precios-costo .costos-edit-field:last-child {
+    margin-bottom: 0;
+}
+.costos-edit-seccion-precios-costo .costos-edit-field-informativo .costos-edit-value {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--logo-dark);
 }
 .costos-edit-section-equivalencia {
     background: rgba(234, 88, 12, 0.05);
@@ -326,6 +360,80 @@ body.costos-page {
 .costos-edit-section-equivalencia .costos-edit-field-informativo .costos-edit-value-cell {
     min-height: 1.5rem;
     padding: 2px 0;
+}
+.costos-edit-equivalencia-from-table {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: #f0fdfa;
+    border: 1px solid var(--logo-teal);
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--logo-dark);
+}
+.costos-edit-equivalencia-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--logo-teal);
+    font-size: 1.1rem;
+}
+.costos-edit-equivalencia-icon i {
+    font-size: inherit;
+}
+.costos-edit-value-equivalencia-display {
+    font-weight: 600;
+    color: var(--logo-dark);
+}
+/* Convertido a (valor de tabla EQUIVALENCIAS, solo lectura) */
+.costos-edit-convertido-from-table {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: #f0fdfa;
+    border: 1px solid var(--logo-teal);
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--logo-dark);
+}
+.costos-edit-convertido-from-table .costos-edit-equivalencia-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--logo-teal);
+    font-size: 1.1rem;
+}
+.costos-edit-value-convertido-display {
+    font-weight: 600;
+    color: var(--logo-dark);
+}
+/* Convertir A (valor de tabla EQUIVALENCIAS, columna Convertir-UnidadMedida, solo lectura) */
+.costos-edit-convertir-from-table {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: #f0fdfa;
+    border: 1px solid var(--logo-teal);
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--logo-dark);
+}
+.costos-edit-convertir-from-table .costos-edit-equivalencia-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--logo-teal);
+    font-size: 1.1rem;
+}
+.costos-edit-value-convertir-display {
+    font-weight: 600;
+    color: var(--logo-dark);
 }
 .costos-edit-field.is-textarea {
     flex-direction: column;
@@ -671,6 +779,64 @@ body.costos-page {
     word-break: break-word;
     overflow-x: auto;
 }
+/* Colores identificatorios por variable: mismo color donde sea que aparezca la variable */
+.costos-debug-content .costos-debug-var-c {
+    color: #1d4ed8;
+    font-weight: 700;
+    background: rgba(29, 78, 216, 0.12);
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+}
+.costos-debug-content .costos-debug-var-fo {
+    color: #047857;
+    font-weight: 700;
+    background: rgba(4, 120, 87, 0.12);
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+}
+.costos-debug-content .costos-debug-var-fd {
+    color: #b45309;
+    font-weight: 700;
+    background: rgba(180, 83, 9, 0.12);
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+}
+.costos-debug-content .costos-debug-var-r {
+    color: #6d28d9;
+    font-weight: 700;
+    background: rgba(109, 40, 217, 0.12);
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+}
+/* Debug precio/costo: Precio (P), Cantidad (C), Equivalencia (E), R1 (precio costo), R2 (precio equiv) */
+.costos-debug-content .costos-debug-var-p {
+    color: #0369a1;
+    font-weight: 700;
+    background: rgba(3, 105, 161, 0.12);
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+}
+.costos-debug-content .costos-debug-var-e {
+    color: #0d9488;
+    font-weight: 700;
+    background: rgba(13, 148, 136, 0.12);
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+}
+.costos-debug-content .costos-debug-var-r1 {
+    color: #b45309;
+    font-weight: 700;
+    background: rgba(180, 83, 9, 0.12);
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+}
+.costos-debug-content .costos-debug-var-r2 {
+    color: #6d28d9;
+    font-weight: 700;
+    background: rgba(109, 40, 217, 0.12);
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+}
 
 /* Crear materia prima: ocultar botón Editar, botón Cerrar (X) y mostrar inputs directamente */
 .costos-edit-value-edit-btn-hidden-in-create {
@@ -876,6 +1042,38 @@ body.costos-page {
 }
 .costos-filter-input::placeholder {
     color: var(--muted-light);
+}
+.costos-filter-select {
+    padding: 10px 32px 10px 12px;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-family: inherit;
+    background: var(--surface);
+    color: var(--logo-dark);
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2364748b' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    min-width: 180px;
+}
+.costos-filter-select:focus {
+    outline: none;
+    border-color: var(--logo-teal);
+    box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.2);
+}
+.costos-filter-label-dias {
+    margin-left: 8px;
+}
+@media (max-width: 768px) {
+    .costos-filter-label-dias { margin-left: 0; }
+    .costos-filter-select { min-width: 160px; }
+}
+@media (max-width: 480px) {
+    .costos-filter-select { width: 100%; max-width: 280px; min-width: 0; min-height: 44px; }
 }
 .costos-filter-count {
     margin: 0;
@@ -1131,6 +1329,36 @@ body.costos-page {
     color: var(--logo-dark);
     font-size: 0.8rem;
     margin-top: 2px;
+}
+.costos-extra-actions {
+    grid-column: 1 / -1;
+    margin-top: 8px;
+    padding-top: 12px;
+    border-top: 1px dashed #fed7aa;
+}
+.costos-extra-info .costos-card-edit-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 18px;
+    min-width: 180px;
+    min-height: 44px;
+    white-space: nowrap;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--logo-teal-dark);
+    background: var(--logo-teal-light);
+    border: 1px solid var(--logo-teal);
+    border-radius: 10px;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s;
+    box-sizing: border-box;
+}
+.costos-extra-info .costos-card-edit-btn:hover {
+    background: var(--logo-teal);
+    color: #fff;
+    text-decoration: none;
 }
 @media (max-width: 480px) {
     .costos-card-main {

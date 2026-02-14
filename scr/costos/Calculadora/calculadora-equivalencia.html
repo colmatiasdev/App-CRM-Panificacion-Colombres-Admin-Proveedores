@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Calculadora de equivalencia - Panificación Colombres</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../costos.css">
+    <script src="../../../config.js"></script>
+    <script src="../costos-sheet.js"></script>
+</head>
+<body class="costos-page">
+    <nav class="costos-nav" aria-label="Navegación principal">
+        <a href="../../../index.html#costos" class="costos-nav-link">Inicio</a>
+        <a href="../Packing/packing.html" class="costos-nav-link">Packing</a>
+        <a href="../Materia-Prima/materia-prima.html" class="costos-nav-link">Materia prima</a>
+        <a href="calculadora-equivalencia.html" class="costos-nav-link is-active">Calculadora</a>
+    </nav>
+    <main class="costos-main">
+        <h1 class="costos-title">Calculadora de equivalencia</h1>
+        <p class="costos-intro">Convertí cantidades entre unidades de medida (masa, volumen, longitud, conteo). Las equivalencias usan las reglas estándar y las definidas en la hoja de equivalencias.</p>
+
+        <div class="costos-calc-panel costos-calc-panel-standalone" id="panel-calculadora-equivalencia">
+            <div class="costos-calc-inner">
+                <div class="costos-calc-block costos-calc-datos">
+                    <div class="costos-calc-field">
+                        <label for="calc-cantidad" class="costos-calc-label">Cantidad</label>
+                        <input type="number" id="calc-cantidad" class="costos-calc-input" min="0" step="any" placeholder="Ej: 1" value="1">
+                    </div>
+                    <div class="costos-calc-field">
+                        <label for="calc-unidad" class="costos-calc-label">Unidad de medida</label>
+                        <select id="calc-unidad" class="costos-calc-select">
+                            <option value="kg">KG</option>
+                            <option value="gramos">Gramos</option>
+                            <option value="litro">Litro</option>
+                            <option value="cc">CC</option>
+                            <option value="metro">Metro</option>
+                            <option value="centimetro">Centímetro</option>
+                            <option value="docena">Docena</option>
+                            <option value="unidad">Unidad</option>
+                        </select>
+                    </div>
+                    <div class="costos-calc-field">
+                        <label for="calc-presentacion" class="costos-calc-label">Presentación</label>
+                        <select id="calc-presentacion" class="costos-calc-select">
+                            <option value="Bidon">Bidon</option>
+                            <option value="Bolsa">Bolsa</option>
+                            <option value="Paquete">Paquete</option>
+                            <option value="Cajon">Cajon</option>
+                            <option value="Caja">Caja</option>
+                            <option value="Pote">Pote</option>
+                            <option value="Pilon">Pilon</option>
+                            <option value="Molde">Molde</option>
+                            <option value="Pieza">Pieza</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="costos-calc-block costos-calc-destino">
+                    <label for="calc-destino" class="costos-calc-label">Convertir a</label>
+                    <select id="calc-destino" class="costos-calc-select">
+                        <option value="gramos">Gramos</option>
+                        <option value="kg">KG</option>
+                        <option value="cc">CC</option>
+                        <option value="litro">Litro</option>
+                        <option value="centimetro">Centímetro</option>
+                        <option value="metro">Metro</option>
+                        <option value="unidad">Unidad</option>
+                        <option value="docena">Docena</option>
+                    </select>
+                </div>
+                <div class="costos-calc-block costos-calc-resultado-block">
+                    <span class="costos-calc-label">Resultado</span>
+                    <output id="calc-resultado" class="costos-calc-resultado" for="calc-cantidad calc-unidad calc-destino">—</output>
+                </div>
+                <p class="costos-calc-note">Conversiones: 1 KG = 1000 g · 1 L = 1000 cc · 1 m = 100 cm · 1 docena = 12 unidad. La presentación es referencial.</p>
+            </div>
+        </div>
+        <section id="costos-debug-equivalencia" class="costos-debug-equivalencia" aria-label="Debug equivalencia" style="display:none;">
+            <h2 class="costos-debug-title">Debug — Cálculo de equivalencia</h2>
+            <pre id="costos-debug-equivalencia-content" class="costos-debug-content"></pre>
+        </section>
+    </main>
+    <script>
+(function () {
+    var cantidad = document.getElementById("calc-cantidad");
+    var unidad = document.getElementById("calc-unidad");
+    var presentacion = document.getElementById("calc-presentacion");
+    var destino = document.getElementById("calc-destino");
+    var resultado = document.getElementById("calc-resultado");
+    var debugSection = document.getElementById("costos-debug-equivalencia");
+    var debugContent = document.getElementById("costos-debug-equivalencia-content");
+    if (window.APP_CONFIG && window.APP_CONFIG.costos && window.APP_CONFIG.costos.debugEquivalencia && debugSection) {
+        debugSection.style.display = "block";
+    }
+
+    function nombreUnidad(val) {
+        return { kg: "KG", gramos: "g", litro: "L", cc: "cc", metro: "m", centimetro: "cm", docena: "docena", unidad: "unidad" }[val] || val;
+    }
+    function calcularEquivalencia() {
+        var q = parseFloat(cantidad.value) || 0;
+        var u = unidad.value;
+        var p = presentacion.value;
+        var d = destino.value;
+        if (q <= 0 || !resultado) {
+            if (resultado) resultado.textContent = "—";
+            if (debugContent && debugSection && debugSection.style.display !== "none") {
+                debugContent.textContent = "Cantidad ≤ 0 o sin resultado. Ingresá una cantidad para ver el cálculo.";
+            }
+            return;
+        }
+        var equiv = q;
+        if (window.COSTOS_EQUIVALENCIA && window.COSTOS_EQUIVALENCIA.convert) {
+            equiv = window.COSTOS_EQUIVALENCIA.convert(q, u, d);
+        }
+        var resNum = typeof equiv === "number" && !isNaN(equiv) ? equiv : q;
+        var resUnidad = resNum.toLocaleString("es-AR") + " " + nombreUnidad(d);
+        resultado.textContent = q + " " + nombreUnidad(u) + " [" + p + "] equivale a " + resUnidad;
+        if (debugContent && debugSection && debugSection.style.display !== "none" && window.COSTOS_EQUIVALENCIA && window.COSTOS_EQUIVALENCIA.convertWithDebug) {
+            var out = window.COSTOS_EQUIVALENCIA.convertWithDebug(q, u, d);
+            var db = out.debug;
+            function esc(s) { var x = String(s == null ? "" : s); return x.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+            var catOrigenStr = db.categoriaOrigen != null ? db.categoriaOrigen : db.categoria;
+            var catDestinoStr = db.categoriaDestino != null ? db.categoriaDestino : db.categoria;
+            var formulaLineHtml = db.mismaCategoria
+                ? "Fórmula (valores): <span class=\"costos-debug-var-c\">" + esc(db.cantidad) + "</span> × <span class=\"costos-debug-var-fo\">" + esc(db.factorOrigen) + "</span> / <span class=\"costos-debug-var-fd\">" + esc(db.factorDestino) + "</span> = <span class=\"costos-debug-var-r\">" + esc(db.resultado) + "</span>\n\n<span class=\"costos-debug-var-r\">R</span> = Resultado (equivalencia): <span class=\"costos-debug-var-r\">" + esc(db.resultado) + "</span>"
+                : "Fórmula no aplicada: origen y destino son de distinta categoría (" + esc(catOrigenStr) + " ≠ " + esc(catDestinoStr) + ").\n<span class=\"costos-debug-var-r\">R</span> = C (sin convertir) = <span class=\"costos-debug-var-r\">" + esc(db.resultado) + "</span>";
+            debugContent.innerHTML =
+                "<span class=\"costos-debug-var-c\">C</span> = Cantidad (origen): <span class=\"costos-debug-var-c\">" + esc(db.cantidad) + "</span>\n" +
+                "UP-Origen = Unidad presentación (origen): \"" + esc(db.unidadOrigen) + "\" → normalizado: \"" + esc(db.normalizadoOrigen) + "\"\n" +
+                "UD-Destino = Unidad destino (Convertir a): \"" + esc(db.unidadDestino) + "\" → normalizado: \"" + esc(db.normalizadoDestino) + "\"\n" +
+                "Cat-Origen = Categoría origen: " + esc(catOrigenStr) + " | Cat-Destino = Categoría destino: " + esc(catDestinoStr) + "\n" +
+                "<span class=\"costos-debug-var-fo\">FO</span> = Factor origen: <span class=\"costos-debug-var-fo\">" + esc(db.factorOrigen) + "</span> | <span class=\"costos-debug-var-fd\">FD</span> = Factor destino: <span class=\"costos-debug-var-fd\">" + esc(db.factorDestino) + "</span>\n" +
+                "Misma categoría: " + esc(db.mismaCategoria) + "\n\n" +
+                "Fórmula (cuando misma categoría): <span class=\"costos-debug-var-r\">R</span> = <span class=\"costos-debug-var-c\">C</span> × <span class=\"costos-debug-var-fo\">FO</span> / <span class=\"costos-debug-var-fd\">FD</span>\n" +
+                formulaLineHtml;
+        }
+    }
+
+    [cantidad, unidad, presentacion, destino].forEach(function (el) {
+        if (el) el.addEventListener("input", calcularEquivalencia);
+        if (el) el.addEventListener("change", calcularEquivalencia);
+    });
+    calcularEquivalencia();
+})();
+    </script>
+</body>
+</html>
