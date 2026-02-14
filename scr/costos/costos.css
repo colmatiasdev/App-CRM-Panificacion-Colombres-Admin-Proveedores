@@ -1094,6 +1094,10 @@ body.costos-page {
 .costos-datos-message .costos-placeholder {
     margin: 0 0 8px;
 }
+.costos-placeholder-small {
+    font-size: 0.8rem;
+    margin-top: 4px;
+}
 .costos-loading {
     color: var(--muted);
     font-size: 0.9rem;

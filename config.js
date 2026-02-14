@@ -12,11 +12,11 @@ window.APP_CONFIG = {
     },
 
     /** Apps Script desplegado – ABM (list, get, search, create, update, delete). Ver docs/APPS_SCRIPT_ABM_README.md */
-    appsScriptUrl: "https://script.google.com/macros/s/AKfycbxFuBw5z3V1JZlmr8P4jPxfWcyjPQ-1jrcgZvKBPMGs49_YxPzuW-T_f7JFRHnF1Jtt1A/exec",
+    appsScriptUrl: "https://script.google.com/macros/s/AKfycbxuc3g3X3_8MvfcKpxkD2Z0HhV9MOJ3wUuRsiTVMBfDZ1OqiPKs91R94ozHpa3TO1W_8A/exec",
 
     /**
      * Google Sheets – Un solo documento publicado con todas las hojas.
-     * Documento: PRECIO-Materia-Prima, PRECIO-Packing, COMBOS, EQUIVALENCIAS.
+     * Documento: Costo - Proveedores (pubhtml para ver, /pub para CSV).
      * Las URLs CSV se arman desde baseUrl + gid de cada hoja (fallback cuando no hay Apps Script).
      */
     googleSheet: {
