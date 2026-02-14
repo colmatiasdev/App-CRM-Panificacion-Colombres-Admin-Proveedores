@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Editar precio - Packing - Panificación Colombres</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../costos.css">
+    <script src="../../../config.js"></script>
+    <style>
+        .costos-visualizar-card { max-width: 520px; margin: 0 auto; padding: 24px; background: var(--surface); border-radius: 12px; border: 1px solid rgba(234, 88, 12, 0.15); box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+        .costos-visualizar-nombre { font-size: 1.25rem; font-weight: 700; color: var(--logo-dark); margin: 0 0 8px 0; }
+        .costos-visualizar-precio-ant { font-size: 0.8rem; color: var(--muted); margin-bottom: 16px; }
+        .costos-visualizar-seccion { margin: 18px 0; padding: 14px 16px; background: rgba(234, 88, 12, 0.04); border-radius: 10px; border: 1px solid rgba(234, 88, 12, 0.15); }
+        .costos-visualizar-seccion-tit { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--logo-dark); margin: 0 0 8px 0; }
+        .costos-visualizar-seccion-precio { background: rgba(13, 148, 136, 0.05); border-color: rgba(13, 148, 136, 0.2); }
+        .costos-visualizar-seccion-precio .costos-visualizar-seccion-tit { color: var(--logo-teal); }
+        .costos-visualizar-field { margin-bottom: 12px; }
+        .costos-visualizar-field:last-child { margin-bottom: 0; }
+        .costos-visualizar-label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--logo-dark); margin-bottom: 4px; }
+        .costos-visualizar-value { font-size: 1rem; color: var(--logo-dark); }
+        .costos-visualizar-input { width: 100%; padding: 12px 14px; font-size: 1rem; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; }
+        .costos-visualizar-input:focus { outline: none; border-color: var(--logo-orange); box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.15); }
+        .costos-visualizar-actions { margin-top: 24px; display: flex; gap: 12px; flex-wrap: wrap; }
+        .costos-visualizar-actions .costos-edit-btn-save { flex: 1; min-width: 140px; }
+        .costos-visualizar-back { color: var(--logo-orange); text-decoration: none; font-size: 0.9rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 16px; }
+        .costos-visualizar-back:hover { text-decoration: underline; }
+    </style>
+</head>
+<body class="costos-page">
+    <nav class="costos-nav" aria-label="Navegación principal">
+        <a href="../../../index.html#costos" class="costos-nav-link">Inicio</a>
+        <a href="packing.html" class="costos-nav-link is-active">Packing</a>
+        <a href="../Materia-Prima/materia-prima.html" class="costos-nav-link">Materia prima</a>
+        <a href="../Calculadora/calculadora-equivalencia.html" class="costos-nav-link">Calculadora</a>
+    </nav>
+    <main class="costos-main">
+        <a href="packing.html" class="costos-visualizar-back"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Volver al listado</a>
+        <h1 class="costos-title">Editar precio</h1>
+        <p class="costos-intro">Actualizá solo el precio actual. El resto de los datos se muestran a modo informativo.</p>
+        <div id="visualizar-container" class="costos-datos">
+            <p id="visualizar-no-data" class="costos-placeholder" style="display:none;">No hay datos del registro. Volvé a Packing y usá el botón de editar precio junto al precio en la tarjeta.</p>
+            <div id="visualizar-card" class="costos-visualizar-card" style="display:none;"></div>
+        </div>
+    </main>
+    <script>
+        (function () {
+            function norm(s) { return String(s != null ? s : "").trim().toLowerCase().replace(/\s/g, "").replace(/-/g, ""); }
+            function findIdx(headers, names) {
+                for (var i = 0; i < headers.length; i++) {
+                    var h = norm(headers[i]);
+                    for (var j = 0; j < names.length; j++) if (h === names[j]) return i;
+                }
+                return -1;
+            }
+            function formatMonedaArg(val) {
+                if (val == null || String(val).trim() === "") return "—";
+                var s = String(val).trim().replace(",", ".");
+                var n = parseFloat(s);
+                if (isNaN(n)) return String(val);
+                var parts = n.toFixed(2).split(".");
+                var withDots = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                return "$ " + withDots + "," + parts[1];
+            }
+            function formatMonedaArgHasta4Dec(val) {
+                if (val == null || String(val).trim() === "") return "—";
+                var s = String(val).trim().replace(",", ".");
+                var n = parseFloat(s);
+                if (isNaN(n)) return String(val);
+                var factor = Math.pow(10, 4);
+                n = Math.round(n * factor) / factor;
+                var fixed = n.toFixed(4);
+                var parts = fixed.split(".");
+                var decPart = (parts[1] || "").replace(/0+$/, "");
+                var withDots = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                if (decPart === "") return "$ " + withDots;
+                return "$ " + withDots + "," + decPart;
+            }
+            function roundToDecimals(num, d) { var f = Math.pow(10, d); return Math.round(num * f) / f; }
+            function precioDisplayToNumericString(str) {
+                if (!str || String(str).trim() === "" || String(str).trim() === "—") return "";
+                var s = String(str).trim().replace(/\$\s?/g, "").replace(/\s/g, "").replace(/\./g, "").replace(",", ".");
+                var n = parseFloat(s);
+                return isNaN(n) ? "" : String(n);
+            }
+            function escapeHtml(text) {
+                if (text == null) return "";
+                var s = String(text);
+                return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+            }
+
+            var raw = sessionStorage.getItem("costosVisualizarRecordPacking");
+            var noDataEl = document.getElementById("visualizar-no-data");
+            var cardEl = document.getElementById("visualizar-card");
+
+            if (!raw) {
+                noDataEl.style.display = "block";
+                noDataEl.textContent = "No hay datos del registro. Volvé a Packing y usá el botón de editar precio (lápiz) junto al precio en la tarjeta.";
+                cardEl.style.display = "none";
+                return;
+            }
+
+            var data;
+            try { data = JSON.parse(raw); } catch (e) {
+                noDataEl.style.display = "block";
+                cardEl.style.display = "none";
+                return;
+            }
+
+            var headers = data.headers || [];
+            var row = data.row || [];
+            var id = data.id || "";
+
+            var idxNombre = findIdx(headers, ["nombreproducto", "nombre-producto"]);
+            var idxPrecioAnt = findIdx(headers, ["precioanterior", "precio-anterior"]);
+            var idxPresCant = findIdx(headers, ["presentacioncantidadmedida", "presentacion-cantidad-medida"]);
+            var idxPresUnid = findIdx(headers, ["presentacionunidad", "presentacion-unidad"]);
+            var idxPresTipo = findIdx(headers, ["presentaciontipo", "presentacion-tipo"]);
+            var idxPrecioActual = findIdx(headers, ["precioactual", "precio-actual"]);
+            var idxCantidadUm = findIdx(headers, ["cantidadunidadmedida", "cantidad-unidad-medida"]);
+            var idxEquivUm = findIdx(headers, ["equivalenciaunidadmedida", "equivalencia-unidad-medida"]);
+            var idxPrecioCosto = findIdx(headers, ["preciocostoxunidad", "precio-costo-x-unidad"]);
+            var idxPrecioEquiv = findIdx(headers, ["precioequivalenciaxunidad", "precio-equivalencia-x-unidad"]);
+            var idxFecha = findIdx(headers, ["fechaactualizadaal", "fecha-actualizada-al"]);
+
+            var nombre = idxNombre >= 0 ? String(row[idxNombre] != null ? row[idxNombre] : "").trim() : "";
+            var precioAnt = idxPrecioAnt >= 0 ? row[idxPrecioAnt] : "";
+            var presCant = idxPresCant >= 0 ? String(row[idxPresCant] != null ? row[idxPresCant] : "").trim() : "";
+            var presUnid = idxPresUnid >= 0 ? String(row[idxPresUnid] != null ? row[idxPresUnid] : "").trim() : "";
+            var presTipo = idxPresTipo >= 0 ? String(row[idxPresTipo] != null ? row[idxPresTipo] : "").trim() : "";
+            var presentacionResum = (presCant + " " + presUnid + (presTipo ? " [" + presTipo + "]" : "")).trim() || "—";
+
+            noDataEl.style.display = "none";
+            cardEl.style.display = "block";
+
+            var headerPrecioActual = idxPrecioActual >= 0 ? String(headers[idxPrecioActual] != null ? headers[idxPrecioActual] : "").trim() : "Precio-Actual";
+            var headerPrecioCosto = idxPrecioCosto >= 0 ? String(headers[idxPrecioCosto] != null ? headers[idxPrecioCosto] : "").trim() : "Precio-Costo-x-Unidad";
+            var headerPrecioEquiv = idxPrecioEquiv >= 0 ? String(headers[idxPrecioEquiv] != null ? headers[idxPrecioEquiv] : "").trim() : "Precio-Equivalencia-x-Unidad";
+            var headerFecha = idxFecha >= 0 ? String(headers[idxFecha] != null ? headers[idxFecha] : "").trim() : "Fecha-Actualizada-Al";
+
+            var precioActualVal = idxPrecioActual >= 0 ? String(row[idxPrecioActual] != null ? row[idxPrecioActual] : "").trim() : "";
+            var cantidadNum = idxCantidadUm >= 0 ? parseFloat(String(row[idxCantidadUm] != null ? row[idxCantidadUm] : "").replace(",", ".")) : NaN;
+            var equivNum = idxEquivUm >= 0 ? parseFloat(String(row[idxEquivUm] != null ? row[idxEquivUm] : "").replace(",", ".")) : NaN;
+
+            function getPrecioCosto(precio) {
+                if (isNaN(precio) || isNaN(cantidadNum) || cantidadNum === 0) return NaN;
+                return roundToDecimals(precio / cantidadNum, 4);
+            }
+            function getPrecioEquiv(precioCosto) {
+                if (isNaN(precioCosto) || isNaN(equivNum) || equivNum === 0) return NaN;
+                return roundToDecimals(precioCosto / equivNum, 4);
+            }
+
+            var html = "";
+            html += "<div class=\"costos-visualizar-nombre\">" + escapeHtml(nombre || "—") + "</div>";
+            html += "<div class=\"costos-visualizar-precio-ant\">Precio anterior: " + escapeHtml(precioAnt ? formatMonedaArg(precioAnt) : "—") + "</div>";
+            html += "<div class=\"costos-visualizar-seccion\"><div class=\"costos-visualizar-seccion-tit\">Presentación</div><div class=\"costos-visualizar-value\">" + escapeHtml(presentacionResum) + "</div></div>";
+            html += "<div class=\"costos-visualizar-field\"><label class=\"costos-visualizar-label\">Precio actual</label><input type=\"text\" id=\"visualizar-precio-input\" class=\"costos-visualizar-input\" placeholder=\"Ej: 1500 o 1.234,56\" value=\"" + escapeHtml(precioActualVal) + "\" autocomplete=\"off\"></div>";
+            html += "<div class=\"costos-visualizar-seccion costos-visualizar-seccion-precio\">";
+            html += "<div class=\"costos-visualizar-seccion-tit\">Precio de Costo</div>";
+            html += "<div class=\"costos-visualizar-field\"><span class=\"costos-visualizar-label\">Precio de Costo por unidad</span><div id=\"visualizar-precio-costo\" class=\"costos-visualizar-value\">" + (idxPrecioCosto >= 0 ? escapeHtml(formatMonedaArgHasta4Dec(row[idxPrecioCosto])) : "—") + "</div></div>";
+            html += "<div class=\"costos-visualizar-field\"><span class=\"costos-visualizar-label\">Precio equivalencia por unidad</span><div id=\"visualizar-precio-equiv\" class=\"costos-visualizar-value\">" + (idxPrecioEquiv >= 0 ? escapeHtml(formatMonedaArgHasta4Dec(row[idxPrecioEquiv])) : "—") + "</div></div>";
+            html += "</div>";
+            html += "<div class=\"costos-visualizar-actions\"><button type=\"button\" id=\"visualizar-btn-guardar\" class=\"costos-edit-btn-save\"><i class=\"fa-solid fa-check\" aria-hidden=\"true\"></i> Guardar precio</button></div>";
+            cardEl.innerHTML = html;
+
+            var inputPrecio = document.getElementById("visualizar-precio-input");
+            var spanCosto = document.getElementById("visualizar-precio-costo");
+            var spanEquiv = document.getElementById("visualizar-precio-equiv");
+            var btnGuardar = document.getElementById("visualizar-btn-guardar");
+
+            function parsePrecio(str) {
+                var s = (str || "").trim().replace(",", ".");
+                return parseFloat(s);
+            }
+            function updateCalculados() {
+                var precio = parsePrecio(inputPrecio.value);
+                if (isNaN(precio) && precioAnt) precio = parsePrecio(String(precioAnt).replace(/\./g, "").replace(",", "."));
+                var pc = getPrecioCosto(precio);
+                var pe = isNaN(pc) ? NaN : getPrecioEquiv(pc);
+                if (spanCosto) spanCosto.textContent = isNaN(pc) ? "—" : formatMonedaArgHasta4Dec(pc);
+                if (spanEquiv) spanEquiv.textContent = isNaN(pe) ? "—" : formatMonedaArgHasta4Dec(pe);
+            }
+            inputPrecio.addEventListener("input", updateCalculados);
+            inputPrecio.addEventListener("change", updateCalculados);
+            updateCalculados();
+
+            function getTodayDate() {
+                var d = new Date();
+                var day = d.getDate(), month = d.getMonth() + 1, year = d.getFullYear();
+                return (day < 10 ? "0" : "") + day + "/" + (month < 10 ? "0" : "") + month + "/" + year;
+            }
+
+            btnGuardar.addEventListener("click", function () {
+                var val = (inputPrecio.value || "").trim();
+                if (!val) { alert("Ingresá un valor para el precio actual."); inputPrecio.focus(); return; }
+                var appsScriptUrl = (window.APP_CONFIG && window.APP_CONFIG.appsScriptUrl) ? String(window.APP_CONFIG.appsScriptUrl).trim() : "";
+                if (!appsScriptUrl) { alert("No está configurada la URL de la API (appsScriptUrl en config.js)."); return; }
+                var precioNum = parsePrecio(val);
+                if (isNaN(precioNum)) { alert("El precio debe ser un número válido."); return; }
+                var precioCostoStr = spanCosto && spanCosto.textContent ? precioDisplayToNumericString(spanCosto.textContent) : "";
+                var precioEquivStr = spanEquiv && spanEquiv.textContent ? precioDisplayToNumericString(spanEquiv.textContent) : "";
+                var body = {
+                    action: "update",
+                    sheet: "packing",
+                    id: id
+                };
+                body[headerPrecioActual] = val;
+                body[headerPrecioCosto] = precioCostoStr;
+                body[headerPrecioEquiv] = precioEquivStr;
+                body[headerFecha] = getTodayDate();
+
+                btnGuardar.disabled = true;
+                btnGuardar.innerHTML = "<i class=\"fa-solid fa-spinner fa-spin\" aria-hidden=\"true\"></i> Guardando…";
+                var formBody = new URLSearchParams();
+                for (var key in body) { if (body.hasOwnProperty(key)) formBody.append(key, body[key] != null ? body[key] : ""); }
+                fetch(appsScriptUrl, { method: "POST", body: formBody })
+                    .then(function (res) { return res.text(); })
+                    .then(function (text) {
+                        var json;
+                        try { json = JSON.parse(text); } catch (e) { json = null; }
+                        if (json && json.success) {
+                            alert("Precio actualizado correctamente.");
+                            window.location.replace("packing.html");
+                        } else {
+                            alert("Error al actualizar: " + (json && json.error ? json.error : "Respuesta inválida"));
+                            btnGuardar.disabled = false;
+                            btnGuardar.innerHTML = "<i class=\"fa-solid fa-check\" aria-hidden=\"true\"></i> Guardar precio";
+                        }
+                    })
+                    .catch(function (err) {
+                        alert("Error de conexión: " + (err.message || "Revisá appsScriptUrl."));
+                        btnGuardar.disabled = false;
+                        btnGuardar.innerHTML = "<i class=\"fa-solid fa-check\" aria-hidden=\"true\"></i> Guardar precio";
+                    });
+            });
+        })();
+    </script>
+</body>
+</html>
