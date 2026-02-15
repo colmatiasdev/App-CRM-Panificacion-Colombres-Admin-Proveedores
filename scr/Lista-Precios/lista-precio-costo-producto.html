@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Lista de costos del producto - Panificación Colombres</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../costos/costos.css">
+    <link rel="stylesheet" href="lista-precios.css">
+    <script src="../../config.js"></script>
+</head>
+<body class="costos-page">
+    <nav class="costos-nav" aria-label="Navegación principal">
+        <a href="../../index.html" class="costos-nav-link">Inicio</a>
+        <a href="lista-precios.html" class="costos-nav-link is-active">Lista de precios</a>
+    </nav>
+    <main class="costos-main">
+        <a href="lista-precios.html" class="costos-back"><i class="fa-solid fa-arrow-left costos-back-arrow" aria-hidden="true"></i> Volver a Lista de precios</a>
+        <h1 class="costos-title">Lista de costos del producto</h1>
+        <p class="costos-intro">Productos elaborados de la lista de precios con su costo total y resumen de composición (elaboración, packing, materia prima directa).</p>
+
+        <section class="lista-costo-producto-section" aria-label="Productos con desglose de costo">
+            <div id="lista-costo-producto-contenido" class="lista-costo-producto-lista"></div>
+        </section>
+    </main>
+    <script src="lista-precios.js"></script>
+    <script src="lista-precio-costo-producto.js"></script>
+</body>
+</html>

@@ -66,3 +66,160 @@
         margin-top: 2px;
     }
 }
+
+/* ========== Lista de costos del producto ========== */
+.lista-costo-producto-section {
+    margin-top: 24px;
+}
+
+.lista-costo-producto-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.lista-costo-producto-card {
+    background: #fff;
+    border: 1px solid var(--border, #e2e8f0);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.lista-costo-producto-card-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px 16px;
+    padding: 16px 18px;
+    background: linear-gradient(135deg, rgba(13, 148, 136, 0.06) 0%, rgba(13, 148, 136, 0.02) 100%);
+    border-bottom: 1px solid transparent;
+}
+
+.lista-costo-producto-card.is-detalle-abierto .lista-costo-producto-card-header {
+    border-bottom-color: var(--border, #e2e8f0);
+}
+
+.lista-costo-producto-card-header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.lista-costo-producto-card-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--muted, #64748b);
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, transform 0.2s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.lista-costo-producto-card-toggle:hover {
+    background: rgba(13, 148, 136, 0.1);
+    color: var(--logo-teal, #0D9488);
+}
+
+.lista-costo-producto-card-toggle:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.3);
+}
+
+.lista-costo-producto-card-toggle i {
+    font-size: 0.85rem;
+    transition: transform 0.2s;
+}
+
+.lista-costo-producto-card-detalle {
+    overflow: hidden;
+    max-height: 220px;
+    opacity: 1;
+    transition: max-height 0.3s ease, opacity 0.2s ease;
+}
+
+.lista-costo-producto-card-detalle.is-collapsed {
+    max-height: 0;
+    opacity: 0;
+}
+
+.lista-costo-producto-card-nombre {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--logo-dark, #1F2937);
+}
+
+.lista-costo-producto-card-total {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--logo-teal, #0D9488);
+}
+
+.lista-costo-producto-card-resumen {
+    padding: 14px 18px 12px;
+    display: grid;
+    gap: 8px;
+}
+
+.lista-costo-producto-fila {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+}
+
+.lista-costo-producto-fila-label {
+    color: var(--muted, #64748b);
+    font-weight: 500;
+}
+
+.lista-costo-producto-fila-valor {
+    font-weight: 600;
+    color: var(--logo-dark, #1F2937);
+}
+
+.lista-costo-producto-fila.lista-costo-elaboracion .lista-costo-producto-fila-valor { color: #0ea5e9; }
+.lista-costo-producto-fila.lista-costo-packing .lista-costo-producto-fila-valor { color: #f59e0b; }
+.lista-costo-producto-fila.lista-costo-materia-prima .lista-costo-producto-fila-valor { color: #22c55e; }
+
+.lista-costo-producto-barra {
+    display: flex;
+    height: 8px;
+    margin: 0 18px 14px;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #f1f5f9;
+}
+
+.lista-costo-barra-segment {
+    display: block;
+    height: 100%;
+    min-width: 2px;
+    transition: width 0.25s ease;
+}
+
+.lista-costo-barra-elaboracion { background: #0ea5e9; }
+.lista-costo-barra-packing { background: #f59e0b; }
+.lista-costo-barra-materia { background: #22c55e; }
+
+@media (max-width: 480px) {
+    .lista-costo-producto-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 14px 16px;
+    }
+    .lista-costo-producto-card-resumen {
+        padding: 12px 16px 10px;
+    }
+    .lista-costo-producto-barra {
+        margin: 0 16px 12px;
+    }
+}
