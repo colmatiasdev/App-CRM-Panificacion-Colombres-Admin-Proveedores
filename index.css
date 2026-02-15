@@ -98,6 +98,36 @@ body {
     transform: scale(0.98);
 }
 
+/* Botón Lista de precios — módulo distinto a Costos (diseño diferenciado) */
+.lista-precios-btn {
+    grid-column: 1 / -1;
+    min-height: var(--touch-min);
+    padding: 14px 12px;
+    border-radius: 16px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    transition: transform 0.2s, background 0.2s, color 0.2s, border-color 0.2s;
+    -webkit-tap-highlight-color: transparent;
+    border: 2px solid #0D9488;
+    background: transparent;
+    color: #0f766e;
+}
+
+.lista-precios-btn:hover {
+    background: #0D9488;
+    color: white;
+    border-color: #0D9488;
+}
+
+.lista-precios-btn:active {
+    transform: scale(0.98);
+}
+
 /* Footer con safe area */
 .index-footer {
     padding: 24px var(--space-mobile) 28px;
