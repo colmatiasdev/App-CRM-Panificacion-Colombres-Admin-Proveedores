@@ -1,0 +1,68 @@
+/* Módulo Lista de precios — estilos propios del módulo */
+/* Variables usadas (complementan costos.css si se carga junto) */
+
+/* Menú de subpáginas (Distribuidor, Mayorista, Al público) */
+.costos-lista-precios-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 20px;
+}
+
+.costos-lista-precios-card {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px 18px;
+    padding: 18px 20px;
+    background: #fff;
+    border: 2px solid var(--border, #e2e8f0);
+    border-radius: 12px;
+    text-decoration: none;
+    color: var(--logo-dark, #1F2937);
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    -webkit-tap-highlight-color: rgba(13, 148, 136, 0.1);
+}
+
+.costos-lista-precios-card:hover {
+    border-color: var(--logo-teal, #0D9488);
+    background: var(--logo-teal-light, #ccfbf1);
+    text-decoration: none;
+    color: var(--logo-dark, #1F2937);
+    box-shadow: 0 4px 12px rgba(13, 148, 136, 0.12);
+}
+
+.costos-lista-precios-card-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background: rgba(13, 148, 136, 0.12);
+    color: var(--logo-teal, #0D9488);
+    border-radius: 10px;
+    font-size: 1.35rem;
+}
+
+.costos-lista-precios-card-title {
+    flex: 1;
+    min-width: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--logo-dark, #1F2937);
+}
+
+.costos-lista-precios-card-desc {
+    width: 100%;
+    font-size: 0.85rem;
+    color: var(--muted, #64748b);
+    margin-top: -4px;
+    padding-left: 62px;
+}
+
+@media (max-width: 480px) {
+    .costos-lista-precios-card-desc {
+        padding-left: 0;
+        margin-top: 2px;
+    }
+}
