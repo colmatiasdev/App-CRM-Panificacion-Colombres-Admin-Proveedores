@@ -137,7 +137,7 @@
         columnas.forEach(function (col) {
             var nombre = col.nombre || "";
             if (!nombre) return;
-            if (col.visibleEnCard !== true) return;
+            if (col.visible !== true) return;
             var nameNorm = norm(nombre);
             if (nameNorm !== norm((headers[idColIdx] || "")) && nameNorm !== norm((headers[nameColIdx] || ""))) {
                 var idx = headers.indexOf(nombre);

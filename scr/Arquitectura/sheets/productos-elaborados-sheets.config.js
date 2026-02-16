@@ -1,6 +1,6 @@
 /**
  * Configuración del módulo Productos elaborados.
- * Es la única fuente de configuración del módulo: columnas, orden, visibleEnCard, agrupación.
+ * Es la única fuente de configuración del módulo: columnas, orden, visible, agrupación.
  * Para cambiar el comportamiento del módulo, editá este archivo directamente.
  */
 window.PRODUCTOS_ELABORADOS_SHEETS_JSON = {
@@ -20,7 +20,7 @@ window.PRODUCTOS_ELABORADOS_SHEETS_JSON = {
           "tipo": "numeric",
           "nullable": true,
           "autogeneradoOrden": true,
-          "visibleEnCard": false,
+          "visible": false,
           "descripcion": "Orden de aparición en listados. Se puede autogenerar.",
           "restricciones": {
             "min": 0,
@@ -31,7 +31,7 @@ window.PRODUCTOS_ELABORADOS_SHEETS_JSON = {
           "nombre": "IDProducto",
           "tipo": "text",
           "nullable": false,
-          "visibleEnCard": false,
+          "visible": false,
           "descripcion": "Identificador único del producto (clave primaria).",
           "restricciones": {}
         },
@@ -39,7 +39,7 @@ window.PRODUCTOS_ELABORADOS_SHEETS_JSON = {
           "nombre": "Comercio-Sucursal",
           "tipo": "text",
           "nullable": true,
-          "visibleEnCard": false,
+          "visible": false,
           "listadoValores": "COMPONENTE-COMBOS.Combo-Comercio-Sucursal",
           "descripcion": "Comercio o sucursal asociada; valores desde combo.",
           "restricciones": {
@@ -50,7 +50,7 @@ window.PRODUCTOS_ELABORADOS_SHEETS_JSON = {
           "nombre": "Nombre-Producto",
           "tipo": "text",
           "nullable": true,
-          "visibleEnCard": true,
+          "visible": true,
           "descripcion": "Nombre del producto elaborado.",
           "restricciones": {
             "maxLongitud": 500
@@ -61,7 +61,7 @@ window.PRODUCTOS_ELABORADOS_SHEETS_JSON = {
           "tipo": "numeric",
           "nullable": true,
           "decimales": 2,
-          "visibleEnCard": true,
+          "visible": true,
           "descripcion": "Costo final actual del producto.",
           "restricciones": {
             "min": 0
@@ -71,7 +71,7 @@ window.PRODUCTOS_ELABORADOS_SHEETS_JSON = {
           "nombre": "Observaciones",
           "tipo": "text",
           "nullable": true,
-          "visibleEnCard": false,
+          "visible": false,
           "restricciones": {
             "maxLongitud": 2000
           }
@@ -80,7 +80,7 @@ window.PRODUCTOS_ELABORADOS_SHEETS_JSON = {
           "nombre": "Habilitado",
           "tipo": "text",
           "nullable": true,
-          "visibleEnCard": true,
+          "visible": false,
           "descripcion": "Sí / No.",
           "restricciones": {
             "valoresPermitidos": [

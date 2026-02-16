@@ -15,7 +15,7 @@ Esta carpeta es **scr/Arquitectura/sheets/**. El módulo Productos elaborados se
 | Archivo | Módulo | Hojas |
 |--------|--------|--------|
 | `costos-sheets.json` | Costos | packing, materiaPrima, combos, equivalencias |
-| `productos-elaborados-sheets.config.js` | Productos elaborados | Listado-Productos-Elaborados (incl. `listado.columnasAgrupacion`, `modosAgrupacion`, `visibleEnCard`) |
+| `productos-elaborados-sheets.config.js` | Productos elaborados | Listado-Productos-Elaborados (incl. `listado.columnasAgrupacion`, `modosAgrupacion`, `visible`) |
 
 ## Esquema de cada JSON
 
@@ -66,7 +66,7 @@ Esta carpeta es **scr/Arquitectura/sheets/**. El módulo Productos elaborados se
 ## Orden y visibilidad en listado (Productos elaborados)
 
 - **Columna de orden**: La columna con `"autogeneradoOrden": true` (ej. `Orden-Lista`) define el orden de la lista; el módulo ordena las filas por ese campo (numérico).
-- **Visibilidad en la card**: Cada columna puede llevar `"visibleEnCard": true` o `"visibleEnCard": false`. Solo las que tienen `true` se muestran en el cuerpo de cada tarjeta del listado (el título de la card sigue siendo la columna nombre, p. ej. Nombre-Producto).
+- **Visibilidad en la card**: Cada columna puede llevar `"visible": true` o `"visible": false`. Solo las que tienen `true` se muestran en el cuerpo de cada tarjeta del listado (el título de la card sigue siendo la columna nombre, p. ej. Nombre-Producto).
 
 ## Listado con agrupación (Productos elaborados)
 
