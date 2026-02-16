@@ -1,11 +1,18 @@
-{
+/**
+ * Configuración del módulo Productos elaborados.
+ * Generado desde productos-elaborados-sheets.json. Es la única fuente de configuración del módulo.
+ * Para cambiar: editá productos-elaborados-sheets.json y ejecutá: node scripts/update-productos-elaborados-config.js
+ */
+window.PRODUCTOS_ELABORADOS_SHEETS_JSON = {
   "modulo": "productos-elaborados",
   "descripcion": "Módulo Productos elaborados (Armador de Productos). Listado y ABM sobre la hoja Listado-Productos-Elaborados.",
   "hojas": [
     {
       "nombre": "Listado-Productos-Elaborados",
       "nombreHoja": "Listado-Productos-Elaborados",
-      "clavePrimaria": ["IDProducto"],
+      "clavePrimaria": [
+        "IDProducto"
+      ],
       "clavesForaneas": [],
       "columnas": [
         {
@@ -15,7 +22,10 @@
           "autogeneradoOrden": true,
           "visibleEnCard": false,
           "descripcion": "Orden de aparición en listados. Se puede autogenerar.",
-          "restricciones": { "min": 0, "entero": true }
+          "restricciones": {
+            "min": 0,
+            "entero": true
+          }
         },
         {
           "nombre": "IDProducto",
@@ -32,7 +42,9 @@
           "visibleEnCard": false,
           "listadoValores": "COMPONENTE-COMBOS.Combo-Comercio-Sucursal",
           "descripcion": "Comercio o sucursal asociada; valores desde combo.",
-          "restricciones": { "maxLongitud": 200 }
+          "restricciones": {
+            "maxLongitud": 200
+          }
         },
         {
           "nombre": "Nombre-Producto",
@@ -40,7 +52,9 @@
           "nullable": true,
           "visibleEnCard": true,
           "descripcion": "Nombre del producto elaborado.",
-          "restricciones": { "maxLongitud": 500 }
+          "restricciones": {
+            "maxLongitud": 500
+          }
         },
         {
           "nombre": "Costo-Producto-Final-Actual",
@@ -49,37 +63,69 @@
           "decimales": 2,
           "visibleEnCard": true,
           "descripcion": "Costo final actual del producto.",
-          "restricciones": { "min": 0 }
+          "restricciones": {
+            "min": 0
+          }
         },
         {
           "nombre": "Observaciones",
           "tipo": "text",
           "nullable": true,
           "visibleEnCard": false,
-          "restricciones": { "maxLongitud": 2000 }
+          "restricciones": {
+            "maxLongitud": 2000
+          }
         },
         {
           "nombre": "Habilitado",
           "tipo": "text",
           "nullable": true,
-          "visibleEnCard": true,
+          "visibleEnCard": false,
           "descripcion": "Sí / No.",
-          "restricciones": { "valoresPermitidos": ["Sí", "No", ""] }
+          "restricciones": {
+            "valoresPermitidos": [
+              "Sí",
+              "No",
+              ""
+            ]
+          }
         }
       ],
       "indices": [
-        { "columnas": ["IDProducto"], "unico": true },
-        { "columnas": ["Orden-Lista"], "unico": false },
-        { "columnas": ["Comercio-Sucursal"], "unico": false }
+        {
+          "columnas": [
+            "IDProducto"
+          ],
+          "unico": true
+        },
+        {
+          "columnas": [
+            "Orden-Lista"
+          ],
+          "unico": false
+        },
+        {
+          "columnas": [
+            "Comercio-Sucursal"
+          ],
+          "unico": false
+        }
       ],
       "listado": {
-        "columnasAgrupacion": ["Comercio-Sucursal"],
+        "columnasAgrupacion": [
+          "Comercio-Sucursal"
+        ],
         "modosAgrupacion": [
           [],
-          ["Comercio-Sucursal"],
-          ["Comercio-Sucursal", "Habilitado"]
+          [
+            "Comercio-Sucursal"
+          ],
+          [
+            "Comercio-Sucursal",
+            "Habilitado"
+          ]
         ]
       }
     }
   ]
-}
+};

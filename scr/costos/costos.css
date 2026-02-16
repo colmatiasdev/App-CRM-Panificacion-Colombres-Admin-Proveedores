@@ -1108,6 +1108,41 @@ body.costos-page {
     color: var(--muted);
     flex-basis: 100%;
 }
+.costos-filter-group-by {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.costos-filter-group-by .costos-filter-select {
+    min-width: 200px;
+}
+
+/* Listado agrupado (Productos elaborados) */
+.costos-listado-grupo {
+    margin-bottom: 28px;
+}
+.costos-grupo-titulo {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--logo-teal-dark);
+    margin: 0 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--logo-teal-light);
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.costos-grupo-count {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--muted);
+}
+.costos-grupo-cards {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
 
 .costos-placeholder {
     color: var(--muted-light);

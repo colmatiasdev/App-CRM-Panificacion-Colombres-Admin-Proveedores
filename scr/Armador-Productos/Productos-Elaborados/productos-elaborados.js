@@ -29,6 +29,38 @@
         return -1;
     }
 
+    function findColumnIndices(headers, columnNames) {
+        var indices = [];
+        for (var c = 0; c < columnNames.length; c++) {
+            var idx = findColumnIndex(headers, [norm(columnNames[c])]);
+            if (idx >= 0) indices.push(idx);
+        }
+        return indices;
+    }
+
+    /** Agrupa filas por valores de las columnas en colIndices. Devuelve { "key": [rows], ... } con key = "val1|val2" (vacío = "Sin valor"). */
+    function groupRowsBy(rows, colIndices) {
+        var groups = {};
+        for (var r = 0; r < rows.length; r++) {
+            var row = rows[r];
+            var parts = [];
+            for (var i = 0; i < colIndices.length; i++) {
+                var v = row[colIndices[i]];
+                parts.push(v != null && String(v).trim() !== "" ? String(v).trim() : "—");
+            }
+            var key = parts.join(" | ");
+            if (!groups[key]) groups[key] = [];
+            groups[key].push(row);
+        }
+        return groups;
+    }
+
+    function etiquetaModoAgrupacion(columnas) {
+        if (!columnas || columnas.length === 0) return "Sin agrupar";
+        if (columnas.length === 1) return "Por " + columnas[0];
+        return "Por " + columnas.slice(0, -1).join(", ") + " y " + columnas[columnas.length - 1];
+    }
+
     function getRowId(headers, row, idColumnIndex) {
         if (idColumnIndex >= 0 && row[idColumnIndex] != null) return String(row[idColumnIndex]).trim();
         return row[0] != null ? String(row[0]).trim() : "";
@@ -64,7 +96,25 @@
         return { headers: headers, rows: rows };
     }
 
-    function renderList(container, sheetConfig, headers, rows, filterText) {
+    /** Ordena las filas por la columna de orden (autogeneradoOrden). Si no hay columna o está vacía, deja el orden intacto. */
+    function sortRowsByOrden(rows, headers, columnaOrdenLista) {
+        if (!columnaOrdenLista || !rows.length) return rows;
+        var ordenIdx = findColumnIndex(headers, [norm(columnaOrdenLista)]);
+        if (ordenIdx < 0) return rows;
+        var sorted = rows.slice();
+        sorted.sort(function (a, b) {
+            var va = a[ordenIdx];
+            var vb = b[ordenIdx];
+            var na = typeof va === "number" && !isNaN(va) ? va : parseFloat(String(va || "0"), 10);
+            var nb = typeof vb === "number" && !isNaN(vb) ? vb : parseFloat(String(vb || "0"), 10);
+            if (isNaN(na)) na = 0;
+            if (isNaN(nb)) nb = 0;
+            return na - nb;
+        });
+        return sorted;
+    }
+
+    function renderList(container, sheetConfig, headers, rows, filterText, modoAgrupacionColumnas) {
         if (!container) return;
         var columnas = sheetConfig.columnas || [];
         var clavePrimaria = sheetConfig.clavePrimaria || ["IDProducto"];
@@ -87,35 +137,63 @@
         columnas.forEach(function (col) {
             var nombre = col.nombre || "";
             if (!nombre) return;
+            if (col.visibleEnCard !== true) return;
             var nameNorm = norm(nombre);
             if (nameNorm !== norm((headers[idColIdx] || "")) && nameNorm !== norm((headers[nameColIdx] || ""))) {
                 var idx = headers.indexOf(nombre);
                 if (idx >= 0) extraIndexes.push(idx);
             }
         });
-        if (extraIndexes.length === 0) {
-            headers.forEach(function (_, c) {
-                if (c !== nameColIdx && c !== idColIdx) extraIndexes.push(c);
-            });
-        }
+
+        var colIndicesAgrupar = (modoAgrupacionColumnas && modoAgrupacionColumnas.length > 0)
+            ? findColumnIndices(headers, modoAgrupacionColumnas)
+            : [];
+        var grouped = colIndicesAgrupar.length > 0 ? groupRowsBy(visible, colIndicesAgrupar) : null;
+        var groupKeys = grouped ? Object.keys(grouped).sort() : null;
 
         var html = '<div class="costos-cards costos-cards-productos-elaborados">';
-        visible.forEach(function (row) {
-            var id = getRowId(headers, row, idColIdx);
-            var title = getRowTitle(headers, row, nameColIdx);
-            var extra = [];
-            extraIndexes.forEach(function (c) {
-                var val = row[c] != null ? String(row[c]).trim() : "";
-                if (val) extra.push(escapeHtml(headers[c]) + ": " + escapeHtml(val));
+        if (grouped && groupKeys && groupKeys.length > 0) {
+            groupKeys.forEach(function (key) {
+                var groupRows = grouped[key];
+                html += '<div class="costos-listado-grupo">';
+                html += '<h2 class="costos-grupo-titulo">' + escapeHtml(key) + ' <span class="costos-grupo-count">(' + groupRows.length + ')</span></h2>';
+                html += '<div class="costos-grupo-cards">';
+                groupRows.forEach(function (row) {
+                    var id = getRowId(headers, row, idColIdx);
+                    var title = getRowTitle(headers, row, nameColIdx);
+                    var extra = [];
+                    extraIndexes.forEach(function (c) {
+                        var val = row[c] != null ? String(row[c]).trim() : "";
+                        if (val) extra.push(escapeHtml(headers[c]) + ": " + escapeHtml(val));
+                    });
+                    var extraHtml = extra.length ? "<p class=\"costos-card-extra\">" + extra.join(" · ") + "</p>" : "";
+                    html += "<div class=\"costos-card costos-card-producto-elaborado\">";
+                    html += "<div class=\"costos-card-header\"><h3 class=\"costos-card-title\">" + escapeHtml(title) + "</h3></div>";
+                    html += "<div class=\"costos-card-body\">" + extraHtml + "</div>";
+                    html += "<div class=\"costos-card-actions\">";
+                    html += "<a href=\"" + EDIT_URL + "\" class=\"costos-card-btn costos-card-btn-editar\" data-action=\"editar\" data-id=\"" + escapeHtml(id) + "\" data-row-index=\"" + rows.indexOf(row) + "\">Editar</a>";
+                    html += "</div></div>";
+                });
+                html += "</div></div>";
             });
-            var extraHtml = extra.length ? "<p class=\"costos-card-extra\">" + extra.join(" · ") + "</p>" : "";
-            html += "<div class=\"costos-card costos-card-producto-elaborado\">";
-            html += "<div class=\"costos-card-header\"><h3 class=\"costos-card-title\">" + escapeHtml(title) + "</h3></div>";
-            html += "<div class=\"costos-card-body\">" + extraHtml + "</div>";
-            html += "<div class=\"costos-card-actions\">";
-            html += "<a href=\"" + EDIT_URL + "\" class=\"costos-card-btn costos-card-btn-editar\" data-action=\"editar\" data-id=\"" + escapeHtml(id) + "\" data-row-index=\"" + rows.indexOf(row) + "\">Editar</a>";
-            html += "</div></div>";
-        });
+        } else {
+            visible.forEach(function (row) {
+                var id = getRowId(headers, row, idColIdx);
+                var title = getRowTitle(headers, row, nameColIdx);
+                var extra = [];
+                extraIndexes.forEach(function (c) {
+                    var val = row[c] != null ? String(row[c]).trim() : "";
+                    if (val) extra.push(escapeHtml(headers[c]) + ": " + escapeHtml(val));
+                });
+                var extraHtml = extra.length ? "<p class=\"costos-card-extra\">" + extra.join(" · ") + "</p>" : "";
+                html += "<div class=\"costos-card costos-card-producto-elaborado\">";
+                html += "<div class=\"costos-card-header\"><h3 class=\"costos-card-title\">" + escapeHtml(title) + "</h3></div>";
+                html += "<div class=\"costos-card-body\">" + extraHtml + "</div>";
+                html += "<div class=\"costos-card-actions\">";
+                html += "<a href=\"" + EDIT_URL + "\" class=\"costos-card-btn costos-card-btn-editar\" data-action=\"editar\" data-id=\"" + escapeHtml(id) + "\" data-row-index=\"" + rows.indexOf(row) + "\">Editar</a>";
+                html += "</div></div>";
+            });
+        }
         html += "</div>";
         container.innerHTML = html;
         container.classList.remove("costos-datos-message");
@@ -176,6 +254,46 @@
                 var nombreHoja = sheetConfig.nombreHoja;
                 var columnas = sheetConfig.columnas || [];
                 var headersConfig = columnas.map(function (c) { return { nombre: c.nombre }; });
+                var modosAgrupacion = sheetConfig.modosAgrupacion || [];
+                var columnasAgrupacion = sheetConfig.columnasAgrupacion || [];
+                if (modosAgrupacion.length === 0 && columnasAgrupacion.length > 0) {
+                    modosAgrupacion = [[], columnasAgrupacion];
+                }
+                if (modosAgrupacion.length === 0) {
+                    modosAgrupacion = [[]];
+                }
+                var defaultModoIndex = 0;
+                for (var m = 0; m < modosAgrupacion.length; m++) {
+                    var modo = modosAgrupacion[m];
+                    if (Array.isArray(modo) && modo.length === columnasAgrupacion.length && modo.length > 0) {
+                        var igual = modo.every(function (col, i) { return col === columnasAgrupacion[i]; });
+                        if (igual) { defaultModoIndex = m; break; }
+                    }
+                }
+                if (columnasAgrupacion.length > 0 && defaultModoIndex === 0 && modosAgrupacion[0] && modosAgrupacion[0].length === 0) {
+                    for (var n = 1; n < modosAgrupacion.length; n++) {
+                        var mo = modosAgrupacion[n];
+                        if (Array.isArray(mo) && mo.length === columnasAgrupacion.length && mo.every(function (col, i) { return col === columnasAgrupacion[i]; })) {
+                            defaultModoIndex = n;
+                            break;
+                        }
+                    }
+                }
+
+                var agruparWrap = document.getElementById("productos-elaborados-agrupar-wrap");
+                var agruparSelect = document.getElementById("agrupar-productos-elaborados");
+                if (agruparSelect && modosAgrupacion.length > 1) {
+                    agruparWrap.style.display = "";
+                    agruparSelect.innerHTML = "";
+                    modosAgrupacion.forEach(function (modo, idx) {
+                        var opt = document.createElement("option");
+                        opt.value = idx;
+                        opt.textContent = etiquetaModoAgrupacion(Array.isArray(modo) ? modo : []);
+                        if (idx === defaultModoIndex) opt.selected = true;
+                        agruparSelect.appendChild(opt);
+                    });
+                }
+
                 var url = appsScriptUrl + "?action=list&sheet=" + encodeURIComponent(nombreHoja) + "&_=" + Date.now();
                 return fetch(url, { cache: "no-store" })
                     .then(function (res) { return res.json(); })
@@ -194,15 +312,31 @@
                                 return apiHeaders.map(function (k) { return obj[k] != null ? obj[k] : ""; });
                             });
                         }
+                        if (sheetConfig.columnaOrdenLista) {
+                            rows = sortRowsByOrden(rows, headers, sheetConfig.columnaOrdenLista);
+                        }
                         if (!headers.length && !rows.length) {
                             showMessage(container, "La hoja no tiene datos.");
                             return { sheetConfig: sheetConfig, headers: headers, rows: rows };
                         }
-                        renderList(container, sheetConfig, headers, rows, (filterInput && filterInput.value) ? filterInput.value : "");
+
+                        function getModoActual() {
+                            var sel = document.getElementById("agrupar-productos-elaborados");
+                            var idx = sel ? parseInt(sel.value, 10) : defaultModoIndex;
+                            if (isNaN(idx) || idx < 0 || idx >= modosAgrupacion.length) idx = defaultModoIndex;
+                            return modosAgrupacion[idx] || [];
+                        }
+
+                        function redraw() {
+                            renderList(container, sheetConfig, headers, rows, (filterInput && filterInput.value) ? filterInput.value : "", getModoActual());
+                        }
+
+                        redraw();
                         if (filterInput) {
-                            filterInput.addEventListener("input", function () {
-                                renderList(container, sheetConfig, headers, rows, filterInput.value);
-                            });
+                            filterInput.addEventListener("input", redraw);
+                        }
+                        if (agruparSelect) {
+                            agruparSelect.addEventListener("change", redraw);
                         }
                         return { sheetConfig: sheetConfig, headers: headers, rows: rows };
                     });

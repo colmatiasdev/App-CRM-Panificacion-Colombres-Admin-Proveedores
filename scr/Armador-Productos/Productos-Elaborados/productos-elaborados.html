@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="../../costos/costos.css">
     <script src="../../../config.js"></script>
     <script src="../../Arquitectura/config-sheets.js"></script>
+    <script src="../../Arquitectura/sheets/productos-elaborados-sheets.config.js"></script>
 </head>
 <body class="costos-page">
     <nav class="costos-nav" aria-label="Navegación principal">
@@ -29,9 +30,15 @@
         </div>
         <p class="costos-intro">Listado desde la hoja <strong>Listado-Productos-Elaborados</strong>. Creá o modificá productos.</p>
 
-        <section class="costos-filter-section" aria-label="Filtrar listado">
+        <section class="costos-filter-section" aria-label="Filtrar y agrupar listado">
             <label for="filter-productos-elaborados" class="costos-filter-label">Buscar</label>
             <input type="search" id="filter-productos-elaborados" class="costos-filter-input" placeholder="Nombre o texto del producto…" autocomplete="off">
+            <div class="costos-filter-group-by" id="productos-elaborados-agrupar-wrap" style="display:none;">
+                <label for="agrupar-productos-elaborados" class="costos-filter-label">Agrupar por</label>
+                <select id="agrupar-productos-elaborados" class="costos-filter-select" aria-label="Modo de agrupación">
+                    <!-- opciones se llenan por JS según config -->
+                </select>
+            </div>
             <p class="costos-filter-count" id="productos-elaborados-count" aria-live="polite"></p>
         </section>
 
