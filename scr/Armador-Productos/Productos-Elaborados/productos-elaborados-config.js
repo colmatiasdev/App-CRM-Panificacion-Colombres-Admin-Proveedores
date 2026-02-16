@@ -1,9 +1,8 @@
 /**
  * Configuración del módulo Productos elaborados.
- * Lee siempre la config desde window.PRODUCTOS_ELABORADOS_SHEETS_JSON (definida en
- * scr/Arquitectura/sheets/productos-elaborados-sheets.config.js). Ese archivo es la
- * configuración del módulo; para cambiarla, editá productos-elaborados-sheets.json
- * y sincronizá el .config.js (o editá directamente el .config.js).
+ * Lee la config desde window.PRODUCTOS_ELABORADOS_SHEETS_JSON (definida en
+ * scr/Arquitectura/sheets/productos-elaborados-sheets.config.js). Para cambiar
+ * el comportamiento del módulo, editá directamente ese .config.js.
  */
 (function () {
     var CACHE_MAX_AGE_MS = 5 * 60 * 1000;
@@ -22,16 +21,11 @@
         return hojas[0] || null;
     }
 
-    function parseColumnNorm(col) {
-        var nombre = (col && col.nombre) ? String(col.nombre).trim() : "";
-        return { nombre: nombre, norm: norm(nombre), col: col };
-    }
-
     function buildConfigFromJson(json) {
                 var hojas = json.hojas || json.sheets || [];
                 var hoja = getSheetConfig(hojas, "Listado-Productos-Elaborados");
                 if (!hoja) {
-                    throw new Error("No se encontró la hoja Listado-Productos-Elaborados en el JSON.");
+                    throw new Error("No se encontró la hoja Listado-Productos-Elaborados en la configuración.");
                 }
                 var nombreHoja = String(hoja.nombreHoja || hoja.nombre || "Listado-Productos-Elaborados").trim();
                 var clavePrimaria = Array.isArray(hoja.clavePrimaria) ? hoja.clavePrimaria : (hoja.idColumn ? [hoja.idColumn] : ["IDProducto"]);
@@ -63,11 +57,9 @@
                 return config;
     }
 
-    var JSON_URL = "../../Arquitectura/sheets/productos-elaborados-sheets.json";
-
     /**
-     * Carga la configuración: intenta primero el JSON (así al editar el archivo y recargar se ve el cambio).
-     * Si el fetch falla (sin servidor, 404), usa window.PRODUCTOS_ELABORADOS_SHEETS_JSON del .config.js.
+     * Carga la configuración desde window.PRODUCTOS_ELABORADOS_SHEETS_JSON
+     * (script productos-elaborados-sheets.config.js). Editá ese archivo para cambiar la config.
      * @returns {Promise<{ nombreHoja: string, clavePrimaria: string[], columnas: Array }>}
      */
     function loadConfig() {
@@ -75,24 +67,15 @@
         if (cached && cached.timestamp && (Date.now() - cached.timestamp < CACHE_MAX_AGE_MS)) {
             return Promise.resolve(cached.config);
         }
-        var url = JSON_URL + "?_=" + Date.now();
-        return fetch(url, { cache: "no-store" })
-            .then(function (res) {
-                if (res && res.ok) return res.json();
-                return Promise.reject(new Error("JSON no disponible"));
-            })
-            .then(buildConfigFromJson)
-            .catch(function () {
-                var json = window.PRODUCTOS_ELABORADOS_SHEETS_JSON;
-                if (!json) {
-                    return Promise.reject(new Error("No se pudo cargar la configuración. Revisá que exista productos-elaborados-sheets.json (o el script .config.js) y que la app se abra desde un servidor que sirva los archivos."));
-                }
-                try {
-                    return Promise.resolve(buildConfigFromJson(json));
-                } catch (e) {
-                    return Promise.reject(e);
-                }
-            });
+        var json = window.PRODUCTOS_ELABORADOS_SHEETS_JSON;
+        if (!json) {
+            return Promise.reject(new Error("Falta la configuración del módulo. Cargá el script scr/Arquitectura/sheets/productos-elaborados-sheets.config.js antes de productos-elaborados-config.js."));
+        }
+        try {
+            return Promise.resolve(buildConfigFromJson(json));
+        } catch (e) {
+            return Promise.reject(e);
+        }
     }
 
     window.PRODUCTOS_ELABORADOS_LOAD_CONFIG = loadConfig;

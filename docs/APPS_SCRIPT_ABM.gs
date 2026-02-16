@@ -101,7 +101,7 @@ var CONFIG = {
   },
 
   /** Hoja Listado Productos Elaborados (Armador de Productos) – ?sheet=Listado-Productos-Elaborados
-   * Debe coincidir con scr/Arquitectura/sheets/productos-elaborados-sheets.json */
+   * Debe coincidir con scr/Arquitectura/sheets/productos-elaborados-sheets.config.js */
   'listado-productos-elaborados': {
     sheetName: 'Listado-Productos-Elaborados',
     gid: 0,

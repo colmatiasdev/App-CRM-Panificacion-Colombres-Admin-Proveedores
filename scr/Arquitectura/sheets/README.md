@@ -1,6 +1,6 @@
 # Configuración de hojas (Sheets) por módulo
 
-Cada archivo JSON en esta carpeta describe las **tablas (hojas de Google Sheets)** que consume un módulo de la app: nombre de la hoja, campos y restricciones. Sirve para:
+Los archivos en esta carpeta definen las **tablas (hojas de Google Sheets)** que consume cada módulo: nombre de hoja, campos y restricciones. Sirve para:
 
 - **Configurar** la app desde un solo lugar (nombre de tabla, clave para la API).
 - **Especificar restricciones** de cada campo (obligatorio, tipo, mínimo/máximo, enum, etc.).
@@ -8,14 +8,14 @@ Cada archivo JSON en esta carpeta describe las **tablas (hojas de Google Sheets)
 
 ## Ubicación
 
-Esta carpeta es **scr/Arquitectura/sheets/**. El módulo Productos elaborados usa como configuración el archivo **productos-elaborados-sheets.config.js** (no hay servidor que sirva el JSON). Ese `.config.js` expone `window.PRODUCTOS_ELABORADOS_SHEETS_JSON` y se carga en listado, crear y editar. La fuente de verdad para editar es **productos-elaborados-sheets.json**; después de modificarlo, hay que regenerar el `.config.js` (script en la raíz del proyecto: `node scripts/update-productos-elaborados-config.js`).
+Esta carpeta es **scr/Arquitectura/sheets/**. El módulo Productos elaborados se configura solo con **productos-elaborados-sheets.config.js**: ese archivo expone `window.PRODUCTOS_ELABORADOS_SHEETS_JSON` y se carga en listado, crear y editar. Para cambiar columnas, agrupación o visibilidad en cards, editá directamente ese `.config.js`.
 
 ## Archivos
 
 | Archivo | Módulo | Hojas |
 |--------|--------|--------|
 | `costos-sheets.json` | Costos | packing, materiaPrima, combos, equivalencias |
-| `productos-elaborados-sheets.json` | Productos elaborados | Listado-Productos-Elaborados (incl. `listado.columnasAgrupacion` y `modosAgrupacion`) |
+| `productos-elaborados-sheets.config.js` | Productos elaborados | Listado-Productos-Elaborados (incl. `listado.columnasAgrupacion`, `modosAgrupacion`, `visibleEnCard`) |
 
 ## Esquema de cada JSON
 
@@ -70,16 +70,16 @@ Esta carpeta es **scr/Arquitectura/sheets/**. El módulo Productos elaborados us
 
 ## Listado con agrupación (Productos elaborados)
 
-En `productos-elaborados-sheets.json` la hoja puede incluir un objeto **`listado`** para el listado en pantalla:
+En `productos-elaborados-sheets.config.js` (objeto `window.PRODUCTOS_ELABORADOS_SHEETS_JSON.hojas[0]`) la hoja puede incluir un objeto **`listado`** para el listado en pantalla:
 
 - **`columnasAgrupacion`**: array de nombres de columnas por las que agrupar por defecto (ej. `["Comercio-Sucursal"]`).
 - **`modosAgrupacion`**: array de modos; cada modo es un array de columnas. Ej.: `[]` = sin agrupar, `["Comercio-Sucursal"]` = por una columna, `["Comercio-Sucursal", "Habilitado"]` = por dos. El usuario puede elegir el modo en un desplegable si hay más de un modo.
 
 ## Uso en la app
 
-- Los módulos pueden **cargar** el JSON correspondiente (por ejemplo con `fetch`) y usar `sheetKey`, `idColumn` y `fields` para construir formularios y validar.
-- Si no se cargan dinámicamente, estos JSON sirven como **documentación y referencia** al modificar el código o el Apps Script; al cambiar una hoja o sus columnas, actualizá primero el JSON y luego el código/Apps Script para mantenerlos alineados.
+- **Costos**: usa `costos-sheets.json` como referencia; el código y el Apps Script deben mantener las mismas hojas y columnas.
+- **Productos elaborados**: usa **productos-elaborados-sheets.config.js** (objeto `window.PRODUCTOS_ELABORADOS_SHEETS_JSON`); editá ese archivo para cambiar columnas, orden, visibilidad en cards y agrupación.
 
 ## Apps Script
 
-El backend (Google Apps Script) debe exponer las hojas con el mismo **nombre de pestaña** o **sheetKey** que figure en cada JSON (por ejemplo `getSheetByName("Listado-Productos-Elaborados")` o un mapeo `sheetKey` → nombre de hoja).
+El backend (Google Apps Script) debe exponer las hojas con el mismo **nombre de pestaña** que figure en la config de cada módulo (por ejemplo `getSheetByName("Listado-Productos-Elaborados")` para Productos elaborados).

@@ -1,7 +1,7 @@
 /**
  * Configuración del módulo Productos elaborados.
- * Generado desde productos-elaborados-sheets.json. Es la única fuente de configuración del módulo.
- * Para cambiar: editá productos-elaborados-sheets.json y ejecutá: node scripts/update-productos-elaborados-config.js
+ * Es la única fuente de configuración del módulo: columnas, orden, visibleEnCard, agrupación.
+ * Para cambiar el comportamiento del módulo, editá este archivo directamente.
  */
 window.PRODUCTOS_ELABORADOS_SHEETS_JSON = {
   "modulo": "productos-elaborados",
@@ -80,7 +80,7 @@ window.PRODUCTOS_ELABORADOS_SHEETS_JSON = {
           "nombre": "Habilitado",
           "tipo": "text",
           "nullable": true,
-          "visibleEnCard": false,
+          "visibleEnCard": true,
           "descripcion": "Sí / No.",
           "restricciones": {
             "valoresPermitidos": [
