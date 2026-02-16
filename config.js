@@ -33,4 +33,4 @@ window.APP_CONFIG = {
         debugEquivalencia: true
     }
 };
-/* appsScriptUrl, googleSheet y URLs CSV están en config-sheets.js (cargar después de config.js). */
+/* appsScriptUrl, googleSheet y URLs CSV están en scr/Arquitectura/config-sheets.js (cargar después de config.js). */
