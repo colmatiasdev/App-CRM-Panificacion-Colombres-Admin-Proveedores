@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Crear producto elaborado - Panificación Colombres</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../../costos/costos.css">
+    <script src="../../../config.js"></script>
+    <script src="../../../config-sheets.js"></script>
+</head>
+<body class="costos-page">
+    <nav class="costos-nav" aria-label="Navegación principal">
+        <a href="../../../index.html" class="costos-nav-link">Inicio</a>
+        <a href="../armador-productos.html" class="costos-nav-link">Armador de Productos</a>
+        <a href="productos-elaborados.html" class="costos-nav-link is-active">Productos elaborados</a>
+    </nav>
+    <main class="costos-main">
+        <h1 class="costos-title">Crear producto elaborado</h1>
+        <p class="costos-intro">Completá los datos del nuevo producto según la estructura de la hoja <strong>Listado-Productos-Elaborados</strong>.</p>
+        <div id="edit-form-container" class="costos-datos">
+            <p id="edit-no-data" class="costos-placeholder" style="display:none;">No se pudo cargar el formulario. Revisá que exista scr/Arquitectura/sheets/productos-elaborados-sheets.json.</p>
+            <p id="edit-loading" class="costos-placeholder">Cargando formulario…</p>
+            <form id="costos-edit-form" class="costos-edit-form" style="display:none;">
+                <div id="edit-fields"></div>
+                <div class="costos-edit-actions">
+                    <a href="productos-elaborados.html" class="costos-edit-btn-cancel">Volver al listado</a>
+                    <button type="submit" class="costos-edit-btn-save" id="costos-edit-btn-save"><i class="fa-solid fa-plus" aria-hidden="true"></i> Crear producto</button>
+                </div>
+            </form>
+        </div>
+    </main>
+    <script src="productos-elaborados-config.js"></script>
+    <script>
+        (function () {
+            var STORAGE_EDIT = "costosEditRecordProductosElaborados";
+            var config = window.APP_CONFIG || {};
+            var appsScriptUrl = (config.appsScriptUrl || "").trim();
+
+            function norm(s) {
+                return String(s != null ? s : "").trim().toLowerCase().replace(/\s+/g, "").replace(/-/g, "");
+            }
+
+            function isClavePrimaria(nombre, clavePrimaria) {
+                var n = norm(nombre);
+                for (var i = 0; i < (clavePrimaria || []).length; i++) {
+                    if (norm(clavePrimaria[i]) === n) return true;
+                }
+                return false;
+            }
+
+            var noDataEl = document.getElementById("edit-no-data");
+            var loadingEl = document.getElementById("edit-loading");
+            var formEl = document.getElementById("costos-edit-form");
+            var fieldsContainer = document.getElementById("edit-fields");
+
+            if (!appsScriptUrl) {
+                loadingEl.style.display = "none";
+                noDataEl.style.display = "block";
+                noDataEl.textContent = "No está configurada la URL de la API (appsScriptUrl en config.js).";
+            } else {
+                var loadConfig = window.PRODUCTOS_ELABORADOS_LOAD_CONFIG;
+                if (!loadConfig) {
+                    loadingEl.style.display = "none";
+                    noDataEl.style.display = "block";
+                    noDataEl.textContent = "No se pudo cargar la configuración del módulo.";
+                    return;
+                }
+                loadConfig().then(function (sheetConfig) {
+                    var nombreHoja = sheetConfig.nombreHoja;
+                    var clavePrimaria = sheetConfig.clavePrimaria || [];
+                    var columnas = sheetConfig.columnas || [];
+                    loadingEl.style.display = "none";
+                    formEl.style.display = "block";
+                    fieldsContainer.innerHTML = "";
+                    var headers = columnas.map(function (c) { return c.nombre; });
+                    columnas.forEach(function (col, idx) {
+                        var nombre = (col.nombre || "").trim();
+                        if (!nombre || isClavePrimaria(nombre, clavePrimaria)) return;
+                        var nameNorm = norm(nombre);
+                        var restr = col.restricciones || {};
+                        var label = document.createElement("label");
+                        label.className = "costos-edit-label";
+                        label.setAttribute("for", "field-" + idx);
+                        label.textContent = nombre;
+                        var wrap = document.createElement("div");
+                        wrap.className = "costos-edit-field";
+                        wrap.appendChild(label);
+                        if (restr.valoresPermitidos && Array.isArray(restr.valoresPermitidos)) {
+                            var select = document.createElement("select");
+                            select.id = "field-" + idx;
+                            select.className = "costos-edit-input";
+                            select.setAttribute("data-header-index", String(idx));
+                            select.setAttribute("data-nombre", nombre);
+                            restr.valoresPermitidos.forEach(function (v) {
+                                var opt = document.createElement("option");
+                                opt.value = v;
+                                opt.textContent = v === "" ? "—" : v;
+                                select.appendChild(opt);
+                            });
+                            wrap.appendChild(select);
+                        } else if (col.tipo === "numeric") {
+                            var input = document.createElement("input");
+                            input.type = "number";
+                            input.step = col.decimales != null ? (Math.pow(10, -col.decimales)) : "0.01";
+                            if (restr.min != null) input.min = restr.min;
+                            input.id = "field-" + idx;
+                            input.className = "costos-edit-input";
+                            input.setAttribute("data-header-index", String(idx));
+                            input.setAttribute("data-nombre", nombre);
+                            input.placeholder = col.decimales ? "0.00" : "0";
+                            wrap.appendChild(input);
+                        } else {
+                            var input = document.createElement("input");
+                            input.type = "text";
+                            input.id = "field-" + idx;
+                            input.className = "costos-edit-input";
+                            input.setAttribute("data-header-index", String(idx));
+                            input.setAttribute("data-nombre", nombre);
+                            if (restr.maxLongitud) input.maxLength = restr.maxLongitud;
+                            wrap.appendChild(input);
+                        }
+                        fieldsContainer.appendChild(wrap);
+                    });
+
+                    formEl.addEventListener("submit", function (e) {
+                        e.preventDefault();
+                        var newRow = headers.map(function () { return ""; });
+                        formEl.querySelectorAll("[data-header-index]").forEach(function (el) {
+                            var idx = parseInt(el.getAttribute("data-header-index"), 10);
+                            if (idx >= 0 && idx < newRow.length) newRow[idx] = el.value != null ? String(el.value).trim() : "";
+                        });
+                        var body = { action: "create", sheet: nombreHoja };
+                        for (var k = 0; k < headers.length; k++) {
+                            if (headers[k]) body[headers[k]] = newRow[k] != null ? newRow[k] : "";
+                        }
+                        var formBody = new URLSearchParams();
+                        for (var key in body) {
+                            if (body.hasOwnProperty(key)) formBody.append(key, body[key] != null ? body[key] : "");
+                        }
+                        var saveBtn = formEl.querySelector(".costos-edit-btn-save");
+                        var btnText = saveBtn ? saveBtn.innerHTML : "";
+                        if (saveBtn) {
+                            saveBtn.disabled = true;
+                            saveBtn.innerHTML = "<i class=\"fa-solid fa-spinner fa-spin\" aria-hidden=\"true\"></i> Guardando…";
+                        }
+                        fetch(appsScriptUrl, { method: "POST", body: formBody })
+                            .then(function (res) { return res.text(); })
+                            .then(function (text) {
+                                var json;
+                                try { json = JSON.parse(text); } catch (err) {
+                                    if (text && (text.trim().indexOf("<!DOCTYPE") === 0 || text.trim().indexOf("<html") === 0)) {
+                                        throw new Error("El servidor respondió con HTML. Revisá que el Apps Script esté desplegado como aplicación web.");
+                                    }
+                                    throw new Error("Respuesta no válida: " + (text ? text.substring(0, 60) + "…" : "vacía"));
+                                }
+                                return json;
+                            })
+                            .then(function (json) {
+                                if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = btnText; }
+                                if (json && json.success) {
+                                    alert("Producto creado correctamente.");
+                                    window.location.replace("productos-elaborados.html");
+                                } else {
+                                    alert("Error al guardar: " + (json && json.error ? json.error : "Respuesta inválida"));
+                                }
+                            })
+                            .catch(function (err) {
+                                if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = btnText; }
+                                alert("Error de conexión: " + (err.message || "Revisá appsScriptUrl."));
+                            });
+                    });
+                }).catch(function (err) {
+                    loadingEl.style.display = "none";
+                    noDataEl.style.display = "block";
+                    noDataEl.textContent = "Error al cargar configuración: " + (err.message || "Revisá el JSON de arquitectura.");
+                });
+            }
+        })();
+    </script>
+</body>
+</html>
