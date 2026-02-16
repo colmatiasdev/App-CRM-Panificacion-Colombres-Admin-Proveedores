@@ -1,10 +1,33 @@
 /**
- * Carga la configuración de la hoja Listado-Productos-Elaborados desde scr/Arquitectura/sheets/productos-elaborados-sheets.json
- * y la expone en window.PRODUCTOS_ELABORADOS_CONFIG para listado, crear y editar.
+ * Configuración de la hoja Listado-Productos-Elaborados para el módulo Productos elaborados.
+ * Usa la config embebida para no depender del servidor (evita 404). Para cambiar columnas, editá este objeto
+ * o el JSON en scr/Arquitectura/sheets/productos-elaborados-sheets.json y sincronizá.
  */
 (function () {
     var CACHE_MAX_AGE_MS = 5 * 60 * 1000;
-    var CONFIG_URL = "../../Arquitectura/sheets/productos-elaborados-sheets.json";
+
+    var CONFIG_EMBED = {
+        hojas: [{
+            nombre: "Listado-Productos-Elaborados",
+            nombreHoja: "Listado-Productos-Elaborados",
+            clavePrimaria: ["IDProducto"],
+            clavesForaneas: [],
+            columnas: [
+                { nombre: "Orden-Lista", tipo: "numeric", nullable: true, autogeneradoOrden: true, descripcion: "Orden de aparición en listados.", restricciones: { min: 0, entero: true } },
+                { nombre: "IDProducto", tipo: "text", nullable: false, descripcion: "Identificador único (clave primaria).", restricciones: {} },
+                { nombre: "Comercio-Sucursal", tipo: "text", nullable: true, listadoValores: "COMPONENTE-COMBOS.Combo-Comercio-Sucursal", restricciones: { maxLongitud: 200 } },
+                { nombre: "Nombre-Producto", tipo: "text", nullable: true, descripcion: "Nombre del producto elaborado.", restricciones: { maxLongitud: 500 } },
+                { nombre: "Costo-Producto-Final-Actual", tipo: "numeric", nullable: true, decimales: 2, restricciones: { min: 0 } },
+                { nombre: "Observaciones", tipo: "text", nullable: true, restricciones: { maxLongitud: 2000 } },
+                { nombre: "Habilitado", tipo: "text", nullable: true, descripcion: "Sí / No.", restricciones: { valoresPermitidos: ["Sí", "No", ""] } }
+            ],
+            indices: [
+                { columnas: ["IDProducto"], unico: true },
+                { columnas: ["Orden-Lista"], unico: false },
+                { columnas: ["Comercio-Sucursal"], unico: false }
+            ]
+        }]
+    };
 
     function norm(s) {
         return String(s != null ? s : "").trim().toLowerCase().replace(/\s+/g, "").replace(/-/g, "");
@@ -51,7 +74,7 @@
     }
 
     /**
-     * Carga el JSON de configuración desde scr/Arquitectura/sheets/productos-elaborados-sheets.json
+     * Devuelve la configuración de la hoja (embebida, sin fetch). Siempre resuelve correctamente.
      * @returns {Promise<{ nombreHoja: string, clavePrimaria: string[], columnas: Array }>}
      */
     function loadConfig() {
@@ -59,12 +82,12 @@
         if (cached && cached.timestamp && (Date.now() - cached.timestamp < CACHE_MAX_AGE_MS)) {
             return Promise.resolve(cached.config);
         }
-        return fetch(CONFIG_URL + "?_=" + Date.now(), { cache: "no-store" })
-            .then(function (res) {
-                if (!res.ok) throw new Error("Config no encontrada en scr/Arquitectura/sheets/productos-elaborados-sheets.json (" + res.status + ")");
-                return res.json();
-            })
-            .then(buildConfigFromJson);
+        try {
+            var config = buildConfigFromJson(CONFIG_EMBED);
+            return Promise.resolve(config);
+        } catch (e) {
+            return Promise.reject(e);
+        }
     }
 
     window.PRODUCTOS_ELABORADOS_LOAD_CONFIG = loadConfig;

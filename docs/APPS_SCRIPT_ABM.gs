@@ -3,7 +3,7 @@
  * Un solo archivo: copiá y pegá todo en el editor de Apps Script.
  *
  * Acciones: list | get | search | create | update | delete | fillIds
- * Parámetro sheet: materiaPrima | packing (o el nombre que agregues en CONFIG)
+ * Parámetro sheet: materiaPrima | packing | combos | equivalencias | Listado-Productos-Elaborados
  *
  * Desplegar: Implementar → Nueva implementación → Aplicación web
  * Ejecutar como: Yo | Quién puede acceder: Cualquier usuario (o según necesites)
@@ -98,6 +98,26 @@ var CONFIG = {
     headers: ['Categoria', 'Unidad', 'Factor', 'Convertir-UnidadMedida', 'Factor-Unidad-Equivalencia', 'Convertido-UnidadMedida', 'Alias', 'Tipo', 'Notas'],
     idColumn: 'Unidad',
     filterColumns: ['Categoria', 'Unidad', 'Tipo']
+  },
+
+  /** Hoja Listado Productos Elaborados (Armador de Productos) – ?sheet=Listado-Productos-Elaborados
+   * Debe coincidir con scr/Arquitectura/sheets/productos-elaborados-sheets.json */
+  'listado-productos-elaborados': {
+    sheetName: 'Listado-Productos-Elaborados',
+    gid: 0,
+    headers: [
+      'Orden-Lista',
+      'IDProducto',
+      'Comercio-Sucursal',
+      'Nombre-Producto',
+      'Costo-Producto-Final-Actual',
+      'Observaciones',
+      'Habilitado'
+    ],
+    idColumn: 'IDProducto',
+    idPrefix: 'PROD-',
+    filterColumns: ['IDProducto', 'Comercio-Sucursal', 'Nombre-Producto', 'Habilitado'],
+    requiredOnCreate: ['Nombre-Producto']
   }
 
   // Para agregar otra hoja, copiá un bloque (p.ej. packing), cambiá la clave y sheetName:
