@@ -128,6 +128,66 @@ body {
     transform: scale(0.98);
 }
 
+/* Botón Armador de Productos — módulo diferenciado */
+.armador-productos-btn {
+    grid-column: 1 / -1;
+    min-height: var(--touch-min);
+    padding: 14px 12px;
+    border-radius: 16px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    transition: transform 0.2s, background 0.2s, color 0.2s, border-color 0.2s;
+    -webkit-tap-highlight-color: transparent;
+    border: 2px solid #8B5CF6;
+    background: transparent;
+    color: #6d28d9;
+}
+
+.armador-productos-btn:hover {
+    background: #8B5CF6;
+    color: white;
+    border-color: #8B5CF6;
+}
+
+.armador-productos-btn:active {
+    transform: scale(0.98);
+}
+
+/* Botón Productos elaborados — listado y ABM desde hoja Listado-Productos-Elaborados */
+.productos-elaborados-btn {
+    grid-column: 1 / -1;
+    min-height: var(--touch-min);
+    padding: 14px 12px;
+    border-radius: 16px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    transition: transform 0.2s, background 0.2s, color 0.2s, border-color 0.2s;
+    -webkit-tap-highlight-color: transparent;
+    border: 2px solid #059669;
+    background: transparent;
+    color: #047857;
+}
+
+.productos-elaborados-btn:hover {
+    background: #059669;
+    color: white;
+    border-color: #059669;
+}
+
+.productos-elaborados-btn:active {
+    transform: scale(0.98);
+}
+
 /* Footer con safe area */
 .index-footer {
     padding: 24px var(--space-mobile) 28px;

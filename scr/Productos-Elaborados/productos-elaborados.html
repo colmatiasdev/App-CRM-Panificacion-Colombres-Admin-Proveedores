@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Productos elaborados - Panificación Colombres</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../costos/costos.css">
+    <script src="../../config.js"></script>
+</head>
+<body class="costos-page">
+    <nav class="costos-nav" aria-label="Navegación principal">
+        <a href="../../index.html" class="costos-nav-link">Inicio</a>
+        <a href="productos-elaborados.html" class="costos-nav-link is-active">Productos elaborados</a>
+    </nav>
+    <main class="costos-main">
+        <div class="costos-title-row">
+            <h1 class="costos-title">Productos elaborados</h1>
+            <a href="#" id="btn-nuevo-producto-elaborado" class="costos-calc-btn costos-btn-nueva" role="button">
+                <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                <span class="costos-calc-btn-text-long">Nuevo producto</span>
+                <span class="costos-calc-btn-text-short">Nuevo</span>
+            </a>
+        </div>
+        <p class="costos-intro">Listado desde la hoja <strong>Listado-Productos-Elaborados</strong>. Creá o modificá productos.</p>
+
+        <section class="costos-filter-section" aria-label="Filtrar listado">
+            <label for="filter-productos-elaborados" class="costos-filter-label">Buscar</label>
+            <input type="search" id="filter-productos-elaborados" class="costos-filter-input" placeholder="Nombre o texto del producto…" autocomplete="off">
+            <p class="costos-filter-count" id="productos-elaborados-count" aria-live="polite"></p>
+        </section>
+
+        <div id="datos-productos-elaborados" class="costos-datos">
+            <p class="costos-loading">Cargando datos…</p>
+        </div>
+    </main>
+    <script src="productos-elaborados.js"></script>
+</body>
+</html>

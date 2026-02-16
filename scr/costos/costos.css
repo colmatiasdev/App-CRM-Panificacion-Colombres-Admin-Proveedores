@@ -763,6 +763,17 @@ body.costos-page {
     cursor: not-allowed;
     pointer-events: none;
 }
+.costos-edit-btn-cancel {
+    display: inline-block;
+    margin-right: 12px;
+    color: #059669;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+.costos-edit-btn-cancel:hover {
+    text-decoration: underline;
+}
 
 /* Debug equivalencia (visible si config.costos.debugEquivalencia === true) */
 .costos-debug-equivalencia {

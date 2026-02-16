@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Editar producto elaborado - Panificación Colombres</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../costos/costos.css">
+    <script src="../../config.js"></script>
+</head>
+<body class="costos-page">
+    <nav class="costos-nav" aria-label="Navegación principal">
+        <a href="../../index.html" class="costos-nav-link">Inicio</a>
+        <a href="productos-elaborados.html" class="costos-nav-link is-active">Productos elaborados</a>
+    </nav>
+    <main class="costos-main">
+        <h1 class="costos-title">Editar producto elaborado</h1>
+        <p class="costos-intro">Modificá los datos y guardá los cambios.</p>
+        <div id="edit-form-container" class="costos-datos">
+            <p id="edit-no-data" class="costos-placeholder" style="display:none;">No hay datos del registro. Volvé al listado y usá «Editar» en una tarjeta.</p>
+            <form id="costos-edit-form" class="costos-edit-form" style="display:none;">
+                <div id="edit-fields"></div>
+                <div class="costos-edit-actions">
+                    <a href="productos-elaborados.html" class="costos-edit-btn-cancel">Volver al listado</a>
+                    <button type="submit" class="costos-edit-btn-save" id="costos-edit-btn-save"><i class="fa-solid fa-check" aria-hidden="true"></i> Guardar cambios</button>
+                </div>
+            </form>
+        </div>
+    </main>
+    <script>
+        (function () {
+            var SHEET_KEY = "listadoProductosElaborados";
+            var STORAGE_EDIT = "costosEditRecordProductosElaborados";
+            var config = window.APP_CONFIG || {};
+            var appsScriptUrl = (config.appsScriptUrl || "").trim();
+
+            function getTodayDate() {
+                var d = new Date();
+                var day = d.getDate();
+                var month = d.getMonth() + 1;
+                var year = d.getFullYear();
+                return (day < 10 ? "0" : "") + day + "/" + (month < 10 ? "0" : "") + month + "/" + year;
+            }
+
+            var noDataEl = document.getElementById("edit-no-data");
+            var formEl = document.getElementById("costos-edit-form");
+            var fieldsContainer = document.getElementById("edit-fields");
+
+            var raw = sessionStorage.getItem(STORAGE_EDIT);
+            if (!raw) {
+                noDataEl.style.display = "block";
+                formEl.style.display = "none";
+            } else {
+                try {
+                    var data = JSON.parse(raw);
+                    var headers = data.headers || [];
+                    var row = data.row || [];
+                    var id = data.id != null ? String(data.id) : "";
+
+                    if (!headers.length) {
+                        noDataEl.style.display = "block";
+                        formEl.style.display = "none";
+                    } else {
+                        noDataEl.style.display = "none";
+                        formEl.style.display = "block";
+                        fieldsContainer.innerHTML = "";
+                        headers.forEach(function (headerName, idx) {
+                            var val = row[idx] != null ? String(row[idx]).trim() : "";
+                            var label = document.createElement("label");
+                            label.className = "costos-edit-label";
+                            label.setAttribute("for", "field-" + idx);
+                            label.textContent = headerName;
+                            var input = document.createElement("input");
+                            input.type = "text";
+                            input.id = "field-" + idx;
+                            input.className = "costos-edit-input";
+                            input.setAttribute("data-header-index", String(idx));
+                            input.value = val;
+                            var wrap = document.createElement("div");
+                            wrap.className = "costos-edit-field";
+                            wrap.appendChild(label);
+                            wrap.appendChild(input);
+                            fieldsContainer.appendChild(wrap);
+                        });
+
+                        formEl.addEventListener("submit", function (e) {
+                            e.preventDefault();
+                            var newRow = [];
+                            formEl.querySelectorAll("input[data-header-index]").forEach(function (inp) {
+                                var idx = parseInt(inp.getAttribute("data-header-index"), 10);
+                                while (newRow.length <= idx) newRow.push("");
+                                newRow[idx] = inp.value != null ? inp.value : "";
+                            });
+                            var body = { action: "update", sheet: SHEET_KEY, id: id };
+                            for (var k = 0; k < headers.length; k++) {
+                                if (headers[k]) body[headers[k]] = newRow[k] != null ? newRow[k] : "";
+                            }
+                            var formBody = new URLSearchParams();
+                            for (var key in body) {
+                                if (body.hasOwnProperty(key)) formBody.append(key, body[key] != null ? body[key] : "");
+                            }
+                            var saveBtn = formEl.querySelector(".costos-edit-btn-save");
+                            var btnText = saveBtn ? saveBtn.innerHTML : "";
+                            if (saveBtn) {
+                                saveBtn.disabled = true;
+                                saveBtn.innerHTML = "<i class=\"fa-solid fa-spinner fa-spin\" aria-hidden=\"true\"></i> Guardando…";
+                            }
+                            fetch(appsScriptUrl, { method: "POST", body: formBody })
+                                .then(function (res) { return res.text(); })
+                                .then(function (text) {
+                                    var json;
+                                    try { json = JSON.parse(text); } catch (err) {
+                                        if (text && (text.trim().indexOf("<!DOCTYPE") === 0 || text.trim().indexOf("<html") === 0)) {
+                                            throw new Error("El servidor respondió con HTML.");
+                                        }
+                                        throw new Error("Respuesta no válida: " + (text ? text.substring(0, 60) + "…" : "vacía"));
+                                    }
+                                    return json;
+                                })
+                                .then(function (json) {
+                                    if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = btnText; }
+                                    if (json && json.success) {
+                                        try { sessionStorage.setItem(STORAGE_EDIT, JSON.stringify({ id: id, headers: headers, row: newRow })); } catch (e) {}
+                                        alert("Cambios guardados correctamente.");
+                                        window.location.replace("productos-elaborados.html");
+                                    } else {
+                                        alert("Error al guardar: " + (json && json.error ? json.error : "Respuesta inválida"));
+                                    }
+                                })
+                                .catch(function (err) {
+                                    if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = btnText; }
+                                    alert("Error de conexión: " + (err.message || "Revisá appsScriptUrl."));
+                                });
+                        });
+                    }
+                } catch (err) {
+                    noDataEl.style.display = "block";
+                    formEl.style.display = "none";
+                }
+            }
+        })();
+    </script>
+</body>
+</html>
