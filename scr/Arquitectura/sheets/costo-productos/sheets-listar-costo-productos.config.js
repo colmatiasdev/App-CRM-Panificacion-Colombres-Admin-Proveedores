@@ -131,6 +131,7 @@
       clavesForaneas: hoja.clavesForaneas || [],
       columnasPropias: Array.isArray(hoja.columnasPropias) ? hoja.columnasPropias : [],
       formulas: hoja.formulas && typeof hoja.formulas === "object" ? hoja.formulas : {},
+      lookups: Array.isArray(hoja.lookups) ? hoja.lookups : [],
       columnaOrden: hoja.columnaOrden,
       prefijoId: hoja.prefijoId,
       patronId: hoja.patronId,

@@ -56,18 +56,20 @@
       nombre: "Costo-Producto-Maestro-Total",
       alias: "Costo Producto Maestro Total",
       tipoDato: "numeric",
-      tipoComponente: "text-box",
+      tipoComponente: "text-box",   
       decimales: 2,
-      visible: false,
+      obligatorio: true,
+      visible: true,
       restricciones: { min: 0 }
     },
     {
       nombre: "Costo-Packing",
       alias: "Costo Packing",
       tipoDato: "numeric",
-      tipoComponente: "text-box",
+      tipoComponente: "text-box",   
       decimales: 2,
-      visible: false,
+      obligatorio: true,
+      visible: true,
       restricciones: { min: 0 }
     },
     {
@@ -76,7 +78,8 @@
       tipoDato: "numeric",
       tipoComponente: "text-box",
       decimales: 2,
-      visible: false,
+      obligatorio: true,
+      visible: true,
       restricciones: {}
     },
     {
@@ -85,7 +88,8 @@
       tipoDato: "numeric",
       tipoComponente: "text-box",
       decimales: 0,
-      visible: false,
+      obligatorio: true,
+      visible: true, 
       restricciones: { min: 0, max: 5 }
     },
     {
@@ -94,15 +98,17 @@
       tipoDato: "numeric",
       tipoComponente: "label",
       decimales: 2,
-      visible: false,
+      visible: true,
+      obligatorio: true,
       restricciones: { min: 0 }
     },
     {
       nombre: "Tiempo-Packing-Minutos",
       alias: "Tiempo Packing Minutos",
       tipoDato: "numeric",
-      tipoComponente: "text-box",
-      visible: false,
+      tipoComponente: "text-box", 
+      obligatorio: true,
+      visible: true,
       restricciones: { min: 0, entero: true }
     },
     {
@@ -110,7 +116,8 @@
       alias: "Costo Mano Obra Packing",
       tipoDato: "numeric",
       tipoComponente: "text-box",
-      decimales: 2,
+      decimales: 2, 
+      obligatorio: true,
       visible: false,
       restricciones: { min: 0 }
     },
@@ -119,8 +126,9 @@
       alias: "Costo Producto Final Actual",
       tipoDato: "numeric",
       tipoComponente: "text-box",
-      decimales: 2,
-      visible: false,
+      decimales: 2, 
+      obligatorio: true,
+      visible: true,
       restricciones: { min: 0 }
     },
     {
@@ -129,7 +137,8 @@
       tipoDato: "numeric",
       tipoComponente: "text-box",
       decimales: 2,
-      visible: false,
+      visible: true,
+      obligatorio: true,
       restricciones: { min: 0 }
     },
     {
@@ -151,6 +160,7 @@
       clavesForaneas: hoja.clavesForaneas || [],
       columnasPropias: Array.isArray(hoja.columnasPropias) ? hoja.columnasPropias : [],
       formulas: hoja.formulas && typeof hoja.formulas === "object" ? hoja.formulas : {},
+      lookups: Array.isArray(hoja.lookups) ? hoja.lookups : [],
       columnaOrden: hoja.columnaOrden,
       prefijoId: hoja.prefijoId,
       patronId: hoja.patronId,

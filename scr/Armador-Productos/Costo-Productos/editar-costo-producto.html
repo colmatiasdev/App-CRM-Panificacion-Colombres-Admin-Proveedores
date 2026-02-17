@@ -297,6 +297,41 @@
                             }
                             return "";
                         }
+                        function setFormValueByNombreEditar(form, nombreColumna, value) {
+                            var list = form.querySelectorAll("[data-nombre]");
+                            for (var i = 0; i < list.length; i++) {
+                                if (list[i].getAttribute("data-nombre") === nombreColumna) {
+                                    var str = (value != null && value !== "") ? String(value).trim() : "";
+                                    if (list[i].value !== undefined) list[i].value = str;
+                                    else list[i].textContent = str;
+                                    break;
+                                }
+                            }
+                        }
+                        function applyLookupsCostosEditar(form, sheetConfig, apiUrl) {
+                            if (!sheetConfig.lookups || sheetConfig.lookups.length === 0 || !apiUrl) return Promise.resolve();
+                            var promesas = sheetConfig.lookups.map(function (lookup) {
+                                var claveVal = getFormValueByNombreEditar(form, lookup.columnaClaveLocal);
+                                if (!claveVal) {
+                                    setFormValueByNombreEditar(form, lookup.columnaDestino, "");
+                                    return Promise.resolve();
+                                }
+                                var url = apiUrl + "?action=get&sheet=" + encodeURIComponent(lookup.tablaOrigen) + "&id=" + encodeURIComponent(claveVal);
+                                return fetch(url, { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (resp) {
+                                    if (!resp || !resp.success || !resp.data) {
+                                        setFormValueByNombreEditar(form, lookup.columnaDestino, "");
+                                        return;
+                                    }
+                                    var val = resp.data[lookup.columnaOrigen];
+                                    var dec = (lookup.decimales != null) ? lookup.decimales : 2;
+                                    if (typeof val === "number" && !isNaN(val)) val = val.toFixed(dec);
+                                    else if (val != null && val !== "") val = String(val).trim();
+                                    else val = "";
+                                    setFormValueByNombreEditar(form, lookup.columnaDestino, val);
+                                }).catch(function () { setFormValueByNombreEditar(form, lookup.columnaDestino, ""); });
+                            });
+                            return Promise.all(promesas);
+                        }
                         function applyFormulasCostosEditar(form) {
                             form.querySelectorAll("[data-formula-expresion]").forEach(function (span) {
                                 var expr = span.getAttribute("data-formula-expresion");
@@ -320,6 +355,7 @@
                             });
                         }
                         applyFormulasCostosEditar(formEl);
+                        applyLookupsCostosEditar(formEl, sheetConfig, appsScriptUrl);
                         formEl.querySelectorAll("input[data-nombre], select[data-nombre]").forEach(function (input) {
                             var nombre = input.getAttribute("data-nombre");
                             if (!nombre) return;
@@ -336,12 +372,26 @@
                                 input.addEventListener("input", function () { applyFormulasCostosEditar(formEl); });
                                 input.addEventListener("change", function () { applyFormulasCostosEditar(formEl); });
                             }
+                            var esClaveLookup = false;
+                            if (sheetConfig.lookups) {
+                                for (var l = 0; l < sheetConfig.lookups.length; l++) {
+                                    if (sheetConfig.lookups[l].columnaClaveLocal === nombre) {
+                                        esClaveLookup = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (esClaveLookup) {
+                                input.addEventListener("input", function () { applyLookupsCostosEditar(formEl, sheetConfig, appsScriptUrl); });
+                                input.addEventListener("change", function () { applyLookupsCostosEditar(formEl, sheetConfig, appsScriptUrl); });
+                            }
                         });
 
                         formEl.addEventListener("submit", function (e) {
                             e.preventDefault();
                             hideEditAlert();
                             applyFormulasCostosEditar(formEl);
+                            applyLookupsCostosEditar(formEl, sheetConfig, appsScriptUrl).then(function () {
                             var newRow = row.slice ? row.slice() : row.map(function (x) { return x; });
                             formEl.querySelectorAll("[data-header-index]").forEach(function (el) {
                                 var idx = parseInt(el.getAttribute("data-header-index"), 10);
@@ -393,6 +443,7 @@
                                 .finally(function () {
                                     if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.hide();
                                 });
+                            });
                         });
                     }).catch(function (err) {
                         loadingEl.style.display = "none";
