@@ -1,7 +1,8 @@
 /**
  * Configuración del módulo Productos elaborados.
- * Lee la config desde window.PRODUCTOS_ELABORADOS_SHEETS_JSON (definida en
- * scr/Arquitectura/sheets/productos-elaborados/productos-elaborados-sheets.config.js).
+ * Lee la config desde window.PRODUCTOS_ELABORADOS_SHEETS_JSON. Cada página carga primero
+ * productos-elaborados-sheets-base.js (datos fijos: modulo, hoja, clavePrimaria, prefijoId, indices)
+ * y luego su script de acción (listar/crear/editar/ver-producto-elaborado-sheets.config.js), que solo define columnas.
  * Define las acciones (Listar, Crear, Editar, Ver) y la página HTML de cada una.
  */
 (function () {
@@ -127,7 +128,7 @@
 
     /**
      * Carga la configuración desde window.PRODUCTOS_ELABORADOS_SHEETS_JSON
-     * (script productos-elaborados-sheets.config.js). Editá ese archivo para cambiar la config.
+     * (script *-sheets.config.js de la acción correspondiente). Editá el config de cada acción para cambiar la config.
      * @returns {Promise<{ nombreHoja: string, clavePrimaria: string[], columnas: Array }>}
      */
     function loadConfig() {
@@ -137,7 +138,7 @@
         }
         var json = window.PRODUCTOS_ELABORADOS_SHEETS_JSON;
         if (!json) {
-            return Promise.reject(new Error("Falta la configuración del módulo. Cargá el script scr/Arquitectura/sheets/productos-elaborados/productos-elaborados-sheets.config.js antes de productos-elaborados-config.js."));
+            return Promise.reject(new Error("Falta la configuración del módulo. Cargá el script de la acción (listar/crear/editar/ver)-productos-elaborados-sheets.config.js antes de productos-elaborados-config.js."));
         }
         try {
             return Promise.resolve(buildConfigFromJson(json));

@@ -1,6 +1,6 @@
 /**
- * Listado de Productos Elaborados. Usa la configuración de scr/Arquitectura/sheets/productos-elaborados/productos-elaborados-sheets.config.js
- * para nombre de hoja, clave primaria y columnas. Siempre solicita datos frescos a la API (cache-busting).
+ * Listado de Productos Elaborados. Usa la configuración de listar-productos-elaborados-sheets.config.js
+ * (cargado por productos-elaborados.html) para nombre de hoja, clave primaria, columnas y agrupación.
  */
 (function () {
     var STORAGE_EDIT = "costosEditRecordProductosElaborados";

@@ -12,7 +12,8 @@
     <script src="../../Arquitectura/config.js"></script>
     <script src="../../Arquitectura/config-sheets.js"></script>
     <script src="../../Arquitectura/generar-id.js"></script>
-    <script src="../../Arquitectura/sheets/productos-elaborados/productos-elaborados-sheets.config.js"></script>
+    <script src="../../Arquitectura/sheets/productos-elaborados/productos-elaborados-sheets-base.js"></script>
+    <script src="../../Arquitectura/sheets/productos-elaborados/crear-producto-elaborado-sheets.config.js"></script>
     <script>window.PRODUCTOS_ELABORADOS_ACCION_ACTUAL = "crear";</script>
 </head>
 <body class="costos-page">
@@ -25,7 +26,7 @@
         <h1 class="costos-title">Crear producto elaborado</h1>
         <p class="costos-intro">Completá los datos del nuevo producto según la estructura de la hoja <strong>Listado-Productos-Elaborados</strong>.</p>
         <div id="edit-form-container" class="costos-datos">
-            <p id="edit-no-data" class="costos-placeholder" style="display:none;">No se pudo cargar el formulario. Revisá que exista scr/Arquitectura/sheets/productos-elaborados/productos-elaborados-sheets.config.js.</p>
+            <p id="edit-no-data" class="costos-placeholder" style="display:none;">No se pudo cargar el formulario. Revisá que existan productos-elaborados-sheets-base.js y crear-producto-elaborado-sheets.config.js.</p>
             <p id="edit-loading" class="costos-placeholder">Cargando formulario…</p>
             <form id="costos-edit-form" class="costos-edit-form" style="display:none;">
                 <div id="edit-fields"></div>
