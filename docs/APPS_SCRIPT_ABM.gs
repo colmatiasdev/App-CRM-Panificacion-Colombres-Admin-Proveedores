@@ -297,6 +297,30 @@ function objectToRow(headers, obj) {
   });
 }
 
+/**
+ * Normaliza un objeto de fila (con claves que pueden ser del sheet) al orden y nombres de configHeaders.
+ * Así la API siempre devuelve datos según la configuración del módulo, aunque la hoja tenga columnas en otro orden o con nombres ligeramente distintos.
+ */
+function normalizeRowToConfigHeaders(rowObj, configHeaders) {
+  var norm = function (s) {
+    return (s != null ? String(s) : '').trim().toLowerCase().replace(/\s+/g, '').replace(/-/g, '');
+  };
+  var out = {};
+  configHeaders.forEach(function (h) {
+    var val = rowObj[h];
+    if (val === undefined || val === null) {
+      for (var k in rowObj) {
+        if (Object.prototype.hasOwnProperty.call(rowObj, k) && norm(k) === norm(h)) {
+          val = rowObj[k];
+          break;
+        }
+      }
+    }
+    out[h] = val !== undefined && val !== null ? val : '';
+  });
+  return out;
+}
+
 function generateId(prefix) {
   var alfanum = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
   var base = (new Date().getTime().toString(36) + Math.random().toString(36).slice(2, 6)).slice(-8);
@@ -444,25 +468,30 @@ function handleRequest(params) {
     rows.push(row);
   }
 
+  var configHeaders = configSheet.headers || headerRow;
+
   try {
     // ─── LISTAR ───
     if (action === ACTIONS.LIST) {
       var limit = parseInt(params[SEARCH_PARAMS.limit], 10) || 500;
       var offset = parseInt(params[SEARCH_PARAMS.offset], 10) || 0;
-      var list = rows.slice(offset, offset + limit).map(function (row) { return rowToObject(headerRow, row); });
-      return jsonResponse(true, { headers: headerRow, rows: list, total: rows.length });
+      var list = rows.slice(offset, offset + limit).map(function (row) {
+        var obj = rowToObject(headerRow, row);
+        return normalizeRowToConfigHeaders(obj, configHeaders);
+      });
+      return jsonResponse(true, { headers: configHeaders, rows: list, total: rows.length });
     }
 
     // ─── BUSCAR / FILTRAR ───
     if (action === ACTIONS.SEARCH) {
       var filters = {};
-      headers.forEach(function (h) {
+      configHeaders.forEach(function (h) {
         if (params[h] != null && params[h] !== '') filters[h] = params[h];
       });
       var q = (params[SEARCH_PARAMS.q] || params.q || '').toString().trim();
       var filtered = rows;
       if (Object.keys(filters).length > 0) filtered = filterRows(filtered, headerRow, filters);
-      if (q) filtered = searchInRows(filtered, headerRow, configSheet.filterColumns, q);
+      if (q) filtered = searchInRows(filtered, headerRow, configSheet.filterColumns || [], q);
       var sortBy = params[SEARCH_PARAMS.sortBy];
       if (sortBy && headerRow.indexOf(sortBy) !== -1) {
         var colIdx = headerRow.indexOf(sortBy);
@@ -475,8 +504,11 @@ function handleRequest(params) {
       }
       var limitS = parseInt(params[SEARCH_PARAMS.limit], 10) || 200;
       var offsetS = parseInt(params[SEARCH_PARAMS.offset], 10) || 0;
-      var slice = filtered.slice(offsetS, offsetS + limitS).map(function (row) { return rowToObject(headerRow, row); });
-      return jsonResponse(true, { headers: headerRow, rows: slice, total: filtered.length });
+      var slice = filtered.slice(offsetS, offsetS + limitS).map(function (row) {
+        var obj = rowToObject(headerRow, row);
+        return normalizeRowToConfigHeaders(obj, configHeaders);
+      });
+      return jsonResponse(true, { headers: configHeaders, rows: slice, total: filtered.length });
     }
 
     // ─── OBTENER UNO (por id) ───
@@ -487,7 +519,8 @@ function handleRequest(params) {
       if (idColIdx === -1) return jsonResponse(false, null, 'Columna id no configurada');
       for (var g = 0; g < rows.length; g++) {
         if (String(rows[g][idColIdx] || '').trim() === id) {
-          return jsonResponse(true, rowToObject(headerRow, rows[g]));
+          var getObj = rowToObject(headerRow, rows[g]);
+          return jsonResponse(true, normalizeRowToConfigHeaders(getObj, configHeaders));
         }
       }
       return jsonResponse(false, null, 'No encontrado');
@@ -496,29 +529,32 @@ function handleRequest(params) {
     // ─── CREAR REGISTRO ───
     if (action === ACTIONS.CREATE) {
       var newObj = {};
-      headers.forEach(function (h, idx) {
+      configHeaders.forEach(function (h, idx) {
         newObj[h] = params[h] != null ? params[h] : (params[idx] != null ? params[idx] : '');
       });
       if (!(configSheet.idColumn in newObj) || !String(newObj[configSheet.idColumn]).trim()) {
         newObj[configSheet.idColumn] = generateId(configSheet.idPrefix);
       }
-      for (var r = 0; r < configSheet.requiredOnCreate.length; r++) {
-        var req = configSheet.requiredOnCreate[r];
-        if (!String(newObj[req] || '').trim()) {
-          return jsonResponse(false, null, 'Falta campo obligatorio: ' + req);
+      if (configSheet.requiredOnCreate && configSheet.requiredOnCreate.length > 0) {
+        for (var r = 0; r < configSheet.requiredOnCreate.length; r++) {
+          var req = configSheet.requiredOnCreate[r];
+          if (!String(newObj[req] || '').trim()) {
+            return jsonResponse(false, null, 'Falta campo obligatorio: ' + req);
+          }
         }
       }
       if (configSheet.dateUpdatedColumn) {
         newObj[configSheet.dateUpdatedColumn] = new Date().toISOString().slice(0, 10);
       }
-      var newRow = objectToRow(headerRow, newObj);
+      var newObjForSheet = normalizeRowToConfigHeaders(newObj, headerRow);
+      var newRow = objectToRow(headerRow, newObjForSheet);
       sheet.appendRow(newRow);
       if (sheetKey === 'tabla-costo-productos' && PROPAGACION_COSTO_PRODUCTOS && PROPAGACION_COSTO_PRODUCTOS.columnas && PROPAGACION_COSTO_PRODUCTOS.columnas.length > 0 && PROPAGACION_COSTO_PRODUCTOS.soloEnUpdate !== true) {
         try {
           propagarCostoProductosAReferenciadores(newObj[configSheet.idColumn] || '', newObj);
         } catch (errProp) {}
       }
-      return jsonResponse(true, newObj);
+      return jsonResponse(true, normalizeRowToConfigHeaders(newObj, configHeaders));
     }
 
     // ─── MODIFICAR REGISTRO ───
@@ -536,8 +572,8 @@ function handleRequest(params) {
       }
       if (rowIndex < 0) return jsonResponse(false, null, 'No encontrado');
       var existing = rows[rowIndex - 2];
-      var updatedObj = rowToObject(headerRow, existing);
-      headerRow.forEach(function (h) {
+      var updatedObj = normalizeRowToConfigHeaders(rowToObject(headerRow, existing), configHeaders);
+      configHeaders.forEach(function (h) {
         if (h !== configSheet.idColumn && params[h] !== undefined && params[h] !== null) {
           updatedObj[h] = params[h];
         }
@@ -545,8 +581,9 @@ function handleRequest(params) {
       if (configSheet.dateUpdatedColumn) {
         updatedObj[configSheet.dateUpdatedColumn] = new Date().toISOString().slice(0, 10);
       }
-      var upRow = objectToRow(headerRow, updatedObj);
-      sheet.getRange(rowIndex, 1, 1, upRow.length).setValues([upRow]);
+      var updatedObjForSheet = normalizeRowToConfigHeaders(updatedObj, headerRow);
+      var upRow = objectToRow(headerRow, updatedObjForSheet);
+      sheet.getRange(rowIndex, 1, rowIndex, upRow.length).setValues([upRow]);
       if (sheetKey === 'tabla-costo-productos' && PROPAGACION_COSTO_PRODUCTOS && PROPAGACION_COSTO_PRODUCTOS.columnas && PROPAGACION_COSTO_PRODUCTOS.columnas.length > 0) {
         try {
           propagarCostoProductosAReferenciadores(idUp, updatedObj);
@@ -554,7 +591,7 @@ function handleRequest(params) {
           // No fallar el update si la propagación falla; se puede revisar en logs
         }
       }
-      return jsonResponse(true, updatedObj);
+      return jsonResponse(true, normalizeRowToConfigHeaders(updatedObj, configHeaders));
     }
 
     // ─── ELIMINAR REGISTRO ───
