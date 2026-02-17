@@ -79,7 +79,8 @@
       visible: true,
       obligatorio: false,
       descripcion: "Costo final actual.",
-      restricciones: { min: 0 }
+      restricciones: { min: 0 },
+      formatoVisual: "moneda"
     },
     {
       nombre: "Observaciones",

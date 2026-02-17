@@ -138,6 +138,10 @@
                     if (!nombre) return;
                     if (col.visible === false) return;
                     var val = row[idx] != null ? String(row[idx]).trim() : "—";
+                    if ((col.tipoDato === "numeric" || col.tipo === "numeric") && col.formatoVisual && val !== "—" && typeof window.formatNumeroVisual === "function") {
+                        var num = parseFloat(String(val).replace(",", "."));
+                        if (!isNaN(num)) val = window.formatNumeroVisual(num, col.formatoVisual, col.decimales != null ? col.decimales : 2);
+                    }
                     html += "<dt class=\"costos-ver-dt\">" + escapeHtml(nombre) + "</dt>";
                     html += "<dd class=\"costos-ver-dd\">" + escapeHtml(val) + "</dd>";
                 });

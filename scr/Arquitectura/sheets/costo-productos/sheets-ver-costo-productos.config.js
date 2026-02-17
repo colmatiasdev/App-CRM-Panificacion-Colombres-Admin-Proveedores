@@ -44,7 +44,8 @@
       tipoDato: "numeric",
       tipoComponente: "label",
       decimales: 2,
-      visible: true
+      visible: true,
+      formatoVisual: "moneda"
     },
     {
       nombre: "Costo-Packing",
@@ -52,7 +53,8 @@
       tipoDato: "numeric",
       tipoComponente: "label",
       decimales: 2,
-      visible: true
+      visible: true,
+      formatoVisual: "moneda"
     },
     {
       nombre: "Costos-Fijos",
@@ -60,7 +62,8 @@
       tipoDato: "numeric",
       tipoComponente: "label",
       decimales: 2,
-      visible: true
+      visible: true,
+      formatoVisual: "moneda"
     },
     {
       nombre: "Merma-Porcentaje",
@@ -68,7 +71,8 @@
       tipoDato: "numeric",
       tipoComponente: "label",
       decimales: 2,
-      visible: true
+      visible: true,
+      formatoVisual: "porcentaje"
     },
     {
       nombre: "Merma-Importe",
@@ -76,7 +80,8 @@
       tipoDato: "numeric",
       tipoComponente: "label",
       decimales: 2,
-      visible: true
+      visible: true,
+      formatoVisual: "moneda"
     },
     {
       nombre: "Tiempo-Packing-Minutos",
@@ -91,7 +96,8 @@
       tipoDato: "numeric",
       tipoComponente: "label",
       decimales: 2,
-      visible: true
+      visible: true,
+      formatoVisual: "moneda"
     },
     {
       nombre: "Costo-Producto-Final-Actual",
@@ -99,7 +105,8 @@
       tipoDato: "numeric",
       tipoComponente: "label",
       decimales: 2,
-      visible: true
+      visible: true,
+      formatoVisual: "moneda"
     },
     {
       nombre: "Costo-Producto-Final-Anterior",
@@ -107,7 +114,8 @@
       tipoDato: "numeric",
       tipoComponente: "label",
       decimales: 2,
-      visible: true
+      visible: true,
+      formatoVisual: "moneda"
     },
     {
       nombre: "Habilitado",

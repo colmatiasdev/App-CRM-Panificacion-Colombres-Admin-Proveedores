@@ -177,8 +177,11 @@
                                 ro.className = "costos-edit-input costos-edit-readonly";
                                 ro.setAttribute("data-header-index", String(idx));
                                 ro.setAttribute("data-nombre", col.nombre || nombre);
+                                if (col.formatoVisual) ro.setAttribute("data-formato-visual", col.formatoVisual);
                                 ro.setAttribute("aria-readonly", "true");
-                                ro.textContent = val || (col.descripcion || "—");
+                                var dispVal = val || (col.descripcion || "—");
+                                if ((tipoDato === "numeric" || col.tipo === "numeric") && col.formatoVisual && typeof window.formatNumeroVisual === "function" && (val !== "" && val != null)) dispVal = window.formatNumeroVisual(val, col.formatoVisual, col.decimales != null ? col.decimales : 2);
+                                ro.textContent = dispVal;
                                 wrap.appendChild(ro);
                                 inputEl = ro;
                             } else if (tipoComp === "combo-basico") {
@@ -272,6 +275,8 @@
                                 var idx = parseInt(el.getAttribute("data-header-index"), 10);
                                 if (idx < 0) return;
                                 var val = (el.value != null ? String(el.value).trim() : (el.textContent != null ? String(el.textContent).trim() : ""));
+                                var formato = el.getAttribute("data-formato-visual");
+                                if (formato && typeof window.parseNumeroVisual === "function") val = window.parseNumeroVisual(val, formato) || val;
                                 while (newRow.length <= idx) newRow.push("");
                                 newRow[idx] = val;
                             });
@@ -301,6 +306,8 @@
                                 var idx = parseInt(el.getAttribute("data-header-index"), 10);
                                 if (idx < 0) return;
                                 var val = (el.value != null ? String(el.value).trim() : (el.textContent != null ? String(el.textContent).trim() : ""));
+                                var formato = el.getAttribute("data-formato-visual");
+                                if (formato && typeof window.parseNumeroVisual === "function") val = window.parseNumeroVisual(val, formato) || val;
                                 while (newRow.length <= idx) newRow.push("");
                                 newRow[idx] = val;
                             });

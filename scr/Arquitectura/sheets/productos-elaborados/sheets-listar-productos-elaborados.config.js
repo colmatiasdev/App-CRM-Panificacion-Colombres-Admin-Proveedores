@@ -66,7 +66,8 @@
       tipoComponente: "label",
       decimales: 2,
       visible: true,
-      descripcion: "Costo final actual."
+      descripcion: "Costo final actual.",
+      formatoVisual: "moneda"
     },
     {
       nombre: "Observaciones",

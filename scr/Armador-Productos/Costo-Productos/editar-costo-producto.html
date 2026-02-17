@@ -210,14 +210,18 @@
                                 ro.className = "costos-edit-input costos-edit-readonly";
                                 ro.setAttribute("data-header-index", String(idx));
                                 ro.setAttribute("data-nombre", col.nombre);
+                                if (col.formatoVisual) ro.setAttribute("data-formato-visual", col.formatoVisual);
                                 ro.setAttribute("aria-readonly", "true");
                                 if (esFormula) {
                                     ro.setAttribute("data-formula-expresion", formulaCol.expresion);
                                     ro.setAttribute("data-formula-decimales", String(formulaCol.decimales != null ? formulaCol.decimales : 2));
                                     ro.setAttribute("data-formula-fuentes", JSON.stringify(formulaCol.fuentes));
-                                    ro.textContent = val || "0";
+                                    var rawVal = val || "0";
+                                    ro.textContent = (typeof window.formatNumeroVisual === "function" && col.formatoVisual) ? window.formatNumeroVisual(rawVal, col.formatoVisual, col.decimales != null ? col.decimales : 2) : rawVal;
                                 } else {
-                                    ro.textContent = val || (col.descripcion || "—");
+                                    var dispVal = val || (col.descripcion || "—");
+                                    if ((tipoDato === "numeric" || col.tipo === "numeric") && col.formatoVisual && typeof window.formatNumeroVisual === "function" && (val !== "" && val != null)) dispVal = window.formatNumeroVisual(val, col.formatoVisual, col.decimales != null ? col.decimales : 2);
+                                    ro.textContent = dispVal;
                                 }
                                 wrap.appendChild(ro);
                                 if (esFormula) {
@@ -297,13 +301,21 @@
                             }
                             return "";
                         }
-                        function setFormValueByNombreEditar(form, nombreColumna, value) {
+                        function setFormValueByNombreEditar(form, nombreColumna, value, decimalesOptional) {
                             var list = form.querySelectorAll("[data-nombre]");
                             for (var i = 0; i < list.length; i++) {
                                 if (list[i].getAttribute("data-nombre") === nombreColumna) {
                                     var str = (value != null && value !== "") ? String(value).trim() : "";
-                                    if (list[i].value !== undefined) list[i].value = str;
-                                    else list[i].textContent = str;
+                                    if (list[i].value !== undefined) {
+                                        list[i].value = str;
+                                    } else {
+                                        var formato = list[i].getAttribute("data-formato-visual");
+                                        if (formato && str !== "" && typeof window.formatNumeroVisual === "function") {
+                                            var num = parseFloat(String(str).replace(",", "."));
+                                            if (!isNaN(num)) str = window.formatNumeroVisual(num, formato, decimalesOptional != null ? decimalesOptional : 2);
+                                        }
+                                        list[i].textContent = str;
+                                    }
                                     break;
                                 }
                             }
@@ -328,12 +340,13 @@
                                     if (typeof val === "number" && !isNaN(val)) val = val.toFixed(dec);
                                     else if (val != null && val !== "") val = String(val).trim();
                                     else val = "";
-                                    setFormValueByNombreEditar(form, lookup.columnaDestino, val);
+                                    setFormValueByNombreEditar(form, lookup.columnaDestino, val, dec);
                                 }).catch(function () { setFormValueByNombreEditar(form, lookup.columnaDestino, ""); });
                             });
                             return Promise.all(promesas);
                         }
-                        function applyFormulasCostosEditar(form) {
+                        function applyFormulasCostosEditar(form, sheetConfig) {
+                            var columnas = (sheetConfig && sheetConfig.columnas) ? sheetConfig.columnas : [];
                             form.querySelectorAll("[data-formula-expresion]").forEach(function (span) {
                                 var expr = span.getAttribute("data-formula-expresion");
                                 var dec = parseInt(span.getAttribute("data-formula-decimales"), 10) || 2;
@@ -352,13 +365,16 @@
                                 var result;
                                 try { result = Function("return (" + exprEval + ");")(); } catch (err) { result = 0; }
                                 if (typeof result !== "number" || isNaN(result)) result = 0;
-                                span.textContent = result.toFixed(dec);
+                                var nombreCol = span.getAttribute("data-nombre");
+                                var col = nombreCol ? columnas.filter(function (c) { return (c.nombre || "") === nombreCol; })[0] : null;
+                                var formato = (col && col.formatoVisual) ? col.formatoVisual : null;
+                                span.textContent = (typeof window.formatNumeroVisual === "function" && formato) ? window.formatNumeroVisual(result, formato, dec) : result.toFixed(dec);
                             });
                         }
                         var initialValuesEditar = {};
                         var checkFormChangesEditar = function () {};
 
-                        applyFormulasCostosEditar(formEl);
+                        applyFormulasCostosEditar(formEl, sheetConfig);
                         applyLookupsCostosEditar(formEl, sheetConfig, appsScriptUrl);
                         formEl.querySelectorAll("input[data-nombre], select[data-nombre]").forEach(function (input) {
                             var nombre = input.getAttribute("data-nombre");
@@ -425,13 +441,15 @@
                         formEl.addEventListener("submit", function (e) {
                             e.preventDefault();
                             hideEditAlert();
-                            applyFormulasCostosEditar(formEl);
+                            applyFormulasCostosEditar(formEl, sheetConfig);
                             applyLookupsCostosEditar(formEl, sheetConfig, appsScriptUrl).then(function () {
                             var newRow = row.slice ? row.slice() : row.map(function (x) { return x; });
                             formEl.querySelectorAll("[data-header-index]").forEach(function (el) {
                                 var idx = parseInt(el.getAttribute("data-header-index"), 10);
                                 if (idx < 0) return;
                                 var val = (el.value != null ? String(el.value).trim() : (el.textContent != null ? String(el.textContent).trim() : ""));
+                                var formato = el.getAttribute("data-formato-visual");
+                                if (formato && typeof window.parseNumeroVisual === "function") val = window.parseNumeroVisual(val, formato) || val;
                                 while (newRow.length <= idx) newRow.push("");
                                 newRow[idx] = val;
                             });
