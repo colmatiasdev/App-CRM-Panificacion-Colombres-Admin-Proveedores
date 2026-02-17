@@ -1,5 +1,5 @@
 /**
- * Listado de Productos Elaborados. Usa la configuración de scr/Arquitectura/sheets/productos-elaborados-sheets.config.js
+ * Listado de Productos Elaborados. Usa la configuración de scr/Arquitectura/sheets/productos-elaborados/productos-elaborados-sheets.config.js
  * para nombre de hoja, clave primaria y columnas. Siempre solicita datos frescos a la API (cache-busting).
  */
 (function () {

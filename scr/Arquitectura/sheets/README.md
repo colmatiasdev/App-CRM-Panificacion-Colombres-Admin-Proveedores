@@ -8,14 +8,14 @@ Los archivos en esta carpeta definen las **tablas (hojas de Google Sheets)** que
 
 ## Ubicación
 
-Esta carpeta es **scr/Arquitectura/sheets/**. El módulo Productos elaborados se configura solo con **productos-elaborados-sheets.config.js**: ese archivo expone `window.PRODUCTOS_ELABORADOS_SHEETS_JSON` y se carga en listado, crear y editar. Para cambiar columnas, agrupación o visibilidad en cards, editá directamente ese `.config.js`.
+Esta carpeta es **scr/Arquitectura/sheets/**. El módulo Productos elaborados se configura solo con **productos-elaborados/productos-elaborados-sheets.config.js**: ese archivo expone `window.PRODUCTOS_ELABORADOS_SHEETS_JSON` y se carga en listado, crear y editar. Para cambiar columnas, agrupación o visibilidad en cards, editá directamente ese `.config.js`.
 
 ## Archivos
 
 | Archivo | Módulo | Hojas |
 |--------|--------|--------|
 | `costos-sheets.json` | Costos | packing, materiaPrima, combos, equivalencias |
-| `productos-elaborados-sheets.config.js` | Productos elaborados | Listado-Productos-Elaborados (incl. `listado.columnasAgrupacion`, `modosAgrupacion`, `visible`) |
+| `productos-elaborados/productos-elaborados-sheets.config.js` | Productos elaborados | Listado-Productos-Elaborados (incl. `listado.columnasAgrupacion`, `modosAgrupacion`, `visible`) |
 
 ## Esquema de cada JSON
 
@@ -65,7 +65,7 @@ Esta carpeta es **scr/Arquitectura/sheets/**. El módulo Productos elaborados se
 
 ## Columnas tipo label (solo lectura / autogeneradas)
 
-En la config de la hoja (p. ej. en `productos-elaborados-sheets.config.js`), cada columna puede tener **`"label": true`**: son columnas autogeneradas por el sistema que el usuario no debe modificar (para no perder relaciones). Ejemplos: la columna de orden (`autogeneradoOrden`), la clave primaria (ID). En **crear** no se muestran campos para esas columnas; el ID se genera con la función de Arquitectura. En **editar** se muestran en solo lectura (disabled).
+En la config de la hoja (p. ej. en `productos-elaborados/productos-elaborados-sheets.config.js`), cada columna puede tener **`"label": true`**: son columnas autogeneradas por el sistema que el usuario no debe modificar (para no perder relaciones). Ejemplos: la columna de orden (`autogeneradoOrden`), la clave primaria (ID). En **crear** no se muestran campos para esas columnas; el ID se genera con la función de Arquitectura. En **editar** se muestran en solo lectura (disabled).
 
 Para la **clave primaria** que es ID autogenerado, la hoja debe definir:
 - **`prefijoId`**: cadena fija (ej. `"PROD-ELAB"` o `"PROD-BASE"`).
@@ -82,7 +82,7 @@ La generación está en **scr/Arquitectura/generar-id.js** (`window.GENERAR_ID_P
 
 ## Listado con agrupación (Productos elaborados)
 
-En `productos-elaborados-sheets.config.js` (objeto `window.PRODUCTOS_ELABORADOS_SHEETS_JSON.hojas[0]`) la hoja puede incluir un objeto **`listado`** para el listado en pantalla:
+En `productos-elaborados/productos-elaborados-sheets.config.js` (objeto `window.PRODUCTOS_ELABORADOS_SHEETS_JSON.hojas[0]`) la hoja puede incluir un objeto **`listado`** para el listado en pantalla:
 
 - **`columnasAgrupacion`**: array de nombres de columnas por las que agrupar por defecto (ej. `["Comercio-Sucursal"]`).
 - **`modosAgrupacion`**: array de modos; cada modo es un array de columnas. Ej.: `[]` = sin agrupar, `["Comercio-Sucursal"]` = por una columna, `["Comercio-Sucursal", "Habilitado"]` = por dos. El usuario puede elegir el modo en un desplegable si hay más de un modo.
@@ -90,7 +90,7 @@ En `productos-elaborados-sheets.config.js` (objeto `window.PRODUCTOS_ELABORADOS_
 ## Uso en la app
 
 - **Costos**: usa `costos-sheets.json` como referencia; el código y el Apps Script deben mantener las mismas hojas y columnas.
-- **Productos elaborados**: usa **productos-elaborados-sheets.config.js** (objeto `window.PRODUCTOS_ELABORADOS_SHEETS_JSON`); editá ese archivo para cambiar columnas, orden, visibilidad en cards y agrupación.
+- **Productos elaborados**: usa **productos-elaborados/productos-elaborados-sheets.config.js** (objeto `window.PRODUCTOS_ELABORADOS_SHEETS_JSON`); editá ese archivo para cambiar columnas, orden, visibilidad en cards y agrupación.
 
 ## Apps Script
 

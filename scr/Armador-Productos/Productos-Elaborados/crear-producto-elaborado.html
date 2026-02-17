@@ -9,10 +9,10 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="../../costos/costos.css">
-    <script src="../../../config.js"></script>
+    <script src="../../Arquitectura/config.js"></script>
     <script src="../../Arquitectura/config-sheets.js"></script>
     <script src="../../Arquitectura/generar-id.js"></script>
-    <script src="../../Arquitectura/sheets/productos-elaborados-sheets.config.js"></script>
+    <script src="../../Arquitectura/sheets/productos-elaborados/productos-elaborados-sheets.config.js"></script>
     <script>window.PRODUCTOS_ELABORADOS_ACCION_ACTUAL = "crear";</script>
 </head>
 <body class="costos-page">
@@ -25,7 +25,7 @@
         <h1 class="costos-title">Crear producto elaborado</h1>
         <p class="costos-intro">Completá los datos del nuevo producto según la estructura de la hoja <strong>Listado-Productos-Elaborados</strong>.</p>
         <div id="edit-form-container" class="costos-datos">
-            <p id="edit-no-data" class="costos-placeholder" style="display:none;">No se pudo cargar el formulario. Revisá que exista scr/Arquitectura/sheets/productos-elaborados-sheets.config.js.</p>
+            <p id="edit-no-data" class="costos-placeholder" style="display:none;">No se pudo cargar el formulario. Revisá que exista scr/Arquitectura/sheets/productos-elaborados/productos-elaborados-sheets.config.js.</p>
             <p id="edit-loading" class="costos-placeholder">Cargando formulario…</p>
             <form id="costos-edit-form" class="costos-edit-form" style="display:none;">
                 <div id="edit-fields"></div>
@@ -36,7 +36,7 @@
             </form>
         </div>
     </main>
-    <script src="productos-elaborados-config.js"></script>
+    <script src="../../Arquitectura/sheets/productos-elaborados/productos-elaborados-config.js"></script>
     <script>if (window.PRODUCTOS_ELABORADOS_APPLY_NAV) window.PRODUCTOS_ELABORADOS_APPLY_NAV();</script>
     <script>
         (function () {
