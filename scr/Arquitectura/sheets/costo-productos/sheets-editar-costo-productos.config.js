@@ -32,7 +32,7 @@
       alias: "Categoría",
       tipoDato: "text",
       tipoComponente: "combo-basico",
-      comboListadoValores: "Tabla-Costo-Productos.Categoria",
+      comboListadoValores: "COMBO.COMBO-CATEGORIA",
       visible: true,
       obligatorio: true,
       descripcion: "Categoría.",
