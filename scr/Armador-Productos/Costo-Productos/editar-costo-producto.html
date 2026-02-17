@@ -81,6 +81,67 @@
                 if (alertEl) { alertEl.style.display = "none"; alertEl.textContent = ""; alertEl.className = "costos-alert"; }
             }
 
+            /**
+             * Carga los combos declarados como tabla.nombreColumna en comboListadoValores.
+             */
+            function ensureCombosFromColumnas(url, columnas) {
+                if (!url) return Promise.resolve();
+                var refs = {};
+                (columnas || []).forEach(function (col) {
+                    var ref = col.comboListadoValores;
+                    if (ref != null && typeof ref === "string") {
+                        var refTrim = String(ref).trim();
+                        var dot = refTrim.indexOf(".");
+                        if (dot > 0 && refTrim.substring(0, dot) !== "COMPONENTE-COMBOS") refs[refTrim] = true;
+                    }
+                });
+                var refList = Object.keys(refs);
+                if (refList.length === 0) return Promise.resolve();
+                function norm(s) { return String(s != null ? s : "").trim().toLowerCase().replace(/\s+/g, "").replace(/-/g, ""); }
+                var promesas = refList.map(function (ref) {
+                    var parts = ref.split(".");
+                    var hoja = parts[0];
+                    var columna = parts.slice(1).join(".");
+                    if (!hoja || !columna) return Promise.resolve();
+                    return fetch(url + "?action=list&sheet=" + encodeURIComponent(hoja) + "&limit=10000&_=" + Date.now(), { cache: "no-store" })
+                        .then(function (res) { return res.json(); })
+                        .then(function (json) {
+                            var headers = (json && json.data && json.data.headers) ? json.data.headers : [];
+                            var rows = (json && json.data && json.data.rows) ? json.data.rows : [];
+                            var idxCol = -1;
+                            for (var h = 0; h < headers.length; h++) {
+                                if (norm(String(headers[h] || "")) === norm(columna)) { idxCol = h; break; }
+                            }
+                            var unicos = {};
+                            if (idxCol >= 0) {
+                                for (var r = 0; r < rows.length; r++) {
+                                    var row = rows[r];
+                                    var v = Array.isArray(row) ? row[idxCol] : (row && headers[idxCol] != null ? row[headers[idxCol]] : null);
+                                    var s = (v != null && String(v).trim() !== "") ? String(v).trim() : null;
+                                    if (s != null) unicos[s] = true;
+                                }
+                            }
+                            if (!window["COMPONENTE-COMBOS"]) window["COMPONENTE-COMBOS"] = {};
+                            window["COMPONENTE-COMBOS"][ref] = Object.keys(unicos).sort();
+                        })
+                        .catch(function () {
+                            if (!window["COMPONENTE-COMBOS"]) window["COMPONENTE-COMBOS"] = {};
+                            window["COMPONENTE-COMBOS"][ref] = [];
+                        });
+                });
+                return Promise.all(promesas);
+            }
+
+            function getValoresCombo(ref) {
+                if (ref == null || typeof ref !== "string") return [];
+                var refTrim = String(ref).trim();
+                if (refTrim.indexOf("COMPONENTE-COMBOS.") === 0) {
+                    var key = refTrim.substring("COMPONENTE-COMBOS.".length);
+                    return (window["COMPONENTE-COMBOS"] && window["COMPONENTE-COMBOS"][key] && Array.isArray(window["COMPONENTE-COMBOS"][key])) ? window["COMPONENTE-COMBOS"][key] : [];
+                }
+                return (window["COMPONENTE-COMBOS"] && window["COMPONENTE-COMBOS"][refTrim] && Array.isArray(window["COMPONENTE-COMBOS"][refTrim])) ? window["COMPONENTE-COMBOS"][refTrim] : [];
+            }
+
             var raw = sessionStorage.getItem(STORAGE_EDIT);
             if (!raw) {
                 loadingEl.style.display = "none";
@@ -95,6 +156,8 @@
                     formEl.style.display = "none";
                 } else {
                     loadConfig().then(function (sheetConfig) {
+                        return ensureCombosFromColumnas(appsScriptUrl, sheetConfig.columnas).then(function () { return sheetConfig; });
+                    }).then(function (sheetConfig) {
                         var data;
                         try { data = JSON.parse(raw); } catch (e) { data = {}; }
                         var headersFromStorage = data.headers || [];
@@ -138,7 +201,13 @@
                                 ro.textContent = val || (col.descripcion || "—");
                                 wrap.appendChild(ro);
                                 inputEl = ro;
-                            } else if (tipoComp === "combo-basico" && restr.valoresPermitidos && Array.isArray(restr.valoresPermitidos)) {
+                            } else if (tipoComp === "combo-basico") {
+                                var valoresCombo = [];
+                                if (restr.valoresPermitidos && Array.isArray(restr.valoresPermitidos)) {
+                                    valoresCombo = restr.valoresPermitidos;
+                                } else if (col.comboListadoValores != null && typeof col.comboListadoValores === "string") {
+                                    valoresCombo = getValoresCombo(col.comboListadoValores);
+                                }
                                 var select = document.createElement("select");
                                 select.id = "field-" + idx;
                                 select.className = "costos-edit-input";
@@ -150,11 +219,11 @@
                                     optVacio.textContent = "—";
                                     select.appendChild(optVacio);
                                 }
-                                restr.valoresPermitidos.forEach(function (v) {
+                                valoresCombo.forEach(function (v) {
                                     var opt = document.createElement("option");
-                                    opt.value = v;
-                                    opt.textContent = v === "" ? "—" : v;
-                                    if (val === v) opt.selected = true;
+                                    opt.value = (v != null ? String(v) : "");
+                                    opt.textContent = (v != null && v !== "") ? String(v) : "—";
+                                    if (val === (v != null ? String(v) : "")) opt.selected = true;
                                     select.appendChild(opt);
                                 });
                                 if (col.obligatorio === true) select.required = true;

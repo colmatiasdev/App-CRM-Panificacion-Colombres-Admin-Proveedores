@@ -31,9 +31,12 @@
       nombre: "Categoria",
       alias: "Categoría",
       tipoDato: "text",
-      tipoComponente: "text-box",
+      tipoComponente: "combo-basico",
+      comboListadoValores: "Tabla-Costo-Productos.Categoria",
       visible: true,
-      restricciones: { maxLongitud: 200 }
+      obligatorio: true,
+      descripcion: "Categoría.",
+      restricciones: {}
     },
     {
       nombre: "Producto",

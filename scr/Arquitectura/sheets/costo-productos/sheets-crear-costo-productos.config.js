@@ -16,8 +16,9 @@
       tipoDato: "numeric",
       tipoComponente: "label",
       autogeneradorID: true,
-      visible: false,
-      descripcion: "Orden.",
+      visible: true,
+      obligatorio: true,
+      descripcion: "Orden",
       restricciones: { min: 0, entero: true }
     },
     {
@@ -25,16 +26,20 @@
       alias: "ID Costo Producto",
       tipoDato: "text",
       tipoComponente: "label",
-      visible: false,
+      visible: true,
+      obligatorio: true,
       descripcion: "ID.",
       restricciones: {}
     },
     {
       nombre: "Categoria",
       alias: "Categoría",
+      tipoDato: "text",
       tipoComponente: "combo-basico",
-      comboListadoValores: "COMPONENTE-COMBOS.Combo-Tipo-Productos",
+      comboListadoValores: "Tabla-Costo-Productos.Categoria",
       visible: true,
+      obligatorio: true,
+      descripcion: "Categoría.",
       restricciones: {}
     },
     {
