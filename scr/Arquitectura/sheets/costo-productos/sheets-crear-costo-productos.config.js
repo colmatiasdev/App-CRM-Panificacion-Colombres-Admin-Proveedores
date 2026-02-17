@@ -90,7 +90,7 @@
       decimales: 0,
       obligatorio: true,
       visible: true,
-      restricciones: { min: 0, max: 5 },
+      restricciones: { min: 0, max: 10 },
       formatoVisual: "porcentaje"
     },
     {
@@ -108,7 +108,8 @@
       nombre: "Tiempo-Packing-Minutos",
       alias: "Tiempo Packing Minutos",
       tipoDato: "numeric",
-      tipoComponente: "text-box", 
+      tipoComponente: "text-box",
+      decimales: 0,
       obligatorio: true,
       visible: true,
       restricciones: { min: 0, entero: true }

@@ -304,7 +304,11 @@
                         } else if (tipoComp === "text-box" && (tipoDato === "numeric" || col.tipo === "numeric")) {
                             var input = document.createElement("input");
                             input.type = "number";
-                            input.step = col.decimales != null ? (Math.pow(10, -col.decimales)) : "0.01";
+                            if (restr.entero === true || (col.decimales != null && col.decimales === 0)) {
+                                input.step = "1";
+                            } else {
+                                input.step = col.decimales != null ? (Math.pow(10, -col.decimales)) : "0.01";
+                            }
                             if (restr.min != null) input.min = restr.min;
                             if (restr.max != null) input.max = restr.max;
                             input.id = "field-" + idx;
@@ -380,9 +384,35 @@
                         });
                         return Promise.all(promesas);
                     }
+                    function ordenFormulasPorDependencias(formulas) {
+                        if (!formulas || typeof formulas !== "object") return [];
+                        var nombres = Object.keys(formulas);
+                        var orden = [];
+                        var restantes = nombres.slice();
+                        while (restantes.length > 0) {
+                            var agregado = false;
+                            for (var r = 0; r < restantes.length; r++) {
+                                var nom = restantes[r];
+                                var f = formulas[nom];
+                                if (!f || !Array.isArray(f.fuentes)) { orden.push(nom); restantes.splice(r, 1); agregado = true; break; }
+                                var depsCumplidas = true;
+                                for (var d = 0; d < f.fuentes.length; d++) {
+                                    if (nombres.indexOf(f.fuentes[d]) !== -1 && orden.indexOf(f.fuentes[d]) === -1) { depsCumplidas = false; break; }
+                                }
+                                if (depsCumplidas) { orden.push(nom); restantes.splice(r, 1); agregado = true; break; }
+                            }
+                            if (!agregado) break;
+                        }
+                        orden = orden.concat(restantes);
+                        return orden;
+                    }
                     function applyFormulasCostos(form, sheetConfig) {
                         var columnas = (sheetConfig && sheetConfig.columnas) ? sheetConfig.columnas : [];
-                        form.querySelectorAll("[data-formula-expresion]").forEach(function (span) {
+                        var formulas = (sheetConfig && sheetConfig.formulas) ? sheetConfig.formulas : {};
+                        var orden = ordenFormulasPorDependencias(formulas);
+                        orden.forEach(function (nombreCol) {
+                            var span = form.querySelector("[data-nombre=" + JSON.stringify(nombreCol) + "][data-formula-expresion]");
+                            if (!span) return;
                             var expr = span.getAttribute("data-formula-expresion");
                             var dec = parseInt(span.getAttribute("data-formula-decimales"), 10) || 2;
                             var fuentesJson = span.getAttribute("data-formula-fuentes");
@@ -394,14 +424,22 @@
                             for (var i = 0; i < fuentes.length; i++) {
                                 var letter = String.fromCharCode(97 + i);
                                 var val = getFormValueByNombre(form, fuentes[i]);
-                                var num = parseFloat(String(val).replace(",", ".")) || 0;
+                                var colFuente = columnas.filter(function (c) { return (c.nombre || "") === fuentes[i]; })[0] || null;
+                                var num;
+                                if (colFuente && colFuente.formatoVisual && typeof window.parseNumeroVisual === "function") {
+                                    var raw = window.parseNumeroVisual(val, colFuente.formatoVisual);
+                                    num = parseFloat(raw) || 0;
+                                } else {
+                                    num = parseFloat(String(val).replace(",", ".")) || 0;
+                                }
+                                num = Math.round(num * 100) / 100;
                                 exprEval = exprEval.replace(new RegExp("\\b" + letter + "\\b", "g"), String(num));
                             }
                             var result;
                             try { result = Function("return (" + exprEval + ");")(); } catch (err) { result = 0; }
                             if (typeof result !== "number" || isNaN(result)) result = 0;
-                            var nombreCol = span.getAttribute("data-nombre");
-                            var col = nombreCol ? columnas.filter(function (c) { return (c.nombre || "") === nombreCol; })[0] : null;
+                            result = Math.round(result * 100) / 100;
+                            var col = columnas.filter(function (c) { return (c.nombre || "") === nombreCol; })[0] || null;
                             var formato = (col && col.formatoVisual) ? col.formatoVisual : null;
                             span.textContent = (typeof window.formatNumeroVisual === "function" && formato) ? window.formatNumeroVisual(result, formato, dec) : result.toFixed(dec);
                         });
@@ -437,12 +475,13 @@
                             }
                         }
                         if (esClaveLookup) {
-                            input.addEventListener("input", function () { applyLookupsCostos(formEl, sheetConfig, appsScriptUrl).then(checkFormChangesCrear); });
-                            input.addEventListener("change", function () { applyLookupsCostos(formEl, sheetConfig, appsScriptUrl).then(checkFormChangesCrear); });
+                            input.addEventListener("input", function () { applyLookupsCostos(formEl, sheetConfig, appsScriptUrl).then(function () { applyFormulasCostos(formEl, sheetConfig); checkFormChangesCrear(); }); });
+                            input.addEventListener("change", function () { applyLookupsCostos(formEl, sheetConfig, appsScriptUrl).then(function () { applyFormulasCostos(formEl, sheetConfig); checkFormChangesCrear(); }); });
                         }
                     });
 
                     applyLookupsCostos(formEl, sheetConfig, appsScriptUrl).then(function () {
+                        applyFormulasCostos(formEl, sheetConfig);
                         var saveBtn = formEl.querySelector(".costos-edit-btn-save");
                         (sheetConfig.valorAnterior || []).forEach(function (r) {
                             var v = getFormValueByNombre(formEl, r.columnaOrigen);

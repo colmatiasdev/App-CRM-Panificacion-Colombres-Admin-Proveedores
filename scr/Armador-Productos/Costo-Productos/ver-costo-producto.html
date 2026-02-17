@@ -62,6 +62,64 @@
                 return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
             }
 
+            function ordenFormulasPorDependenciasVer(formulas) {
+                if (!formulas || typeof formulas !== "object") return [];
+                var nombres = Object.keys(formulas);
+                var orden = [];
+                var restantes = nombres.slice();
+                while (restantes.length > 0) {
+                    var agregado = false;
+                    for (var r = 0; r < restantes.length; r++) {
+                        var nom = restantes[r];
+                        var f = formulas[nom];
+                        if (!f || !Array.isArray(f.fuentes)) { orden.push(nom); restantes.splice(r, 1); agregado = true; break; }
+                        var depsCumplidas = true;
+                        for (var d = 0; d < f.fuentes.length; d++) {
+                            if (nombres.indexOf(f.fuentes[d]) !== -1 && orden.indexOf(f.fuentes[d]) === -1) { depsCumplidas = false; break; }
+                        }
+                        if (depsCumplidas) { orden.push(nom); restantes.splice(r, 1); agregado = true; break; }
+                    }
+                    if (!agregado) break;
+                }
+                return orden.concat(restantes);
+            }
+
+            function computarFormulasVer(row, columnas, formulas) {
+                var computed = {};
+                if (!formulas || !columnas.length) return computed;
+                var idxPorNombre = {};
+                columnas.forEach(function (c, i) { idxPorNombre[c.nombre] = i; });
+                function valorNumerico(nombreCol) {
+                    var idx = idxPorNombre[nombreCol];
+                    if (idx == null || idx < 0) return 0;
+                    var val = row[idx] != null ? String(row[idx]).trim() : "";
+                    if (val === "") return 0;
+                    var col = columnas[idx];
+                    if (col && col.formatoVisual && typeof window.parseNumeroVisual === "function" && (val.indexOf("$") !== -1 || val.indexOf("%") !== -1)) {
+                        var raw = window.parseNumeroVisual(val, col.formatoVisual);
+                        return Math.round((parseFloat(raw) || 0) * 100) / 100;
+                    }
+                    return Math.round((parseFloat(String(val).replace(",", ".")) || 0) * 100) / 100;
+                }
+                var orden = ordenFormulasPorDependenciasVer(formulas);
+                orden.forEach(function (nombreCol) {
+                    var f = formulas[nombreCol];
+                    if (!f || !f.expresion || !Array.isArray(f.fuentes)) return;
+                    var exprEval = f.expresion;
+                    for (var i = 0; i < f.fuentes.length; i++) {
+                        var letter = String.fromCharCode(97 + i);
+                        var num = computed[f.fuentes[i]] !== undefined ? computed[f.fuentes[i]] : valorNumerico(f.fuentes[i]);
+                        num = Math.round(num * 100) / 100;
+                        exprEval = exprEval.replace(new RegExp("\\b" + letter + "\\b", "g"), String(num));
+                    }
+                    var result;
+                    try { result = Function("return (" + exprEval + ");")(); } catch (err) { result = 0; }
+                    result = (typeof result === "number" && !isNaN(result)) ? result : 0;
+                    computed[nombreCol] = Math.round(result * 100) / 100;
+                });
+                return computed;
+            }
+
             var noDataEl = document.getElementById("ver-no-data");
             var loadingEl = document.getElementById("ver-loading");
             var detalleEl = document.getElementById("ver-detalle");
@@ -128,6 +186,8 @@
                 if (row.length !== (columnas.map(function (c) { return c.nombre; })).length) {
                     row = headers.map(function (_, i) { return rowFromStorage[i] != null ? String(rowFromStorage[i]) : ""; });
                 }
+                var formulas = (window.COSTO_PRODUCTOS_SHEET_BASE && window.COSTO_PRODUCTOS_SHEET_BASE.hoja && window.COSTO_PRODUCTOS_SHEET_BASE.hoja.formulas) || {};
+                var computed = computarFormulasVer(row, columnas, formulas);
                 loadingEl.style.display = "none";
                 noDataEl.style.display = "none";
                 detalleEl.style.display = "block";
@@ -137,10 +197,16 @@
                     var nombre = (col.alias != null ? col.alias : col.nombre || "").trim();
                     if (!nombre) return;
                     if (col.visible === false) return;
-                    var val = row[idx] != null ? String(row[idx]).trim() : "—";
-                    if ((col.tipoDato === "numeric" || col.tipo === "numeric") && col.formatoVisual && val !== "—" && typeof window.formatNumeroVisual === "function") {
-                        var num = parseFloat(String(val).replace(",", "."));
-                        if (!isNaN(num)) val = window.formatNumeroVisual(num, col.formatoVisual, col.decimales != null ? col.decimales : 2);
+                    var val;
+                    if (computed[col.nombre] !== undefined) {
+                        var dec = (formulas[col.nombre] && formulas[col.nombre].decimales != null) ? formulas[col.nombre].decimales : (col.decimales != null ? col.decimales : 2);
+                        val = (typeof window.formatNumeroVisual === "function" && col.formatoVisual) ? window.formatNumeroVisual(computed[col.nombre], col.formatoVisual, dec) : String(computed[col.nombre]);
+                    } else {
+                        val = row[idx] != null ? String(row[idx]).trim() : "—";
+                        if ((col.tipoDato === "numeric" || col.tipo === "numeric") && col.formatoVisual && val !== "—" && typeof window.formatNumeroVisual === "function") {
+                            var num = parseFloat(String(val).replace(",", "."));
+                            if (!isNaN(num)) val = window.formatNumeroVisual(num, col.formatoVisual, col.decimales != null ? col.decimales : 2);
+                        }
                     }
                     html += "<dt class=\"costos-ver-dt\">" + escapeHtml(nombre) + "</dt>";
                     html += "<dd class=\"costos-ver-dd\">" + escapeHtml(val) + "</dd>";
