@@ -15,13 +15,25 @@ HTML5, CSS3, JavaScript (vanilla). Sin dependencias de build.
 
 ## Cómo ejecutar
 
-Servir los archivos por HTTP, por ejemplo:
+La app usa rutas con `/scr/` en el path (igual que en [GitHub Pages](https://colmatiasdev.github.io/App-CRM-Panificacion-Colombres-Admin-Proveedores/)). **Hay que levantar el servidor desde la raíz del proyecto** (la carpeta que contiene `scr`, `index.html`, etc.), no desde dentro de `scr`.
+
+Desde la **raíz del proyecto**:
 
 ```bash
-npx serve -l 3000
+# Opción 1: Python
+python -m http.server 8081
+
+# Opción 2: npx serve
+npx serve -l 8081
 ```
 
-Abrir `http://localhost:3000`.
+Luego abrir en el navegador, por ejemplo:
+
+- Portada: `http://localhost:8081/index.html`
+- Costos Materia prima: `http://localhost:8081/scr/costos/Materia-Prima/materia-prima.html`
+- Packing: `http://localhost:8081/scr/costos/Packing/packing.html`
+
+Si levantás el servidor desde otra carpeta (por ejemplo desde `scr`), las URLs con `/scr/` darán 404.
 
 ## Estructura
 

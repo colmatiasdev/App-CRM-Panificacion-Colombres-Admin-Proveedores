@@ -20,13 +20,14 @@
     <nav class="costos-nav" aria-label="Navegación principal">
         <a href="../../../index.html" class="costos-nav-link">Inicio</a>
         <a href="../armador-productos.html" class="costos-nav-link">Armador de Productos</a>
-        <a href="../Productos-Elaborados/productos-elaborados.html" class="costos-nav-link">Productos elaborados</a>
+        <a href="../Productos-Elaborados/productos-elaborados.html" class="costos-nav-link">Lista de Productos Elaborados</a>
         <a href="costo-productos.html" class="costos-nav-link" data-accion="listar">Costo productos</a>
     </nav>
     <main class="costos-main">
         <h1 class="costos-title">Crear costo producto</h1>
         <p class="costos-intro">Completá los datos según la estructura de la hoja <strong>Tabla-Costo-Productos</strong>.</p>
         <div id="edit-form-container" class="costos-datos">
+            <div id="costos-edit-alert" class="costos-alert" role="alert" aria-live="polite" style="display:none;"></div>
             <p id="edit-no-data" class="costos-placeholder" style="display:none;">No se pudo cargar el formulario. Revisá que existan costo-productos-sheets-base.js y sheets-crear-costo-productos.config.js.</p>
             <p id="edit-loading" class="costos-placeholder">Cargando formulario…</p>
             <form id="costos-edit-form" class="costos-edit-form" style="display:none;">
@@ -62,6 +63,119 @@
             var loadingEl = document.getElementById("edit-loading");
             var formEl = document.getElementById("costos-edit-form");
             var fieldsContainer = document.getElementById("edit-fields");
+            var alertEl = document.getElementById("costos-edit-alert");
+
+            function showEditAlert(message, type) {
+                if (!alertEl) return;
+                alertEl.textContent = message || "";
+                alertEl.className = "costos-alert costos-alert--" + (type === "success" ? "success" : "error");
+                alertEl.style.display = message ? "block" : "none";
+            }
+            function hideEditAlert() {
+                if (alertEl) { alertEl.style.display = "none"; alertEl.textContent = ""; alertEl.className = "costos-alert"; }
+            }
+
+            /**
+             * Precalcula el siguiente valor para la columna con autogeneradorID (columnaOrden).
+             */
+            function ensureOrdenPreview(sheetConfig, url) {
+                var nombreHoja = sheetConfig && sheetConfig.nombreHoja;
+                if (!url || !nombreHoja) return Promise.resolve();
+                if (sheetConfig._ordenPreview != null) return Promise.resolve();
+                return fetch(url + "?action=list&sheet=" + encodeURIComponent(nombreHoja) + "&limit=10000&_=" + Date.now(), { cache: "no-store" })
+                    .then(function (res) { return res.json(); })
+                    .then(function (json) {
+                        var headers = (json && json.data && json.data.headers) ? json.data.headers : [];
+                        var rows = (json && json.data && json.data.rows) ? json.data.rows : [];
+                        var colOrden = (sheetConfig.columnaOrden && String(sheetConfig.columnaOrden).trim()) || "";
+                        if (colOrden) {
+                            var idxColOrden = -1;
+                            for (var i = 0; i < headers.length; i++) {
+                                if (norm(String(headers[i] || "")) === norm(colOrden)) { idxColOrden = i; break; }
+                            }
+                            var maxVal = 0;
+                            if (idxColOrden >= 0) {
+                                for (var j = 0; j < rows.length; j++) {
+                                    var r = rows[j];
+                                    var val = Array.isArray(r) ? r[idxColOrden] : (r && headers[idxColOrden] != null ? r[headers[idxColOrden]] : null);
+                                    var num = (val != null && val !== "") ? parseFloat(String(val), 10) : NaN;
+                                    if (!isNaN(num) && num > maxVal) maxVal = num;
+                                }
+                            }
+                            sheetConfig._ordenPreview = String(maxVal + 1);
+                        } else {
+                            sheetConfig._ordenPreview = "1";
+                        }
+                    })
+                    .catch(function () {
+                        if (sheetConfig) sheetConfig._ordenPreview = "1";
+                    });
+            }
+
+            /**
+             * Carga los combos declarados como tabla.nombreColumna en comboListadoValores.
+             * Obtiene la hoja por API y guarda en window["COMPONENTE-COMBOS"][ref] los valores únicos de la columna.
+             */
+            function ensureCombosFromColumnas(url, columnas) {
+                if (!url) return Promise.resolve();
+                var refs = {};
+                (columnas || []).forEach(function (col) {
+                    var ref = col.comboListadoValores;
+                    if (ref != null && typeof ref === "string") {
+                        var refTrim = String(ref).trim();
+                        var dot = refTrim.indexOf(".");
+                        if (dot > 0) {
+                            var parte1 = refTrim.substring(0, dot);
+                            if (parte1 !== "COMPONENTE-COMBOS") refs[refTrim] = true;
+                        }
+                    }
+                });
+                var refList = Object.keys(refs);
+                if (refList.length === 0) return Promise.resolve();
+                var promesas = refList.map(function (ref) {
+                    var parts = ref.split(".");
+                    var hoja = parts[0];
+                    var columna = parts.slice(1).join(".");
+                    if (!hoja || !columna) return Promise.resolve();
+                    return fetch(url + "?action=list&sheet=" + encodeURIComponent(hoja) + "&limit=10000&_=" + Date.now(), { cache: "no-store" })
+                        .then(function (res) { return res.json(); })
+                        .then(function (json) {
+                            var headers = (json && json.data && json.data.headers) ? json.data.headers : [];
+                            var rows = (json && json.data && json.data.rows) ? json.data.rows : [];
+                            var idxCol = -1;
+                            for (var h = 0; h < headers.length; h++) {
+                                if (norm(String(headers[h] || "")) === norm(columna)) { idxCol = h; break; }
+                            }
+                            var unicos = {};
+                            if (idxCol >= 0) {
+                                for (var r = 0; r < rows.length; r++) {
+                                    var row = rows[r];
+                                    var v = Array.isArray(row) ? row[idxCol] : (row && headers[idxCol] != null ? row[headers[idxCol]] : null);
+                                    var s = (v != null && String(v).trim() !== "") ? String(v).trim() : null;
+                                    if (s != null) unicos[s] = true;
+                                }
+                            }
+                            if (!window["COMPONENTE-COMBOS"]) window["COMPONENTE-COMBOS"] = {};
+                            window["COMPONENTE-COMBOS"][ref] = Object.keys(unicos).sort();
+                        })
+                        .catch(function () {
+                            if (!window["COMPONENTE-COMBOS"]) window["COMPONENTE-COMBOS"] = {};
+                            window["COMPONENTE-COMBOS"][ref] = [];
+                        });
+                });
+                return Promise.all(promesas);
+            }
+
+            /** Resuelve comboListadoValores a array de opciones: COMPONENTE-COMBOS.X o tabla.columna. */
+            function getValoresCombo(ref) {
+                if (ref == null || typeof ref !== "string") return [];
+                var refTrim = String(ref).trim();
+                if (refTrim.indexOf("COMPONENTE-COMBOS.") === 0) {
+                    var key = refTrim.substring("COMPONENTE-COMBOS.".length);
+                    return (window["COMPONENTE-COMBOS"] && window["COMPONENTE-COMBOS"][key] && Array.isArray(window["COMPONENTE-COMBOS"][key])) ? window["COMPONENTE-COMBOS"][key] : [];
+                }
+                return (window["COMPONENTE-COMBOS"] && window["COMPONENTE-COMBOS"][refTrim] && Array.isArray(window["COMPONENTE-COMBOS"][refTrim])) ? window["COMPONENTE-COMBOS"][refTrim] : [];
+            }
 
             if (!appsScriptUrl) {
                 loadingEl.style.display = "none";
@@ -76,6 +190,11 @@
                     return;
                 }
                 loadConfig().then(function (sheetConfig) {
+                    return Promise.all([
+                        ensureOrdenPreview(sheetConfig, appsScriptUrl),
+                        ensureCombosFromColumnas(appsScriptUrl, sheetConfig.columnas)
+                    ]).then(function () { return sheetConfig; });
+                }).then(function (sheetConfig) {
                     var nombreHoja = sheetConfig.nombreHoja;
                     var clavePrimaria = sheetConfig.clavePrimaria || [];
                     var columnas = sheetConfig.columnas || [];
@@ -83,12 +202,14 @@
                     formEl.style.display = "block";
                     fieldsContainer.innerHTML = "";
                     var headers = columnas.map(function (c) { return c.nombre; });
+                    var idGeneradoPreview = (window.GENERAR_ID_PARA_HOJA && sheetConfig.clavePrimaria && sheetConfig.clavePrimaria[0]) ? window.GENERAR_ID_PARA_HOJA(sheetConfig) : "";
                     columnas.forEach(function (col, idx) {
                         var nombre = (col.alias != null ? col.alias : col.nombre || "").trim();
                         if (!nombre) return;
-                        if (col.label === true) return;
-                        if (isClavePrimaria(col.nombre, clavePrimaria)) return;
+                        if (col.visible === false) return;
                         var restr = col.restricciones || {};
+                        var tipoComp = col.tipoComponente != null ? col.tipoComponente : col.tipo;
+                        var tipoDato = col.tipoDato != null ? col.tipoDato : col.tipo;
                         var label = document.createElement("label");
                         label.className = "costos-edit-label";
                         label.setAttribute("for", "field-" + idx);
@@ -96,29 +217,64 @@
                         var wrap = document.createElement("div");
                         wrap.className = "costos-edit-field";
                         wrap.appendChild(label);
-                        if (restr.valoresPermitidos && Array.isArray(restr.valoresPermitidos)) {
+                        if (tipoComp === "label") {
+                            var valorMostrar = "";
+                            if (isClavePrimaria(col.nombre, clavePrimaria) && idGeneradoPreview) {
+                                valorMostrar = idGeneradoPreview;
+                            } else if (col.autogeneradorID === true && sheetConfig.columnaOrden && String(col.nombre || "").trim() === String(sheetConfig.columnaOrden).trim() && sheetConfig._ordenPreview != null) {
+                                valorMostrar = sheetConfig._ordenPreview;
+                            }
+                            var ro = document.createElement("span");
+                            ro.id = "field-" + idx;
+                            ro.className = "costos-edit-input costos-edit-readonly";
+                            ro.setAttribute("data-header-index", String(idx));
+                            ro.setAttribute("data-nombre", col.nombre);
+                            ro.setAttribute("aria-readonly", "true");
+                            ro.textContent = valorMostrar || (col.descripcion || "Solo lectura");
+                            wrap.appendChild(ro);
+                        } else if (tipoComp === "combo-basico") {
+                            var valoresCombo = [];
+                            if (restr.valoresPermitidos && Array.isArray(restr.valoresPermitidos)) {
+                                valoresCombo = restr.valoresPermitidos;
+                            } else {
+                                var ref = col.comboListadoValores;
+                                if (Array.isArray(ref)) {
+                                    valoresCombo = ref;
+                                } else if (ref != null && typeof ref === "string") {
+                                    valoresCombo = getValoresCombo(ref);
+                                }
+                            }
                             var select = document.createElement("select");
                             select.id = "field-" + idx;
                             select.className = "costos-edit-input";
                             select.setAttribute("data-header-index", String(idx));
                             select.setAttribute("data-nombre", col.nombre);
-                            restr.valoresPermitidos.forEach(function (v) {
+                            if (col.obligatorio !== true) {
+                                var optVacio = document.createElement("option");
+                                optVacio.value = "";
+                                optVacio.textContent = "—";
+                                select.appendChild(optVacio);
+                            }
+                            valoresCombo.forEach(function (v) {
                                 var opt = document.createElement("option");
-                                opt.value = v;
-                                opt.textContent = v === "" ? "—" : v;
+                                opt.value = (v != null ? String(v) : "");
+                                opt.textContent = (v != null && v !== "") ? String(v) : "—";
                                 select.appendChild(opt);
                             });
+                            if (col.obligatorio === true) select.required = true;
                             wrap.appendChild(select);
-                        } else if (col.tipo === "numeric") {
+                        } else if (tipoComp === "text-box" && (tipoDato === "numeric" || col.tipo === "numeric")) {
                             var input = document.createElement("input");
                             input.type = "number";
                             input.step = col.decimales != null ? (Math.pow(10, -col.decimales)) : "0.01";
                             if (restr.min != null) input.min = restr.min;
+                            if (restr.max != null) input.max = restr.max;
                             input.id = "field-" + idx;
                             input.className = "costos-edit-input";
                             input.setAttribute("data-header-index", String(idx));
                             input.setAttribute("data-nombre", col.nombre);
                             input.placeholder = col.decimales ? "0.00" : "0";
+                            if (col.obligatorio === true) input.required = true;
                             wrap.appendChild(input);
                         } else {
                             var input = document.createElement("input");
@@ -128,6 +284,7 @@
                             input.setAttribute("data-header-index", String(idx));
                             input.setAttribute("data-nombre", col.nombre);
                             if (restr.maxLongitud) input.maxLength = restr.maxLongitud;
+                            if (col.obligatorio === true) input.required = true;
                             wrap.appendChild(input);
                         }
                         fieldsContainer.appendChild(wrap);
@@ -135,6 +292,7 @@
 
                     formEl.addEventListener("submit", function (e) {
                         e.preventDefault();
+                        hideEditAlert();
                         var newRow = headers.map(function () { return ""; });
                         formEl.querySelectorAll("[data-header-index]").forEach(function (el) {
                             var idx = parseInt(el.getAttribute("data-header-index"), 10);
@@ -147,21 +305,48 @@
                                 newRow[idColIdx] = window.GENERAR_ID_PARA_HOJA(sheetConfig);
                             }
                         }
-                        var body = { action: "create", sheet: nombreHoja };
-                        for (var k = 0; k < headers.length; k++) {
-                            if (headers[k]) body[headers[k]] = newRow[k] != null ? newRow[k] : "";
-                        }
-                        var formBody = new URLSearchParams();
-                        for (var key in body) {
-                            if (body.hasOwnProperty(key)) formBody.append(key, body[key] != null ? body[key] : "");
-                        }
                         var saveBtn = formEl.querySelector(".costos-edit-btn-save");
                         var btnText = saveBtn ? saveBtn.innerHTML : "";
                         if (saveBtn) {
                             saveBtn.disabled = true;
                             saveBtn.innerHTML = "<i class=\"fa-solid fa-spinner fa-spin\" aria-hidden=\"true\"></i> Guardando…";
                         }
-                        fetch(appsScriptUrl, { method: "POST", body: formBody })
+                        if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.show("Guardando…");
+                        var columnaAutogen = sheetConfig.columnaOrden || null;
+                        var colIdxAutogen = columnaAutogen ? headers.indexOf(columnaAutogen) : -1;
+                        var promesaNewRow = (columnaAutogen && colIdxAutogen >= 0) ? fetch(appsScriptUrl + "?action=list&sheet=" + encodeURIComponent(nombreHoja) + "&limit=10000&_=" + Date.now(), { cache: "no-store" })
+                            .then(function (res) { return res.json(); })
+                            .then(function (json) {
+                                var listHeaders = (json && json.data && json.data.headers) ? json.data.headers : [];
+                                var listRows = (json && json.data && json.data.rows) ? json.data.rows : [];
+                                var idxCol = -1;
+                                for (var h = 0; h < listHeaders.length; h++) {
+                                    if (String(listHeaders[h] || "").trim() === String(columnaAutogen).trim()) { idxCol = h; break; }
+                                }
+                                var maxVal = 0;
+                                if (idxCol >= 0) {
+                                    for (var r = 0; r < listRows.length; r++) {
+                                        var row = listRows[r];
+                                        var v = Array.isArray(row) ? row[idxCol] : (row && listHeaders[idxCol] != null ? row[listHeaders[idxCol]] : null);
+                                        var num = (v != null && v !== "") ? parseFloat(String(v), 10) : NaN;
+                                        if (!isNaN(num) && num > maxVal) maxVal = num;
+                                    }
+                                }
+                                newRow[colIdxAutogen] = String(maxVal + 1);
+                                return newRow;
+                            })
+                            .catch(function () { return newRow; }) : Promise.resolve(newRow);
+                        promesaNewRow.then(function (rowFinal) {
+                            var body = { action: "create", sheet: nombreHoja };
+                            for (var k = 0; k < headers.length; k++) {
+                                if (headers[k]) body[headers[k]] = rowFinal[k] != null ? rowFinal[k] : "";
+                            }
+                            var formBody = new URLSearchParams();
+                            for (var key in body) {
+                                if (body.hasOwnProperty(key)) formBody.append(key, body[key] != null ? body[key] : "");
+                            }
+                            return fetch(appsScriptUrl, { method: "POST", body: formBody });
+                        })
                             .then(function (res) { return res.text(); })
                             .then(function (text) {
                                 var json;
@@ -176,15 +361,17 @@
                             .then(function (json) {
                                 if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = btnText; }
                                 if (json && json.success) {
-                                    alert("Registro creado correctamente.");
                                     window.location.replace("costo-productos.html");
                                 } else {
-                                    alert("Error al guardar: " + (json && json.error ? json.error : "Respuesta inválida"));
+                                    showEditAlert("Error al guardar: " + (json && json.error ? json.error : "Respuesta inválida"), "error");
                                 }
                             })
                             .catch(function (err) {
                                 if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = btnText; }
-                                alert("Error de conexión: " + (err.message || "Revisá appsScriptUrl."));
+                                showEditAlert("Error de conexión: " + (err.message || "Revisá appsScriptUrl."), "error");
+                            })
+                            .finally(function () {
+                                if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.hide();
                             });
                     });
                 }).catch(function (err) {

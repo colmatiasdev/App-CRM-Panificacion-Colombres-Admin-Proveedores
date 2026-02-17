@@ -1,21 +1,55 @@
 /**
  * Configuración del módulo Costo Productos (Tabla-Costo-Productos).
  * Lee la config desde window.COSTO_PRODUCTOS_SHEETS_JSON. Cada página carga primero
- * costo-productos-sheets-base.js y luego su script de acción (sheets-listar/crear/editar/ver-costo-productos.config.js).
+ * costo-productos-sheets-base.js (datos fijos: modulo, hoja, clavePrimaria, prefijoId, indices)
+ * y luego su script de acción (sheets-listar/crear/editar/ver-costo-productos.config.js), que solo define columnas.
  * Define las acciones (Listar, Crear, Editar, Ver) y la página HTML de cada una.
  */
 (function () {
     var CACHE_MAX_AGE_MS = 5 * 60 * 1000;
 
+    /**
+     * Acciones del módulo: cada una referencia su HTML y tipo de componente.
+     * visible: si la acción se muestra en la navegación/UI cuando corresponde.
+     * componente: "listado" | "formulario" | "detalle" para saber qué tipo de vista mostrar.
+     */
     var ACCIONES = {
-        listar: { id: "listar", url: "costo-productos.html", label: "Listar", visible: true, componente: "listado" },
-        crear: { id: "crear", url: "crear-costo-producto.html", label: "Crear", visible: true, componente: "formulario" },
-        editar: { id: "editar", url: "editar-costo-producto.html", label: "Editar", visible: true, componente: "formulario" },
-        ver: { id: "ver", url: "ver-costo-producto.html", label: "Ver", visible: true, componente: "detalle" }
+        listar: {
+            id: "listar",
+            url: "costo-productos.html",
+            label: "Listar",
+            visible: true,
+            componente: "listado"
+        },
+        crear: {
+            id: "crear",
+            url: "crear-costo-producto.html",
+            label: "Crear",
+            visible: true,
+            componente: "formulario"
+        },
+        editar: {
+            id: "editar",
+            url: "editar-costo-producto.html",
+            label: "Editar",
+            visible: true,
+            componente: "formulario"
+        },
+        ver: {
+            id: "ver",
+            url: "ver-costo-producto.html",
+            label: "Ver",
+            visible: true,
+            componente: "detalle"
+        }
     };
 
     window.COSTO_PRODUCTOS_ACCIONES = ACCIONES;
 
+    /**
+     * Devuelve la acción actual según lo que haya definido la página (window.COSTO_PRODUCTOS_ACCION_ACTUAL).
+     * Cada HTML debe setear esa variable para que el nav marque el ítem activo.
+     */
     function getAccionActual() {
         var id = (window.COSTO_PRODUCTOS_ACCION_ACTUAL || "").toLowerCase();
         return ACCIONES[id] || ACCIONES.listar;
@@ -23,6 +57,10 @@
 
     window.COSTO_PRODUCTOS_GET_ACCION_ACTUAL = getAccionActual;
 
+    /**
+     * Aplica el estado activo al nav según la acción actual.
+     * El enlace "Costo productos" (data-accion="listar") queda activo en toda la sección (listar, crear, editar, ver).
+     */
     function applyNavAccion() {
         var accion = getAccionActual();
         document.querySelectorAll(".costos-nav-link[data-accion]").forEach(function (a) {
@@ -54,22 +92,26 @@
         var clavePrimaria = Array.isArray(hoja.clavePrimaria) ? hoja.clavePrimaria : (hoja.idColumn ? [hoja.idColumn] : ["IDCosto-Producto"]);
         var columnas = hoja.columnas || [];
         var listado = hoja.listado || {};
-        var columnaOrdenLista = null;
-        for (var c = 0; c < columnas.length; c++) {
-            if (columnas[c].autogeneradoOrden === true) {
-                columnaOrdenLista = String(columnas[c].nombre || "").trim();
-                break;
+        var columnaOrden = (hoja.columnaOrden && String(hoja.columnaOrden).trim()) || null;
+        if (!columnaOrden) {
+            for (var c = 0; c < columnas.length; c++) {
+                if (columnas[c].autogeneradorID === true) {
+                    columnaOrden = String(columnas[c].nombre || "").trim();
+                    break;
+                }
             }
         }
         var config = {
             nombreHoja: nombreHoja,
             clavePrimaria: clavePrimaria,
             columnas: columnas,
+            columnasPropias: Array.isArray(hoja.columnasPropias) ? hoja.columnasPropias : [],
             columnasPorNombre: {},
             indicesExtras: hoja.indices || [],
             columnasAgrupacion: Array.isArray(listado.columnasAgrupacion) ? listado.columnasAgrupacion : (listado.columnasAgrupacion ? [listado.columnasAgrupacion] : []),
             modosAgrupacion: Array.isArray(listado.modosAgrupacion) ? listado.modosAgrupacion : [],
-            columnaOrdenLista: columnaOrdenLista || null,
+            columnaFiltroValores: (listado.columnaFiltroValores && String(listado.columnaFiltroValores).trim()) || null,
+            columnaOrden: columnaOrden,
             prefijoId: hoja.prefijoId != null ? hoja.prefijoId : null,
             patronId: hoja.patronId != null ? hoja.patronId : 1,
             longitudAlfanum: hoja.longitudAlfanum != null ? hoja.longitudAlfanum : 15,
@@ -84,6 +126,11 @@
         return config;
     }
 
+    /**
+     * Carga la configuración desde window.COSTO_PRODUCTOS_SHEETS_JSON
+     * (script *-sheets.config.js de la acción correspondiente). Editá el config de cada acción para cambiar la config.
+     * @returns {Promise<{ nombreHoja: string, clavePrimaria: string[], columnas: Array }>}
+     */
     function loadConfig() {
         var cached = window._costoProductosConfigCache;
         if (cached && cached.timestamp && (Date.now() - cached.timestamp < CACHE_MAX_AGE_MS)) {

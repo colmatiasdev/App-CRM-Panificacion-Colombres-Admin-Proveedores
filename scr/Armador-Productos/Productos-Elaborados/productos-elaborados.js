@@ -4,6 +4,7 @@
  */
 (function () {
     var STORAGE_EDIT = "costosEditRecordProductosElaborados";
+    var STORAGE_FILTRO = "productosElaboradosFiltroValor";
     var ACCIONES = window.PRODUCTOS_ELABORADOS_ACCIONES || {};
     var LISTAR_URL = (ACCIONES.listar && ACCIONES.listar.url) ? ACCIONES.listar.url : "productos-elaborados.html";
     var CREAR_URL = (ACCIONES.crear && ACCIONES.crear.url) ? ACCIONES.crear.url : "crear-producto-elaborado.html";
@@ -99,10 +100,10 @@
         return { headers: headers, rows: rows };
     }
 
-    /** Ordena las filas por la columna de orden (autogeneradoOrden). Si no hay columna o está vacía, deja el orden intacto. */
-    function sortRowsByOrden(rows, headers, columnaOrdenLista) {
-        if (!columnaOrdenLista || !rows.length) return rows;
-        var ordenIdx = findColumnIndex(headers, [norm(columnaOrdenLista)]);
+    /** Ordena las filas por la columna de orden (autogeneradorID). Si no hay columna o está vacía, deja el orden intacto. */
+    function sortRowsByOrden(rows, headers, columnaOrden) {
+        if (!columnaOrden || !rows.length) return rows;
+        var ordenIdx = findColumnIndex(headers, [norm(columnaOrden)]);
         if (ordenIdx < 0) return rows;
         var sorted = rows.slice();
         sorted.sort(function (a, b) {
@@ -117,7 +118,7 @@
         return sorted;
     }
 
-    function renderList(container, sheetConfig, headers, rows, filterText, modoAgrupacionColumnas) {
+    function renderList(container, sheetConfig, headers, rows, filterText, modoAgrupacionColumnas, valorFiltroColumna, indiceColumnaFiltro) {
         if (!container) return;
         var columnas = sheetConfig.columnas || [];
         var clavePrimaria = sheetConfig.clavePrimaria || ["IDProducto"];
@@ -130,9 +131,16 @@
         var filter = (filterText || "").trim().toLowerCase();
         var visible = rows;
         if (filter) {
-            visible = rows.filter(function (row) {
+            visible = visible.filter(function (row) {
                 var concat = row.map(function (c) { return String(c != null ? c : ""); }).join(" ").toLowerCase();
                 return concat.indexOf(filter) !== -1;
+            });
+        }
+        if (valorFiltroColumna != null && String(valorFiltroColumna).trim() !== "" && indiceColumnaFiltro >= 0) {
+            var valorBuscar = String(valorFiltroColumna).trim();
+            visible = visible.filter(function (row) {
+                var v = row[indiceColumnaFiltro];
+                return (v != null ? String(v).trim() : "") === valorBuscar;
             });
         }
 
@@ -296,8 +304,18 @@
                     }
                 }
 
+                var filtrarWrap = document.getElementById("productos-elaborados-filtrar-wrap");
+                var filtrarSelect = document.getElementById("filtrar-valores-productos-elaborados");
                 var agruparWrap = document.getElementById("productos-elaborados-agrupar-wrap");
                 var agruparSelect = document.getElementById("agrupar-productos-elaborados");
+                var columnaFiltroValores = sheetConfig.columnaFiltroValores || null;
+                if (filtrarWrap && filtrarSelect && columnaFiltroValores) {
+                    var colFiltro = columnas.filter(function (c) { return norm(c.nombre) === norm(columnaFiltroValores); })[0];
+                    var aliasFiltro = (colFiltro && colFiltro.alias) ? colFiltro.alias : columnaFiltroValores;
+                    var labelFiltrar = filtrarWrap.querySelector('label[for="filtrar-valores-productos-elaborados"]');
+                    if (labelFiltrar) labelFiltrar.textContent = "Filtrar por " + aliasFiltro;
+                    filtrarSelect.setAttribute("aria-label", "Filtrar por " + aliasFiltro);
+                }
                 if (agruparSelect && modosAgrupacion.length > 1) {
                     agruparWrap.style.display = "";
                     agruparSelect.innerHTML = "";
@@ -311,6 +329,9 @@
                 }
 
                 var url = appsScriptUrl + "?action=list&sheet=" + encodeURIComponent(nombreHoja) + "&_=" + Date.now();
+                var spinner = window.COSTOS_SPINNER;
+                if (spinner) spinner.show("Cargando…");
+                if (btnNuevo) btnNuevo.disabled = true;
                 return fetch(url, { cache: "no-store" })
                     .then(function (res) { return res.json(); })
                     .then(function (json) {
@@ -328,12 +349,51 @@
                                 return apiHeaders.map(function (k) { return obj[k] != null ? obj[k] : ""; });
                             });
                         }
-                        if (sheetConfig.columnaOrdenLista) {
-                            rows = sortRowsByOrden(rows, headers, sheetConfig.columnaOrdenLista);
+                        if (sheetConfig.columnaOrden) {
+                            rows = sortRowsByOrden(rows, headers, sheetConfig.columnaOrden);
                         }
                         if (!headers.length && !rows.length) {
                             showMessage(container, "La hoja no tiene datos.");
                             return { sheetConfig: sheetConfig, headers: headers, rows: rows };
+                        }
+
+                        var indiceColumnaFiltro = -1;
+                        if (columnaFiltroValores && filtrarSelect && filtrarWrap) {
+                            indiceColumnaFiltro = findColumnIndex(headers, [norm(columnaFiltroValores)]);
+                            if (indiceColumnaFiltro >= 0) {
+                                filtrarWrap.style.display = "";
+                                var valoresUnicos = {};
+                                rows.forEach(function (row) {
+                                    var v = row[indiceColumnaFiltro];
+                                    var s = (v != null && String(v).trim() !== "") ? String(v).trim() : "—";
+                                    valoresUnicos[s] = true;
+                                });
+                                var valoresOrdenados = Object.keys(valoresUnicos).sort();
+                                filtrarSelect.innerHTML = "";
+                                var optTodos = document.createElement("option");
+                                optTodos.value = "";
+                                optTodos.textContent = "Todos";
+                                optTodos.selected = true;
+                                filtrarSelect.appendChild(optTodos);
+                                valoresOrdenados.forEach(function (val) {
+                                    var opt = document.createElement("option");
+                                    opt.value = val;
+                                    opt.textContent = val;
+                                    filtrarSelect.appendChild(opt);
+                                });
+                                try {
+                                    var guardado = sessionStorage.getItem(STORAGE_FILTRO);
+                                    if (guardado != null && guardado !== "") {
+                                        var opts = filtrarSelect.querySelectorAll("option");
+                                        for (var o = 0; o < opts.length; o++) {
+                                            if (opts[o].value === guardado) {
+                                                opts[o].selected = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                } catch (e) {}
+                            }
                         }
 
                         function getModoActual() {
@@ -343,21 +403,42 @@
                             return modosAgrupacion[idx] || [];
                         }
 
+                        function getValorFiltroActual() {
+                            var sel = document.getElementById("filtrar-valores-productos-elaborados");
+                            return sel ? (sel.value || "") : "";
+                        }
+
                         function redraw() {
-                            renderList(container, sheetConfig, headers, rows, (filterInput && filterInput.value) ? filterInput.value : "", getModoActual());
+                            var modo = getModoActual();
+                            var valorFiltro = columnaFiltroValores ? getValorFiltroActual() : "";
+                            renderList(container, sheetConfig, headers, rows, (filterInput && filterInput.value) ? filterInput.value : "", modo, valorFiltro, columnaFiltroValores ? indiceColumnaFiltro : -1);
                         }
 
                         redraw();
                         if (filterInput) {
                             filterInput.addEventListener("input", redraw);
                         }
+                        if (filtrarSelect) {
+                            filtrarSelect.addEventListener("change", function () {
+                                try {
+                                    sessionStorage.setItem(STORAGE_FILTRO, filtrarSelect.value || "");
+                                } catch (e) {}
+                                redraw();
+                            });
+                        }
                         if (agruparSelect) {
                             agruparSelect.addEventListener("change", redraw);
                         }
                         return { sheetConfig: sheetConfig, headers: headers, rows: rows };
+                    })
+                    .finally(function () {
+                        if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.hide();
+                        if (btnNuevo) btnNuevo.disabled = false;
                     });
             })
             .catch(function (err) {
+                if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.hide();
+                if (btnNuevo) btnNuevo.disabled = false;
                 showMessage(container, "Error al cargar: " + (err.message || "Revisá la URL de la API y la configuración."));
             });
     }

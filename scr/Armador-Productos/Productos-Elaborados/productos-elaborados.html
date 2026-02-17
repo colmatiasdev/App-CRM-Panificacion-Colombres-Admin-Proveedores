@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Productos elaborados - Panificación Colombres</title>
+    <title>Lista de Productos Elaborados - Panificación Colombres</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -19,12 +19,12 @@
     <nav class="costos-nav" aria-label="Navegación principal">
         <a href="../../../index.html" class="costos-nav-link">Inicio</a>
         <a href="../armador-productos.html" class="costos-nav-link">Armador de Productos</a>
-        <a href="productos-elaborados.html" class="costos-nav-link is-active" data-accion="listar">Productos elaborados</a>
+        <a href="productos-elaborados.html" class="costos-nav-link is-active" data-accion="listar">Lista de Productos Elaborados</a>
         <a href="../Costo-Productos/costo-productos.html" class="costos-nav-link">Costo productos</a>
     </nav>
     <main class="costos-main">
         <div class="costos-title-row">
-            <h1 class="costos-title">Productos elaborados</h1>
+            <h1 class="costos-title">Lista de Productos Elaborados</h1>
             <a href="#" id="btn-nuevo-producto-elaborado" class="costos-calc-btn costos-btn-nueva" role="button">
                 <i class="fa-solid fa-plus" aria-hidden="true"></i>
                 <span class="costos-calc-btn-text-long">Nuevo producto</span>
@@ -33,14 +33,22 @@
         </div>
         <p class="costos-intro">Listado desde la hoja <strong>Listado-Productos-Elaborados</strong>. Creá o modificá productos.</p>
 
-        <section class="costos-filter-section" aria-label="Filtrar y agrupar listado">
-            <label for="filter-productos-elaborados" class="costos-filter-label">Buscar</label>
-            <input type="search" id="filter-productos-elaborados" class="costos-filter-input" placeholder="Nombre o texto del producto…" autocomplete="off">
+        <section class="costos-filter-section costos-filter-section--stacked" aria-label="Filtrar y agrupar listado">
+            <div class="costos-filter-group-by" id="productos-elaborados-filtrar-wrap" style="display:none;">
+                <label for="filtrar-valores-productos-elaborados" class="costos-filter-label">Filtrar por</label>
+                <select id="filtrar-valores-productos-elaborados" class="costos-filter-select" aria-label="Filtrar por valor">
+                    <!-- opciones (Todos + valores) se llenan por JS -->
+                </select>
+            </div>
             <div class="costos-filter-group-by" id="productos-elaborados-agrupar-wrap" style="display:none;">
                 <label for="agrupar-productos-elaborados" class="costos-filter-label">Agrupar por</label>
                 <select id="agrupar-productos-elaborados" class="costos-filter-select" aria-label="Modo de agrupación">
                     <!-- opciones se llenan por JS según config -->
                 </select>
+            </div>
+            <div class="costos-filter-search">
+                <label for="filter-productos-elaborados" class="costos-filter-label">Buscar</label>
+                <input type="search" id="filter-productos-elaborados" class="costos-filter-input" placeholder="Nombre o texto del producto…" autocomplete="off">
             </div>
             <p class="costos-filter-count" id="productos-elaborados-count" aria-live="polite"></p>
         </section>

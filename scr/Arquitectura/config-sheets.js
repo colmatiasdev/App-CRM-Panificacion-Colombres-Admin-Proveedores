@@ -11,7 +11,7 @@
     }
 
     /** Apps Script desplegado – ABM (list, get, search, create, update, delete). */
-    c.appsScriptUrl = "https://script.google.com/macros/s/AKfycbyiLq6cEO0AhXcaCd5CzL1n3Vpn_bB9V6iESAUhQ2GzN2jIN3MG4-qVkrkd8euZuQXkKw/exec";
+    c.appsScriptUrl = "https://script.google.com/macros/s/AKfycbx5dfxqyBgx3dIXQCzyaGZ43uJZs7hcl0z9NuE32vw6JgKTYxnA-lx8SitYcK66Ctu0vw/exec";
 
     /**
      * Google Sheets – Un solo documento publicado con todas las hojas.
@@ -39,4 +39,33 @@
         c.googleSheetMateriaPrimaUrl = gs.baseUrl + "?gid=" + gs.gids.materiaPrima + "&single=true&output=csv";
         c.googleSheetPackingUrl = gs.baseUrl + "?gid=" + gs.gids.packing + "&single=true&output=csv";
     }
+
+    /**
+     * Spinner global para cargar/guardar/procesar.
+     * Uso: COSTOS_SPINNER.show("Cargando…"); … fetch… ; COSTOS_SPINNER.hide();
+     * Deshabilitar botones manualmente: btn.disabled = true; … ; btn.disabled = false;
+     */
+    var overlay = null;
+    window.COSTOS_SPINNER = {
+        show: function (text) {
+            if (!overlay) {
+                overlay = document.createElement("div");
+                overlay.className = "costos-spinner-overlay";
+                overlay.setAttribute("role", "status");
+                overlay.setAttribute("aria-live", "polite");
+                overlay.innerHTML = "<div class=\"costos-spinner-box\"><div class=\"costos-spinner\" aria-hidden=\"true\"></div><span class=\"costos-spinner-text\" id=\"costos-spinner-text\">Procesando…</span></div>";
+                document.body.appendChild(overlay);
+            }
+            overlay.setAttribute("aria-hidden", "false");
+            overlay.style.display = "flex";
+            var textEl = document.getElementById("costos-spinner-text");
+            if (textEl) textEl.textContent = text || "Procesando…";
+        },
+        hide: function () {
+            if (overlay) {
+                overlay.setAttribute("aria-hidden", "true");
+                overlay.style.display = "none";
+            }
+        }
+    };
 })();

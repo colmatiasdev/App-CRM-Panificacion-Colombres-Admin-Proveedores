@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Ver producto elaborado - Panificación Colombres</title>
+    <title>Lista de Productos Elaborados - Panificación Colombres</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -13,22 +13,26 @@
     <script src="../../Arquitectura/config-sheets.js"></script>
     <script src="../../Arquitectura/sheets/productos-elaborados/productos-elaborados-sheets-base.js"></script>
     <script src="../../Arquitectura/sheets/productos-elaborados/sheets-ver-productos-elaborados.config.js"></script>
+    <script src="../../Arquitectura/sheets/costo-productos/costo-productos-sheets-base.js"></script>
+    <script src="../../Arquitectura/sheets/costo-productos/sheets-ver-costo-productos.config.js"></script>
     <script>window.PRODUCTOS_ELABORADOS_ACCION_ACTUAL = "ver";</script>
 </head>
 <body class="costos-page">
     <nav class="costos-nav" aria-label="Navegación principal">
         <a href="../../../index.html" class="costos-nav-link">Inicio</a>
         <a href="../armador-productos.html" class="costos-nav-link">Armador de Productos</a>
-        <a href="productos-elaborados.html" class="costos-nav-link" data-accion="listar">Productos elaborados</a>
+        <a href="productos-elaborados.html" class="costos-nav-link" data-accion="listar">Lista de Productos Elaborados</a>
         <a href="../Costo-Productos/costo-productos.html" class="costos-nav-link">Costo productos</a>
     </nav>
     <main class="costos-main">
-        <h1 class="costos-title costos-title--con-icono"><i class="fa-solid fa-eye costos-title-icono" aria-hidden="true"></i> Ver producto elaborado</h1>
+        <h1 class="costos-title costos-title--con-icono"><i class="fa-solid fa-eye costos-title-icono" aria-hidden="true"></i> Lista de Productos Elaborados</h1>
         <p class="costos-intro">Datos del registro. Solo visualización.</p>
         <div id="ver-container" class="costos-datos">
             <p id="ver-no-data" class="costos-placeholder" style="display:none;">No hay datos del registro. Volvé al listado y usá «Ver» en una tarjeta.</p>
             <p id="ver-loading" class="costos-placeholder">Cargando…</p>
             <div id="ver-detalle" class="costos-ver-detalle" style="display:none;"></div>
+            <div id="ver-sin-costo" class="costos-ver-sin-costo" style="display:none;"></div>
+            <div id="ver-relacionado" class="costos-ver-relacionado" style="display:none;"></div>
             <div id="ver-actions" class="costos-edit-actions" style="display:none;">
                 <a href="productos-elaborados.html" class="costos-edit-btn-cancel">Volver al listado</a>
                 <a href="editar-producto-elaborado.html" id="ver-btn-editar" class="costos-edit-btn-editar"><i class="fa-solid fa-pen" aria-hidden="true"></i> Editar</a>
@@ -64,7 +68,58 @@
             var noDataEl = document.getElementById("ver-no-data");
             var loadingEl = document.getElementById("ver-loading");
             var detalleEl = document.getElementById("ver-detalle");
+            var sinCostoEl = document.getElementById("ver-sin-costo");
+            var relacionadoEl = document.getElementById("ver-relacionado");
             var actionsEl = document.getElementById("ver-actions");
+
+            function getConfigAsignar() {
+                var base = window.PRODUCTOS_ELABORADOS_SHEET_BASE;
+                var hoja = base && base.hoja;
+                var fks = hoja && hoja.clavesForaneas;
+                if (!fks) return null;
+                for (var i = 0; i < fks.length; i++) {
+                    if (fks[i].columna === "IDCosto-Producto" && fks[i].asignarCuandoVacio) return fks[i].asignarCuandoVacio;
+                }
+                return null;
+            }
+
+            function renderRelacionado(idCostoProducto, appsScriptUrl) {
+                if (!idCostoProducto || !relacionadoEl) return;
+                var configRel = window.COSTO_PRODUCTOS_SHEETS_JSON;
+                if (!configRel || !configRel.hojas || !configRel.hojas[0]) return;
+                var columnasRel = configRel.hojas[0].columnas || [];
+                // Mostrar de inmediato la sección con estado de carga (visible mientras tarda el fetch)
+                relacionadoEl.innerHTML = "<h2 class=\"costos-ver-subtitulo\">Costo producto relacionado</h2><p class=\"costos-placeholder\"><i class=\"fa-solid fa-spinner fa-spin\" aria-hidden=\"true\"></i> Cargando datos…</p>";
+                relacionadoEl.style.display = "block";
+                if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.show("Cargando costo relacionado…");
+                var urlGet = appsScriptUrl + "?action=get&sheet=Tabla-Costo-Productos&id=" + encodeURIComponent(idCostoProducto);
+                fetch(urlGet, { cache: "no-store" })
+                    .then(function (r) { return r.json(); })
+                    .then(function (resp) {
+                        if (!resp || !resp.success || !resp.data) {
+                            relacionadoEl.style.display = "none";
+                            return;
+                        }
+                        var obj = resp.data;
+                        var htmlRel = "<h2 class=\"costos-ver-subtitulo\">Costo producto relacionado</h2><dl class=\"costos-ver-dl\">";
+                        columnasRel.forEach(function (col) {
+                            var nombre = (col.alias != null ? col.alias : col.nombre || "").trim();
+                            if (!nombre) return;
+                            var val = (obj[col.nombre] != null && obj[col.nombre] !== "") ? String(obj[col.nombre]).trim() : "—";
+                            htmlRel += "<dt class=\"costos-ver-dt\">" + escapeHtml(nombre) + "</dt>";
+                            htmlRel += "<dd class=\"costos-ver-dd\">" + escapeHtml(val) + "</dd>";
+                        });
+                        htmlRel += "</dl>";
+                        relacionadoEl.innerHTML = htmlRel;
+                        relacionadoEl.style.display = "block";
+                    })
+                    .catch(function () {
+                        relacionadoEl.style.display = "none";
+                    })
+                    .finally(function () {
+                        if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.hide();
+                    });
+            }
 
             var raw = sessionStorage.getItem(STORAGE_EDIT);
             if (!raw) {
@@ -95,7 +150,9 @@
                         actionsEl.style.display = "flex";
 
                         var html = "<dl class=\"costos-ver-dl\">";
+                        var idxIDCostoProducto = -1;
                         columnas.forEach(function (col, idx) {
+                            if (col.nombre === "IDCosto-Producto") idxIDCostoProducto = idx;
                             var nombre = (col.alias != null ? col.alias : col.nombre || "").trim();
                             if (!nombre) return;
                             var val = row[idx] != null ? String(row[idx]).trim() : "—";
@@ -104,6 +161,42 @@
                         });
                         html += "</dl>";
                         detalleEl.innerHTML = html;
+
+                        var idCostoVal = (idxIDCostoProducto >= 0 && row[idxIDCostoProducto]) ? String(row[idxIDCostoProducto]).trim() : "";
+                        var idxIDProducto = -1;
+                        columnas.forEach(function (c, i) { if (c.nombre === "IDProducto") idxIDProducto = i; });
+                        var idProductoActual = (idxIDProducto >= 0 && row[idxIDProducto]) ? String(row[idxIDProducto]).trim() : "";
+
+                        if (idxIDCostoProducto >= 0 && idCostoVal) {
+                            var config = window.APP_CONFIG || {};
+                            var appsScriptUrl = (config.appsScriptUrl || "").trim();
+                            if (appsScriptUrl) renderRelacionado(idCostoVal, appsScriptUrl);
+                            if (sinCostoEl) sinCostoEl.style.display = "none";
+                        } else if (idxIDCostoProducto >= 0 && sinCostoEl && idProductoActual) {
+                            var configAsignar = getConfigAsignar();
+                            if (configAsignar) {
+                                var urlListado = (configAsignar.urlListado || "costo-productos.html").trim().replace(/^\//, "");
+                                var paramId = (configAsignar.paramIdProducto || "idProductoElaborado").trim();
+                                var etiqueta = (configAsignar.etiquetaBoton || "Asignar Producto a la Lista").trim();
+                                var query = "?asignarProducto=1&" + paramId + "=" + encodeURIComponent(idProductoActual);
+                                var href;
+                                try {
+                                    var origin = window.location.origin || "";
+                                    var path = window.location.pathname || "";
+                                    var idxArmador = path.indexOf("Armador-Productos");
+                                    if (idxArmador !== -1) {
+                                        var basePath = path.substring(0, idxArmador + "Armador-Productos".length + 1);
+                                        href = origin + basePath + "Costo-Productos/" + urlListado + query;
+                                    } else {
+                                        href = "../Costo-Productos/" + urlListado + query;
+                                    }
+                                } catch (e) {
+                                    href = "../Costo-Productos/" + urlListado + query;
+                                }
+                                sinCostoEl.innerHTML = "<a href=\"" + escapeHtml(href) + "\" class=\"costos-calc-btn costos-ver-btn-crear-costo\"><i class=\"fa-solid fa-link\" aria-hidden=\"true\"></i> " + escapeHtml(etiqueta) + "</a>";
+                                sinCostoEl.style.display = "block";
+                            }
+                        }
                     }).catch(function (err) {
                         loadingEl.style.display = "none";
                         noDataEl.style.display = "block";

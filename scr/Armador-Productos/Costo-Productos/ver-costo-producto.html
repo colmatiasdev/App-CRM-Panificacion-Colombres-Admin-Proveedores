@@ -19,7 +19,7 @@
     <nav class="costos-nav" aria-label="Navegación principal">
         <a href="../../../index.html" class="costos-nav-link">Inicio</a>
         <a href="../armador-productos.html" class="costos-nav-link">Armador de Productos</a>
-        <a href="../Productos-Elaborados/productos-elaborados.html" class="costos-nav-link">Productos elaborados</a>
+        <a href="../Productos-Elaborados/productos-elaborados.html" class="costos-nav-link">Lista de Productos Elaborados</a>
         <a href="costo-productos.html" class="costos-nav-link" data-accion="listar">Costo productos</a>
     </nav>
     <main class="costos-main">
@@ -29,6 +29,7 @@
             <p id="ver-no-data" class="costos-placeholder" style="display:none;">No hay datos del registro. Volvé al listado y usá «Ver» en una tarjeta.</p>
             <p id="ver-loading" class="costos-placeholder">Cargando…</p>
             <div id="ver-detalle" class="costos-ver-detalle" style="display:none;"></div>
+            <div id="ver-relacion-actions" class="costos-ver-relacion-actions" style="display:none;"></div>
             <div id="ver-actions" class="costos-edit-actions" style="display:none;">
                 <a href="costo-productos.html" class="costos-edit-btn-cancel">Volver al listado</a>
                 <a href="editar-costo-producto.html" id="ver-btn-editar" class="costos-edit-btn-editar"><i class="fa-solid fa-pen" aria-hidden="true"></i> Editar</a>
@@ -64,7 +65,47 @@
             var noDataEl = document.getElementById("ver-no-data");
             var loadingEl = document.getElementById("ver-loading");
             var detalleEl = document.getElementById("ver-detalle");
+            var relacionActionsEl = document.getElementById("ver-relacion-actions");
             var actionsEl = document.getElementById("ver-actions");
+
+            function renderBotonesRelacion(row, columnas, pkColumna) {
+                if (!relacionActionsEl) return;
+                var base = window.COSTO_PRODUCTOS_SHEET_BASE;
+                var hoja = base && base.hoja;
+                var refs = hoja && hoja.referenciadoPor;
+                if (!refs || !Array.isArray(refs) || refs.length === 0) {
+                    relacionActionsEl.style.display = "none";
+                    return;
+                }
+                var idxPk = -1;
+                columnas.forEach(function (c, i) {
+                    if (c.nombre === pkColumna) idxPk = i;
+                });
+                if (idxPk < 0) {
+                    relacionActionsEl.style.display = "none";
+                    return;
+                }
+                var idActual = row[idxPk] != null ? String(row[idxPk]).trim() : "";
+                if (!idActual) {
+                    relacionActionsEl.style.display = "none";
+                    return;
+                }
+                var html = "";
+                refs.forEach(function (ref) {
+                    var card = (ref.cardinalidad || "").toString().toLowerCase();
+                    var etiqueta = (card === "1:n")
+                        ? (ref.etiquetaBoton1aN || "Ver registros asignados")
+                        : (ref.etiquetaBoton1a1 || "Asignar");
+                    var url = (ref.urlListado || "#") + (ref.parametroFiltroId ? "?" + ref.parametroFiltroId + "=" + encodeURIComponent(idActual) : "");
+                    html += "<a href=\"" + escapeHtml(url) + "\" class=\"costos-calc-btn costos-ver-btn-relacion\"><i class=\"fa-solid fa-link\" aria-hidden=\"true\"></i> " + escapeHtml(etiqueta) + "</a>";
+                });
+                if (html) {
+                    relacionActionsEl.innerHTML = html;
+                    relacionActionsEl.style.display = "flex";
+                } else {
+                    relacionActionsEl.style.display = "none";
+                }
+            }
 
             var raw = sessionStorage.getItem(STORAGE_EDIT);
             if (!raw) {
@@ -104,6 +145,10 @@
                         });
                         html += "</dl>";
                         detalleEl.innerHTML = html;
+
+                        var base = window.COSTO_PRODUCTOS_SHEET_BASE;
+                        var pkColumna = (base && base.hoja && base.hoja.clavePrimaria && base.hoja.clavePrimaria[0]) ? base.hoja.clavePrimaria[0] : "IDCosto-Producto";
+                        renderBotonesRelacion(row, columnas, pkColumna);
                     }).catch(function (err) {
                         loadingEl.style.display = "none";
                         noDataEl.style.display = "block";

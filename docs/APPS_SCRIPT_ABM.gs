@@ -81,13 +81,13 @@ var CONFIG = {
     dateUpdatedColumn: 'Fecha-Actualizada-Al'
   },
 
-  /** Hoja Combos – listas para combos – ?sheet=combos */
+  /** Hoja Combos – listas para combos – ?sheet=combos o ?sheet=COMBO */
   combos: {
     sheetName: 'COMBOS',
     gid: 0,
-    headers: ['TIPO-UNIDAD-MEDIDA', 'CONVERTIR-UNIDAD-MEDIDA', 'TIPO-PRESENTACION'],
+    headers: ['TIPO-UNIDAD-MEDIDA', 'CONVERTIR-UNIDAD-MEDIDA', 'TIPO-PRESENTACION', 'COMBO-CATEGORIA'],
     idColumn: 'TIPO-UNIDAD-MEDIDA',
-    filterColumns: ['TIPO-UNIDAD-MEDIDA', 'CONVERTIR-UNIDAD-MEDIDA', 'TIPO-PRESENTACION']
+    filterColumns: ['TIPO-UNIDAD-MEDIDA', 'CONVERTIR-UNIDAD-MEDIDA', 'TIPO-PRESENTACION', 'COMBO-CATEGORIA']
   },
 
   /** Hoja Equivalencias – unidades y factores para conversión – ?sheet=equivalencias
@@ -119,7 +119,7 @@ var CONFIG = {
     idColumn: 'IDProducto',
     idPrefix: 'PROD-ELAB-',
     filterColumns: ['IDProducto', 'IDCosto-Producto', 'Comercio-Sucursal', 'Nombre-Producto', 'Habilitado'],
-    requiredOnCreate: ['Nombre-Producto']
+    requiredOnCreate: ['Comercio-Sucursal']
   },
 
   /** Hoja Tabla Costo Productos (Armador de Productos) – ?sheet=Tabla-Costo-Productos
@@ -246,10 +246,11 @@ function searchInRows(rows, headers, filterColumns, q) {
   });
 }
 
-/** Obtiene la config de la hoja por parámetro sheet (materiaPrima, packing, etc.) */
+/** Obtiene la config de la hoja por parámetro sheet (materiaPrima, packing, combos, etc.) */
 function getSheetConfig(sheetKey) {
-  var key = (sheetKey || 'materiaPrima').toLowerCase();
+  var key = (sheetKey || 'materiaPrima').toString().trim().toLowerCase();
   if (CONFIG[key]) return CONFIG[key];
+  if (key === 'combo') return CONFIG.combos;
   return CONFIG.materiaPrima;
 }
 

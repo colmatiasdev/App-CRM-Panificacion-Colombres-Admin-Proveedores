@@ -28,8 +28,17 @@ Esta carpeta es **scr/Arquitectura/sheets/**. El módulo Productos elaborados us
 
 ## Relaciones PK/FK entre tablas
 
-- **Listado-Productos-Elaborados** (hoja `Listado-Productos-Elaborados`): **PK** = `IDProducto`. **FK** = columna `IDCosto-Producto` → referencia a **Tabla-Costo-Productos** por su PK `IDCosto-Producto`. Definido en `productos-elaborados/productos-elaborados-sheets-base.js` (`clavesForaneas`).
-- **Tabla-Costo-Productos** (hoja `Tabla-Costo-Productos`): **PK** = `IDCosto-Producto`. Sin FKs. Definido en `costo-productos/costo-productos-sheets-base.js`.
+- **Listado-Productos-Elaborados** (hoja `Listado-Productos-Elaborados`): **PK** = `IDProducto`. **FK** = columna `IDCosto-Producto` → referencia a **Tabla-Costo-Productos** por su PK `IDCosto-Producto`. **Relación 1:1.** Definido en `productos-elaborados/productos-elaborados-sheets-base.js` (`clavesForaneas`, propiedad `cardinalidad: "1:1"`).
+- **Tabla-Costo-Productos** (hoja `Tabla-Costo-Productos`): **PK** = `IDCosto-Producto`. Sin FKs. Relación 1:1 con Listado-Productos-Elaborados. Definido en `costo-productos/costo-productos-sheets-base.js`.
+
+### Relación inversa y botón en Ver (referenciadoPor)
+
+En la tabla que **es referenciada** por otra (por ejemplo Tabla-Costo-Productos, referenciada por Listado-Productos-Elaborados), se puede definir **`referenciadoPor`** en la config base de la hoja. Así la acción **Ver** muestra un botón que depende de la **cardinalidad**:
+
+- **`cardinalidad: "1:1"`**: botón con `etiquetaBoton1a1` (ej. "Asignar productos elaborados") → enlaza al listado de la tabla relacionada con el ID actual como parámetro.
+- **`cardinalidad: "1:N"`**: botón con `etiquetaBoton1aN` (ej. "Ver productos elaborados asignados") → mismo enlace para listar/filtrar los registros que referencian este ID.
+
+Cada entrada en `referenciadoPor` incluye: `tabla`, `nombreHoja`, `columnaFK`, `pkReferencia`, `cardinalidad`, `etiquetaBoton1a1`, `etiquetaBoton1aN`, `urlListado`, `parametroFiltroId`. Cambiando `cardinalidad` y las etiquetas en la config se ajusta el comportamiento sin tocar el HTML.
 
 ## Esquema de cada JSON
 
@@ -79,7 +88,7 @@ Esta carpeta es **scr/Arquitectura/sheets/**. El módulo Productos elaborados us
 
 ## Columnas tipo label (solo lectura / autogeneradas)
 
-En la config de cada acción (p. ej. en `productos-elaborados/sheets-crear-productos-elaborados.config.js`), cada columna puede tener **`"label": true`**: son columnas autogeneradas por el sistema que el usuario no debe modificar (para no perder relaciones). Ejemplos: la columna de orden (`autogeneradoOrden`), la clave primaria (ID). En **crear** no se muestran campos para esas columnas; el ID se genera con la función de Arquitectura. En **editar** se muestran en solo lectura (disabled).
+En la config de cada acción (p. ej. en `productos-elaborados/sheets-crear-productos-elaborados.config.js`), cada columna puede tener **`"label": true`**: son columnas autogeneradas por el sistema que el usuario no debe modificar (para no perder relaciones). Ejemplos: la columna de orden (`autogeneradorID`), la clave primaria (ID). En **crear** no se muestran campos para esas columnas; el ID se genera con la función de Arquitectura. En **editar** se muestran en solo lectura (disabled).
 
 Para la **clave primaria** que es ID autogenerado, la hoja en el **base** define:
 - **`prefijoId`**: cadena fija (ej. `"PROD-ELAB"`).
@@ -91,7 +100,7 @@ La generación está en **scr/Arquitectura/generar-id.js** (`window.GENERAR_ID_P
 
 ## Orden y visibilidad en listado (Productos elaborados)
 
-- **Columna de orden**: La columna con `"autogeneradoOrden": true` (ej. `Orden-Lista`) define el orden de la lista; el módulo ordena las filas por ese campo (numérico).
+- **Columna de orden**: La columna de orden (nombre en `hoja.columnaOrden` en el base, ej. `Orden-Lista`) define el orden de la lista; el módulo ordena las filas por ese campo (numérico). **Solo en la acción Crear** se usa la propiedad **`autogeneradorID`: true** en esa columna (en `sheets-crear-*.config.js`): al crear un registro, el valor se asigna como **máximo valor existente + 1**. En listar, editar y ver no se usa `autogeneradorID` porque el registro ya tiene el valor asignado.
 - **Visibilidad en la card**: Cada columna puede llevar `"visible": true` o `"visible": false`. Solo las que tienen `true` se muestran en el cuerpo de cada tarjeta del listado (el título de la card sigue siendo la columna nombre, p. ej. Nombre-Producto).
 
 ## Listado con agrupación (Productos elaborados)
