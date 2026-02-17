@@ -1,6 +1,7 @@
 /**
  * Configuración de la acción Listar para Producto Unitario Base.
  * Cargado por producto-unitario-base.html. Requiere producto-unitario-base-sheets-base.js antes.
+ * tipoDato: tipo de dato. tipoComponente: label, combo-basico, text-box, etc.
  */
 (function () {
   var base = window.PRODUCTO_UNITARIO_BASE_SHEET_BASE;
@@ -9,22 +10,146 @@
   }
   var hoja = base.hoja;
   var columnas = [
-    { nombre: "Orden", alias: "Orden", tipoDato: "numeric", tipoComponente: "label", visible: false },
-    { nombre: "IDCosto-ProductoUnitario", alias: "ID Costo Producto Unitario", tipoDato: "text", tipoComponente: "label", visible: false },
-    { nombre: "Comercio-Sucursal", alias: "Comercio Sucursal", tipoDato: "text", tipoComponente: "label", visible: false },
-    { nombre: "Tipo-Producto", alias: "Tipo Producto", tipoDato: "text", tipoComponente: "label", visible: false },
-    { nombre: "Nombre-Producto", alias: "Nombre Producto", tipoDato: "text", tipoComponente: "label", visible: true },
-    { nombre: "IDElaboracion-ProductoBase", alias: "ID Elaboración Base", tipoDato: "text", tipoComponente: "label", visible: false },
-    { nombre: "Costo-Produccion-ProductoBase", alias: "Costo Producción Base", tipoDato: "numeric", tipoComponente: "label", decimales: 2, visible: true, formatoVisual: "moneda" },
-    { nombre: "Costo-Relleno-Producto", alias: "Costo Relleno", tipoDato: "numeric", tipoComponente: "label", decimales: 2, visible: true, formatoVisual: "moneda" },
-    { nombre: "Costo-Decoracion-Producto", alias: "Costo Decoración", tipoDato: "numeric", tipoComponente: "label", decimales: 2, visible: true, formatoVisual: "moneda" },
-    { nombre: "Tiempo-Elaboracion-Minutos", alias: "Tiempo (min)", tipoDato: "numeric", tipoComponente: "label", visible: true },
-    { nombre: "Costo-Mano-Obra-Elaboracion", alias: "Costo Mano Obra", tipoDato: "numeric", tipoComponente: "label", decimales: 2, visible: true, formatoVisual: "moneda" },
-    { nombre: "Costo-Elaboracion-Actual", alias: "Costo Elaboración Actual", tipoDato: "numeric", tipoComponente: "label", decimales: 2, visible: true, formatoVisual: "moneda" },
-    { nombre: "Costo-Elaboracion-Anterior", alias: "Costo Anterior", tipoDato: "numeric", tipoComponente: "label", decimales: 2, visible: true, formatoVisual: "moneda" },
-    { nombre: "Habilitado", alias: "Habilitado", tipoDato: "text", tipoComponente: "label", visible: false },
-    { nombre: "Fecha-Registro-Actualizado-Al", alias: "Actualizado", tipoDato: "text", tipoComponente: "label", visible: false },
-    { nombre: "Actualizado", alias: "Actualizado", tipoDato: "text", tipoComponente: "label", visible: false }
+    {
+      nombre: "Orden",
+      alias: "Orden",
+      tipoDato: "numeric",
+      tipoComponente: "label",
+      visible: false,
+      descripcion: "Orden de aparición en listados."
+    },
+    {
+      nombre: "IDCosto-ProductoUnitario",
+      alias: "ID Costo Producto Unitario",
+      tipoDato: "text",
+      tipoComponente: "label",
+      visible: false,
+      descripcion: "Identificador único."
+    },
+    {
+      nombre: "Comercio-Sucursal",
+      alias: "Comercio Sucursal",
+      tipoDato: "text",
+      tipoComponente: "label",
+      visible: false,
+      listadoValores: "COMPONENTE-COMBOS.Combo-Comercio-Sucursal",
+      descripcion: "Comercio o sucursal."
+    },
+    {
+      nombre: "Tipo-Producto",
+      alias: "Tipo Producto",
+      tipoDato: "text",
+      tipoComponente: "label",
+      visible: false,
+      descripcion: "Tipo de producto."
+    },
+    {
+      nombre: "Nombre-Producto",
+      alias: "Nombre Producto",
+      tipoDato: "text",
+      tipoComponente: "label",
+      visible: true,
+      descripcion: "Nombre del producto."
+    },
+    {
+      nombre: "IDElaboracion-ProductoBase",
+      alias: "ID Elaboración Base",
+      tipoDato: "text",
+      tipoComponente: "label",
+      visible: false,
+      descripcion: "Referencia a elaboración productos base."
+    },
+    {
+      nombre: "Costo-Produccion-ProductoBase",
+      alias: "Costo Producción Base",
+      tipoDato: "numeric",
+      tipoComponente: "label",
+      decimales: 2,
+      visible: true,
+      descripcion: "Costo de producción base.",
+      formatoVisual: "moneda"
+    },
+    {
+      nombre: "Costo-Relleno-Producto",
+      alias: "Costo Relleno",
+      tipoDato: "numeric",
+      tipoComponente: "label",
+      decimales: 2,
+      visible: true,
+      descripcion: "Costo de relleno.",
+      formatoVisual: "moneda"
+    },
+    {
+      nombre: "Costo-Decoracion-Producto",
+      alias: "Costo Decoración",
+      tipoDato: "numeric",
+      tipoComponente: "label",
+      decimales: 2,
+      visible: true,
+      descripcion: "Costo de decoración.",
+      formatoVisual: "moneda"
+    },
+    {
+      nombre: "Tiempo-Elaboracion-Minutos",
+      alias: "Tiempo (min)",
+      tipoDato: "numeric",
+      tipoComponente: "label",
+      visible: true,
+      descripcion: "Tiempo de elaboración en minutos."
+    },
+    {
+      nombre: "Costo-Mano-Obra-Elaboracion",
+      alias: "Costo Mano Obra",
+      tipoDato: "numeric",
+      tipoComponente: "label",
+      decimales: 2,
+      visible: true,
+      descripcion: "Costo mano de obra elaboración.",
+      formatoVisual: "moneda"
+    },
+    {
+      nombre: "Costo-Elaboracion-Actual",
+      alias: "Costo Elaboración Actual",
+      tipoDato: "numeric",
+      tipoComponente: "label",
+      decimales: 2,
+      visible: true,
+      descripcion: "Costo elaboración actual (fórmula G+H+I+K).",
+      formatoVisual: "moneda"
+    },
+    {
+      nombre: "Costo-Elaboracion-Anterior",
+      alias: "Costo Anterior",
+      tipoDato: "numeric",
+      tipoComponente: "label",
+      decimales: 2,
+      visible: true,
+      descripcion: "Costo elaboración anterior.",
+      formatoVisual: "moneda"
+    },
+    {
+      nombre: "Habilitado",
+      alias: "Habilitado",
+      tipoDato: "text",
+      tipoComponente: "label",
+      visible: false,
+      descripcion: "Sí / No."
+    },
+    {
+      nombre: "Fecha-Registro-Actualizado-Al",
+      alias: "Actualizado",
+      tipoDato: "text",
+      tipoComponente: "label",
+      visible: false,
+      descripcion: "Fecha de última actualización."
+    },
+    {
+      nombre: "Actualizado",
+      alias: "Actualizado",
+      tipoDato: "text",
+      tipoComponente: "label",
+      visible: false
+    }
   ];
   window.PRODUCTO_UNITARIO_BASE_SHEETS_JSON = {
     modulo: base.modulo,
@@ -42,7 +167,9 @@
       listado: {
         columnasAgrupacion: ["Comercio-Sucursal"],
         columnaFiltroValores: "Comercio-Sucursal",
-        modosAgrupacion: [["Tipo-Producto"]]
+        modosAgrupacion: [
+          ["Tipo-Producto"]
+        ]
       }
     }]
   };

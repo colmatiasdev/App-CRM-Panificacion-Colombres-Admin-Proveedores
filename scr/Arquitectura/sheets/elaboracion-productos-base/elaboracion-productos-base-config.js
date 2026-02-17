@@ -6,10 +6,34 @@
   var CACHE_MAX_AGE_MS = 5 * 60 * 1000;
 
   var ACCIONES = {
-    listar: { id: "listar", url: "elaboracion-productos-base.html", label: "Listar", visible: true, componente: "listado" },
-    crear: { id: "crear", url: "crear-elaboracion-productos-base.html", label: "Crear", visible: true, componente: "formulario" },
-    editar: { id: "editar", url: "editar-elaboracion-productos-base.html", label: "Editar", visible: true, componente: "formulario" },
-    ver: { id: "ver", url: "ver-elaboracion-productos-base.html", label: "Ver", visible: true, componente: "detalle" }
+    listar: {
+      id: "listar",
+      url: "elaboracion-productos-base.html",
+      label: "Listar",
+      visible: true,
+      componente: "listado"
+    },
+    crear: {
+      id: "crear",
+      url: "crear-elaboracion-productos-base.html",
+      label: "Crear",
+      visible: true,
+      componente: "formulario"
+    },
+    editar: {
+      id: "editar",
+      url: "editar-elaboracion-productos-base.html",
+      label: "Editar",
+      visible: true,
+      componente: "formulario"
+    },
+    ver: {
+      id: "ver",
+      url: "ver-elaboracion-productos-base.html",
+      label: "Ver",
+      visible: true,
+      componente: "detalle"
+    }
   };
 
   window.ELABORACION_PRODUCTOS_BASE_ACCIONES = ACCIONES;

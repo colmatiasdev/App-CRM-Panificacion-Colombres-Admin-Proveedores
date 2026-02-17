@@ -20,7 +20,12 @@ window.ELABORACION_PRODUCTOS_BASE_SHEET_BASE = {
     ],
     columnaOrden: null,
     clavesForaneas: [
-      { columna: "IDReceta-Base", tabla: "Tabla-Receta-Base", pkReferencia: "IDCosto-ProductoUnitario", cardinalidad: "N:1" }
+      {
+        columna: "IDReceta-Base",
+        tabla: "Tabla-Receta-Base",
+        pkReferencia: "IDCosto-ProductoUnitario",
+        cardinalidad: "N:1"
+      }
     ],
     prefijoId: "ELAB-",
     patronId: 1,

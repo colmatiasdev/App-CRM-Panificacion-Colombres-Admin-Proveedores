@@ -12,10 +12,22 @@ window.PRODUCTO_UNITARIO_BASE_SHEET_BASE = {
     nombreHoja: "Tabla-Receta-Base",
     clavePrimaria: ["IDCosto-ProductoUnitario"],
     columnasPropias: [
-      "Orden", "IDCosto-ProductoUnitario", "Comercio-Sucursal", "Tipo-Producto", "Nombre-Producto",
-      "IDElaboracion-ProductoBase", "Costo-Produccion-ProductoBase", "Costo-Relleno-Producto", "Costo-Decoracion-Producto",
-      "Tiempo-Elaboracion-Minutos", "Costo-Mano-Obra-Elaboracion", "Costo-Elaboracion-Actual", "Costo-Elaboracion-Anterior",
-      "Habilitado", "Fecha-Registro-Actualizado-Al", "Actualizado"
+      "Orden",
+      "IDCosto-ProductoUnitario",
+      "Comercio-Sucursal",
+      "Tipo-Producto",
+      "Nombre-Producto",
+      "IDElaboracion-ProductoBase",
+      "Costo-Produccion-ProductoBase",
+      "Costo-Relleno-Producto",
+      "Costo-Decoracion-Producto",
+      "Tiempo-Elaboracion-Minutos",
+      "Costo-Mano-Obra-Elaboracion",
+      "Costo-Elaboracion-Actual",
+      "Costo-Elaboracion-Anterior",
+      "Habilitado",
+      "Fecha-Registro-Actualizado-Al",
+      "Actualizado"
     ],
     columnaOrden: "Orden",
     clavesForaneas: [],
@@ -28,7 +40,12 @@ window.PRODUCTO_UNITARIO_BASE_SHEET_BASE = {
     ],
     formulas: {
       "Costo-Elaboracion-Actual": {
-        fuentes: ["Costo-Produccion-ProductoBase", "Costo-Relleno-Producto", "Costo-Decoracion-Producto", "Costo-Mano-Obra-Elaboracion"],
+        fuentes: [
+          "Costo-Produccion-ProductoBase",
+          "Costo-Relleno-Producto",
+          "Costo-Decoracion-Producto",
+          "Costo-Mano-Obra-Elaboracion"
+        ],
         operacion: "suma",
         expresion: "a + b + c + d",
         decimales: 2,
@@ -36,7 +53,10 @@ window.PRODUCTO_UNITARIO_BASE_SHEET_BASE = {
       }
     },
     valorAnterior: [
-      { columnaOrigen: "Costo-Elaboracion-Actual", columnaDestino: "Costo-Elaboracion-Anterior" }
+      {
+        columnaOrigen: "Costo-Elaboracion-Actual",
+        columnaDestino: "Costo-Elaboracion-Anterior"
+      }
     ]
   }
 };

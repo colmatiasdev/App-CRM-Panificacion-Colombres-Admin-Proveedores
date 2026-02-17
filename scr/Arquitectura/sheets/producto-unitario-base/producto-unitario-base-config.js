@@ -7,10 +7,34 @@
   var CACHE_MAX_AGE_MS = 5 * 60 * 1000;
 
   var ACCIONES = {
-    listar: { id: "listar", url: "producto-unitario-base.html", label: "Listar", visible: true, componente: "listado" },
-    crear: { id: "crear", url: "crear-producto-unitario-base.html", label: "Crear", visible: true, componente: "formulario" },
-    editar: { id: "editar", url: "editar-producto-unitario-base.html", label: "Editar", visible: true, componente: "formulario" },
-    ver: { id: "ver", url: "ver-producto-unitario-base.html", label: "Ver", visible: true, componente: "detalle" }
+    listar: {
+      id: "listar",
+      url: "producto-unitario-base.html",
+      label: "Listar",
+      visible: true,
+      componente: "listado"
+    },
+    crear: {
+      id: "crear",
+      url: "crear-producto-unitario-base.html",
+      label: "Crear",
+      visible: true,
+      componente: "formulario"
+    },
+    editar: {
+      id: "editar",
+      url: "editar-producto-unitario-base.html",
+      label: "Editar",
+      visible: true,
+      componente: "formulario"
+    },
+    ver: {
+      id: "ver",
+      url: "ver-producto-unitario-base.html",
+      label: "Ver",
+      visible: true,
+      componente: "detalle"
+    }
   };
 
   window.PRODUCTO_UNITARIO_BASE_ACCIONES = ACCIONES;
@@ -78,7 +102,11 @@
     if (cached && cached.timestamp && (Date.now() - cached.timestamp < CACHE_MAX_AGE_MS)) return Promise.resolve(cached.config);
     var json = window.PRODUCTO_UNITARIO_BASE_SHEETS_JSON;
     if (!json) return Promise.reject(new Error("Falta la configuración del módulo. Cargá el script de la acción antes de producto-unitario-base-config.js."));
-    try { return Promise.resolve(buildConfigFromJson(json)); } catch (e) { return Promise.reject(e); }
+    try {
+      return Promise.resolve(buildConfigFromJson(json));
+    } catch (e) {
+      return Promise.reject(e);
+    }
   }
   window.PRODUCTO_UNITARIO_BASE_LOAD_CONFIG = loadConfig;
 })();
