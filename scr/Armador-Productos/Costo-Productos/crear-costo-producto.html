@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Crear producto elaborado - Panificación Colombres</title>
+    <title>Crear costo producto - Panificación Colombres</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -12,37 +12,37 @@
     <script src="../../Arquitectura/config.js"></script>
     <script src="../../Arquitectura/config-sheets.js"></script>
     <script src="../../Arquitectura/generar-id.js"></script>
-    <script src="../../Arquitectura/sheets/productos-elaborados/productos-elaborados-sheets-base.js"></script>
-    <script src="../../Arquitectura/sheets/productos-elaborados/sheets-crear-productos-elaborados.config.js"></script>
-    <script>window.PRODUCTOS_ELABORADOS_ACCION_ACTUAL = "crear";</script>
+    <script src="../../Arquitectura/sheets/costo-productos/costo-productos-sheets-base.js"></script>
+    <script src="../../Arquitectura/sheets/costo-productos/sheets-crear-costo-productos.config.js"></script>
+    <script>window.COSTO_PRODUCTOS_ACCION_ACTUAL = "crear";</script>
 </head>
 <body class="costos-page">
     <nav class="costos-nav" aria-label="Navegación principal">
         <a href="../../../index.html" class="costos-nav-link">Inicio</a>
         <a href="../armador-productos.html" class="costos-nav-link">Armador de Productos</a>
-        <a href="productos-elaborados.html" class="costos-nav-link" data-accion="listar">Productos elaborados</a>
-        <a href="../Costo-Productos/costo-productos.html" class="costos-nav-link">Costo productos</a>
+        <a href="../Productos-Elaborados/productos-elaborados.html" class="costos-nav-link">Productos elaborados</a>
+        <a href="costo-productos.html" class="costos-nav-link" data-accion="listar">Costo productos</a>
     </nav>
     <main class="costos-main">
-        <h1 class="costos-title">Crear producto elaborado</h1>
-        <p class="costos-intro">Completá los datos del nuevo producto según la estructura de la hoja <strong>Listado-Productos-Elaborados</strong>.</p>
+        <h1 class="costos-title">Crear costo producto</h1>
+        <p class="costos-intro">Completá los datos según la estructura de la hoja <strong>Tabla-Costo-Productos</strong>.</p>
         <div id="edit-form-container" class="costos-datos">
-            <p id="edit-no-data" class="costos-placeholder" style="display:none;">No se pudo cargar el formulario. Revisá que existan productos-elaborados-sheets-base.js y sheets-crear-productos-elaborados.config.js.</p>
+            <p id="edit-no-data" class="costos-placeholder" style="display:none;">No se pudo cargar el formulario. Revisá que existan costo-productos-sheets-base.js y sheets-crear-costo-productos.config.js.</p>
             <p id="edit-loading" class="costos-placeholder">Cargando formulario…</p>
             <form id="costos-edit-form" class="costos-edit-form" style="display:none;">
                 <div id="edit-fields"></div>
                 <div class="costos-edit-actions">
-                    <a href="productos-elaborados.html" class="costos-edit-btn-cancel">Volver al listado</a>
-                    <button type="submit" class="costos-edit-btn-save" id="costos-edit-btn-save"><i class="fa-solid fa-plus" aria-hidden="true"></i> Crear producto</button>
+                    <a href="costo-productos.html" class="costos-edit-btn-cancel">Volver al listado</a>
+                    <button type="submit" class="costos-edit-btn-save" id="costos-edit-btn-save"><i class="fa-solid fa-plus" aria-hidden="true"></i> Crear</button>
                 </div>
             </form>
         </div>
     </main>
-    <script src="../../Arquitectura/sheets/productos-elaborados/productos-elaborados-config.js"></script>
-    <script>if (window.PRODUCTOS_ELABORADOS_APPLY_NAV) window.PRODUCTOS_ELABORADOS_APPLY_NAV();</script>
+    <script src="../../Arquitectura/sheets/costo-productos/costo-productos-config.js"></script>
+    <script>if (window.COSTO_PRODUCTOS_APPLY_NAV) window.COSTO_PRODUCTOS_APPLY_NAV();</script>
     <script>
         (function () {
-            var STORAGE_EDIT = "costosEditRecordProductosElaborados";
+            var STORAGE_EDIT = "costosEditRecordCostoProductos";
             var config = window.APP_CONFIG || {};
             var appsScriptUrl = (config.appsScriptUrl || "").trim();
 
@@ -68,7 +68,7 @@
                 noDataEl.style.display = "block";
                 noDataEl.textContent = "No está configurada la URL de la API (appsScriptUrl en config.js).";
             } else {
-                var loadConfig = window.PRODUCTOS_ELABORADOS_LOAD_CONFIG;
+                var loadConfig = window.COSTO_PRODUCTOS_LOAD_CONFIG;
                 if (!loadConfig) {
                     loadingEl.style.display = "none";
                     noDataEl.style.display = "block";
@@ -87,8 +87,7 @@
                         var nombre = (col.alias != null ? col.alias : col.nombre || "").trim();
                         if (!nombre) return;
                         if (col.label === true) return;
-                        if (isClavePrimaria(nombre, clavePrimaria)) return;
-                        var nameNorm = norm(nombre);
+                        if (isClavePrimaria(col.nombre, clavePrimaria)) return;
                         var restr = col.restricciones || {};
                         var label = document.createElement("label");
                         label.className = "costos-edit-label";
@@ -102,7 +101,7 @@
                             select.id = "field-" + idx;
                             select.className = "costos-edit-input";
                             select.setAttribute("data-header-index", String(idx));
-                            select.setAttribute("data-nombre", nombre);
+                            select.setAttribute("data-nombre", col.nombre);
                             restr.valoresPermitidos.forEach(function (v) {
                                 var opt = document.createElement("option");
                                 opt.value = v;
@@ -118,7 +117,7 @@
                             input.id = "field-" + idx;
                             input.className = "costos-edit-input";
                             input.setAttribute("data-header-index", String(idx));
-                            input.setAttribute("data-nombre", nombre);
+                            input.setAttribute("data-nombre", col.nombre);
                             input.placeholder = col.decimales ? "0.00" : "0";
                             wrap.appendChild(input);
                         } else {
@@ -127,7 +126,7 @@
                             input.id = "field-" + idx;
                             input.className = "costos-edit-input";
                             input.setAttribute("data-header-index", String(idx));
-                            input.setAttribute("data-nombre", nombre);
+                            input.setAttribute("data-nombre", col.nombre);
                             if (restr.maxLongitud) input.maxLength = restr.maxLongitud;
                             wrap.appendChild(input);
                         }
@@ -177,8 +176,8 @@
                             .then(function (json) {
                                 if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = btnText; }
                                 if (json && json.success) {
-                                    alert("Producto creado correctamente.");
-                                    window.location.replace("productos-elaborados.html");
+                                    alert("Registro creado correctamente.");
+                                    window.location.replace("costo-productos.html");
                                 } else {
                                     alert("Error al guardar: " + (json && json.error ? json.error : "Respuesta inválida"));
                                 }

@@ -114,6 +114,22 @@ body.costos-page {
     margin: 0;
     letter-spacing: -0.02em;
 }
+.costos-title--con-icono {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+}
+.costos-title-icono {
+    font-size: 1.5rem;
+    color: var(--logo-teal);
+    opacity: 0.9;
+}
+.costos-title--con-icono .costos-title-icono.fa-eye {
+    color: var(--logo-teal-dark);
+}
+.costos-title--con-icono .costos-title-icono.fa-pen {
+    color: var(--logo-orange);
+}
 .costos-calc-btn {
     display: inline-flex;
     align-items: center;
@@ -740,9 +756,31 @@ body.costos-page {
     display: none;
 }
 .costos-edit-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
     margin-top: 20px;
     padding-top: 16px;
     border-top: 1px solid var(--border);
+}
+.costos-ver-detalle {
+    margin-bottom: 20px;
+}
+.costos-ver-dl {
+    display: grid;
+    grid-template-columns: minmax(140px, auto) 1fr;
+    gap: 8px 24px;
+    margin: 0;
+}
+.costos-ver-dt {
+    font-weight: 600;
+    color: var(--logo-dark);
+    margin: 0;
+}
+.costos-ver-dd {
+    margin: 0;
+    color: var(--muted);
 }
 .costos-edit-btn-save {
     background: linear-gradient(180deg, var(--logo-orange) 0%, #c2410c 100%);
@@ -762,6 +800,28 @@ body.costos-page {
     opacity: 0.5;
     cursor: not-allowed;
     pointer-events: none;
+}
+.costos-edit-btn-editar {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-right: 0;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    border-radius: 10px;
+    text-decoration: none;
+    background: var(--logo-teal);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+}
+.costos-edit-btn-editar:hover {
+    background: var(--logo-teal-dark);
+    color: #fff;
+    text-decoration: none;
+    opacity: 0.95;
 }
 .costos-edit-btn-cancel {
     display: inline-block;
@@ -1189,6 +1249,41 @@ body.costos-page {
     margin-bottom: 12px;
     border: 1px solid #ffedd5;
     box-shadow: 0 4px 12px rgba(234, 88, 12, 0.06);
+}
+.costos-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+}
+.costos-card-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s;
+}
+.costos-card-btn-ver {
+    background: var(--logo-teal-light);
+    color: var(--logo-teal-dark);
+}
+.costos-card-btn-ver:hover {
+    background: var(--logo-teal);
+    color: #fff;
+}
+.costos-card-btn-editar {
+    background: #ffedd5;
+    color: var(--logo-orange);
+}
+.costos-card-btn-editar:hover {
+    background: var(--logo-orange);
+    color: #fff;
 }
 .costos-card-deshabilitado {
     opacity: 0.82;

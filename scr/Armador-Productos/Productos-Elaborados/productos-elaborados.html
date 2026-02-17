@@ -9,15 +9,18 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="../../costos/costos.css">
-    <script src="../../../config.js"></script>
+    <script src="../../Arquitectura/config.js"></script>
     <script src="../../Arquitectura/config-sheets.js"></script>
-    <script src="../../Arquitectura/sheets/productos-elaborados-sheets.config.js"></script>
+    <script src="../../Arquitectura/sheets/productos-elaborados/productos-elaborados-sheets-base.js"></script>
+    <script src="../../Arquitectura/sheets/productos-elaborados/sheets-listar-productos-elaborados.config.js"></script>
+    <script>window.PRODUCTOS_ELABORADOS_ACCION_ACTUAL = "listar";</script>
 </head>
 <body class="costos-page">
     <nav class="costos-nav" aria-label="Navegación principal">
         <a href="../../../index.html" class="costos-nav-link">Inicio</a>
         <a href="../armador-productos.html" class="costos-nav-link">Armador de Productos</a>
-        <a href="productos-elaborados.html" class="costos-nav-link is-active">Productos elaborados</a>
+        <a href="productos-elaborados.html" class="costos-nav-link is-active" data-accion="listar">Productos elaborados</a>
+        <a href="../Costo-Productos/costo-productos.html" class="costos-nav-link">Costo productos</a>
     </nav>
     <main class="costos-main">
         <div class="costos-title-row">
@@ -46,7 +49,8 @@
             <p class="costos-loading">Cargando datos…</p>
         </div>
     </main>
-    <script src="productos-elaborados-config.js"></script>
+    <script src="../../Arquitectura/sheets/productos-elaborados/productos-elaborados-config.js"></script>
     <script src="productos-elaborados.js"></script>
+    <script>if (window.PRODUCTOS_ELABORADOS_APPLY_NAV) window.PRODUCTOS_ELABORADOS_APPLY_NAV();</script>
 </body>
 </html>

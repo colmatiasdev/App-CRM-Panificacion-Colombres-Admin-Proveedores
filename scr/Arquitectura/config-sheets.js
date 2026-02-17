@@ -24,8 +24,10 @@
             materiaPrima: 0,
             packing: 1565788325
         },
-        /** Hoja Listado-Productos-Elaborados (módulo Productos elaborados). Apps Script: sheet=Listado-Productos-Elaborados */
-        listadoProductosElaborados: "Listado-Productos-Elaborados"
+        /** Hoja Listado-Productos-Elaborados (módulo Productos elaborados). Apps Script: sheet=Listado-Productos-Elaborados. FK: IDCosto-Producto → Tabla-Costo-Productos */
+        listadoProductosElaborados: "Listado-Productos-Elaborados",
+        /** Hoja Tabla-Costo-Productos (módulo Costo productos). Apps Script: sheet=Tabla-Costo-Productos. PK: IDCosto-Producto */
+        tablaCostoProductos: "Tabla-Costo-Productos"
     };
 
     /** URLs CSV por hoja (se rellenan a continuación desde googleSheet). */

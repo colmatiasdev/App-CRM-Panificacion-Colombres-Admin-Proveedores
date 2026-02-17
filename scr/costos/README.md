@@ -7,7 +7,7 @@ Cada módulo tiene **su propia carpeta** con:
 - **HTML**: listado (`packing.html` / `materia-prima.html`), crear (`crear-*.html`), editar (`editar-*.html`).
 - **CSS compartido**: `../costos.css` (un solo archivo para todos los módulos de costos).
 - **JS compartido**: `../costos-sheet.js` (lógica de listado, formularios y API).
-- **Config global**: `../../../config.js` (raíz del proyecto).
+- **Config global**: `../../Arquitectura/config.js` (scr/Arquitectura).
 
 Estructura:
 
@@ -36,12 +36,12 @@ Desde **cualquier archivo** dentro de `scr/costos/Packing/` o `scr/costos/Materi
 |-------------|--------------------|--------|
 | CSS costos  | `../costos.css`    | El CSS está en la carpeta padre `scr/costos/`. |
 | JS costos   | `../costos-sheet.js`| El JS está en `scr/costos/`. |
-| Config      | `../../../config.js` | `config.js` está en la raíz del proyecto. |
+| Config      | `../../Arquitectura/config.js` | `config.js` está en scr/Arquitectura. |
 
 **Errores habituales:**
 
 - En crear/editar de Materia Prima usar `costos.css` o `costos-sheet.js` sin `../` → el navegador busca dentro de `Materia-Prima/` y no encuentra los archivos (CSS/JS no se ven).
-- Usar `../../config.js` → apunta a `scr/config.js`; debe ser `../../../config.js` para llegar a la raíz.
+- Usar `../config.js` desde costos → apunta a scr/config.js (no existe); debe ser `../../Arquitectura/config.js` para scr/Arquitectura/config.js.
 
 ## Navegación rápida
 
@@ -58,6 +58,6 @@ Así se puede saltar entre módulos sin volver al inicio. La **Calculadora de eq
 
 1. Crear carpeta `scr/costos/NombreModulo/`.
 2. Añadir `listado.html`, `crear-nombre-modulo.html`, `editar-nombre-modulo.html`.
-3. En cada HTML: `<link href="../costos.css">`, `<script src="../costos-sheet.js">`, `<script src="../../../config.js">`.
+3. En cada HTML: `<link href="../costos.css">`, `<script src="../costos-sheet.js">`, `<script src="../../Arquitectura/config.js">`.
 4. Incluir la misma `<nav class="costos-nav">` con enlaces a Inicio, Packing, Materia prima (y el nuevo módulo si se desea).
-5. En `costos-sheet.js` y en `config.js` (googleSheet.gids) añadir la hoja/nombre del nuevo módulo si usa Sheets/API.
+5. En `costos-sheet.js` y en `scr/Arquitectura/config-sheets.js` (googleSheet.gids) añadir la hoja/nombre del nuevo módulo si usa Sheets/API.

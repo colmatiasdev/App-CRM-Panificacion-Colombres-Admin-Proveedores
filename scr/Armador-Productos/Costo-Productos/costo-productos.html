@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Costo Productos - Panificación Colombres</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../../costos/costos.css">
+    <script src="../../Arquitectura/config.js"></script>
+    <script src="../../Arquitectura/config-sheets.js"></script>
+    <script src="../../Arquitectura/sheets/costo-productos/costo-productos-sheets-base.js"></script>
+    <script src="../../Arquitectura/sheets/costo-productos/sheets-listar-costo-productos.config.js"></script>
+    <script>window.COSTO_PRODUCTOS_ACCION_ACTUAL = "listar";</script>
+</head>
+<body class="costos-page">
+    <nav class="costos-nav" aria-label="Navegación principal">
+        <a href="../../../index.html" class="costos-nav-link">Inicio</a>
+        <a href="../armador-productos.html" class="costos-nav-link">Armador de Productos</a>
+        <a href="../Productos-Elaborados/productos-elaborados.html" class="costos-nav-link">Productos elaborados</a>
+        <a href="costo-productos.html" class="costos-nav-link is-active" data-accion="listar">Costo productos</a>
+    </nav>
+    <main class="costos-main">
+        <div class="costos-title-row">
+            <h1 class="costos-title">Costo productos</h1>
+            <a href="#" id="btn-nuevo-costo-producto" class="costos-calc-btn costos-btn-nueva" role="button">
+                <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                <span class="costos-calc-btn-text-long">Nuevo costo producto</span>
+                <span class="costos-calc-btn-text-short">Nuevo</span>
+            </a>
+        </div>
+        <p class="costos-intro">Listado desde la hoja <strong>Tabla-Costo-Productos</strong>. Creá o modificá registros de costo.</p>
+
+        <section class="costos-filter-section" aria-label="Filtrar y agrupar listado">
+            <label for="filter-costo-productos" class="costos-filter-label">Buscar</label>
+            <input type="search" id="filter-costo-productos" class="costos-filter-input" placeholder="Categoría, producto, texto…" autocomplete="off">
+            <div class="costos-filter-group-by" id="costo-productos-agrupar-wrap" style="display:none;">
+                <label for="agrupar-costo-productos" class="costos-filter-label">Agrupar por</label>
+                <select id="agrupar-costo-productos" class="costos-filter-select" aria-label="Modo de agrupación">
+                </select>
+            </div>
+            <p class="costos-filter-count" id="costo-productos-count" aria-live="polite"></p>
+        </section>
+
+        <div id="datos-costo-productos" class="costos-datos">
+            <p class="costos-loading">Cargando datos…</p>
+        </div>
+    </main>
+    <script src="../../Arquitectura/sheets/costo-productos/costo-productos-config.js"></script>
+    <script src="costo-productos.js"></script>
+    <script>if (window.COSTO_PRODUCTOS_APPLY_NAV) window.COSTO_PRODUCTOS_APPLY_NAV();</script>
+</body>
+</html>

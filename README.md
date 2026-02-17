@@ -7,7 +7,7 @@ Sitio web para panadería artesanal: portada institucional, enlaces a inicio de 
 - **Portada**: logo, texto institucional, botones Iniciar sesión / Registrarse / Conocenos
 - **Auth**: páginas de login y registro (`scr/auth/`)
 - **Footer**: pie con nombre y copyright
-- **config.js**: datos de contacto (WhatsApp, Instagram, delivery) para uso futuro
+- **config.js** (`scr/Arquitectura/config.js`): datos de contacto (WhatsApp, Instagram, delivery) y configuración compartida
 
 ## Tecnologías
 
@@ -26,11 +26,11 @@ Abrir `http://localhost:3000`.
 ## Estructura
 
 ```
-├── config.js       # Configuración (contacto/redes)
 ├── index.html      # Portada
 ├── index.css       # Estilos
 ├── imagenes/logo/  # Logos
 ├── scr/
+│   ├── Arquitectura/  # config.js, config-sheets.js, generar-id.js, sheets/
 │   ├── auth/       # login.html, registro.html
 │   └── footer/     # footer (CSS/JS para otras páginas)
 └── docs/           # Documentación de referencia
