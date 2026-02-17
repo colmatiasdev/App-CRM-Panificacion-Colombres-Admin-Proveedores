@@ -72,7 +72,8 @@ window.COSTO_PRODUCTOS_SHEET_BASE = {
       "columnaClaveForanea": "IDCosto-Producto",
       "columnas": [
         { "columnaOrigen": "Costo-Producto-Final-Actual", "columnaDestino": "Costo-Producto-Final-Actual" },
-        { "columnaOrigen": "Producto", "columnaDestino": "Nombre-Producto" }
+        { "columnaOrigen": "Producto", "columnaDestino": "Nombre-Producto" },
+        { "columnaOrigen": "Categoria", "columnaDestino": "Categoria" }
       ]
     }
   }

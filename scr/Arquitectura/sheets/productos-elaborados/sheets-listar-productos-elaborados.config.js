@@ -44,6 +44,14 @@
       descripcion: "Comercio o sucursal."
     },
     {
+      nombre: "Categoria",
+      alias: "Categoría",
+      tipoDato: "text",
+      tipoComponente: "label",
+      visible: true,
+      descripcion: "Categoría del producto (propagada desde costo)."
+    },
+    {
       nombre: "Nombre-Producto",
       alias: "Nombre Producto",
       tipoDato: "text",

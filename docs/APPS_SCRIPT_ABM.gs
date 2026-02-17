@@ -111,6 +111,7 @@ var CONFIG = {
       'IDProducto',
       'IDCosto-Producto',
       'Comercio-Sucursal',
+      'Categoria',
       'Nombre-Producto',
       'Costo-Producto-Final-Actual',
       'Observaciones',
@@ -118,7 +119,7 @@ var CONFIG = {
     ],
     idColumn: 'IDProducto',
     idPrefix: 'PROD-ELAB-',
-    filterColumns: ['IDProducto', 'IDCosto-Producto', 'Comercio-Sucursal', 'Nombre-Producto', 'Habilitado'],
+    filterColumns: ['IDProducto', 'IDCosto-Producto', 'Comercio-Sucursal', 'Categoria', 'Nombre-Producto', 'Habilitado'],
     requiredOnCreate: ['Comercio-Sucursal']
   },
 
@@ -182,7 +183,8 @@ var PROPAGACION_COSTO_PRODUCTOS = {
   columnaClaveForanea: 'IDCosto-Producto',
   columnas: [
     { columnaOrigen: 'Costo-Producto-Final-Actual', columnaDestino: 'Costo-Producto-Final-Actual' },
-    { columnaOrigen: 'Producto', columnaDestino: 'Nombre-Producto' }
+    { columnaOrigen: 'Producto', columnaDestino: 'Nombre-Producto' },
+    { columnaOrigen: 'Categoria', columnaDestino: 'Categoria' }
   ]
 };
 

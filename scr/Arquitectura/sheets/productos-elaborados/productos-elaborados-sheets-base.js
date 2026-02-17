@@ -21,7 +21,7 @@ window.PRODUCTOS_ELABORADOS_SHEET_BASE = {
         "tabla": "Tabla-Costo-Productos",
         "pkReferencia": "IDCosto-Producto",
         "cardinalidad": "1:1",
-        "columnasVinculadasPorRelacion": ["IDCosto-Producto", "Nombre-Producto", "Costo-Producto-Final-Actual"],
+        "columnasVinculadasPorRelacion": ["IDCosto-Producto", "Categoria", "Nombre-Producto", "Costo-Producto-Final-Actual"],
         "asignarCuandoVacio": {
           "etiquetaBoton": "Asignar Producto a la Lista",
           "urlListado": "costo-productos.html",
@@ -30,6 +30,7 @@ window.PRODUCTOS_ELABORADOS_SHEET_BASE = {
           "nombreHojaDestino": "Listado-Productos-Elaborados",
           "columnasAActualizar": [
             { "destino": "IDCosto-Producto", "origen": "IDCosto-Producto" },
+            { "destino": "Categoria", "origen": "Categoria" },
             { "destino": "Nombre-Producto", "origen": "Producto" },
             { "destino": "Costo-Producto-Final-Actual", "origen": "Costo-Producto-Final-Actual" }
           ]

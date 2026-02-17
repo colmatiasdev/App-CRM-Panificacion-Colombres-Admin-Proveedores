@@ -53,6 +53,16 @@
       restricciones: {}
     },
     {
+      nombre: "Categoria",
+      alias: "Categoría",
+      tipoDato: "text",
+      tipoComponente: "label",
+      visible: true,
+      obligatorio: false,
+      descripcion: "Categoría (propagada desde Tabla-Costo-Productos).",
+      restricciones: {}
+    },
+    {
       nombre: "Nombre-Producto",
       alias: "Nombre Producto",
       tipoDato: "text",
