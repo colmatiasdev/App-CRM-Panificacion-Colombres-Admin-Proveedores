@@ -141,6 +141,7 @@
       nombreHoja: hoja.nombreHoja,
       clavePrimaria: hoja.clavePrimaria,
       clavesForaneas: hoja.clavesForaneas || [],
+      columnasPropias: Array.isArray(hoja.columnasPropias) ? hoja.columnasPropias : [],
       columnaOrden: hoja.columnaOrden,
       prefijoId: hoja.prefijoId,
       patronId: hoja.patronId,

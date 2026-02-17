@@ -13,6 +13,11 @@ window.COSTO_PRODUCTOS_SHEET_BASE = {
     "nombre": "Tabla-Costo-Productos",
     "nombreHoja": "Tabla-Costo-Productos",
     "clavePrimaria": ["IDCosto-Producto"],
+    "columnasPropias": [
+      "Orden", "IDCosto-Producto", "Categoria", "Producto", "Costo-Producto-Maestro-Total",
+      "Costo-Packing", "Costos-Fijos", "Merma-Porcentaje", "Merma-Importe", "Tiiempo-Packing-Minutos",
+      "Costo-Mano-Obra-Packing", "Costo-Producto-Final-Actual", "Costo-Producto-Final-Anterior", "Habilitado"
+    ],
     "columnaOrden": "Orden",
     "clavesForaneas": [],
     "prefijoId": "COSTO-PROD",

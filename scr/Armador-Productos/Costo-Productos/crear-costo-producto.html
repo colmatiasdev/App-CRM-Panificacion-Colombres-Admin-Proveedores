@@ -27,6 +27,7 @@
         <h1 class="costos-title">Crear costo producto</h1>
         <p class="costos-intro">Completá los datos según la estructura de la hoja <strong>Tabla-Costo-Productos</strong>.</p>
         <div id="edit-form-container" class="costos-datos">
+            <div id="costos-edit-alert" class="costos-alert" role="alert" aria-live="polite" style="display:none;"></div>
             <p id="edit-no-data" class="costos-placeholder" style="display:none;">No se pudo cargar el formulario. Revisá que existan costo-productos-sheets-base.js y sheets-crear-costo-productos.config.js.</p>
             <p id="edit-loading" class="costos-placeholder">Cargando formulario…</p>
             <form id="costos-edit-form" class="costos-edit-form" style="display:none;">
@@ -62,6 +63,17 @@
             var loadingEl = document.getElementById("edit-loading");
             var formEl = document.getElementById("costos-edit-form");
             var fieldsContainer = document.getElementById("edit-fields");
+            var alertEl = document.getElementById("costos-edit-alert");
+
+            function showEditAlert(message, type) {
+                if (!alertEl) return;
+                alertEl.textContent = message || "";
+                alertEl.className = "costos-alert costos-alert--" + (type === "success" ? "success" : "error");
+                alertEl.style.display = message ? "block" : "none";
+            }
+            function hideEditAlert() {
+                if (alertEl) { alertEl.style.display = "none"; alertEl.textContent = ""; alertEl.className = "costos-alert"; }
+            }
 
             if (!appsScriptUrl) {
                 loadingEl.style.display = "none";
@@ -155,6 +167,7 @@
 
                     formEl.addEventListener("submit", function (e) {
                         e.preventDefault();
+                        hideEditAlert();
                         var newRow = headers.map(function () { return ""; });
                         formEl.querySelectorAll("[data-header-index]").forEach(function (el) {
                             var idx = parseInt(el.getAttribute("data-header-index"), 10);
@@ -223,15 +236,14 @@
                             .then(function (json) {
                                 if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = btnText; }
                                 if (json && json.success) {
-                                    alert("Registro creado correctamente.");
                                     window.location.replace("costo-productos.html");
                                 } else {
-                                    alert("Error al guardar: " + (json && json.error ? json.error : "Respuesta inválida"));
+                                    showEditAlert("Error al guardar: " + (json && json.error ? json.error : "Respuesta inválida"), "error");
                                 }
                             })
                             .catch(function (err) {
                                 if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = btnText; }
-                                alert("Error de conexión: " + (err.message || "Revisá appsScriptUrl."));
+                                showEditAlert("Error de conexión: " + (err.message || "Revisá appsScriptUrl."), "error");
                             })
                             .finally(function () {
                                 if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.hide();
