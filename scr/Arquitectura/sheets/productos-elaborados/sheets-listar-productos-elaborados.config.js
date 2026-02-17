@@ -16,8 +16,7 @@
       tipoDato: "numeric",
       tipoComponente: "label",
       visible: false,
-      descripcion: "Orden de aparición en listados.",
-      restricciones: { min: 0, entero: true }
+      descripcion: "Orden de aparición en listados."
     },
     {
       nombre: "IDProducto",
@@ -25,8 +24,7 @@
       tipoDato: "text",
       tipoComponente: "label",
       visible: false,
-      descripcion: "Identificador único.",
-      restricciones: {}
+      descripcion: "Identificador único."
     },
     {
       nombre: "IDCosto-Producto",
@@ -34,8 +32,7 @@
       tipoDato: "text",
       tipoComponente: "label",
       visible: false,
-      descripcion: "Referencia a Tabla-Costo-Productos (FK).",
-      restricciones: { maxLongitud: 100 }
+      descripcion: "Referencia a Tabla-Costo-Productos (FK)."
     },
     {
       nombre: "Comercio-Sucursal",
@@ -44,8 +41,7 @@
       tipoComponente: "label",
       visible: false,
       listadoValores: "COMPONENTE-COMBOS.Combo-Comercio-Sucursal",
-      descripcion: "Comercio o sucursal.",
-      restricciones: { maxLongitud: 200 }
+      descripcion: "Comercio o sucursal."
     },
     {
       nombre: "Nombre-Producto",
@@ -53,8 +49,7 @@
       tipoDato: "text",
       tipoComponente: "label",
       visible: true,
-      descripcion: "Nombre del producto.",
-      restricciones: { maxLongitud: 500 }
+      descripcion: "Nombre del producto."
     },
     {
       nombre: "Costo-Producto-Final-Actual",
@@ -63,16 +58,14 @@
       tipoComponente: "label",
       decimales: 2,
       visible: true,
-      descripcion: "Costo final actual.",
-      restricciones: { min: 0 }
+      descripcion: "Costo final actual."
     },
     {
       nombre: "Observaciones",
       alias: "Observaciones",
       tipoDato: "text",
       tipoComponente: "label",
-      visible: false,
-      restricciones: { maxLongitud: 2000 }
+      visible: false
     },
     {
       nombre: "Habilitado",
@@ -80,8 +73,7 @@
       tipoDato: "text",
       tipoComponente: "label",
       visible: false,
-      descripcion: "Sí / No.",
-      restricciones: { valoresPermitidos: ["Sí", "No", ""] }
+      descripcion: "Sí / No."
     }
   ];
   window.PRODUCTOS_ELABORADOS_SHEETS_JSON = {
