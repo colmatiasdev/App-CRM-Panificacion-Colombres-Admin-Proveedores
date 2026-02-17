@@ -31,7 +31,7 @@
       alias: "Categoría",
       tipoDato: "text",
       tipoComponente: "label",
-      visible: true,
+      visible: false,
       descripcion: "Categoría."
     },
     {
@@ -105,7 +105,7 @@
     },
     {
       nombre: "Costo-Producto-Final-Actual",
-      alias: "Costo Producto Final Actual",
+      alias: "Costo Actual",
       tipoDato: "numeric",
       tipoComponente: "label",
       decimales: 2,
@@ -114,11 +114,11 @@
     },
     {
       nombre: "Costo-Producto-Final-Anterior",
-      alias: "Costo Producto Final Anterior",
+      alias: "Costo Anterior",
       tipoDato: "numeric",
       tipoComponente: "label",
       decimales: 2,
-      visible: false,
+      visible: true,
       formatoVisual: "moneda"
     },
     {

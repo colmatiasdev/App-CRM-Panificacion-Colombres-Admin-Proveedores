@@ -114,6 +114,7 @@ var CONFIG = {
       'Categoria',
       'Nombre-Producto',
       'Costo-Producto-Final-Actual',
+      'Costo-Producto-Final-Anterior',
       'Observaciones',
       'Habilitado'
     ],
@@ -183,6 +184,7 @@ var PROPAGACION_COSTO_PRODUCTOS = {
   columnaClaveForanea: 'IDCosto-Producto',
   columnas: [
     { columnaOrigen: 'Costo-Producto-Final-Actual', columnaDestino: 'Costo-Producto-Final-Actual' },
+    { columnaOrigen: 'Costo-Producto-Final-Anterior', columnaDestino: 'Costo-Producto-Final-Anterior' },
     { columnaOrigen: 'Producto', columnaDestino: 'Nombre-Producto' },
     { columnaOrigen: 'Categoria', columnaDestino: 'Categoria' }
   ]

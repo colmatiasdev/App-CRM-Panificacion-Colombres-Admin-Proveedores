@@ -1436,6 +1436,20 @@ body.costos-page {
     border: 1px solid #ffedd5;
     box-shadow: 0 4px 12px rgba(234, 88, 12, 0.06);
 }
+.costos-card-body {
+    margin-top: 8px;
+}
+.costos-card-extra {
+    list-style: disc;
+    margin: 0 0 0 1.1em;
+    padding: 0;
+}
+.costos-card-extra li {
+    margin-bottom: 4px;
+}
+.costos-card-extra li:last-child {
+    margin-bottom: 0;
+}
 .costos-card-actions {
     display: flex;
     flex-wrap: wrap;

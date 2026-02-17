@@ -49,6 +49,14 @@
           "restrictions": { "min": 0 }
         },
         {
+          "name": "Costo-Producto-Final-Anterior",
+          "type": "number",
+          "required": false,
+          "hiddenInList": false,
+          "description": "Costo final anterior (propagado desde costo)",
+          "restrictions": { "min": 0 }
+        },
+        {
           "name": "Observaciones",
           "type": "string",
           "required": false,

@@ -70,6 +70,16 @@
       formatoVisual: "moneda"
     },
     {
+      nombre: "Costo-Producto-Final-Anterior",
+      alias: "Costo Anterior",
+      tipoDato: "numeric",
+      tipoComponente: "label",
+      decimales: 2,
+      visible: true,
+      descripcion: "Costo final anterior (propagado desde costo).",
+      formatoVisual: "moneda"
+    },
+    {
       nombre: "Observaciones",
       alias: "Observaciones",
       tipoDato: "text",

@@ -84,6 +84,17 @@
       restricciones: { min: 0 }
     },
     {
+      nombre: "Costo-Producto-Final-Anterior",
+      alias: "Costo Producto Final Anterior",
+      tipoDato: "numeric",
+      tipoComponente: "label",
+      decimales: 2,
+      visible: false,
+      obligatorio: false,
+      descripcion: "Costo final anterior (propagado al asignar costo).",
+      formatoVisual: "moneda"
+    },
+    {
       nombre: "Observaciones",
       alias: "Observaciones",
       tipoDato: "text",

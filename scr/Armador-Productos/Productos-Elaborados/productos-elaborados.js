@@ -202,11 +202,15 @@
                         var val = row[c] != null ? String(row[c]).trim() : "";
                         if (val) {
                             var colConfig = columnas.filter(function (col) { return norm(col.nombre) === norm(headers[c]); })[0];
+                            if (colConfig && colConfig.formatoVisual && typeof window.formatNumeroVisual === "function") {
+                                var num = parseFloat(String(val).replace(",", "."));
+                                if (!isNaN(num)) val = window.formatNumeroVisual(num, colConfig.formatoVisual, colConfig.decimales != null ? colConfig.decimales : 2);
+                            }
                             var label = (colConfig && colConfig.alias) ? colConfig.alias : headers[c];
                             extra.push(escapeHtml(label) + ": " + escapeHtml(val));
                         }
                     });
-                    var extraHtml = extra.length ? "<p class=\"costos-card-extra\">" + extra.join(" · ") + "</p>" : "";
+                    var extraHtml = extra.length ? "<ul class=\"costos-card-extra\">" + extra.map(function (item) { return "<li>" + item + "</li>"; }).join("") + "</ul>" : "";
                     html += "<div class=\"costos-card costos-card-producto-elaborado\">";
                     html += "<div class=\"costos-card-header\"><h3 class=\"costos-card-title\">" + escapeHtml(title) + "</h3></div>";
                     html += "<div class=\"costos-card-body\">" + extraHtml + "</div>";
@@ -223,11 +227,15 @@
                     var val = row[c] != null ? String(row[c]).trim() : "";
                     if (val) {
                         var colConfig = columnas.filter(function (col) { return norm(col.nombre) === norm(headers[c]); })[0];
+                        if (colConfig && colConfig.formatoVisual && typeof window.formatNumeroVisual === "function") {
+                            var num = parseFloat(String(val).replace(",", "."));
+                            if (!isNaN(num)) val = window.formatNumeroVisual(num, colConfig.formatoVisual, colConfig.decimales != null ? colConfig.decimales : 2);
+                        }
                         var label = (colConfig && colConfig.alias) ? colConfig.alias : headers[c];
                         extra.push(escapeHtml(label) + ": " + escapeHtml(val));
                     }
                 });
-                var extraHtml = extra.length ? "<p class=\"costos-card-extra\">" + extra.join(" · ") + "</p>" : "";
+                var extraHtml = extra.length ? "<ul class=\"costos-card-extra\">" + extra.map(function (item) { return "<li>" + item + "</li>"; }).join("") + "</ul>" : "";
                 html += "<div class=\"costos-card costos-card-producto-elaborado\">";
                 html += "<div class=\"costos-card-header\"><h3 class=\"costos-card-title\">" + escapeHtml(title) + "</h3></div>";
                 html += "<div class=\"costos-card-body\">" + extraHtml + "</div>";

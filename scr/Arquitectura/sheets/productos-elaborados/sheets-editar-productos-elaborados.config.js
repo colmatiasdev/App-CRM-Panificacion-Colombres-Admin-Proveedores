@@ -83,6 +83,18 @@
       formatoVisual: "moneda"
     },
     {
+      nombre: "Costo-Producto-Final-Anterior",
+      alias: "Costo Producto Final Anterior",
+      tipoDato: "numeric",
+      tipoComponente: "label",
+      decimales: 2,
+      visible: true,
+      obligatorio: false,
+      descripcion: "Costo final anterior (propagado desde costo).",
+      restricciones: { min: 0 },
+      formatoVisual: "moneda"
+    },
+    {
       nombre: "Observaciones",
       alias: "Observaciones",
       tipoDato: "text",
