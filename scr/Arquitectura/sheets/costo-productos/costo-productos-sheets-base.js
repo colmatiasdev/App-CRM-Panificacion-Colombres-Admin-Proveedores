@@ -9,6 +9,7 @@
  *   columnaOrigen: nombre en COSTO-EMPLEADOS (Costo-x-Minutos-Packing o Costo-Mano-Obra-Packing). Si no existe, se prueba columnaDestino. Aplica en crear y editar.
  * valorAnterior: en crear y editar, columnaDestino recibe el valor de columnaOrigen al cargar; si columnaOrigen
  *   cambia, se guarda el valor anterior de columnaOrigen en columnaDestino (resguardar dato). Ej.: Costo-Producto-Final-Actual → Costo-Producto-Final-Anterior.
+ * propagacion: al actualizar esta hoja, propagar columnas a tablas que referencian por FK. Sincronizar con CONFIG/PROPAGACION en APPS_SCRIPT_ABM.gs.
  */
 window.COSTO_PRODUCTOS_SHEET_BASE = {
   "modulo": "costo-productos",
@@ -64,6 +65,14 @@ window.COSTO_PRODUCTOS_SHEET_BASE = {
         "columnaOrigen": "Costo-Producto-Final-Actual",
         "columnaDestino": "Costo-Producto-Final-Anterior"
       }
-    ]
+    ],
+    "propagacion": {
+      "soloEnUpdate": false,
+      "tablaDestino": "listado-productos-elaborados",
+      "columnaClaveForanea": "IDCosto-Producto",
+      "columnas": [
+        { "columnaOrigen": "Costo-Producto-Final-Actual", "columnaDestino": "Costo-Producto-Final-Actual" }
+      ]
+    }
   }
 };

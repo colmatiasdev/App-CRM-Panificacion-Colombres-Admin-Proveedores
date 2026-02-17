@@ -109,6 +109,7 @@
             formulas: hoja.formulas && typeof hoja.formulas === "object" ? hoja.formulas : {},
             lookups: Array.isArray(hoja.lookups) ? hoja.lookups : [],
             valorAnterior: Array.isArray(hoja.valorAnterior) ? hoja.valorAnterior : [],
+            propagacion: hoja.propagacion && typeof hoja.propagacion === "object" ? hoja.propagacion : null,
             columnasPorNombre: {},
             indicesExtras: hoja.indices || [],
             columnasAgrupacion: Array.isArray(listado.columnasAgrupacion) ? listado.columnasAgrupacion : (listado.columnasAgrupacion ? [listado.columnasAgrupacion] : []),
