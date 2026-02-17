@@ -37,14 +37,19 @@
         <div id="costo-productos-asignar-banner" class="costos-asignar-banner" style="display:none;" role="status"></div>
 
         <section class="costos-filter-section costos-filter-section--stacked" aria-label="Filtrar y agrupar listado">
-            <div class="costos-filter-search">
-                <label for="filter-costo-productos" class="costos-filter-label">Buscar</label>
-                <input type="search" id="filter-costo-productos" class="costos-filter-input" placeholder="Categoría, producto, texto…" autocomplete="off">
+            <div class="costos-filter-group-by" id="costo-productos-filtrar-wrap" style="display:none;">
+                <label for="filtrar-valores-costo-productos" class="costos-filter-label">Filtrar por</label>
+                <select id="filtrar-valores-costo-productos" class="costos-filter-select" aria-label="Filtrar por valor">
+                </select>
             </div>
             <div class="costos-filter-group-by" id="costo-productos-agrupar-wrap" style="display:none;">
                 <label for="agrupar-costo-productos" class="costos-filter-label">Agrupar por</label>
                 <select id="agrupar-costo-productos" class="costos-filter-select" aria-label="Modo de agrupación">
                 </select>
+            </div>
+            <div class="costos-filter-search">
+                <label for="filter-costo-productos" class="costos-filter-label">Buscar</label>
+                <input type="search" id="filter-costo-productos" class="costos-filter-input" placeholder="Categoría, producto, texto…" autocomplete="off">
             </div>
             <p class="costos-filter-count" id="costo-productos-count" aria-live="polite"></p>
         </section>

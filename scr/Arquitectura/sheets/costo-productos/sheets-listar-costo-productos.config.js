@@ -136,10 +136,10 @@
       indices: hoja.indices,
       columnas: columnas,
       listado: {
-        columnasAgrupacion: ["Categorial"],
-        columnaFiltroValores: "Categorial",
+        columnasAgrupacion: ["Categoria"],
+        columnaFiltroValores: "Categoria",
         modosAgrupacion: [
-          ["Categorial"],
+          ["Categoria"],
         ]
       }
     }]

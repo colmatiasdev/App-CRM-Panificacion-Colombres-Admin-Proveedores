@@ -5,6 +5,7 @@
 (function () {
     var STORAGE_EDIT = "costosEditRecordCostoProductos";
     var STORAGE_EDIT_PRODUCTOS_ELABORADOS = "costosEditRecordProductosElaborados";
+    var STORAGE_FILTRO = "costoProductosFiltroValor";
     var ACCIONES = window.COSTO_PRODUCTOS_ACCIONES || {};
     var params = {};
     try {
@@ -121,7 +122,7 @@
         return sorted;
     }
 
-    function renderList(container, sheetConfig, headers, rows, filterText, modoAgrupacionColumnas, assignMode, idProductoElaboradoParam) {
+    function renderList(container, sheetConfig, headers, rows, filterText, modoAgrupacionColumnas, valorFiltroColumna, indiceColumnaFiltro, assignMode, idProductoElaboradoParam) {
         if (!container) return;
         var columnas = sheetConfig.columnas || [];
         var clavePrimaria = sheetConfig.clavePrimaria || ["IDCosto-Producto"];
@@ -135,9 +136,16 @@
         var filter = (filterText || "").trim().toLowerCase();
         var visible = rows;
         if (filter) {
-            visible = rows.filter(function (row) {
+            visible = visible.filter(function (row) {
                 var concat = row.map(function (c) { return String(c != null ? c : ""); }).join(" ").toLowerCase();
                 return concat.indexOf(filter) !== -1;
+            });
+        }
+        if (valorFiltroColumna != null && String(valorFiltroColumna).trim() !== "" && indiceColumnaFiltro >= 0) {
+            var valorBuscar = String(valorFiltroColumna).trim();
+            visible = visible.filter(function (row) {
+                var v = row[indiceColumnaFiltro];
+                return (v != null ? String(v).trim() : "") === valorBuscar;
             });
         }
 
@@ -405,6 +413,16 @@
                     }
                 }
 
+                var columnaFiltroValores = sheetConfig.columnaFiltroValores || null;
+                var filtrarWrap = document.getElementById("costo-productos-filtrar-wrap");
+                var filtrarSelect = document.getElementById("filtrar-valores-costo-productos");
+                if (filtrarWrap && filtrarSelect && columnaFiltroValores) {
+                    var colFiltro = columnas.filter(function (c) { return norm(c.nombre) === norm(columnaFiltroValores); })[0];
+                    var aliasFiltro = (colFiltro && colFiltro.alias) ? colFiltro.alias : columnaFiltroValores;
+                    var labelFiltrar = filtrarWrap.querySelector('label[for="filtrar-valores-costo-productos"]');
+                    if (labelFiltrar) labelFiltrar.textContent = "Filtrar por " + aliasFiltro;
+                    filtrarSelect.setAttribute("aria-label", "Filtrar por " + aliasFiltro);
+                }
                 var agruparWrap = document.getElementById("costo-productos-agrupar-wrap");
                 var agruparSelect = document.getElementById("agrupar-costo-productos");
                 if (agruparSelect && modosAgrupacion.length > 1) {
@@ -448,6 +466,45 @@
                             return { sheetConfig: sheetConfig, headers: headers, rows: rows };
                         }
 
+                        var indiceColumnaFiltro = -1;
+                        if (columnaFiltroValores && filtrarSelect && filtrarWrap) {
+                            indiceColumnaFiltro = findColumnIndex(headers, [norm(columnaFiltroValores)]);
+                            if (indiceColumnaFiltro >= 0) {
+                                filtrarWrap.style.display = "";
+                                var valoresUnicos = {};
+                                rows.forEach(function (row) {
+                                    var v = row[indiceColumnaFiltro];
+                                    var s = (v != null && String(v).trim() !== "") ? String(v).trim() : "—";
+                                    valoresUnicos[s] = true;
+                                });
+                                var valoresOrdenados = Object.keys(valoresUnicos).sort();
+                                filtrarSelect.innerHTML = "";
+                                var optTodos = document.createElement("option");
+                                optTodos.value = "";
+                                optTodos.textContent = "Todos";
+                                optTodos.selected = true;
+                                filtrarSelect.appendChild(optTodos);
+                                valoresOrdenados.forEach(function (val) {
+                                    var opt = document.createElement("option");
+                                    opt.value = val;
+                                    opt.textContent = val;
+                                    filtrarSelect.appendChild(opt);
+                                });
+                                try {
+                                    var guardado = sessionStorage.getItem(STORAGE_FILTRO);
+                                    if (guardado != null && guardado !== "") {
+                                        var opts = filtrarSelect.querySelectorAll("option");
+                                        for (var o = 0; o < opts.length; o++) {
+                                            if (opts[o].value === guardado) {
+                                                opts[o].selected = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                } catch (e) {}
+                            }
+                        }
+
                         function getModoActual() {
                             var sel = document.getElementById("agrupar-costo-productos");
                             var idx = sel ? parseInt(sel.value, 10) : defaultModoIndex;
@@ -455,13 +512,28 @@
                             return modosAgrupacion[idx] || [];
                         }
 
+                        function getValorFiltroActual() {
+                            var sel = document.getElementById("filtrar-valores-costo-productos");
+                            return sel ? (sel.value || "") : "";
+                        }
+
                         function redraw() {
-                            renderList(container, sheetConfig, headers, rows, (filterInput && filterInput.value) ? filterInput.value : "", getModoActual(), asignarProducto, idProductoElaborado);
+                            var modo = getModoActual();
+                            var valorFiltro = columnaFiltroValores ? getValorFiltroActual() : "";
+                            renderList(container, sheetConfig, headers, rows, (filterInput && filterInput.value) ? filterInput.value : "", modo, valorFiltro, columnaFiltroValores ? indiceColumnaFiltro : -1, asignarProducto, idProductoElaborado);
                         }
 
                         redraw();
                         if (filterInput) {
                             filterInput.addEventListener("input", redraw);
+                        }
+                        if (filtrarSelect) {
+                            filtrarSelect.addEventListener("change", function () {
+                                try {
+                                    sessionStorage.setItem(STORAGE_FILTRO, filtrarSelect.value || "");
+                                } catch (e) {}
+                                redraw();
+                            });
                         }
                         if (agruparSelect) {
                             agruparSelect.addEventListener("change", redraw);

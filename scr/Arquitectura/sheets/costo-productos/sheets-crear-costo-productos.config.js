@@ -32,10 +32,10 @@
     {
       nombre: "Categoria",
       alias: "Categoría",
-      tipoDato: "text",
-      tipoComponente: "text-box",
+      tipoComponente: "combo-basico",
+      comboListadoValores: "COMPONENTE-COMBOS.Combo-Tipo-Productos",
       visible: true,
-      restricciones: { maxLongitud: 200 }
+      restricciones: {}
     },
     {
       nombre: "Producto",
