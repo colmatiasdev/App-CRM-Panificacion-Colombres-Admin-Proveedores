@@ -9,13 +9,66 @@
   }
   var hoja = base.hoja;
   var columnas = [
-    { "nombre": "Orden-Lista", "tipo": "numeric", "nullable": true, "autogeneradoOrden": true, "label": true, "visible": true, "descripcion": "Orden en listados.", "restricciones": { "min": 0, "entero": true } },
-    { "nombre": "IDProducto", "tipo": "text", "nullable": false, "label": true, "visible": false, "descripcion": "ID (solo lectura).", "restricciones": {} },
-    { "nombre": "Comercio-Sucursal", "tipo": "text", "nullable": true, "visible": false, "listadoValores": "COMPONENTE-COMBOS.Combo-Comercio-Sucursal", "descripcion": "Comercio o sucursal.", "restricciones": { "maxLongitud": 200 } },
-    { "nombre": "Nombre-Producto", "tipo": "text", "nullable": true, "visible": true, "descripcion": "Nombre del producto.", "restricciones": { "maxLongitud": 500 } },
-    { "nombre": "Costo-Producto-Final-Actual", "tipo": "numeric", "nullable": true, "decimales": 2, "visible": true, "descripcion": "Costo final actual.", "restricciones": { "min": 0 } },
-    { "nombre": "Observaciones", "tipo": "text", "nullable": true, "visible": false, "restricciones": { "maxLongitud": 2000 } },
-    { "nombre": "Habilitado", "tipo": "text", "nullable": true, "visible": false, "descripcion": "Sí / No.", "restricciones": { "valoresPermitidos": ["Sí", "No", ""] } }
+    {
+      nombre: "Orden-Lista",
+      tipo: "numeric",
+      nullable: true,
+      autogeneradoOrden: true,
+      label: true,
+      visible: true,
+      descripcion: "Orden en listados.",
+      restricciones: { min: 0, entero: true }
+    },
+    {
+      nombre: "IDProducto",
+      tipo: "text",
+      nullable: false,
+      label: true,
+      visible: false,
+      descripcion: "ID (solo lectura).",
+      restricciones: {}
+    },
+    {
+      nombre: "Comercio-Sucursal",
+      tipo: "text",
+      nullable: true,
+      visible: false,
+      listadoValores: "COMPONENTE-COMBOS.Combo-Comercio-Sucursal",
+      descripcion: "Comercio o sucursal.",
+      restricciones: { maxLongitud: 200 }
+    },
+    {
+      nombre: "Nombre-Producto",
+      tipo: "text",
+      nullable: true,
+      visible: true,
+      descripcion: "Nombre del producto.",
+      restricciones: { maxLongitud: 500 }
+    },
+    {
+      nombre: "Costo-Producto-Final-Actual",
+      tipo: "numeric",
+      nullable: true,
+      decimales: 2,
+      visible: true,
+      descripcion: "Costo final actual.",
+      restricciones: { min: 0 }
+    },
+    {
+      nombre: "Observaciones",
+      tipo: "text",
+      nullable: true,
+      visible: false,
+      restricciones: { maxLongitud: 2000 }
+    },
+    {
+      nombre: "Habilitado",
+      tipo: "text",
+      nullable: true,
+      visible: false,
+      descripcion: "Sí / No.",
+      restricciones: { valoresPermitidos: ["Sí", "No", ""] }
+    }
   ];
   window.PRODUCTOS_ELABORADOS_SHEETS_JSON = {
     modulo: base.modulo,
