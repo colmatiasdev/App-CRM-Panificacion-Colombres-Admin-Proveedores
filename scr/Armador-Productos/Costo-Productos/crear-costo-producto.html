@@ -392,8 +392,6 @@
                     }
                     var initialValuesCrear = {};
                     var checkFormChangesCrear = function () {};
-                    var previousValoresCrear = {};
-                    var applyValorAnteriorCrear = function () {};
 
                     applyFormulasCostos(formEl);
                     applyLookupsCostos(formEl, sheetConfig, appsScriptUrl);
@@ -410,8 +408,8 @@
                             }
                         }
                         if (esFuente) {
-                            input.addEventListener("input", function () { applyFormulasCostos(formEl); applyValorAnteriorCrear(); checkFormChangesCrear(); });
-                            input.addEventListener("change", function () { applyFormulasCostos(formEl); applyValorAnteriorCrear(); checkFormChangesCrear(); });
+                            input.addEventListener("input", function () { applyFormulasCostos(formEl); checkFormChangesCrear(); });
+                            input.addEventListener("change", function () { applyFormulasCostos(formEl); checkFormChangesCrear(); });
                         }
                         var esClaveLookup = false;
                         if (sheetConfig.lookups) {
@@ -432,8 +430,8 @@
                         var saveBtn = formEl.querySelector(".costos-edit-btn-save");
                         (sheetConfig.valorAnterior || []).forEach(function (r) {
                             var v = getFormValueByNombre(formEl, r.columnaOrigen);
-                            previousValoresCrear[r.columnaOrigen] = v;
-                            setFormValueByNombre(formEl, r.columnaDestino, v);
+                            var actualDestino = getFormValueByNombre(formEl, r.columnaDestino);
+                            if (actualDestino !== v) setFormValueByNombre(formEl, r.columnaDestino, v);
                         });
                         formEl.querySelectorAll("[data-nombre]").forEach(function (el) {
                             var n = el.getAttribute("data-nombre");
@@ -450,22 +448,9 @@
                             });
                             if (saveBtn) saveBtn.disabled = !has;
                         };
-                        applyValorAnteriorCrear = function () {
-                            (sheetConfig.valorAnterior || []).forEach(function (r) {
-                                setFormValueByNombre(formEl, r.columnaDestino, previousValoresCrear[r.columnaOrigen] != null ? previousValoresCrear[r.columnaOrigen] : "");
-                                previousValoresCrear[r.columnaOrigen] = getFormValueByNombre(formEl, r.columnaOrigen);
-                            });
-                        };
                         formEl.querySelectorAll("input[data-nombre], select[data-nombre]").forEach(function (input) {
                             input.addEventListener("input", checkFormChangesCrear);
                             input.addEventListener("change", checkFormChangesCrear);
-                        });
-                        (sheetConfig.valorAnterior || []).forEach(function (r) {
-                            var elOrigen = formEl.querySelector("[data-nombre=\"" + r.columnaOrigen + "\"]");
-                            if (elOrigen && (elOrigen.tagName === "INPUT" || elOrigen.tagName === "SELECT")) {
-                                elOrigen.addEventListener("input", applyValorAnteriorCrear);
-                                elOrigen.addEventListener("change", applyValorAnteriorCrear);
-                            }
                         });
                     });
 
@@ -473,7 +458,6 @@
                         e.preventDefault();
                         hideEditAlert();
                         applyFormulasCostos(formEl);
-                        applyValorAnteriorCrear();
                         applyLookupsCostos(formEl, sheetConfig, appsScriptUrl).then(function () {
                         var newRow = headers.map(function () { return ""; });
                         formEl.querySelectorAll("[data-header-index]").forEach(function (el) {

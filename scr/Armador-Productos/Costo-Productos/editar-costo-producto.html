@@ -357,8 +357,6 @@
                         }
                         var initialValuesEditar = {};
                         var checkFormChangesEditar = function () {};
-                        var previousValoresEditar = {};
-                        var applyValorAnteriorEditar = function () {};
 
                         applyFormulasCostosEditar(formEl);
                         applyLookupsCostosEditar(formEl, sheetConfig, appsScriptUrl);
@@ -375,8 +373,8 @@
                                 }
                             }
                             if (esFuente) {
-                                input.addEventListener("input", function () { applyFormulasCostosEditar(formEl); applyValorAnteriorEditar(); checkFormChangesEditar(); });
-                                input.addEventListener("change", function () { applyFormulasCostosEditar(formEl); applyValorAnteriorEditar(); checkFormChangesEditar(); });
+                                input.addEventListener("input", function () { applyFormulasCostosEditar(formEl); checkFormChangesEditar(); });
+                                input.addEventListener("change", function () { applyFormulasCostosEditar(formEl); checkFormChangesEditar(); });
                             }
                             var esClaveLookup = false;
                             if (sheetConfig.lookups) {
@@ -396,9 +394,12 @@
                         applyLookupsCostosEditar(formEl, sheetConfig, appsScriptUrl).then(function () {
                             var saveBtn = formEl.querySelector(".costos-edit-btn-save");
                             (sheetConfig.valorAnterior || []).forEach(function (r) {
-                                var v = getFormValueByNombreEditar(formEl, r.columnaOrigen);
-                                previousValoresEditar[r.columnaOrigen] = v;
-                                setFormValueByNombreEditar(formEl, r.columnaDestino, v);
+                                var idxDestino = headers.indexOf(r.columnaDestino);
+                                var valorAnteriorDesdeRegistro = (idxDestino >= 0 && row[idxDestino] != null && row[idxDestino] !== "") ? String(row[idxDestino]).trim() : null;
+                                if (valorAnteriorDesdeRegistro === null) {
+                                    var v = getFormValueByNombreEditar(formEl, r.columnaOrigen);
+                                    setFormValueByNombreEditar(formEl, r.columnaDestino, v);
+                                }
                             });
                             formEl.querySelectorAll("[data-nombre]").forEach(function (el) {
                                 var n = el.getAttribute("data-nombre");
@@ -415,22 +416,9 @@
                                 });
                                 if (saveBtn) saveBtn.disabled = !has;
                             };
-                            applyValorAnteriorEditar = function () {
-                                (sheetConfig.valorAnterior || []).forEach(function (r) {
-                                    setFormValueByNombreEditar(formEl, r.columnaDestino, previousValoresEditar[r.columnaOrigen] != null ? previousValoresEditar[r.columnaOrigen] : "");
-                                    previousValoresEditar[r.columnaOrigen] = getFormValueByNombreEditar(formEl, r.columnaOrigen);
-                                });
-                            };
                             formEl.querySelectorAll("input[data-nombre], select[data-nombre]").forEach(function (input) {
                                 input.addEventListener("input", checkFormChangesEditar);
                                 input.addEventListener("change", checkFormChangesEditar);
-                            });
-                            (sheetConfig.valorAnterior || []).forEach(function (r) {
-                                var elOrigen = formEl.querySelector("[data-nombre=\"" + r.columnaOrigen + "\"]");
-                                if (elOrigen && (elOrigen.tagName === "INPUT" || elOrigen.tagName === "SELECT")) {
-                                    elOrigen.addEventListener("input", applyValorAnteriorEditar);
-                                    elOrigen.addEventListener("change", applyValorAnteriorEditar);
-                                }
                             });
                         });
 
@@ -438,7 +426,6 @@
                             e.preventDefault();
                             hideEditAlert();
                             applyFormulasCostosEditar(formEl);
-                            applyValorAnteriorEditar();
                             applyLookupsCostosEditar(formEl, sheetConfig, appsScriptUrl).then(function () {
                             var newRow = row.slice ? row.slice() : row.map(function (x) { return x; });
                             formEl.querySelectorAll("[data-header-index]").forEach(function (el) {

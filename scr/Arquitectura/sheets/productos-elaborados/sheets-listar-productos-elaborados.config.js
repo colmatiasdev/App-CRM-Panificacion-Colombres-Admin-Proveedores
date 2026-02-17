@@ -48,7 +48,7 @@
       alias: "Categoría",
       tipoDato: "text",
       tipoComponente: "label",
-      visible: true,
+      visible: false,
       descripcion: "Categoría del producto (propagada desde costo)."
     },
     {
@@ -61,7 +61,7 @@
     },
     {
       nombre: "Costo-Producto-Final-Actual",
-      alias: "Costo Producto Final Actual",
+      alias: "Costo Producto",
       tipoDato: "numeric",
       tipoComponente: "label",
       decimales: 2,
@@ -98,7 +98,7 @@
       indices: hoja.indices,
       columnas: columnas,
       listado: {
-        columnasAgrupacion: ["Categoria"],
+        columnasAgrupacion: ["Comercio-Sucursal"],
         columnaFiltroValores: "Comercio-Sucursal",
         modosAgrupacion: [
           ["Categoria"],  
