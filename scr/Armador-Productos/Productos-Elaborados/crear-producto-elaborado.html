@@ -33,7 +33,7 @@
                 <div id="edit-fields"></div>
                 <div class="costos-edit-actions">
                     <a href="productos-elaborados.html" class="costos-edit-btn-cancel">Volver al listado</a>
-                    <button type="submit" class="costos-edit-btn-save" id="costos-edit-btn-save"><i class="fa-solid fa-plus" aria-hidden="true"></i> Crear producto</button>
+                    <button type="submit" class="costos-edit-btn-save" id="costos-edit-btn-save"><i class="fa-solid fa-plus" aria-hidden="true"></i> Seleccionar Producto</button>
                 </div>
             </form>
         </div>
@@ -63,26 +63,26 @@
             var formEl = document.getElementById("costos-edit-form");
             var fieldsContainer = document.getElementById("edit-fields");
 
-            function ensureComboComercioSucursal(nombreHoja, url) {
-                if (window["COMPONENTE-COMBOS"] && Array.isArray(window["COMPONENTE-COMBOS"]["Combo-Comercio-Sucursal"]) && window["COMPONENTE-COMBOS"]["Combo-Comercio-Sucursal"].length > 0) {
-                    return Promise.resolve();
-                }
+            function ensureComboYPreviews(sheetConfig, url) {
+                var nombreHoja = sheetConfig && sheetConfig.nombreHoja;
                 if (!url || !nombreHoja) return Promise.resolve();
+                var combosListos = window["COMPONENTE-COMBOS"] && Array.isArray(window["COMPONENTE-COMBOS"]["Combo-Comercio-Sucursal"]) && window["COMPONENTE-COMBOS"]["Combo-Comercio-Sucursal"].length > 0;
+                if (combosListos && sheetConfig._ordenListaPreview != null) return Promise.resolve();
                 return fetch(url + "?action=list&sheet=" + encodeURIComponent(nombreHoja) + "&limit=10000&_=" + Date.now(), { cache: "no-store" })
                     .then(function (res) { return res.json(); })
                     .then(function (json) {
                         var headers = (json && json.data && json.data.headers) ? json.data.headers : [];
                         var rows = (json && json.data && json.data.rows) ? json.data.rows : [];
-                        var colIdx = -1;
+                        var colIdxComercio = -1;
                         for (var h = 0; h < headers.length; h++) {
-                            if (String(headers[h] || "").trim() === "Comercio-Sucursal") { colIdx = h; break; }
+                            if (String(headers[h] || "").trim() === "Comercio-Sucursal") { colIdxComercio = h; break; }
                         }
                         var unicos = [];
                         var set = {};
-                        if (colIdx >= 0) {
+                        if (colIdxComercio >= 0) {
                             for (var r = 0; r < rows.length; r++) {
                                 var row = rows[r];
-                                var v = Array.isArray(row) ? row[colIdx] : (row && headers[colIdx] != null ? row[headers[colIdx]] : null);
+                                var v = Array.isArray(row) ? row[colIdxComercio] : (row && headers[colIdxComercio] != null ? row[headers[colIdxComercio]] : null);
                                 var s = (v != null && String(v).trim() !== "") ? String(v).trim() : null;
                                 if (s != null && !set[s]) { set[s] = true; unicos.push(s); }
                             }
@@ -90,10 +90,28 @@
                         unicos.sort();
                         if (!window["COMPONENTE-COMBOS"]) window["COMPONENTE-COMBOS"] = {};
                         window["COMPONENTE-COMBOS"]["Combo-Comercio-Sucursal"] = unicos;
+                        if (sheetConfig && sheetConfig.columnaOrden) {
+                            var colOrden = String(sheetConfig.columnaOrden).trim();
+                            var idxColOrden = -1;
+                            for (var i = 0; i < headers.length; i++) {
+                                if (String(headers[i] || "").trim() === colOrden) { idxColOrden = i; break; }
+                            }
+                            var maxVal = 0;
+                            if (idxColOrden >= 0) {
+                                for (var j = 0; j < rows.length; j++) {
+                                    var r = rows[j];
+                                    var val = Array.isArray(r) ? r[idxColOrden] : (r && headers[idxColOrden] != null ? r[headers[idxColOrden]] : null);
+                                    var num = (val != null && val !== "") ? parseFloat(String(val), 10) : NaN;
+                                    if (!isNaN(num) && num > maxVal) maxVal = num;
+                                }
+                            }
+                            sheetConfig._ordenListaPreview = String(maxVal + 1);
+                        }
                     })
                     .catch(function () {
                         if (!window["COMPONENTE-COMBOS"]) window["COMPONENTE-COMBOS"] = {};
                         if (!window["COMPONENTE-COMBOS"]["Combo-Comercio-Sucursal"]) window["COMPONENTE-COMBOS"]["Combo-Comercio-Sucursal"] = [];
+                        if (sheetConfig) sheetConfig._ordenListaPreview = "1";
                     });
             }
 
@@ -110,7 +128,7 @@
                     return;
                 }
                 loadConfig().then(function (sheetConfig) {
-                    return ensureComboComercioSucursal(sheetConfig.nombreHoja, appsScriptUrl).then(function () { return sheetConfig; });
+                    return ensureComboYPreviews(sheetConfig, appsScriptUrl).then(function () { return sheetConfig; });
                 }).then(function (sheetConfig) {
                     var nombreHoja = sheetConfig.nombreHoja;
                     var clavePrimaria = sheetConfig.clavePrimaria || [];
@@ -148,7 +166,9 @@
                         wrap.className = "costos-edit-field";
                         wrap.appendChild(label);
                         if (soloLectura || esPkAutogenerado) {
-                            var valorMostrar = esPkAutogenerado ? idGeneradoPreview : "";
+                            var valorMostrar = "";
+                            if (esPkAutogenerado) valorMostrar = idGeneradoPreview;
+                            else if (tipoComp === "label" && col.autogeneradorID === true && sheetConfig.columnaOrden && String(col.nombre || "").trim() === String(sheetConfig.columnaOrden).trim() && sheetConfig._ordenListaPreview != null) valorMostrar = sheetConfig._ordenListaPreview;
                             var ro = document.createElement("span");
                             ro.id = "field-" + idx;
                             ro.className = "costos-edit-input costos-edit-readonly";
@@ -179,7 +199,7 @@
                             select.className = "costos-edit-input";
                             select.setAttribute("data-header-index", String(idx));
                             select.setAttribute("data-nombre", nombreCol);
-                            if (col.nullable !== false && !(restr.valoresPermitidos && Array.isArray(restr.valoresPermitidos))) {
+                            if (col.obligatorio !== true && !(restr.valoresPermitidos && Array.isArray(restr.valoresPermitidos))) {
                                 var optVacio = document.createElement("option");
                                 optVacio.value = "";
                                 optVacio.textContent = "—";
@@ -191,7 +211,7 @@
                                 opt.textContent = (v != null && v !== "") ? String(v) : "—";
                                 select.appendChild(opt);
                             });
-                            if (col.nullable === false || col.obligatorio) select.required = true;
+                            if (col.obligatorio === true) select.required = true;
                             wrap.appendChild(select);
                         } else if (tipoComp === "text-box" && (tipoDato === "numeric" || col.tipo === "numeric")) {
                             var input = document.createElement("input");
@@ -213,7 +233,7 @@
                             input.setAttribute("data-header-index", String(idx));
                             input.setAttribute("data-nombre", nombreCol);
                             if (restr.maxLongitud) input.maxLength = restr.maxLongitud;
-                            if (col.nullable === false) input.required = true;
+                            if (col.obligatorio === true) input.required = true;
                             wrap.appendChild(input);
                         }
                         fieldsContainer.appendChild(wrap);
@@ -242,6 +262,7 @@
                             saveBtn.innerHTML = "<i class=\"fa-solid fa-spinner fa-spin\" aria-hidden=\"true\"></i> Guardando…";
                         }
                         if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.show("Guardando…");
+                        var idProductoCreado = "";
                         var columnaAutogen = sheetConfig.columnaOrden || null;
                         var colIdxAutogen = columnaAutogen ? headers.indexOf(columnaAutogen) : -1;
                         var promesaNewRow = (columnaAutogen && colIdxAutogen >= 0) ? fetch(appsScriptUrl + "?action=list&sheet=" + encodeURIComponent(nombreHoja) + "&limit=10000&_=" + Date.now(), { cache: "no-store" })
@@ -267,6 +288,10 @@
                             })
                             .catch(function () { return newRow; }) : Promise.resolve(newRow);
                         promesaNewRow.then(function (rowFinal) {
+                            if (sheetConfig.clavePrimaria && sheetConfig.clavePrimaria[0]) {
+                                var idxId = headers.indexOf(sheetConfig.clavePrimaria[0]);
+                                if (idxId >= 0) idProductoCreado = rowFinal[idxId] != null ? String(rowFinal[idxId]) : "";
+                            }
                             var body = { action: "create", sheet: nombreHoja };
                             for (var k = 0; k < headers.length; k++) {
                                 if (headers[k]) body[headers[k]] = rowFinal[k] != null ? rowFinal[k] : "";
@@ -291,8 +316,9 @@
                             .then(function (json) {
                                 if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = btnText; }
                                 if (json && json.success) {
-                                    alert("Producto creado correctamente.");
-                                    window.location.replace("productos-elaborados.html");
+                                    alert("Producto creado correctamente. Seleccioná el costo producto con el que vincularlo.");
+                                    var urlCostoProductos = "../Costo-Productos/costo-productos.html?asignarProducto=1&idProductoElaborado=" + encodeURIComponent(idProductoCreado);
+                                    window.location.replace(urlCostoProductos);
                                 } else {
                                     alert("Error al guardar: " + (json && json.error ? json.error : "Respuesta inválida"));
                                 }

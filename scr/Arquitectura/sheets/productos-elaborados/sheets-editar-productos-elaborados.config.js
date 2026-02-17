@@ -15,7 +15,6 @@
       alias: "Orden Lista",
       tipoDato: "numeric",
       tipoComponente: "label",
-      nullable: true,
       visible: true,
       descripcion: "Orden en listados.",
       restricciones: { min: 0, entero: true }
@@ -25,7 +24,6 @@
       alias: "ID Producto",
       tipoDato: "text",
       tipoComponente: "label",
-      nullable: false,
       visible: false,
       descripcion: "ID (solo lectura).",
       restricciones: {}
@@ -35,7 +33,6 @@
       alias: "ID Costo Producto",
       tipoDato: "text",
       tipoComponente: "text-box",
-      nullable: true,
       visible: false,
       descripcion: "Referencia a Tabla-Costo-Productos (FK).",
       restricciones: { maxLongitud: 100 }
@@ -46,7 +43,6 @@
       tipoDato: "text",
       tipoComponente: "combo-basico",
       comboListadoValores: "COMPONENTE-COMBOS.Combo-Comercio-Sucursal",
-      nullable: false,
       obligatorio: true,
       visible: true,
       descripcion: "Comercio o sucursal.",
@@ -57,7 +53,6 @@
       alias: "Nombre Producto",
       tipoDato: "text",
       tipoComponente: "text-box",
-      nullable: true,
       visible: true,
       descripcion: "Nombre del producto.",
       restricciones: { maxLongitud: 500 }
@@ -67,7 +62,6 @@
       alias: "Costo Producto Final Actual",
       tipoDato: "numeric",
       tipoComponente: "text-box",
-      nullable: true,
       decimales: 2,
       visible: true,
       descripcion: "Costo final actual.",
@@ -78,7 +72,6 @@
       alias: "Observaciones",
       tipoDato: "text",
       tipoComponente: "text-box",
-      nullable: true,
       visible: false,
       restricciones: { maxLongitud: 2000 }
     },
@@ -87,7 +80,6 @@
       alias: "Habilitado",
       tipoDato: "text",
       tipoComponente: "combo-basico",
-      nullable: true,
       visible: false,
       descripcion: "Sí / No.",
       restricciones: { valoresPermitidos: ["Sí", "No", ""] }

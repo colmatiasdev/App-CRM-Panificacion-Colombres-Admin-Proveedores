@@ -184,7 +184,7 @@
                                 select.className = "costos-edit-input";
                                 select.setAttribute("data-header-index", String(idx));
                                 select.setAttribute("data-nombre", col.nombre || nombre);
-                                if (col.nullable !== false && !(restr.valoresPermitidos && Array.isArray(restr.valoresPermitidos))) {
+                                if (col.obligatorio !== true && !(restr.valoresPermitidos && Array.isArray(restr.valoresPermitidos))) {
                                     var optVacio = document.createElement("option");
                                     optVacio.value = "";
                                     optVacio.textContent = "—";
@@ -197,7 +197,7 @@
                                     if (val === (v != null ? String(v) : "")) opt.selected = true;
                                     select.appendChild(opt);
                                 });
-                                if (col.nullable === false || col.obligatorio) select.required = true;
+                                if (col.obligatorio === true) select.required = true;
                                 wrap.appendChild(select);
                                 inputEl = select;
                             } else if ((tipoComp === "text-box" || tipoComp === "numeric") && (tipoDato === "numeric" || col.tipo === "numeric")) {
