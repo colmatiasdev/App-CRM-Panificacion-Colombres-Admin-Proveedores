@@ -13,12 +13,13 @@
     <script src="../../Arquitectura/config-sheets.js"></script>
     <script src="../../Arquitectura/generar-id.js"></script>
     <script src="../../Arquitectura/sheets/productos-elaborados-sheets.config.js"></script>
+    <script>window.PRODUCTOS_ELABORADOS_ACCION_ACTUAL = "crear";</script>
 </head>
 <body class="costos-page">
     <nav class="costos-nav" aria-label="Navegación principal">
         <a href="../../../index.html" class="costos-nav-link">Inicio</a>
         <a href="../armador-productos.html" class="costos-nav-link">Armador de Productos</a>
-        <a href="productos-elaborados.html" class="costos-nav-link is-active">Productos elaborados</a>
+        <a href="productos-elaborados.html" class="costos-nav-link" data-accion="listar">Productos elaborados</a>
     </nav>
     <main class="costos-main">
         <h1 class="costos-title">Crear producto elaborado</h1>
@@ -36,6 +37,7 @@
         </div>
     </main>
     <script src="productos-elaborados-config.js"></script>
+    <script>if (window.PRODUCTOS_ELABORADOS_APPLY_NAV) window.PRODUCTOS_ELABORADOS_APPLY_NAV();</script>
     <script>
         (function () {
             var STORAGE_EDIT = "costosEditRecordProductosElaborados";

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Ver producto elaborado - Panificación Colombres</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../../costos/costos.css">
+    <script src="../../../config.js"></script>
+    <script src="../../Arquitectura/config-sheets.js"></script>
+    <script src="../../Arquitectura/sheets/productos-elaborados-sheets.config.js"></script>
+    <script>window.PRODUCTOS_ELABORADOS_ACCION_ACTUAL = "ver";</script>
+</head>
+<body class="costos-page">
+    <nav class="costos-nav" aria-label="Navegación principal">
+        <a href="../../../index.html" class="costos-nav-link">Inicio</a>
+        <a href="../armador-productos.html" class="costos-nav-link">Armador de Productos</a>
+        <a href="productos-elaborados.html" class="costos-nav-link" data-accion="listar">Productos elaborados</a>
+    </nav>
+    <main class="costos-main">
+        <h1 class="costos-title costos-title--con-icono"><i class="fa-solid fa-eye costos-title-icono" aria-hidden="true"></i> Ver producto elaborado</h1>
+        <p class="costos-intro">Datos del registro. Solo visualización.</p>
+        <div id="ver-container" class="costos-datos">
+            <p id="ver-no-data" class="costos-placeholder" style="display:none;">No hay datos del registro. Volvé al listado y usá «Ver» en una tarjeta.</p>
+            <p id="ver-loading" class="costos-placeholder">Cargando…</p>
+            <div id="ver-detalle" class="costos-ver-detalle" style="display:none;"></div>
+            <div id="ver-actions" class="costos-edit-actions" style="display:none;">
+                <a href="productos-elaborados.html" class="costos-edit-btn-cancel">Volver al listado</a>
+                <a href="editar-producto-elaborado.html" id="ver-btn-editar" class="costos-edit-btn-editar"><i class="fa-solid fa-pen" aria-hidden="true"></i> Editar</a>
+            </div>
+        </div>
+    </main>
+    <script src="productos-elaborados-config.js"></script>
+    <script>if (window.PRODUCTOS_ELABORADOS_APPLY_NAV) window.PRODUCTOS_ELABORADOS_APPLY_NAV();</script>
+    <script>
+        (function () {
+            var STORAGE_EDIT = "costosEditRecordProductosElaborados";
+            function norm(s) {
+                return String(s != null ? s : "").trim().toLowerCase().replace(/\s+/g, "").replace(/-/g, "");
+            }
+            function mapRowToConfigOrder(rowFromStorage, headersFromStorage, columnas) {
+                var configNombres = columnas.map(function (c) { return c.nombre; });
+                var out = [];
+                for (var i = 0; i < configNombres.length; i++) {
+                    var nombre = configNombres[i];
+                    var idx = -1;
+                    for (var j = 0; j < headersFromStorage.length; j++) {
+                        if (norm(headersFromStorage[j]) === norm(nombre)) { idx = j; break; }
+                    }
+                    out.push(idx >= 0 ? (rowFromStorage[idx] != null ? String(rowFromStorage[idx]) : "") : "");
+                }
+                return out;
+            }
+            function escapeHtml(text) {
+                if (text == null) return "";
+                return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+            }
+
+            var noDataEl = document.getElementById("ver-no-data");
+            var loadingEl = document.getElementById("ver-loading");
+            var detalleEl = document.getElementById("ver-detalle");
+            var actionsEl = document.getElementById("ver-actions");
+
+            var raw = sessionStorage.getItem(STORAGE_EDIT);
+            if (!raw) {
+                loadingEl.style.display = "none";
+                noDataEl.style.display = "block";
+            } else {
+                var loadConfig = window.PRODUCTOS_ELABORADOS_LOAD_CONFIG;
+                if (!loadConfig) {
+                    loadingEl.style.display = "none";
+                    noDataEl.style.display = "block";
+                    noDataEl.textContent = "No se pudo cargar la configuración del módulo.";
+                } else {
+                    loadConfig().then(function (sheetConfig) {
+                        var data;
+                        try { data = JSON.parse(raw); } catch (e) { data = {}; }
+                        var headersFromStorage = data.headers || [];
+                        var rowFromStorage = data.row || [];
+                        var columnas = sheetConfig.columnas || [];
+                        var headers = columnas.map(function (c) { return c.nombre; });
+                        var row = mapRowToConfigOrder(rowFromStorage, headersFromStorage, columnas);
+                        if (row.length !== headers.length) {
+                            row = headers.map(function (_, i) { return rowFromStorage[i] != null ? String(rowFromStorage[i]) : ""; });
+                        }
+
+                        loadingEl.style.display = "none";
+                        noDataEl.style.display = "none";
+                        detalleEl.style.display = "block";
+                        actionsEl.style.display = "flex";
+
+                        var html = "<dl class=\"costos-ver-dl\">";
+                        columnas.forEach(function (col, idx) {
+                            var nombre = (col.nombre || "").trim();
+                            if (!nombre) return;
+                            var val = row[idx] != null ? String(row[idx]).trim() : "—";
+                            html += "<dt class=\"costos-ver-dt\">" + escapeHtml(nombre) + "</dt>";
+                            html += "<dd class=\"costos-ver-dd\">" + escapeHtml(val) + "</dd>";
+                        });
+                        html += "</dl>";
+                        detalleEl.innerHTML = html;
+                    }).catch(function (err) {
+                        loadingEl.style.display = "none";
+                        noDataEl.style.display = "block";
+                        noDataEl.textContent = "Error al cargar configuración: " + (err.message || "");
+                    });
+                }
+            }
+        })();
+    </script>
+</body>
+</html>

@@ -23,7 +23,7 @@ window.PRODUCTOS_ELABORADOS_SHEETS_JSON = {
           "nullable": true,
           "autogeneradoOrden": true,
           "label": true,
-          "visible": false,
+          "visible": true,
           "descripcion": "Orden de aparición en listados. Autogenerado por el sistema, no editable.",
           "restricciones": {
             "min": 0,

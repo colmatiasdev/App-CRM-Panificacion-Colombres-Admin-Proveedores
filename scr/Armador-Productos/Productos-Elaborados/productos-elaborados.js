@@ -4,8 +4,11 @@
  */
 (function () {
     var STORAGE_EDIT = "costosEditRecordProductosElaborados";
-    var EDIT_URL = "editar-producto-elaborado.html";
-    var CREATE_URL = "crear-producto-elaborado.html";
+    var ACCIONES = window.PRODUCTOS_ELABORADOS_ACCIONES || {};
+    var LISTAR_URL = (ACCIONES.listar && ACCIONES.listar.url) ? ACCIONES.listar.url : "productos-elaborados.html";
+    var CREAR_URL = (ACCIONES.crear && ACCIONES.crear.url) ? ACCIONES.crear.url : "crear-producto-elaborado.html";
+    var EDITAR_URL = (ACCIONES.editar && ACCIONES.editar.url) ? ACCIONES.editar.url : "editar-producto-elaborado.html";
+    var VER_URL = (ACCIONES.ver && ACCIONES.ver.url) ? ACCIONES.ver.url : "ver-producto-elaborado.html";
 
     var config = window.APP_CONFIG || {};
     var appsScriptUrl = (config.appsScriptUrl || "").trim();
@@ -171,7 +174,8 @@
                     html += "<div class=\"costos-card-header\"><h3 class=\"costos-card-title\">" + escapeHtml(title) + "</h3></div>";
                     html += "<div class=\"costos-card-body\">" + extraHtml + "</div>";
                     html += "<div class=\"costos-card-actions\">";
-                    html += "<a href=\"" + EDIT_URL + "\" class=\"costos-card-btn costos-card-btn-editar\" data-action=\"editar\" data-id=\"" + escapeHtml(id) + "\" data-row-index=\"" + rows.indexOf(row) + "\">Editar</a>";
+                    html += "<a href=\"" + VER_URL + "\" class=\"costos-card-btn costos-card-btn-ver\" data-action=\"ver\" data-id=\"" + escapeHtml(id) + "\" data-row-index=\"" + rows.indexOf(row) + "\"><i class=\"fa-solid fa-eye\" aria-hidden=\"true\"></i> Ver</a>";
+                    html += "<a href=\"" + EDITAR_URL + "\" class=\"costos-card-btn costos-card-btn-editar\" data-action=\"editar\" data-id=\"" + escapeHtml(id) + "\" data-row-index=\"" + rows.indexOf(row) + "\"><i class=\"fa-solid fa-pen\" aria-hidden=\"true\"></i> Editar</a>";
                     html += "</div></div>";
                 });
                 html += "</div></div>";
@@ -190,7 +194,8 @@
                 html += "<div class=\"costos-card-header\"><h3 class=\"costos-card-title\">" + escapeHtml(title) + "</h3></div>";
                 html += "<div class=\"costos-card-body\">" + extraHtml + "</div>";
                 html += "<div class=\"costos-card-actions\">";
-                html += "<a href=\"" + EDIT_URL + "\" class=\"costos-card-btn costos-card-btn-editar\" data-action=\"editar\" data-id=\"" + escapeHtml(id) + "\" data-row-index=\"" + rows.indexOf(row) + "\">Editar</a>";
+                html += "<a href=\"" + VER_URL + "\" class=\"costos-card-btn costos-card-btn-ver\" data-action=\"ver\" data-id=\"" + escapeHtml(id) + "\" data-row-index=\"" + rows.indexOf(row) + "\"><i class=\"fa-solid fa-eye\" aria-hidden=\"true\"></i> Ver</a>";
+                html += "<a href=\"" + EDITAR_URL + "\" class=\"costos-card-btn costos-card-btn-editar\" data-action=\"editar\" data-id=\"" + escapeHtml(id) + "\" data-row-index=\"" + rows.indexOf(row) + "\"><i class=\"fa-solid fa-pen\" aria-hidden=\"true\"></i> Editar</a>";
                 html += "</div></div>";
             });
         }
@@ -201,19 +206,22 @@
         var countEl = document.getElementById("productos-elaborados-count");
         if (countEl) countEl.textContent = visible.length + " de " + rows.length + " producto(s)";
 
-        container.querySelectorAll(".costos-card-btn-editar").forEach(function (btn) {
+        function goToCardAction(btn) {
+            var idx = parseInt(btn.getAttribute("data-row-index"), 10);
+            if (isNaN(idx) || idx < 0 || idx >= rows.length) return;
+            try {
+                sessionStorage.setItem(STORAGE_EDIT, JSON.stringify({
+                    id: getRowId(headers, rows[idx], idColIdx),
+                    headers: headers,
+                    row: rows[idx]
+                }));
+            } catch (err) {}
+            window.location.href = btn.getAttribute("href");
+        }
+        container.querySelectorAll(".costos-card-btn-editar, .costos-card-btn-ver").forEach(function (btn) {
             btn.addEventListener("click", function (e) {
                 e.preventDefault();
-                var idx = parseInt(btn.getAttribute("data-row-index"), 10);
-                if (isNaN(idx) || idx < 0 || idx >= rows.length) return;
-                try {
-                    sessionStorage.setItem(STORAGE_EDIT, JSON.stringify({
-                        id: getRowId(headers, rows[idx], idColIdx),
-                        headers: headers,
-                        row: rows[idx]
-                    }));
-                } catch (err) {}
-                window.location.href = btn.getAttribute("href");
+                goToCardAction(btn);
             });
         });
     }
@@ -234,7 +242,7 @@
         if (btnNuevo) {
             btnNuevo.addEventListener("click", function (e) {
                 e.preventDefault();
-                window.location.href = CREATE_URL;
+                window.location.href = CREAR_URL;
             });
         }
 

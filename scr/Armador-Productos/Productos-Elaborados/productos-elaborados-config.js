@@ -1,11 +1,75 @@
 /**
  * Configuración del módulo Productos elaborados.
  * Lee la config desde window.PRODUCTOS_ELABORADOS_SHEETS_JSON (definida en
- * scr/Arquitectura/sheets/productos-elaborados-sheets.config.js). Para cambiar
- * el comportamiento del módulo, editá directamente ese .config.js.
+ * scr/Arquitectura/sheets/productos-elaborados-sheets.config.js).
+ * Define las acciones (Listar, Crear, Editar, Ver) y la página HTML de cada una.
  */
 (function () {
     var CACHE_MAX_AGE_MS = 5 * 60 * 1000;
+
+    /**
+     * Acciones del módulo: cada una referencia su HTML y tipo de componente.
+     * visible: si la acción se muestra en la navegación/UI cuando corresponde.
+     * componente: "listado" | "formulario" | "detalle" para saber qué tipo de vista mostrar.
+     */
+    var ACCIONES = {
+        listar: {
+            id: "listar",
+            url: "productos-elaborados.html",
+            label: "Listar",
+            visible: true,
+            componente: "listado"
+        },
+        crear: {
+            id: "crear",
+            url: "crear-producto-elaborado.html",
+            label: "Crear",
+            visible: true,
+            componente: "formulario"
+        },
+        editar: {
+            id: "editar",
+            url: "editar-producto-elaborado.html",
+            label: "Editar",
+            visible: true,
+            componente: "formulario"
+        },
+        ver: {
+            id: "ver",
+            url: "ver-producto-elaborado.html",
+            label: "Ver",
+            visible: true,
+            componente: "detalle"
+        }
+    };
+
+    window.PRODUCTOS_ELABORADOS_ACCIONES = ACCIONES;
+
+    /**
+     * Devuelve la acción actual según lo que haya definido la página (window.PRODUCTOS_ELABORADOS_ACCION_ACTUAL).
+     * Cada HTML debe setear esa variable para que el nav marque el ítem activo.
+     */
+    function getAccionActual() {
+        var id = (window.PRODUCTOS_ELABORADOS_ACCION_ACTUAL || "").toLowerCase();
+        return ACCIONES[id] || ACCIONES.listar;
+    }
+
+    window.PRODUCTOS_ELABORADOS_GET_ACCION_ACTUAL = getAccionActual;
+
+    /**
+     * Aplica el estado activo al nav según la acción actual.
+     * El enlace "Productos elaborados" (data-accion="listar") queda activo en toda la sección (listar, crear, editar, ver).
+     */
+    function applyNavAccion() {
+        var accion = getAccionActual();
+        document.querySelectorAll(".costos-nav-link[data-accion]").forEach(function (a) {
+            var linkAccion = a.getAttribute("data-accion");
+            var activo = linkAccion === accion.id || (linkAccion === "listar" && ["crear", "editar", "ver"].indexOf(accion.id) !== -1);
+            a.classList.toggle("is-active", !!activo);
+        });
+    }
+
+    window.PRODUCTOS_ELABORADOS_APPLY_NAV = applyNavAccion;
 
     function norm(s) {
         return String(s != null ? s : "").trim().toLowerCase().replace(/\s+/g, "").replace(/-/g, "");
