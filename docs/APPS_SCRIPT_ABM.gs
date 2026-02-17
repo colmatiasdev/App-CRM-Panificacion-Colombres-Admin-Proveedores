@@ -170,34 +170,27 @@ var CONFIG = {
     requiredOnCreate: ['MINUTOS']
   },
 
-  /** Hoja Tabla Receta Base (Armador Receta – Producto Unitario Base) – ?sheet=Tabla-Receta-Base
-   * PK = IDCosto-ProductoUnitario. Costo-Elaboracion-Actual [G + H + I + K] = fórmula. */
+  /** Hoja Tabla Receta Base (Armador Receta – módulo Receta Base) – ?sheet=Tabla-Receta-Base
+   * PK = IDReceta-Base. Fórmulas: Costo-Produccion[C+E] = C+E; Costo-Produccion-ProductoBase [F/G] = F/G.
+   * Sincronizar con scr/Arquitectura/sheets/receta-base/receta-base-sheets-base.js */
   'tabla-receta-base': {
     sheetName: 'Tabla-Receta-Base',
     gid: 0,
     headers: [
-      'Orden',
-      'IDCosto-ProductoUnitario',
-      'Comercio-Sucursal',
-      'Tipo-Producto',
-      'Nombre-Producto',
-      'IDElaboracion-ProductoBase',
-      'Costo-Produccion-ProductoBase',
-      'Costo-Relleno-Producto',
-      'Costo-Decoracion-Producto',
-      'Tiempo-Elaboracion-Minutos',
-      'Costo-Mano-Obra-Elaboracion',
-      'Costo-Elaboracion-Actual [G + H + I + K]',
-      'Costo-Elaboracion-Anterior',
-      'Habilitado',
-      'Fecha-Registro-Actualizado-Al',
-      'Actualizado'
+      'IDReceta-Base',
+      'Descripcion-Masa-Producto',
+      'Costo-Directo-Receta',
+      'Tiempo-Produccion-Minutos',
+      'Costo-Mano-Obra-Produccion',
+      'Costo-Produccion[C+E]',
+      'Rendimiento-Cantidad',
+      'Rendimiento-UnidadMedida',
+      'Costo-Produccion-ProductoBase [F/G]'
     ],
-    idColumn: 'IDCosto-ProductoUnitario',
-    idPrefix: 'RECETA-',
-    filterColumns: ['IDCosto-ProductoUnitario', 'Comercio-Sucursal', 'Tipo-Producto', 'Nombre-Producto', 'Habilitado'],
-    requiredOnCreate: ['Nombre-Producto'],
-    dateUpdatedColumn: 'Fecha-Registro-Actualizado-Al'
+    idColumn: 'IDReceta-Base',
+    idPrefix: 'RECBASE-',
+    filterColumns: ['IDReceta-Base', 'Descripcion-Masa-Producto', 'Rendimiento-UnidadMedida'],
+    requiredOnCreate: ['Descripcion-Masa-Producto']
   },
 
   /** Hoja Tabla Costos Producto Unitario (Armador Receta) – ?sheet=Tabla-Costos-ProductoUnitario
@@ -240,12 +233,13 @@ var CONFIG = {
       'IDElaboracion-ProductoBase',
       'IDReceta-Base',
       'Cantidad',
+      'Descripcion-Masa-Producto',
       'Costo-Produccion-ProductoBase',
       'Monto'
     ],
     idColumn: 'IDElaboracion-ProductoBase',
     idPrefix: 'ELAB-',
-    filterColumns: ['IDElaboracion-ProductoBase', 'IDReceta-Base', 'Cantidad'],
+    filterColumns: ['IDElaboracion-ProductoBase', 'IDReceta-Base', 'Cantidad', 'Descripcion-Masa-Producto'],
     requiredOnCreate: ['IDReceta-Base', 'Cantidad']
   }
 

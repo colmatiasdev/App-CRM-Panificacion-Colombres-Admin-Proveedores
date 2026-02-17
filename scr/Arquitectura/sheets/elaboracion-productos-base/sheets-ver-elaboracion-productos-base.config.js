@@ -36,6 +36,14 @@
       descripcion: "Cantidad."
     },
     {
+      nombre: "Descripcion-Masa-Producto",
+      alias: "Descripción Masa Producto",
+      tipoDato: "text",
+      tipoComponente: "label",
+      visible: true,
+      descripcion: "Descripción de la masa del producto."
+    },
+    {
       nombre: "Costo-Produccion-ProductoBase",
       alias: "Costo Producción Base",
       tipoDato: "numeric",

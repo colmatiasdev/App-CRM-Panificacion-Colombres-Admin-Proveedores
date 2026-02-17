@@ -15,6 +15,7 @@ window.ELABORACION_PRODUCTOS_BASE_SHEET_BASE = {
       "IDElaboracion-ProductoBase",
       "IDReceta-Base",
       "Cantidad",
+      "Descripcion-Masa-Producto",
       "Costo-Produccion-ProductoBase",
       "Monto"
     ],

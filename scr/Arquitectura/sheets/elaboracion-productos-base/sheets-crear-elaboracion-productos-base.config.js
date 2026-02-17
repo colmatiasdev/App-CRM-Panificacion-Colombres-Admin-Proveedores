@@ -43,6 +43,16 @@
       formatoVisual: "numero"
     },
     {
+      nombre: "Descripcion-Masa-Producto",
+      alias: "Descripción Masa Producto",
+      tipoDato: "text",
+      tipoComponente: "text-box",
+      visible: true,
+      obligatorio: false,
+      descripcion: "Descripción de la masa del producto.",
+      restricciones: { maxLongitud: 500 }
+    },
+    {
       nombre: "Costo-Produccion-ProductoBase",
       alias: "Costo Producción Base",
       tipoDato: "numeric",
