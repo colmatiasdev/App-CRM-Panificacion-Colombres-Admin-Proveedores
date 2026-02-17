@@ -767,6 +767,98 @@ body.costos-page {
 .costos-ver-detalle {
     margin-bottom: 20px;
 }
+.costos-ver-sin-costo {
+    margin-top: 16px;
+}
+.costos-ver-sin-costo .costos-ver-btn-crear-costo {
+    text-decoration: none;
+}
+.costos-ver-asignar-label {
+    font-weight: 600;
+    color: var(--logo-dark);
+    margin: 0 0 8px 0;
+}
+.costos-ver-asignar-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+.costos-ver-combo {
+    min-width: 200px;
+    max-width: 100%;
+    padding: 8px 12px;
+    font-size: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--logo-dark);
+}
+.costos-ver-asignar-msg {
+    margin: 8px 0 0 0;
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+.costos-ver-asignar-msg-error {
+    color: #c2410c;
+}
+.costos-asignar-banner {
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    background: rgba(0, 120, 130, 0.1);
+    border: 1px solid var(--logo-teal);
+    border-radius: 10px;
+    color: var(--logo-dark);
+    font-size: 0.95rem;
+}
+.costos-asignar-banner a.costos-asignar-banner-back {
+    margin-left: 10px;
+    color: var(--logo-teal);
+    font-weight: 600;
+}
+.costos-asignar-banner a.costos-asignar-banner-back:hover {
+    text-decoration: underline;
+}
+.costos-card-btn-vincular {
+    background: linear-gradient(180deg, var(--logo-teal) 0%, #006d75 100%);
+    color: #fff;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.costos-card-btn-vincular:hover {
+    opacity: 0.95;
+}
+.costos-ver-relacionado {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+}
+.costos-ver-relacion-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+    margin-bottom: 8px;
+}
+.costos-ver-btn-relacion {
+    text-decoration: none;
+}
+.costos-ver-subtitulo {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 1.25rem;
+    color: var(--logo-dark);
+    margin: 0 0 12px 0;
+}
 .costos-ver-dl {
     display: grid;
     grid-template-columns: minmax(140px, auto) 1fr;
@@ -1998,4 +2090,54 @@ body.costos-page {
     .costos-table td {
         transition: none;
     }
+}
+
+/* Spinner overlay: cargar / guardar / procesar */
+.costos-spinner-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+.costos-spinner-overlay[aria-hidden="true"] {
+    display: none;
+}
+.costos-spinner-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 24px;
+}
+.costos-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid var(--border);
+    border-top-color: var(--logo-teal);
+    border-radius: 50%;
+    animation: costos-spinner-rotate 0.9s linear infinite;
+}
+.costos-spinner-text {
+    font-size: 0.9rem;
+    color: var(--logo-dark);
+    font-weight: 500;
+}
+@keyframes costos-spinner-rotate {
+    to { transform: rotate(360deg); }
+}
+/* Botón deshabilitado durante proceso */
+button:disabled .costos-spinner-btn-inner,
+.costos-btn-busy {
+    pointer-events: none;
+    opacity: 0.8;
+}
+button:disabled,
+a.costos-btn-busy {
+    cursor: not-allowed;
 }

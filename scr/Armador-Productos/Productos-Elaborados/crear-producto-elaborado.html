@@ -20,7 +20,7 @@
     <nav class="costos-nav" aria-label="Navegación principal">
         <a href="../../../index.html" class="costos-nav-link">Inicio</a>
         <a href="../armador-productos.html" class="costos-nav-link">Armador de Productos</a>
-        <a href="productos-elaborados.html" class="costos-nav-link" data-accion="listar">Productos elaborados</a>
+        <a href="productos-elaborados.html" class="costos-nav-link" data-accion="listar">Lista de Productos Elaborados</a>
         <a href="../Costo-Productos/costo-productos.html" class="costos-nav-link">Costo productos</a>
     </nav>
     <main class="costos-main">
@@ -162,6 +162,7 @@
                             saveBtn.disabled = true;
                             saveBtn.innerHTML = "<i class=\"fa-solid fa-spinner fa-spin\" aria-hidden=\"true\"></i> Guardando…";
                         }
+                        if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.show("Guardando…");
                         fetch(appsScriptUrl, { method: "POST", body: formBody })
                             .then(function (res) { return res.text(); })
                             .then(function (text) {
@@ -186,6 +187,9 @@
                             .catch(function (err) {
                                 if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = btnText; }
                                 alert("Error de conexión: " + (err.message || "Revisá appsScriptUrl."));
+                            })
+                            .finally(function () {
+                                if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.hide();
                             });
                     });
                 }).catch(function (err) {

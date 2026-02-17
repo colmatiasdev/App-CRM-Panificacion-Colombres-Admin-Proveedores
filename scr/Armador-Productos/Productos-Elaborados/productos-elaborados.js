@@ -311,6 +311,9 @@
                 }
 
                 var url = appsScriptUrl + "?action=list&sheet=" + encodeURIComponent(nombreHoja) + "&_=" + Date.now();
+                var spinner = window.COSTOS_SPINNER;
+                if (spinner) spinner.show("Cargando…");
+                if (btnNuevo) btnNuevo.disabled = true;
                 return fetch(url, { cache: "no-store" })
                     .then(function (res) { return res.json(); })
                     .then(function (json) {
@@ -355,9 +358,15 @@
                             agruparSelect.addEventListener("change", redraw);
                         }
                         return { sheetConfig: sheetConfig, headers: headers, rows: rows };
+                    })
+                    .finally(function () {
+                        if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.hide();
+                        if (btnNuevo) btnNuevo.disabled = false;
                     });
             })
             .catch(function (err) {
+                if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.hide();
+                if (btnNuevo) btnNuevo.disabled = false;
                 showMessage(container, "Error al cargar: " + (err.message || "Revisá la URL de la API y la configuración."));
             });
     }

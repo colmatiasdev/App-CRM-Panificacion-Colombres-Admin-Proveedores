@@ -39,4 +39,33 @@
         c.googleSheetMateriaPrimaUrl = gs.baseUrl + "?gid=" + gs.gids.materiaPrima + "&single=true&output=csv";
         c.googleSheetPackingUrl = gs.baseUrl + "?gid=" + gs.gids.packing + "&single=true&output=csv";
     }
+
+    /**
+     * Spinner global para cargar/guardar/procesar.
+     * Uso: COSTOS_SPINNER.show("Cargando…"); … fetch… ; COSTOS_SPINNER.hide();
+     * Deshabilitar botones manualmente: btn.disabled = true; … ; btn.disabled = false;
+     */
+    var overlay = null;
+    window.COSTOS_SPINNER = {
+        show: function (text) {
+            if (!overlay) {
+                overlay = document.createElement("div");
+                overlay.className = "costos-spinner-overlay";
+                overlay.setAttribute("role", "status");
+                overlay.setAttribute("aria-live", "polite");
+                overlay.innerHTML = "<div class=\"costos-spinner-box\"><div class=\"costos-spinner\" aria-hidden=\"true\"></div><span class=\"costos-spinner-text\" id=\"costos-spinner-text\">Procesando…</span></div>";
+                document.body.appendChild(overlay);
+            }
+            overlay.setAttribute("aria-hidden", "false");
+            overlay.style.display = "flex";
+            var textEl = document.getElementById("costos-spinner-text");
+            if (textEl) textEl.textContent = text || "Procesando…";
+        },
+        hide: function () {
+            if (overlay) {
+                overlay.setAttribute("aria-hidden", "true");
+                overlay.style.display = "none";
+            }
+        }
+    };
 })();

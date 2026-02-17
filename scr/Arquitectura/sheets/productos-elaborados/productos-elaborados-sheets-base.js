@@ -1,9 +1,10 @@
 /**
  * Configuración base compartida del módulo Productos elaborados.
  * Define modulo, descripcion y la parte fija de la hoja (nombre, nombreHoja, clavePrimaria,
- * clavesForaneas, prefijoId, patronId, indices). Debe cargarse antes de cualquier
- * *-sheets.config.js de acción (listar, crear, editar, ver).
- * Lo que cambia por acción son solo las columnas (y listado en listar).
+ * clavesForaneas (relación con Tabla-Costo-Productos = 1:1), prefijoId, patronId, indices).
+ * columnasPropias: columnas que pertenecen solo a esta tabla (no se rellenan desde la relación).
+ * En cada FK, columnasVinculadasPorRelacion = columnas que se completan desde la tabla relacionada (destino en columnasAActualizar).
+ * Debe cargarse antes de cualquier *-sheets.config.js de acción (listar, crear, editar, ver).
  */
 window.PRODUCTOS_ELABORADOS_SHEET_BASE = {
   "modulo": "productos-elaborados",
@@ -12,8 +13,27 @@ window.PRODUCTOS_ELABORADOS_SHEET_BASE = {
     "nombre": "Listado-Productos-Elaborados",
     "nombreHoja": "Listado-Productos-Elaborados",
     "clavePrimaria": ["IDProducto"],
+    "columnasPropias": ["Orden-Lista", "IDProducto", "Comercio-Sucursal", "Observaciones", "Habilitado"],
     "clavesForaneas": [
-      { "columna": "IDCosto-Producto", "tabla": "Tabla-Costo-Productos", "pkReferencia": "IDCosto-Producto" }
+      {
+        "columna": "IDCosto-Producto",
+        "tabla": "Tabla-Costo-Productos",
+        "pkReferencia": "IDCosto-Producto",
+        "cardinalidad": "1:1",
+        "columnasVinculadasPorRelacion": ["IDCosto-Producto", "Nombre-Producto", "Costo-Producto-Final-Actual"],
+        "asignarCuandoVacio": {
+          "etiquetaBoton": "Asignar Producto a la Lista",
+          "urlListado": "costo-productos.html",
+          "paramIdProducto": "idProductoElaborado",
+          "nombreHojaOrigen": "Tabla-Costo-Productos",
+          "nombreHojaDestino": "Listado-Productos-Elaborados",
+          "columnasAActualizar": [
+            { "destino": "IDCosto-Producto", "origen": "IDCosto-Producto" },
+            { "destino": "Nombre-Producto", "origen": "Producto" },
+            { "destino": "Costo-Producto-Final-Actual", "origen": "Costo-Producto-Final-Actual" }
+          ]
+        }
+      }
     ],
     "prefijoId": "PROD-ELAB",
     "patronId": 1,

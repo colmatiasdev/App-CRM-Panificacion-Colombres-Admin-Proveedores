@@ -1,9 +1,21 @@
 /**
  * Listado de Costo Productos (Tabla-Costo-Productos). Usa sheets-listar-costo-productos.config.js
+ * Modo asignar: ?asignarProducto=1&idProductoElaborado=XXX para vincular un costo a un producto elaborado (1:1).
  */
 (function () {
     var STORAGE_EDIT = "costosEditRecordCostoProductos";
+    var STORAGE_EDIT_PRODUCTOS_ELABORADOS = "costosEditRecordProductosElaborados";
     var ACCIONES = window.COSTO_PRODUCTOS_ACCIONES || {};
+    var params = {};
+    try {
+        var q = (window.location.search || "").replace(/^\?/, "").split("&");
+        for (var i = 0; i < q.length; i++) {
+            var p = q[i].split("=");
+            if (p[0]) params[decodeURIComponent(p[0])] = p.length > 1 ? decodeURIComponent((p.slice(1).join("=")).replace(/\+/g, " ")) : "";
+        }
+    } catch (e) {}
+    var asignarProducto = (params.asignarProducto || "").trim() === "1";
+    var idProductoElaborado = (params.idProductoElaborado || "").trim();
     var LISTAR_URL = (ACCIONES.listar && ACCIONES.listar.url) ? ACCIONES.listar.url : "costo-productos.html";
     var CREAR_URL = (ACCIONES.crear && ACCIONES.crear.url) ? ACCIONES.crear.url : "crear-costo-producto.html";
     var EDITAR_URL = (ACCIONES.editar && ACCIONES.editar.url) ? ACCIONES.editar.url : "editar-costo-producto.html";
@@ -109,7 +121,7 @@
         return sorted;
     }
 
-    function renderList(container, sheetConfig, headers, rows, filterText, modoAgrupacionColumnas) {
+    function renderList(container, sheetConfig, headers, rows, filterText, modoAgrupacionColumnas, assignMode, idProductoElaboradoParam) {
         if (!container) return;
         var columnas = sheetConfig.columnas || [];
         var clavePrimaria = sheetConfig.clavePrimaria || ["IDCosto-Producto"];
@@ -118,6 +130,7 @@
         if (idColIdx < 0) idColIdx = 0;
         var nameColIdx = findColumnIndex(headers, ["producto", "nombreproducto", "nombre-producto"]);
         if (nameColIdx < 0) nameColIdx = 0;
+        var modoAsignar = !!(assignMode && idProductoElaboradoParam);
 
         var filter = (filterText || "").trim().toLowerCase();
         var visible = rows;
@@ -146,6 +159,14 @@
         var grouped = colIndicesAgrupar.length > 0 ? groupRowsBy(visible, colIndicesAgrupar) : null;
         var groupKeys = grouped ? Object.keys(grouped).sort() : null;
 
+        function cardActionsHtml(id, rowIndex) {
+            if (modoAsignar) {
+                return "<button type=\"button\" class=\"costos-card-btn costos-card-btn-vincular\" data-action=\"vincular\" data-id=\"" + escapeHtml(id) + "\" data-row-index=\"" + rowIndex + "\"><i class=\"fa-solid fa-link\" aria-hidden=\"true\"></i> Vincular</button>";
+            }
+            return "<a href=\"" + VER_URL + "\" class=\"costos-card-btn costos-card-btn-ver\" data-action=\"ver\" data-id=\"" + escapeHtml(id) + "\" data-row-index=\"" + rowIndex + "\"><i class=\"fa-solid fa-eye\" aria-hidden=\"true\"></i> Ver</a>" +
+                "<a href=\"" + EDITAR_URL + "\" class=\"costos-card-btn costos-card-btn-editar\" data-action=\"editar\" data-id=\"" + escapeHtml(id) + "\" data-row-index=\"" + rowIndex + "\"><i class=\"fa-solid fa-pen\" aria-hidden=\"true\"></i> Editar</a>";
+        }
+
         var html = '<div class="costos-cards costos-cards-costo-productos">';
         if (grouped && groupKeys && groupKeys.length > 0) {
             groupKeys.forEach(function (key) {
@@ -169,10 +190,7 @@
                     html += "<div class=\"costos-card costos-card-costo-producto\">";
                     html += "<div class=\"costos-card-header\"><h3 class=\"costos-card-title\">" + escapeHtml(title) + "</h3></div>";
                     html += "<div class=\"costos-card-body\">" + extraHtml + "</div>";
-                    html += "<div class=\"costos-card-actions\">";
-                    html += "<a href=\"" + VER_URL + "\" class=\"costos-card-btn costos-card-btn-ver\" data-action=\"ver\" data-id=\"" + escapeHtml(id) + "\" data-row-index=\"" + rows.indexOf(row) + "\"><i class=\"fa-solid fa-eye\" aria-hidden=\"true\"></i> Ver</a>";
-                    html += "<a href=\"" + EDITAR_URL + "\" class=\"costos-card-btn costos-card-btn-editar\" data-action=\"editar\" data-id=\"" + escapeHtml(id) + "\" data-row-index=\"" + rows.indexOf(row) + "\"><i class=\"fa-solid fa-pen\" aria-hidden=\"true\"></i> Editar</a>";
-                    html += "</div></div>";
+                    html += "<div class=\"costos-card-actions\">" + cardActionsHtml(id, rows.indexOf(row)) + "</div></div>";
                 });
                 html += "</div></div>";
             });
@@ -193,10 +211,7 @@
                 html += "<div class=\"costos-card costos-card-costo-producto\">";
                 html += "<div class=\"costos-card-header\"><h3 class=\"costos-card-title\">" + escapeHtml(title) + "</h3></div>";
                 html += "<div class=\"costos-card-body\">" + extraHtml + "</div>";
-                html += "<div class=\"costos-card-actions\">";
-                html += "<a href=\"" + VER_URL + "\" class=\"costos-card-btn costos-card-btn-ver\" data-action=\"ver\" data-id=\"" + escapeHtml(id) + "\" data-row-index=\"" + rows.indexOf(row) + "\"><i class=\"fa-solid fa-eye\" aria-hidden=\"true\"></i> Ver</a>";
-                html += "<a href=\"" + EDITAR_URL + "\" class=\"costos-card-btn costos-card-btn-editar\" data-action=\"editar\" data-id=\"" + escapeHtml(id) + "\" data-row-index=\"" + rows.indexOf(row) + "\"><i class=\"fa-solid fa-pen\" aria-hidden=\"true\"></i> Editar</a>";
-                html += "</div></div>";
+                html += "<div class=\"costos-card-actions\">" + cardActionsHtml(id, rows.indexOf(row)) + "</div></div>";
             });
         }
         html += "</div>";
@@ -218,12 +233,108 @@
             } catch (err) {}
             window.location.href = btn.getAttribute("href");
         }
-        container.querySelectorAll(".costos-card-btn-editar, .costos-card-btn-ver").forEach(function (btn) {
-            btn.addEventListener("click", function (e) {
-                e.preventDefault();
-                goToCardAction(btn);
+
+        if (modoAsignar) {
+            container.querySelectorAll(".costos-card-btn-vincular").forEach(function (btn) {
+                btn.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    var costId = (btn.getAttribute("data-id") || "").trim();
+                    if (!costId) return;
+                    vincularCostoAProductoElaborado(costId, idProductoElaboradoParam, function (err) {
+                        if (err) alert(err);
+                    }, btn);
+                });
             });
-        });
+        } else {
+            container.querySelectorAll(".costos-card-btn-editar, .costos-card-btn-ver").forEach(function (btn) {
+                btn.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    goToCardAction(btn);
+                });
+            });
+        }
+    }
+
+    function getConfigAsignarProductosElaborados() {
+        var base = window.PRODUCTOS_ELABORADOS_SHEET_BASE;
+        var hoja = base && base.hoja;
+        var fks = hoja && hoja.clavesForaneas;
+        if (!fks) return null;
+        for (var i = 0; i < fks.length; i++) {
+            if (fks[i].asignarCuandoVacio) return fks[i].asignarCuandoVacio;
+        }
+        return null;
+    }
+
+    function vincularCostoAProductoElaborado(idCostoProducto, idProductoElaborado, onDone, btnVincular) {
+        var config = window.APP_CONFIG || {};
+        var apiUrl = (config.appsScriptUrl || "").trim();
+        if (!apiUrl) { onDone("No está configurada la URL de la API."); return; }
+        var asignarConfig = getConfigAsignarProductosElaborados();
+        if (!asignarConfig || !asignarConfig.columnasAActualizar || !asignarConfig.nombreHojaOrigen || !asignarConfig.nombreHojaDestino) {
+            onDone("Configuración de asignación no encontrada.");
+            return;
+        }
+        if (btnVincular) btnVincular.disabled = true;
+        if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.show("Vinculando…");
+        var urlGet = apiUrl + "?action=get&sheet=" + encodeURIComponent(asignarConfig.nombreHojaOrigen) + "&id=" + encodeURIComponent(idCostoProducto);
+        fetch(urlGet, { cache: "no-store" })
+            .then(function (r) { return r.json(); })
+            .then(function (resp) {
+                if (!resp || !resp.success || !resp.data) {
+                    onDone("No se encontró el registro de costo.");
+                    return;
+                }
+                var costRecord = resp.data;
+                var body = { action: "update", sheet: asignarConfig.nombreHojaDestino, id: idProductoElaborado };
+                asignarConfig.columnasAActualizar.forEach(function (m) {
+                    body[m.destino] = costRecord[m.origen] != null ? costRecord[m.origen] : "";
+                });
+                var formBody = new URLSearchParams();
+                for (var key in body) {
+                    if (body.hasOwnProperty(key)) formBody.append(key, body[key] != null ? body[key] : "");
+                }
+                return fetch(apiUrl, { method: "POST", body: formBody })
+                    .then(function (res) { return res.json(); })
+                    .then(function (json) {
+                        if (!json || !json.success) {
+                            onDone((json && json.error) ? json.error : "Error al vincular.");
+                            return;
+                        }
+                        var urlList = apiUrl + "?action=list&sheet=" + encodeURIComponent(asignarConfig.nombreHojaDestino) + "&limit=5000&_=" + Date.now();
+                        return fetch(urlList, { cache: "no-store" })
+                            .then(function (r) { return r.json(); })
+                            .then(function (listResp) {
+                                if (!listResp || !listResp.success || !listResp.data) {
+                                    window.location.href = "../Productos-Elaborados/ver-producto-elaborado.html";
+                                    return;
+                                }
+                                var listHeaders = listResp.data.headers || [];
+                                var listRows = listResp.data.rows || [];
+                                var obj = null;
+                                for (var i = 0; i < listRows.length; i++) {
+                                    var o = listRows[i];
+                                    var pid = (o.IDProducto != null ? String(o.IDProducto).trim() : "");
+                                    if (pid === idProductoElaborado) { obj = o; break; }
+                                }
+                                if (obj && listHeaders.length) {
+                                    var rowArray = listHeaders.map(function (h) { return obj[h] != null && obj[h] !== undefined ? obj[h] : ""; });
+                                    try {
+                                        sessionStorage.setItem(STORAGE_EDIT_PRODUCTOS_ELABORADOS, JSON.stringify({ headers: listHeaders, row: rowArray }));
+                                    } catch (e) {}
+                                }
+                                window.location.href = "../Productos-Elaborados/ver-producto-elaborado.html";
+                            });
+                    });
+            })
+            .catch(function (err) {
+                if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.hide();
+                onDone("Error de conexión: " + (err.message || ""));
+            })
+            .finally(function () {
+                if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.hide();
+                if (btnVincular) btnVincular.disabled = false;
+            });
     }
 
     function showMessage(container, text) {
@@ -239,7 +350,13 @@
 
         if (!container) return;
 
+        var bannerEl = document.getElementById("costo-productos-asignar-banner");
+        if (asignarProducto && idProductoElaborado && bannerEl) {
+            bannerEl.innerHTML = "<strong>Vincular costo a producto elaborado (1:1).</strong> Seleccioná un ítem y usá <strong>Vincular</strong> para aceptar el vínculo y volver a Ver producto elaborado. <a href=\"../Productos-Elaborados/ver-producto-elaborado.html\" class=\"costos-asignar-banner-back\">Volver sin vincular</a>";
+            bannerEl.style.display = "block";
+        }
         if (btnNuevo) {
+            if (asignarProducto && idProductoElaborado) btnNuevo.style.display = "none";
             btnNuevo.addEventListener("click", function (e) {
                 e.preventDefault();
                 window.location.href = CREAR_URL;
@@ -303,6 +420,9 @@
                 }
 
                 var url = appsScriptUrl + "?action=list&sheet=" + encodeURIComponent(nombreHoja) + "&_=" + Date.now();
+                var spinner = window.COSTOS_SPINNER;
+                if (spinner) spinner.show("Cargando…");
+                if (btnNuevo) btnNuevo.disabled = true;
                 return fetch(url, { cache: "no-store" })
                     .then(function (res) { return res.json(); })
                     .then(function (json) {
@@ -336,7 +456,7 @@
                         }
 
                         function redraw() {
-                            renderList(container, sheetConfig, headers, rows, (filterInput && filterInput.value) ? filterInput.value : "", getModoActual());
+                            renderList(container, sheetConfig, headers, rows, (filterInput && filterInput.value) ? filterInput.value : "", getModoActual(), asignarProducto, idProductoElaborado);
                         }
 
                         redraw();
@@ -347,9 +467,15 @@
                             agruparSelect.addEventListener("change", redraw);
                         }
                         return { sheetConfig: sheetConfig, headers: headers, rows: rows };
+                    })
+                    .finally(function () {
+                        if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.hide();
+                        if (btnNuevo) btnNuevo.disabled = false;
                     });
             })
             .catch(function (err) {
+                if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.hide();
+                if (btnNuevo) btnNuevo.disabled = false;
                 showMessage(container, "Error al cargar: " + (err.message || "Revisá la URL de la API y la configuración."));
             });
     }

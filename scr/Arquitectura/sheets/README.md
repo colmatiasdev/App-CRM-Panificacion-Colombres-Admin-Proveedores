@@ -28,8 +28,17 @@ Esta carpeta es **scr/Arquitectura/sheets/**. El módulo Productos elaborados us
 
 ## Relaciones PK/FK entre tablas
 
-- **Listado-Productos-Elaborados** (hoja `Listado-Productos-Elaborados`): **PK** = `IDProducto`. **FK** = columna `IDCosto-Producto` → referencia a **Tabla-Costo-Productos** por su PK `IDCosto-Producto`. Definido en `productos-elaborados/productos-elaborados-sheets-base.js` (`clavesForaneas`).
-- **Tabla-Costo-Productos** (hoja `Tabla-Costo-Productos`): **PK** = `IDCosto-Producto`. Sin FKs. Definido en `costo-productos/costo-productos-sheets-base.js`.
+- **Listado-Productos-Elaborados** (hoja `Listado-Productos-Elaborados`): **PK** = `IDProducto`. **FK** = columna `IDCosto-Producto` → referencia a **Tabla-Costo-Productos** por su PK `IDCosto-Producto`. **Relación 1:1.** Definido en `productos-elaborados/productos-elaborados-sheets-base.js` (`clavesForaneas`, propiedad `cardinalidad: "1:1"`).
+- **Tabla-Costo-Productos** (hoja `Tabla-Costo-Productos`): **PK** = `IDCosto-Producto`. Sin FKs. Relación 1:1 con Listado-Productos-Elaborados. Definido en `costo-productos/costo-productos-sheets-base.js`.
+
+### Relación inversa y botón en Ver (referenciadoPor)
+
+En la tabla que **es referenciada** por otra (por ejemplo Tabla-Costo-Productos, referenciada por Listado-Productos-Elaborados), se puede definir **`referenciadoPor`** en la config base de la hoja. Así la acción **Ver** muestra un botón que depende de la **cardinalidad**:
+
+- **`cardinalidad: "1:1"`**: botón con `etiquetaBoton1a1` (ej. "Asignar productos elaborados") → enlaza al listado de la tabla relacionada con el ID actual como parámetro.
+- **`cardinalidad: "1:N"`**: botón con `etiquetaBoton1aN` (ej. "Ver productos elaborados asignados") → mismo enlace para listar/filtrar los registros que referencian este ID.
+
+Cada entrada en `referenciadoPor` incluye: `tabla`, `nombreHoja`, `columnaFK`, `pkReferencia`, `cardinalidad`, `etiquetaBoton1a1`, `etiquetaBoton1aN`, `urlListado`, `parametroFiltroId`. Cambiando `cardinalidad` y las etiquetas en la config se ajusta el comportamiento sin tocar el HTML.
 
 ## Esquema de cada JSON
 

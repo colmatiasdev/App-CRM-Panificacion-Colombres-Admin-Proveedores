@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="../../costos/costos.css">
     <script src="../../Arquitectura/config.js"></script>
     <script src="../../Arquitectura/config-sheets.js"></script>
+    <script src="../../Arquitectura/sheets/productos-elaborados/productos-elaborados-sheets-base.js"></script>
     <script src="../../Arquitectura/sheets/costo-productos/costo-productos-sheets-base.js"></script>
     <script src="../../Arquitectura/sheets/costo-productos/sheets-listar-costo-productos.config.js"></script>
     <script>window.COSTO_PRODUCTOS_ACCION_ACTUAL = "listar";</script>
@@ -19,7 +20,7 @@
     <nav class="costos-nav" aria-label="Navegación principal">
         <a href="../../../index.html" class="costos-nav-link">Inicio</a>
         <a href="../armador-productos.html" class="costos-nav-link">Armador de Productos</a>
-        <a href="../Productos-Elaborados/productos-elaborados.html" class="costos-nav-link">Productos elaborados</a>
+        <a href="../Productos-Elaborados/productos-elaborados.html" class="costos-nav-link">Lista de Productos Elaborados</a>
         <a href="costo-productos.html" class="costos-nav-link is-active" data-accion="listar">Costo productos</a>
     </nav>
     <main class="costos-main">
@@ -32,6 +33,8 @@
             </a>
         </div>
         <p class="costos-intro">Listado desde la hoja <strong>Tabla-Costo-Productos</strong>. Creá o modificá registros de costo.</p>
+
+        <div id="costo-productos-asignar-banner" class="costos-asignar-banner" style="display:none;" role="status"></div>
 
         <section class="costos-filter-section" aria-label="Filtrar y agrupar listado">
             <label for="filter-costo-productos" class="costos-filter-label">Buscar</label>
