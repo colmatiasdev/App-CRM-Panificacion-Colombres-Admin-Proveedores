@@ -108,6 +108,7 @@
             columnasPropias: Array.isArray(hoja.columnasPropias) ? hoja.columnasPropias : [],
             formulas: hoja.formulas && typeof hoja.formulas === "object" ? hoja.formulas : {},
             lookups: Array.isArray(hoja.lookups) ? hoja.lookups : [],
+            valorAnterior: Array.isArray(hoja.valorAnterior) ? hoja.valorAnterior : [],
             columnasPorNombre: {},
             indicesExtras: hoja.indices || [],
             columnasAgrupacion: Array.isArray(listado.columnasAgrupacion) ? listado.columnasAgrupacion : (listado.columnasAgrupacion ? [listado.columnasAgrupacion] : []),

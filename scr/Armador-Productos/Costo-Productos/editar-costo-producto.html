@@ -145,7 +145,7 @@
             function buildFormulaLeyenda(formulaCol, columnas) {
                 if (!formulaCol || !Array.isArray(formulaCol.fuentes) || formulaCol.fuentes.length === 0) return "";
                 var op = (formulaCol.operacion || "").toLowerCase();
-                var opLabel = { suma: "Suma", resta: "Resta", multiplicacion: "Multiplicación", division: "División" }[op] || op || "Cálculo";
+                var opLabel = { suma: "Suma", resta: "Resta", multiplicacion: "Multiplicación", division: "División", porcentaje: "Porcentaje" }[op] || op || "Cálculo";
                 var nombres = formulaCol.fuentes.map(function (nombreCol) {
                     var c = columnas.filter(function (col) { return (col.nombre || "") === nombreCol; })[0];
                     return (c && (c.alias != null ? c.alias : c.nombre)) ? String(c.alias || c.nombre).trim() : nombreCol;
@@ -221,7 +221,7 @@
                                 }
                                 wrap.appendChild(ro);
                                 if (esFormula) {
-                                    var leyenda = buildFormulaLeyenda(formulaCol, columnas);
+                                    var leyenda = (formulaCol.leyenda != null && String(formulaCol.leyenda).trim() !== "") ? String(formulaCol.leyenda).trim() : buildFormulaLeyenda(formulaCol, columnas);
                                     if (leyenda) {
                                         var leyendaEl = document.createElement("p");
                                         leyendaEl.className = "costos-edit-formula-leyenda";
@@ -322,7 +322,8 @@
                                         setFormValueByNombreEditar(form, lookup.columnaDestino, "");
                                         return;
                                     }
-                                    var val = resp.data[lookup.columnaOrigen];
+                                    var data = resp.data;
+                                    var val = (data[lookup.columnaOrigen] != null && data[lookup.columnaOrigen] !== "") ? data[lookup.columnaOrigen] : (data[lookup.columnaDestino] != null && data[lookup.columnaDestino] !== "" ? data[lookup.columnaDestino] : null);
                                     var dec = (lookup.decimales != null) ? lookup.decimales : 2;
                                     if (typeof val === "number" && !isNaN(val)) val = val.toFixed(dec);
                                     else if (val != null && val !== "") val = String(val).trim();
@@ -354,6 +355,11 @@
                                 span.textContent = result.toFixed(dec);
                             });
                         }
+                        var initialValuesEditar = {};
+                        var checkFormChangesEditar = function () {};
+                        var previousValoresEditar = {};
+                        var applyValorAnteriorEditar = function () {};
+
                         applyFormulasCostosEditar(formEl);
                         applyLookupsCostosEditar(formEl, sheetConfig, appsScriptUrl);
                         formEl.querySelectorAll("input[data-nombre], select[data-nombre]").forEach(function (input) {
@@ -369,8 +375,8 @@
                                 }
                             }
                             if (esFuente) {
-                                input.addEventListener("input", function () { applyFormulasCostosEditar(formEl); });
-                                input.addEventListener("change", function () { applyFormulasCostosEditar(formEl); });
+                                input.addEventListener("input", function () { applyFormulasCostosEditar(formEl); applyValorAnteriorEditar(); checkFormChangesEditar(); });
+                                input.addEventListener("change", function () { applyFormulasCostosEditar(formEl); applyValorAnteriorEditar(); checkFormChangesEditar(); });
                             }
                             var esClaveLookup = false;
                             if (sheetConfig.lookups) {
@@ -382,15 +388,57 @@
                                 }
                             }
                             if (esClaveLookup) {
-                                input.addEventListener("input", function () { applyLookupsCostosEditar(formEl, sheetConfig, appsScriptUrl); });
-                                input.addEventListener("change", function () { applyLookupsCostosEditar(formEl, sheetConfig, appsScriptUrl); });
+                                input.addEventListener("input", function () { applyLookupsCostosEditar(formEl, sheetConfig, appsScriptUrl).then(checkFormChangesEditar); });
+                                input.addEventListener("change", function () { applyLookupsCostosEditar(formEl, sheetConfig, appsScriptUrl).then(checkFormChangesEditar); });
                             }
+                        });
+
+                        applyLookupsCostosEditar(formEl, sheetConfig, appsScriptUrl).then(function () {
+                            var saveBtn = formEl.querySelector(".costos-edit-btn-save");
+                            (sheetConfig.valorAnterior || []).forEach(function (r) {
+                                var v = getFormValueByNombreEditar(formEl, r.columnaOrigen);
+                                previousValoresEditar[r.columnaOrigen] = v;
+                                setFormValueByNombreEditar(formEl, r.columnaDestino, v);
+                            });
+                            formEl.querySelectorAll("[data-nombre]").forEach(function (el) {
+                                var n = el.getAttribute("data-nombre");
+                                if (n) initialValuesEditar[n] = (el.value != null ? String(el.value) : String(el.textContent || "")).trim();
+                            });
+                            if (saveBtn) saveBtn.disabled = true;
+                            checkFormChangesEditar = function () {
+                                var has = false;
+                                formEl.querySelectorAll("[data-nombre]").forEach(function (el) {
+                                    var n = el.getAttribute("data-nombre");
+                                    if (!n) return;
+                                    var cur = (el.value != null ? String(el.value) : String(el.textContent || "")).trim();
+                                    if (cur !== (initialValuesEditar[n] != null ? initialValuesEditar[n] : "")) has = true;
+                                });
+                                if (saveBtn) saveBtn.disabled = !has;
+                            };
+                            applyValorAnteriorEditar = function () {
+                                (sheetConfig.valorAnterior || []).forEach(function (r) {
+                                    setFormValueByNombreEditar(formEl, r.columnaDestino, previousValoresEditar[r.columnaOrigen] != null ? previousValoresEditar[r.columnaOrigen] : "");
+                                    previousValoresEditar[r.columnaOrigen] = getFormValueByNombreEditar(formEl, r.columnaOrigen);
+                                });
+                            };
+                            formEl.querySelectorAll("input[data-nombre], select[data-nombre]").forEach(function (input) {
+                                input.addEventListener("input", checkFormChangesEditar);
+                                input.addEventListener("change", checkFormChangesEditar);
+                            });
+                            (sheetConfig.valorAnterior || []).forEach(function (r) {
+                                var elOrigen = formEl.querySelector("[data-nombre=\"" + r.columnaOrigen + "\"]");
+                                if (elOrigen && (elOrigen.tagName === "INPUT" || elOrigen.tagName === "SELECT")) {
+                                    elOrigen.addEventListener("input", applyValorAnteriorEditar);
+                                    elOrigen.addEventListener("change", applyValorAnteriorEditar);
+                                }
+                            });
                         });
 
                         formEl.addEventListener("submit", function (e) {
                             e.preventDefault();
                             hideEditAlert();
                             applyFormulasCostosEditar(formEl);
+                            applyValorAnteriorEditar();
                             applyLookupsCostosEditar(formEl, sheetConfig, appsScriptUrl).then(function () {
                             var newRow = row.slice ? row.slice() : row.map(function (x) { return x; });
                             formEl.querySelectorAll("[data-header-index]").forEach(function (el) {

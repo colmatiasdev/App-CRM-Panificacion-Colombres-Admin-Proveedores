@@ -181,7 +181,7 @@
             function buildFormulaLeyenda(formulaCol, columnas) {
                 if (!formulaCol || !Array.isArray(formulaCol.fuentes) || formulaCol.fuentes.length === 0) return "";
                 var op = (formulaCol.operacion || "").toLowerCase();
-                var opLabel = { suma: "Suma", resta: "Resta", multiplicacion: "Multiplicación", division: "División" }[op] || op || "Cálculo";
+                var opLabel = { suma: "Suma", resta: "Resta", multiplicacion: "Multiplicación", division: "División", porcentaje: "Porcentaje" }[op] || op || "Cálculo";
                 var nombres = formulaCol.fuentes.map(function (nombreCol) {
                     var c = columnas.filter(function (col) { return (col.nombre || "") === nombreCol; })[0];
                     return (c && (c.alias != null ? c.alias : c.nombre)) ? String(c.alias || c.nombre).trim() : nombreCol;
@@ -256,7 +256,7 @@
                             ro.textContent = valorMostrar;
                             wrap.appendChild(ro);
                             if (esFormula) {
-                                var leyenda = buildFormulaLeyenda(formulaCol, columnas);
+                                var leyenda = (formulaCol.leyenda != null && String(formulaCol.leyenda).trim() !== "") ? String(formulaCol.leyenda).trim() : buildFormulaLeyenda(formulaCol, columnas);
                                 if (leyenda) {
                                     var leyendaEl = document.createElement("p");
                                     leyendaEl.className = "costos-edit-formula-leyenda";
@@ -357,7 +357,8 @@
                                     setFormValueByNombre(form, lookup.columnaDestino, "");
                                     return;
                                 }
-                                var val = resp.data[lookup.columnaOrigen];
+                                var data = resp.data;
+                                var val = (data[lookup.columnaOrigen] != null && data[lookup.columnaOrigen] !== "") ? data[lookup.columnaOrigen] : (data[lookup.columnaDestino] != null && data[lookup.columnaDestino] !== "" ? data[lookup.columnaDestino] : null);
                                 var dec = (lookup.decimales != null) ? lookup.decimales : 2;
                                 if (typeof val === "number" && !isNaN(val)) val = val.toFixed(dec);
                                 else if (val != null && val !== "") val = String(val).trim();
@@ -389,6 +390,11 @@
                             span.textContent = result.toFixed(dec);
                         });
                     }
+                    var initialValuesCrear = {};
+                    var checkFormChangesCrear = function () {};
+                    var previousValoresCrear = {};
+                    var applyValorAnteriorCrear = function () {};
+
                     applyFormulasCostos(formEl);
                     applyLookupsCostos(formEl, sheetConfig, appsScriptUrl);
                     formEl.querySelectorAll("input[data-nombre], select[data-nombre]").forEach(function (input) {
@@ -404,8 +410,8 @@
                             }
                         }
                         if (esFuente) {
-                            input.addEventListener("input", function () { applyFormulasCostos(formEl); });
-                            input.addEventListener("change", function () { applyFormulasCostos(formEl); });
+                            input.addEventListener("input", function () { applyFormulasCostos(formEl); applyValorAnteriorCrear(); checkFormChangesCrear(); });
+                            input.addEventListener("change", function () { applyFormulasCostos(formEl); applyValorAnteriorCrear(); checkFormChangesCrear(); });
                         }
                         var esClaveLookup = false;
                         if (sheetConfig.lookups) {
@@ -417,15 +423,57 @@
                             }
                         }
                         if (esClaveLookup) {
-                            input.addEventListener("input", function () { applyLookupsCostos(formEl, sheetConfig, appsScriptUrl); });
-                            input.addEventListener("change", function () { applyLookupsCostos(formEl, sheetConfig, appsScriptUrl); });
+                            input.addEventListener("input", function () { applyLookupsCostos(formEl, sheetConfig, appsScriptUrl).then(checkFormChangesCrear); });
+                            input.addEventListener("change", function () { applyLookupsCostos(formEl, sheetConfig, appsScriptUrl).then(checkFormChangesCrear); });
                         }
+                    });
+
+                    applyLookupsCostos(formEl, sheetConfig, appsScriptUrl).then(function () {
+                        var saveBtn = formEl.querySelector(".costos-edit-btn-save");
+                        (sheetConfig.valorAnterior || []).forEach(function (r) {
+                            var v = getFormValueByNombre(formEl, r.columnaOrigen);
+                            previousValoresCrear[r.columnaOrigen] = v;
+                            setFormValueByNombre(formEl, r.columnaDestino, v);
+                        });
+                        formEl.querySelectorAll("[data-nombre]").forEach(function (el) {
+                            var n = el.getAttribute("data-nombre");
+                            if (n) initialValuesCrear[n] = (el.value != null ? String(el.value) : String(el.textContent || "")).trim();
+                        });
+                        if (saveBtn) saveBtn.disabled = true;
+                        checkFormChangesCrear = function () {
+                            var has = false;
+                            formEl.querySelectorAll("[data-nombre]").forEach(function (el) {
+                                var n = el.getAttribute("data-nombre");
+                                if (!n) return;
+                                var cur = (el.value != null ? String(el.value) : String(el.textContent || "")).trim();
+                                if (cur !== (initialValuesCrear[n] != null ? initialValuesCrear[n] : "")) has = true;
+                            });
+                            if (saveBtn) saveBtn.disabled = !has;
+                        };
+                        applyValorAnteriorCrear = function () {
+                            (sheetConfig.valorAnterior || []).forEach(function (r) {
+                                setFormValueByNombre(formEl, r.columnaDestino, previousValoresCrear[r.columnaOrigen] != null ? previousValoresCrear[r.columnaOrigen] : "");
+                                previousValoresCrear[r.columnaOrigen] = getFormValueByNombre(formEl, r.columnaOrigen);
+                            });
+                        };
+                        formEl.querySelectorAll("input[data-nombre], select[data-nombre]").forEach(function (input) {
+                            input.addEventListener("input", checkFormChangesCrear);
+                            input.addEventListener("change", checkFormChangesCrear);
+                        });
+                        (sheetConfig.valorAnterior || []).forEach(function (r) {
+                            var elOrigen = formEl.querySelector("[data-nombre=\"" + r.columnaOrigen + "\"]");
+                            if (elOrigen && (elOrigen.tagName === "INPUT" || elOrigen.tagName === "SELECT")) {
+                                elOrigen.addEventListener("input", applyValorAnteriorCrear);
+                                elOrigen.addEventListener("change", applyValorAnteriorCrear);
+                            }
+                        });
                     });
 
                     formEl.addEventListener("submit", function (e) {
                         e.preventDefault();
                         hideEditAlert();
                         applyFormulasCostos(formEl);
+                        applyValorAnteriorCrear();
                         applyLookupsCostos(formEl, sheetConfig, appsScriptUrl).then(function () {
                         var newRow = headers.map(function () { return ""; });
                         formEl.querySelectorAll("[data-header-index]").forEach(function (el) {
