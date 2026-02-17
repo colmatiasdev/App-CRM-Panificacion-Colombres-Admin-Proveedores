@@ -167,7 +167,11 @@
                     var extra = [];
                     extraIndexes.forEach(function (c) {
                         var val = row[c] != null ? String(row[c]).trim() : "";
-                        if (val) extra.push(escapeHtml(headers[c]) + ": " + escapeHtml(val));
+                        if (val) {
+                            var colConfig = columnas.filter(function (col) { return norm(col.nombre) === norm(headers[c]); })[0];
+                            var label = (colConfig && colConfig.alias) ? colConfig.alias : headers[c];
+                            extra.push(escapeHtml(label) + ": " + escapeHtml(val));
+                        }
                     });
                     var extraHtml = extra.length ? "<p class=\"costos-card-extra\">" + extra.join(" · ") + "</p>" : "";
                     html += "<div class=\"costos-card costos-card-producto-elaborado\">";
@@ -187,7 +191,11 @@
                 var extra = [];
                 extraIndexes.forEach(function (c) {
                     var val = row[c] != null ? String(row[c]).trim() : "";
-                    if (val) extra.push(escapeHtml(headers[c]) + ": " + escapeHtml(val));
+                    if (val) {
+                        var colConfig = columnas.filter(function (col) { return norm(col.nombre) === norm(headers[c]); })[0];
+                        var label = (colConfig && colConfig.alias) ? colConfig.alias : headers[c];
+                        extra.push(escapeHtml(label) + ": " + escapeHtml(val));
+                    }
                 });
                 var extraHtml = extra.length ? "<p class=\"costos-card-extra\">" + extra.join(" · ") + "</p>" : "";
                 html += "<div class=\"costos-card costos-card-producto-elaborado\">";

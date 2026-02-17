@@ -100,7 +100,7 @@
                         formEl.style.display = "block";
                         fieldsContainer.innerHTML = "";
                         columnas.forEach(function (col, idx) {
-                            var nombre = (col.nombre || "").trim();
+                            var nombre = (col.alias != null ? col.alias : col.nombre || "").trim();
                             if (!nombre) return;
                             var val = row[idx] != null ? String(row[idx]).trim() : "";
                             var nameNorm = norm(nombre);

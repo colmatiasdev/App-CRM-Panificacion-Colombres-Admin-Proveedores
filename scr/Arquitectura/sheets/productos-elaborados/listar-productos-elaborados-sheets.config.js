@@ -11,16 +11,18 @@
   var columnas = [
     {
       nombre: "Orden-Lista",
+      alias: "Orden Lista",
       tipo: "numeric",
       nullable: true,
       autogeneradoOrden: true,
       label: true,
-      visible: true,
+      visible: false,
       descripcion: "Orden de aparición en listados.",
       restricciones: { min: 0, entero: true }
     },
     {
       nombre: "IDProducto",
+      alias: "ID Producto",
       tipo: "text",
       nullable: false,
       label: true,
@@ -30,6 +32,7 @@
     },
     {
       nombre: "Comercio-Sucursal",
+      alias: "Comercio Sucursal",
       tipo: "text",
       nullable: true,
       visible: false,
@@ -39,6 +42,7 @@
     },
     {
       nombre: "Nombre-Producto",
+      alias: "Nombre Producto",
       tipo: "text",
       nullable: true,
       visible: true,
@@ -47,6 +51,7 @@
     },
     {
       nombre: "Costo-Producto-Final-Actual",
+      alias: "Costo Producto Final Actual",
       tipo: "numeric",
       nullable: true,
       decimales: 2,
@@ -56,6 +61,7 @@
     },
     {
       nombre: "Observaciones",
+      alias: "Observaciones",
       tipo: "text",
       nullable: true,
       visible: false,
@@ -63,6 +69,7 @@
     },
     {
       nombre: "Habilitado",
+      alias: "Habilitado",
       tipo: "text",
       nullable: true,
       visible: false,
