@@ -5,7 +5,7 @@
 (function () {
   var base = window.PRODUCTOS_ELABORADOS_SHEET_BASE;
   if (!base || !base.hoja) {
-    throw new Error("Cargá productos-elaborados-sheets-base.js antes de crear-producto-elaborado-sheets.config.js");
+    throw new Error("Cargá productos-elaborados-sheets-base.js antes de sheets-crear-productos-elaborados.config.js");
   }
   var hoja = base.hoja;
   var columnas = [
@@ -29,6 +29,15 @@
       visible: false,
       descripcion: "ID autogenerado.",
       restricciones: {}
+    },
+    {
+      nombre: "IDCosto-Producto",
+      alias: "ID Costo Producto",
+      tipo: "text",
+      nullable: true,
+      visible: false,
+      descripcion: "Referencia a Tabla-Costo-Productos (FK).",
+      restricciones: { maxLongitud: 100 }
     },
     {
       nombre: "Comercio-Sucursal",

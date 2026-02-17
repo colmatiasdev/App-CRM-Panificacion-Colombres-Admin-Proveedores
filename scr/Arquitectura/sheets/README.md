@@ -16,10 +16,20 @@ Esta carpeta es **scr/Arquitectura/sheets/**. El módulo Productos elaborados us
 |--------|--------|--------|
 | `costos-sheets.json` | Costos | packing, materiaPrima, combos, equivalencias |
 | `productos-elaborados/productos-elaborados-sheets-base.js` | Productos elaborados | **Compartido.** modulo, descripcion, hoja (nombre, nombreHoja, clavePrimaria, clavesForaneas, prefijoId, patronId, indices). Cargar antes del config de la acción. |
-| `productos-elaborados/listar-productos-elaborados-sheets.config.js` | Productos elaborados | Listado. Solo columnas + listado (visible en cards, agrupación). |
-| `productos-elaborados/crear-producto-elaborado-sheets.config.js` | Productos elaborados | Crear. Solo columnas (comportamiento del formulario). |
-| `productos-elaborados/editar-producto-elaborado-sheets.config.js` | Productos elaborados | Editar. Solo columnas (comportamiento del formulario). |
-| `productos-elaborados/ver-producto-elaborado-sheets.config.js` | Productos elaborados | Ver. Solo columnas (qué mostrar en detalle). |
+| `productos-elaborados/sheets-listar-productos-elaborados.config.js` | Productos elaborados | Listado. Solo columnas + listado (visible en cards, agrupación). |
+| `productos-elaborados/sheets-crear-productos-elaborados.config.js` | Productos elaborados | Crear. Solo columnas (comportamiento del formulario). |
+| `productos-elaborados/sheets-editar-productos-elaborados.config.js` | Productos elaborados | Editar. Solo columnas (comportamiento del formulario). |
+| `productos-elaborados/sheets-ver-productos-elaborados.config.js` | Productos elaborados | Ver. Solo columnas (qué mostrar en detalle). |
+| `costo-productos/costo-productos-sheets-base.js` | Costo productos | **Compartido.** modulo, hoja Tabla-Costo-Productos, PK IDCosto-Producto, prefijoId COSTO-PROD. |
+| `costo-productos/sheets-listar-costo-productos.config.js` | Costo productos | Listado. Columnas + listado (agrupación por Categoria). |
+| `costo-productos/sheets-crear-costo-productos.config.js` | Costo productos | Crear. Columnas del formulario. |
+| `costo-productos/sheets-editar-costo-productos.config.js` | Costo productos | Editar. Columnas del formulario. |
+| `costo-productos/sheets-ver-costo-productos.config.js` | Costo productos | Ver. Columnas del detalle. |
+
+## Relaciones PK/FK entre tablas
+
+- **Listado-Productos-Elaborados** (hoja `Listado-Productos-Elaborados`): **PK** = `IDProducto`. **FK** = columna `IDCosto-Producto` → referencia a **Tabla-Costo-Productos** por su PK `IDCosto-Producto`. Definido en `productos-elaborados/productos-elaborados-sheets-base.js` (`clavesForaneas`).
+- **Tabla-Costo-Productos** (hoja `Tabla-Costo-Productos`): **PK** = `IDCosto-Producto`. Sin FKs. Definido en `costo-productos/costo-productos-sheets-base.js`.
 
 ## Esquema de cada JSON
 
@@ -69,7 +79,7 @@ Esta carpeta es **scr/Arquitectura/sheets/**. El módulo Productos elaborados us
 
 ## Columnas tipo label (solo lectura / autogeneradas)
 
-En la config de cada acción (p. ej. en `productos-elaborados/crear-producto-elaborado-sheets.config.js`), cada columna puede tener **`"label": true`**: son columnas autogeneradas por el sistema que el usuario no debe modificar (para no perder relaciones). Ejemplos: la columna de orden (`autogeneradoOrden`), la clave primaria (ID). En **crear** no se muestran campos para esas columnas; el ID se genera con la función de Arquitectura. En **editar** se muestran en solo lectura (disabled).
+En la config de cada acción (p. ej. en `productos-elaborados/sheets-crear-productos-elaborados.config.js`), cada columna puede tener **`"label": true`**: son columnas autogeneradas por el sistema que el usuario no debe modificar (para no perder relaciones). Ejemplos: la columna de orden (`autogeneradoOrden`), la clave primaria (ID). En **crear** no se muestran campos para esas columnas; el ID se genera con la función de Arquitectura. En **editar** se muestran en solo lectura (disabled).
 
 Para la **clave primaria** que es ID autogenerado, la hoja en el **base** define:
 - **`prefijoId`**: cadena fija (ej. `"PROD-ELAB"`).
@@ -86,7 +96,7 @@ La generación está en **scr/Arquitectura/generar-id.js** (`window.GENERAR_ID_P
 
 ## Listado con agrupación (Productos elaborados)
 
-En **listar-productos-elaborados-sheets.config.js** (objeto `window.PRODUCTOS_ELABORADOS_SHEETS_JSON.hojas[0]`) la hoja puede incluir un objeto **`listado`** para el listado en pantalla:
+En **sheets-listar-productos-elaborados.config.js** (objeto `window.PRODUCTOS_ELABORADOS_SHEETS_JSON.hojas[0]`) la hoja puede incluir un objeto **`listado`** para el listado en pantalla:
 
 - **`columnasAgrupacion`**: array de nombres de columnas por las que agrupar por defecto (ej. `["Comercio-Sucursal"]`).
 - **`modosAgrupacion`**: array de modos; cada modo es un array de columnas. Ej.: `[]` = sin agrupar, `["Comercio-Sucursal"]` = por una columna, `["Comercio-Sucursal", "Habilitado"]` = por dos. El usuario puede elegir el modo en un desplegable si hay más de un modo.
@@ -94,8 +104,9 @@ En **listar-productos-elaborados-sheets.config.js** (objeto `window.PRODUCTOS_EL
 ## Uso en la app
 
 - **Costos**: usa `costos-sheets.json` como referencia; el código y el Apps Script deben mantener las mismas hojas y columnas.
-- **Productos elaborados**: cargá siempre `productos-elaborados-sheets-base.js` y luego el config de la acción (`listar-`, `crear-`, `editar-` o `ver-producto-elaborado-sheets.config.js`). La base tiene los datos fijos (modulo, hoja, clavePrimaria, prefijoId, indices); cada acción define solo las **columnas** (y en listar el **listado**). Para cambiar nombre de hoja o ID, editá el base; para cambiar comportamiento por pantalla, editá el config de esa acción.
+- **Productos elaborados**: cargá siempre `productos-elaborados-sheets-base.js` y luego el config de la acción (`sheets-listar-`, `sheets-crear-`, `sheets-editar-` o `sheets-ver-productos-elaborados.config.js`). La base tiene los datos fijos (modulo, hoja, clavePrimaria, clavesForaneas, prefijoId, indices); cada acción define solo las **columnas** (y en listar el **listado**). Para cambiar nombre de hoja o ID, editá el base; para cambiar comportamiento por pantalla, editá el config de esa acción.
+- **Costo productos**: cargá `costo-productos-sheets-base.js` y luego el config de la acción (`sheets-listar-`, `sheets-crear-`, `sheets-editar-` o `sheets-ver-costo-productos.config.js`). Misma metodología que Productos elaborados (base + config por acción).
 
 ## Apps Script
 
-El backend (Google Apps Script) debe exponer las hojas con el mismo **nombre de pestaña** que figure en la config de cada módulo (por ejemplo `getSheetByName("Listado-Productos-Elaborados")` para Productos elaborados).
+El backend (Google Apps Script) debe exponer las hojas con el mismo **nombre de pestaña** que figure en la config de cada módulo (por ejemplo `getSheetByName("Listado-Productos-Elaborados")` para Productos elaborados y `getSheetByName("Tabla-Costo-Productos")` para Costo productos).

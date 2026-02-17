@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Editar producto elaborado - Panificación Colombres</title>
+    <title>Editar costo producto - Panificación Colombres</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -12,19 +12,19 @@
     <script src="../../Arquitectura/config.js"></script>
     <script src="../../Arquitectura/config-sheets.js"></script>
     <script src="../../Arquitectura/generar-id.js"></script>
-    <script src="../../Arquitectura/sheets/productos-elaborados/productos-elaborados-sheets-base.js"></script>
-    <script src="../../Arquitectura/sheets/productos-elaborados/sheets-editar-productos-elaborados.config.js"></script>
-    <script>window.PRODUCTOS_ELABORADOS_ACCION_ACTUAL = "editar";</script>
+    <script src="../../Arquitectura/sheets/costo-productos/costo-productos-sheets-base.js"></script>
+    <script src="../../Arquitectura/sheets/costo-productos/sheets-editar-costo-productos.config.js"></script>
+    <script>window.COSTO_PRODUCTOS_ACCION_ACTUAL = "editar";</script>
 </head>
 <body class="costos-page">
     <nav class="costos-nav" aria-label="Navegación principal">
         <a href="../../../index.html" class="costos-nav-link">Inicio</a>
         <a href="../armador-productos.html" class="costos-nav-link">Armador de Productos</a>
-        <a href="productos-elaborados.html" class="costos-nav-link" data-accion="listar">Productos elaborados</a>
-        <a href="../Costo-Productos/costo-productos.html" class="costos-nav-link">Costo productos</a>
+        <a href="../Productos-Elaborados/productos-elaborados.html" class="costos-nav-link">Productos elaborados</a>
+        <a href="costo-productos.html" class="costos-nav-link" data-accion="listar">Costo productos</a>
     </nav>
     <main class="costos-main">
-        <h1 class="costos-title costos-title--con-icono"><i class="fa-solid fa-pen costos-title-icono" aria-hidden="true"></i> Editar producto elaborado</h1>
+        <h1 class="costos-title costos-title--con-icono"><i class="fa-solid fa-pen costos-title-icono" aria-hidden="true"></i> Editar costo producto</h1>
         <p class="costos-intro">Modificá los datos y guardá los cambios.</p>
         <div id="edit-form-container" class="costos-datos">
             <p id="edit-no-data" class="costos-placeholder" style="display:none;">No hay datos del registro. Volvé al listado y usá «Editar» en una tarjeta.</p>
@@ -32,17 +32,17 @@
             <form id="costos-edit-form" class="costos-edit-form" style="display:none;">
                 <div id="edit-fields"></div>
                 <div class="costos-edit-actions">
-                    <a href="productos-elaborados.html" class="costos-edit-btn-cancel">Volver al listado</a>
+                    <a href="costo-productos.html" class="costos-edit-btn-cancel">Volver al listado</a>
                     <button type="submit" class="costos-edit-btn-save" id="costos-edit-btn-save"><i class="fa-solid fa-check" aria-hidden="true"></i> Guardar cambios</button>
                 </div>
             </form>
         </div>
     </main>
-    <script src="../../Arquitectura/sheets/productos-elaborados/productos-elaborados-config.js"></script>
-    <script>if (window.PRODUCTOS_ELABORADOS_APPLY_NAV) window.PRODUCTOS_ELABORADOS_APPLY_NAV();</script>
+    <script src="../../Arquitectura/sheets/costo-productos/costo-productos-config.js"></script>
+    <script>if (window.COSTO_PRODUCTOS_APPLY_NAV) window.COSTO_PRODUCTOS_APPLY_NAV();</script>
     <script>
         (function () {
-            var STORAGE_EDIT = "costosEditRecordProductosElaborados";
+            var STORAGE_EDIT = "costosEditRecordCostoProductos";
             var config = window.APP_CONFIG || {};
             var appsScriptUrl = (config.appsScriptUrl || "").trim();
 
@@ -75,7 +75,7 @@
                 noDataEl.style.display = "block";
                 formEl.style.display = "none";
             } else {
-                var loadConfig = window.PRODUCTOS_ELABORADOS_LOAD_CONFIG;
+                var loadConfig = window.COSTO_PRODUCTOS_LOAD_CONFIG;
                 if (!loadConfig) {
                     loadingEl.style.display = "none";
                     noDataEl.style.display = "block";
@@ -104,7 +104,6 @@
                             var nombre = (col.alias != null ? col.alias : col.nombre || "").trim();
                             if (!nombre) return;
                             var val = row[idx] != null ? String(row[idx]).trim() : "";
-                            var nameNorm = norm(nombre);
                             var restr = col.restricciones || {};
                             var label = document.createElement("label");
                             label.className = "costos-edit-label";
@@ -119,7 +118,7 @@
                                 select.id = "field-" + idx;
                                 select.className = "costos-edit-input";
                                 select.setAttribute("data-header-index", String(idx));
-                                select.setAttribute("data-nombre", nombre);
+                                select.setAttribute("data-nombre", col.nombre);
                                 restr.valoresPermitidos.forEach(function (v) {
                                     var opt = document.createElement("option");
                                     opt.value = v;
@@ -137,7 +136,7 @@
                                 input.id = "field-" + idx;
                                 input.className = "costos-edit-input";
                                 input.setAttribute("data-header-index", String(idx));
-                                input.setAttribute("data-nombre", nombre);
+                                input.setAttribute("data-nombre", col.nombre);
                                 input.value = val;
                                 wrap.appendChild(input);
                                 inputEl = input;
@@ -147,7 +146,7 @@
                                 input.id = "field-" + idx;
                                 input.className = "costos-edit-input";
                                 input.setAttribute("data-header-index", String(idx));
-                                input.setAttribute("data-nombre", nombre);
+                                input.setAttribute("data-nombre", col.nombre);
                                 input.value = val;
                                 if (restr.maxLongitud) input.maxLength = restr.maxLongitud;
                                 wrap.appendChild(input);
@@ -200,7 +199,7 @@
                                     if (json && json.success) {
                                         try { sessionStorage.setItem(STORAGE_EDIT, JSON.stringify({ id: id, headers: headers, row: newRow })); } catch (e) {}
                                         alert("Cambios guardados correctamente.");
-                                        window.location.replace("productos-elaborados.html");
+                                        window.location.replace("costo-productos.html");
                                     } else {
                                         alert("Error al guardar: " + (json && json.error ? json.error : "Respuesta inválida"));
                                     }

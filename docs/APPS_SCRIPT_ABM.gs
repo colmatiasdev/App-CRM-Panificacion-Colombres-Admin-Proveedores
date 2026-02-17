@@ -3,7 +3,7 @@
  * Un solo archivo: copiá y pegá todo en el editor de Apps Script.
  *
  * Acciones: list | get | search | create | update | delete | fillIds
- * Parámetro sheet: materiaPrima | packing | combos | equivalencias | Listado-Productos-Elaborados
+ * Parámetro sheet: materiaPrima | packing | combos | equivalencias | Listado-Productos-Elaborados | Tabla-Costo-Productos
  *
  * Desplegar: Implementar → Nueva implementación → Aplicación web
  * Ejecutar como: Yo | Quién puede acceder: Cualquier usuario (o según necesites)
@@ -101,13 +101,15 @@ var CONFIG = {
   },
 
   /** Hoja Listado Productos Elaborados (Armador de Productos) – ?sheet=Listado-Productos-Elaborados
-   * Debe coincidir con scr/Arquitectura/sheets/productos-elaborados/listar-productos-elaborados-sheets.config.js (y configs crear/editar/ver) */
+   * PK = IDProducto. FK = IDCosto-Producto → Tabla-Costo-Productos.IDCosto-Producto
+   * Debe coincidir con scr/Arquitectura/sheets/productos-elaborados/sheets-listar-productos-elaborados.config.js */
   'listado-productos-elaborados': {
     sheetName: 'Listado-Productos-Elaborados',
     gid: 0,
     headers: [
       'Orden-Lista',
       'IDProducto',
+      'IDCosto-Producto',
       'Comercio-Sucursal',
       'Nombre-Producto',
       'Costo-Producto-Final-Actual',
@@ -115,9 +117,36 @@ var CONFIG = {
       'Habilitado'
     ],
     idColumn: 'IDProducto',
-    idPrefix: 'PROD-',
-    filterColumns: ['IDProducto', 'Comercio-Sucursal', 'Nombre-Producto', 'Habilitado'],
+    idPrefix: 'PROD-ELAB-',
+    filterColumns: ['IDProducto', 'IDCosto-Producto', 'Comercio-Sucursal', 'Nombre-Producto', 'Habilitado'],
     requiredOnCreate: ['Nombre-Producto']
+  },
+
+  /** Hoja Tabla Costo Productos (Armador de Productos) – ?sheet=Tabla-Costo-Productos
+   * PK = IDCosto-Producto. Referenciada por Listado-Productos-Elaborados.IDCosto-Producto */
+  'tabla-costo-productos': {
+    sheetName: 'Tabla-Costo-Productos',
+    gid: 0,
+    headers: [
+      'Orden',
+      'IDCosto-Producto',
+      'Categoria',
+      'Producto',
+      'Costo-Producto-Maestro-Total',
+      'Costo-Packing',
+      'Costos-Fijos',
+      'Merma-Porcentaje',
+      'Merma-Importe',
+      'Tiiempo-Packing-Minutos',
+      'Costo-Mano-Obra-Packing',
+      'Costo-Producto-Final-Actual',
+      'Costo-Producto-Final-Anterior',
+      'Habilitado'
+    ],
+    idColumn: 'IDCosto-Producto',
+    idPrefix: 'COSTO-PROD-',
+    filterColumns: ['IDCosto-Producto', 'Categoria', 'Producto', 'Habilitado'],
+    requiredOnCreate: ['Producto']
   }
 
   // Para agregar otra hoja, copiá un bloque (p.ej. packing), cambiá la clave y sheetName:

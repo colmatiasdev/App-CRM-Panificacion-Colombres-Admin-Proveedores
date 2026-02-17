@@ -12,12 +12,15 @@ window.PRODUCTOS_ELABORADOS_SHEET_BASE = {
     "nombre": "Listado-Productos-Elaborados",
     "nombreHoja": "Listado-Productos-Elaborados",
     "clavePrimaria": ["IDProducto"],
-    "clavesForaneas": [],
+    "clavesForaneas": [
+      { "columna": "IDCosto-Producto", "tabla": "Tabla-Costo-Productos", "pkReferencia": "IDCosto-Producto" }
+    ],
     "prefijoId": "PROD-ELAB",
     "patronId": 1,
     "indices": [
       { "columnas": ["IDProducto"], "unico": true },
       { "columnas": ["Orden-Lista"], "unico": false },
+      { "columnas": ["IDCosto-Producto"], "unico": false },
       { "columnas": ["Comercio-Sucursal"], "unico": false }
     ]
   }

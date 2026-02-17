@@ -1,11 +1,11 @@
 /**
- * Configuración de la acción Ver. Solo columnas (qué mostrar en detalle).
- * Cargado por ver-producto-elaborado.html. Requiere productos-elaborados-sheets-base.js antes.
+ * Configuración de la acción Editar. Solo columnas (comportamiento del formulario).
+ * Cargado por editar-producto-elaborado.html. Requiere productos-elaborados-sheets-base.js antes.
  */
 (function () {
   var base = window.PRODUCTOS_ELABORADOS_SHEET_BASE;
   if (!base || !base.hoja) {
-    throw new Error("Cargá productos-elaborados-sheets-base.js antes de ver-producto-elaborado-sheets.config.js");
+    throw new Error("Cargá productos-elaborados-sheets-base.js antes de sheets-editar-productos-elaborados.config.js");
   }
   var hoja = base.hoja;
   var columnas = [
@@ -26,16 +26,25 @@
       tipo: "text",
       nullable: false,
       label: true,
-      visible: true,
-      descripcion: "Identificador único.",
+      visible: false,
+      descripcion: "ID (solo lectura).",
       restricciones: {}
+    },
+    {
+      nombre: "IDCosto-Producto",
+      alias: "ID Costo Producto",
+      tipo: "text",
+      nullable: true,
+      visible: false,
+      descripcion: "Referencia a Tabla-Costo-Productos (FK).",
+      restricciones: { maxLongitud: 100 }
     },
     {
       nombre: "Comercio-Sucursal",
       alias: "Comercio Sucursal",
       tipo: "text",
       nullable: true,
-      visible: true,
+      visible: false,
       listadoValores: "COMPONENTE-COMBOS.Combo-Comercio-Sucursal",
       descripcion: "Comercio o sucursal.",
       restricciones: { maxLongitud: 200 }
@@ -64,7 +73,7 @@
       alias: "Observaciones",
       tipo: "text",
       nullable: true,
-      visible: true,
+      visible: false,
       restricciones: { maxLongitud: 2000 }
     },
     {
@@ -72,7 +81,7 @@
       alias: "Habilitado",
       tipo: "text",
       nullable: true,
-      visible: true,
+      visible: false,
       descripcion: "Sí / No.",
       restricciones: { valoresPermitidos: ["Sí", "No", ""] }
     }

@@ -1,14 +1,13 @@
 /**
- * Listado de Productos Elaborados. Usa la configuración de sheets-listar-productos-elaborados.config.js
- * (cargado por productos-elaborados.html) para nombre de hoja, clave primaria, columnas y agrupación.
+ * Listado de Costo Productos (Tabla-Costo-Productos). Usa sheets-listar-costo-productos.config.js
  */
 (function () {
-    var STORAGE_EDIT = "costosEditRecordProductosElaborados";
-    var ACCIONES = window.PRODUCTOS_ELABORADOS_ACCIONES || {};
-    var LISTAR_URL = (ACCIONES.listar && ACCIONES.listar.url) ? ACCIONES.listar.url : "productos-elaborados.html";
-    var CREAR_URL = (ACCIONES.crear && ACCIONES.crear.url) ? ACCIONES.crear.url : "crear-producto-elaborado.html";
-    var EDITAR_URL = (ACCIONES.editar && ACCIONES.editar.url) ? ACCIONES.editar.url : "editar-producto-elaborado.html";
-    var VER_URL = (ACCIONES.ver && ACCIONES.ver.url) ? ACCIONES.ver.url : "ver-producto-elaborado.html";
+    var STORAGE_EDIT = "costosEditRecordCostoProductos";
+    var ACCIONES = window.COSTO_PRODUCTOS_ACCIONES || {};
+    var LISTAR_URL = (ACCIONES.listar && ACCIONES.listar.url) ? ACCIONES.listar.url : "costo-productos.html";
+    var CREAR_URL = (ACCIONES.crear && ACCIONES.crear.url) ? ACCIONES.crear.url : "crear-costo-producto.html";
+    var EDITAR_URL = (ACCIONES.editar && ACCIONES.editar.url) ? ACCIONES.editar.url : "editar-costo-producto.html";
+    var VER_URL = (ACCIONES.ver && ACCIONES.ver.url) ? ACCIONES.ver.url : "ver-costo-producto.html";
 
     var config = window.APP_CONFIG || {};
     var appsScriptUrl = (config.appsScriptUrl || "").trim();
@@ -41,7 +40,6 @@
         return indices;
     }
 
-    /** Agrupa filas por valores de las columnas en colIndices. Devuelve { "key": [rows], ... } con key = "val1|val2" (vacío = "Sin valor"). */
     function groupRowsBy(rows, colIndices) {
         var groups = {};
         for (var r = 0; r < rows.length; r++) {
@@ -74,11 +72,6 @@
         return row[0] != null ? String(row[0]).trim() : "Sin nombre";
     }
 
-    /**
-     * Alinea los datos de la API al orden de columnas definido en la configuración.
-     * headersConfig = array de { nombre } desde config.columnas
-     * apiHeaders = lo que devolvió la API; apiRows = array de objetos (o arrays) con datos
-     */
     function alignRowsToConfig(headersConfig, apiHeaders, apiRows) {
         var headers = headersConfig.map(function (c) { return c.nombre || c; });
         var rows = (apiRows || []).map(function (obj) {
@@ -99,7 +92,6 @@
         return { headers: headers, rows: rows };
     }
 
-    /** Ordena las filas por la columna de orden (autogeneradoOrden). Si no hay columna o está vacía, deja el orden intacto. */
     function sortRowsByOrden(rows, headers, columnaOrdenLista) {
         if (!columnaOrdenLista || !rows.length) return rows;
         var ordenIdx = findColumnIndex(headers, [norm(columnaOrdenLista)]);
@@ -120,11 +112,11 @@
     function renderList(container, sheetConfig, headers, rows, filterText, modoAgrupacionColumnas) {
         if (!container) return;
         var columnas = sheetConfig.columnas || [];
-        var clavePrimaria = sheetConfig.clavePrimaria || ["IDProducto"];
+        var clavePrimaria = sheetConfig.clavePrimaria || ["IDCosto-Producto"];
         var pkNorms = clavePrimaria.map(function (k) { return norm(k); });
         var idColIdx = findColumnIndex(headers, pkNorms);
         if (idColIdx < 0) idColIdx = 0;
-        var nameColIdx = findColumnIndex(headers, ["nombreproducto", "nombre-producto", "nombre", "producto"]);
+        var nameColIdx = findColumnIndex(headers, ["producto", "nombreproducto", "nombre-producto"]);
         if (nameColIdx < 0) nameColIdx = 0;
 
         var filter = (filterText || "").trim().toLowerCase();
@@ -154,7 +146,7 @@
         var grouped = colIndicesAgrupar.length > 0 ? groupRowsBy(visible, colIndicesAgrupar) : null;
         var groupKeys = grouped ? Object.keys(grouped).sort() : null;
 
-        var html = '<div class="costos-cards costos-cards-productos-elaborados">';
+        var html = '<div class="costos-cards costos-cards-costo-productos">';
         if (grouped && groupKeys && groupKeys.length > 0) {
             groupKeys.forEach(function (key) {
                 var groupRows = grouped[key];
@@ -174,7 +166,7 @@
                         }
                     });
                     var extraHtml = extra.length ? "<p class=\"costos-card-extra\">" + extra.join(" · ") + "</p>" : "";
-                    html += "<div class=\"costos-card costos-card-producto-elaborado\">";
+                    html += "<div class=\"costos-card costos-card-costo-producto\">";
                     html += "<div class=\"costos-card-header\"><h3 class=\"costos-card-title\">" + escapeHtml(title) + "</h3></div>";
                     html += "<div class=\"costos-card-body\">" + extraHtml + "</div>";
                     html += "<div class=\"costos-card-actions\">";
@@ -198,7 +190,7 @@
                     }
                 });
                 var extraHtml = extra.length ? "<p class=\"costos-card-extra\">" + extra.join(" · ") + "</p>" : "";
-                html += "<div class=\"costos-card costos-card-producto-elaborado\">";
+                html += "<div class=\"costos-card costos-card-costo-producto\">";
                 html += "<div class=\"costos-card-header\"><h3 class=\"costos-card-title\">" + escapeHtml(title) + "</h3></div>";
                 html += "<div class=\"costos-card-body\">" + extraHtml + "</div>";
                 html += "<div class=\"costos-card-actions\">";
@@ -211,8 +203,8 @@
         container.innerHTML = html;
         container.classList.remove("costos-datos-message");
 
-        var countEl = document.getElementById("productos-elaborados-count");
-        if (countEl) countEl.textContent = visible.length + " de " + rows.length + " producto(s)";
+        var countEl = document.getElementById("costo-productos-count");
+        if (countEl) countEl.textContent = visible.length + " de " + rows.length + " registro(s)";
 
         function goToCardAction(btn) {
             var idx = parseInt(btn.getAttribute("data-row-index"), 10);
@@ -241,9 +233,9 @@
     }
 
     function run() {
-        var container = document.getElementById("datos-productos-elaborados");
-        var filterInput = document.getElementById("filter-productos-elaborados");
-        var btnNuevo = document.getElementById("btn-nuevo-producto-elaborado");
+        var container = document.getElementById("datos-costo-productos");
+        var filterInput = document.getElementById("filter-costo-productos");
+        var btnNuevo = document.getElementById("btn-nuevo-costo-producto");
 
         if (!container) return;
 
@@ -259,9 +251,9 @@
             return;
         }
 
-        var loadConfig = window.PRODUCTOS_ELABORADOS_LOAD_CONFIG;
+        var loadConfig = window.COSTO_PRODUCTOS_LOAD_CONFIG;
         if (!loadConfig) {
-            showMessage(container, "No se pudo cargar la configuración del módulo (productos-elaborados-config.js).");
+            showMessage(container, "No se pudo cargar la configuración del módulo (costo-productos-config.js).");
             return;
         }
 
@@ -296,8 +288,8 @@
                     }
                 }
 
-                var agruparWrap = document.getElementById("productos-elaborados-agrupar-wrap");
-                var agruparSelect = document.getElementById("agrupar-productos-elaborados");
+                var agruparWrap = document.getElementById("costo-productos-agrupar-wrap");
+                var agruparSelect = document.getElementById("agrupar-costo-productos");
                 if (agruparSelect && modosAgrupacion.length > 1) {
                     agruparWrap.style.display = "";
                     agruparSelect.innerHTML = "";
@@ -337,7 +329,7 @@
                         }
 
                         function getModoActual() {
-                            var sel = document.getElementById("agrupar-productos-elaborados");
+                            var sel = document.getElementById("agrupar-costo-productos");
                             var idx = sel ? parseInt(sel.value, 10) : defaultModoIndex;
                             if (isNaN(idx) || idx < 0 || idx >= modosAgrupacion.length) idx = defaultModoIndex;
                             return modosAgrupacion[idx] || [];

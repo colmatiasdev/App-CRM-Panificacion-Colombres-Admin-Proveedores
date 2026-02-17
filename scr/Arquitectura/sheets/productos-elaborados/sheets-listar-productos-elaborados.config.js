@@ -5,7 +5,7 @@
 (function () {
   var base = window.PRODUCTOS_ELABORADOS_SHEET_BASE;
   if (!base || !base.hoja) {
-    throw new Error("Cargá productos-elaborados-sheets-base.js antes de listar-productos-elaborados-sheets.config.js");
+    throw new Error("Cargá productos-elaborados-sheets-base.js antes de sheets-listar-productos-elaborados.config.js");
   }
   var hoja = base.hoja;
   var columnas = [
@@ -29,6 +29,15 @@
       visible: false,
       descripcion: "Identificador único.",
       restricciones: {}
+    },
+    {
+      nombre: "IDCosto-Producto",
+      alias: "ID Costo Producto",
+      tipo: "text",
+      nullable: true,
+      visible: false,
+      descripcion: "Referencia a Tabla-Costo-Productos (FK).",
+      restricciones: { maxLongitud: 100 }
     },
     {
       nombre: "Comercio-Sucursal",
@@ -94,6 +103,7 @@
         modosAgrupacion: [
           [],
           ["Comercio-Sucursal"],
+          ["IDCosto-Producto"],
           ["Comercio-Sucursal", "Habilitado"]
         ]
       }
