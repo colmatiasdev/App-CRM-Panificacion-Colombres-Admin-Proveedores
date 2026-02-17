@@ -3,7 +3,7 @@
  * Un solo archivo: copiá y pegá todo en el editor de Apps Script.
  *
  * Acciones: list | get | search | create | update | delete | fillIds
- * Parámetro sheet: materiaPrima | packing | combos | equivalencias | Listado-Productos-Elaborados | Tabla-Costo-Productos
+ * Parámetro sheet: materiaPrima | packing | combos | equivalencias | Listado-Productos-Elaborados | Tabla-Costo-Productos | COSTO-EMPLEADOS
  *
  * Desplegar: Implementar → Nueva implementación → Aplicación web
  * Ejecutar como: Yo | Quién puede acceder: Cualquier usuario (o según necesites)
@@ -137,7 +137,7 @@ var CONFIG = {
       'Costos-Fijos',
       'Merma-Porcentaje',
       'Merma-Importe',
-      'Tiiempo-Packing-Minutos',
+      'Tiempo-Packing-Minutos',
       'Costo-Mano-Obra-Packing',
       'Costo-Producto-Final-Actual',
       'Costo-Producto-Final-Anterior',
@@ -147,6 +147,25 @@ var CONFIG = {
     idPrefix: 'COSTO-PROD-',
     filterColumns: ['IDCosto-Producto', 'Categoria', 'Producto', 'Habilitado'],
     requiredOnCreate: ['Producto']
+  },
+
+  /** Hoja Costo Empleados – ?sheet=COSTO-EMPLEADOS
+   * PK = MINUTOS (ej. 15, 30, 60). Costos por minuto y mano de obra por actividad. */
+  'costo-empleados': {
+    sheetName: 'COSTO-EMPLEADOS',
+    gid: 0,
+    headers: [
+      'MINUTOS',
+      'Costo-x-Minutos-Produccion',
+      'Costo-Mano-Obra-Produccion',
+      'Costo-x-Minutos-Elaboracion',
+      'Costo-Mano-Obra-Elaboracion',
+      'Costo-x-Minutos-Packing',
+      'Costo-Mano-Obra-Packing'
+    ],
+    idColumn: 'MINUTOS',
+    filterColumns: ['MINUTOS'],
+    requiredOnCreate: ['MINUTOS']
   }
 
   // Para agregar otra hoja, copiá un bloque (p.ej. packing), cambiá la clave y sheetName:

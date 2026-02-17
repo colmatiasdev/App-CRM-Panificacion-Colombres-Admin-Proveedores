@@ -27,7 +27,9 @@
         /** Hoja Listado-Productos-Elaborados (módulo Productos elaborados). Apps Script: sheet=Listado-Productos-Elaborados. FK: IDCosto-Producto → Tabla-Costo-Productos */
         listadoProductosElaborados: "Listado-Productos-Elaborados",
         /** Hoja Tabla-Costo-Productos (módulo Costo productos). Apps Script: sheet=Tabla-Costo-Productos. PK: IDCosto-Producto */
-        tablaCostoProductos: "Tabla-Costo-Productos"
+        tablaCostoProductos: "Tabla-Costo-Productos",
+        /** Hoja COSTO-EMPLEADOS. Apps Script: sheet=COSTO-EMPLEADOS. PK: MINUTOS. Costos por minuto y mano de obra. */
+        costoEmpleados: "COSTO-EMPLEADOS"
     };
 
     /** URLs CSV por hoja (se rellenan a continuación desde googleSheet). */

@@ -157,6 +157,7 @@
                         columnas.forEach(function (col, idx) {
                             var nombre = (col.alias != null ? col.alias : col.nombre || "").trim();
                             if (!nombre) return;
+                            if (col.visible === false) return;
                             var val = row[idx] != null ? String(row[idx]).trim() : "";
                             var nameNorm = norm(nombre);
                             var restr = col.restricciones || {};
@@ -249,6 +250,48 @@
                             }
                             fieldsContainer.appendChild(wrap);
                         });
+
+                        var idxCostoProducto = -1;
+                        columnas.forEach(function (c, i) { if (c.nombre === "IDCosto-Producto") idxCostoProducto = i; });
+                        var idCostoProducto = (idxCostoProducto >= 0 && row[idxCostoProducto] != null && String(row[idxCostoProducto]).trim() !== "") ? String(row[idxCostoProducto]).trim() : "";
+                        if (idCostoProducto) {
+                            var verCostoWrap = document.createElement("div");
+                            verCostoWrap.className = "costos-edit-actions costos-edit-actions--ver-costo";
+                            var linkVerCosto = document.createElement("a");
+                            linkVerCosto.href = "../Costo-Productos/ver-costo-producto.html?id=" + encodeURIComponent(idCostoProducto);
+                            linkVerCosto.className = "costos-edit-btn-ver-costo";
+                            linkVerCosto.innerHTML = "<i class=\"fa-solid fa-eye\" aria-hidden=\"true\"></i> Ver Costo producto";
+                            verCostoWrap.appendChild(linkVerCosto);
+                            formEl.insertBefore(verCostoWrap, formEl.querySelector(".costos-edit-actions"));
+                        }
+
+                        var saveBtn = formEl.querySelector(".costos-edit-btn-save");
+                        function getFormRow() {
+                            var newRow = row.slice ? row.slice() : row.map(function (x) { return x; });
+                            formEl.querySelectorAll("[data-header-index]").forEach(function (el) {
+                                var idx = parseInt(el.getAttribute("data-header-index"), 10);
+                                if (idx < 0) return;
+                                var val = (el.value != null ? String(el.value).trim() : (el.textContent != null ? String(el.textContent).trim() : ""));
+                                while (newRow.length <= idx) newRow.push("");
+                                newRow[idx] = val;
+                            });
+                            return newRow;
+                        }
+                        function updateSaveButtonState() {
+                            if (!saveBtn) return;
+                            var current = getFormRow();
+                            var changed = false;
+                            for (var i = 0; i < row.length; i++) {
+                                if (String(row[i] || "").trim() !== String(current[i] || "").trim()) {
+                                    changed = true;
+                                    break;
+                                }
+                            }
+                            saveBtn.disabled = !changed;
+                        }
+                        if (saveBtn) saveBtn.disabled = true;
+                        formEl.addEventListener("input", updateSaveButtonState);
+                        formEl.addEventListener("change", updateSaveButtonState);
 
                         formEl.addEventListener("submit", function (e) {
                             e.preventDefault();

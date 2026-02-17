@@ -93,7 +93,7 @@
       restricciones: { min: 0 }
     },
     {
-      nombre: "Tiiempo-Packing-Minutos",
+      nombre: "Tiempo-Packing-Minutos",
       alias: "Tiempo Packing Minutos",
       tipoDato: "numeric",
       tipoComponente: "text-box",
@@ -122,7 +122,7 @@
       nombre: "Costo-Producto-Final-Anterior",
       alias: "Costo Producto Final Anterior",
       tipoDato: "numeric",
-      tipoComponente: "text-box",
+      tipoComponente: "label",
       decimales: 2,
       visible: true,
       restricciones: { min: 0 }
@@ -132,7 +132,7 @@
       alias: "Habilitado",
       tipoDato: "text",
       tipoComponente: "combo-basico",
-      visible: true,
+      visible: false,
       restricciones: { valoresPermitidos: ["Sí", "No", ""] }
     }
   ];

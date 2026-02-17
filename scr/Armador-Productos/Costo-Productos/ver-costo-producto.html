@@ -96,7 +96,10 @@
                     var etiqueta = (card === "1:n")
                         ? (ref.etiquetaBoton1aN || "Ver registros asignados")
                         : (ref.etiquetaBoton1a1 || "Asignar");
-                    var url = (ref.urlListado || "#") + (ref.parametroFiltroId ? "?" + ref.parametroFiltroId + "=" + encodeURIComponent(idActual) : "");
+                    var parts = [];
+                    if (ref.parametroFiltroId) parts.push(ref.parametroFiltroId + "=" + encodeURIComponent(idActual));
+                    if (card === "1:1" && ref.parametroModoAsignar) parts.push(ref.parametroModoAsignar + "=1");
+                    var url = (ref.urlListado || "#") + (parts.length ? "?" + parts.join("&") : "");
                     html += "<a href=\"" + escapeHtml(url) + "\" class=\"costos-calc-btn costos-ver-btn-relacion\"><i class=\"fa-solid fa-link\" aria-hidden=\"true\"></i> " + escapeHtml(etiqueta) + "</a>";
                 });
                 if (html) {
@@ -107,11 +110,49 @@
                 }
             }
 
-            var raw = sessionStorage.getItem(STORAGE_EDIT);
-            if (!raw) {
+            function getParamsFromUrl() {
+                var p = {};
+                var q = (window.location.search || "").replace(/^\?/, "").split("&");
+                for (var i = 0; i < q.length; i++) {
+                    var kv = q[i].split("=");
+                    if (kv[0]) p[decodeURIComponent(kv[0])] = kv.length > 1 ? decodeURIComponent((kv.slice(1).join("=")).replace(/\+/g, " ")) : "";
+                }
+                return p;
+            }
+
+            function renderDetalle(sheetConfig, data) {
+                var columnas = sheetConfig.columnas || [];
+                var headers = data.headers || [];
+                var rowFromStorage = data.row || [];
+                var row = mapRowToConfigOrder(rowFromStorage, headers, columnas);
+                if (row.length !== (columnas.map(function (c) { return c.nombre; })).length) {
+                    row = headers.map(function (_, i) { return rowFromStorage[i] != null ? String(rowFromStorage[i]) : ""; });
+                }
                 loadingEl.style.display = "none";
-                noDataEl.style.display = "block";
-            } else {
+                noDataEl.style.display = "none";
+                detalleEl.style.display = "block";
+                actionsEl.style.display = "flex";
+                var html = "<dl class=\"costos-ver-dl\">";
+                columnas.forEach(function (col, idx) {
+                    var nombre = (col.alias != null ? col.alias : col.nombre || "").trim();
+                    if (!nombre) return;
+                    if (col.visible === false) return;
+                    var val = row[idx] != null ? String(row[idx]).trim() : "—";
+                    html += "<dt class=\"costos-ver-dt\">" + escapeHtml(nombre) + "</dt>";
+                    html += "<dd class=\"costos-ver-dd\">" + escapeHtml(val) + "</dd>";
+                });
+                html += "</dl>";
+                detalleEl.innerHTML = html;
+                var base = window.COSTO_PRODUCTOS_SHEET_BASE;
+                var pkColumna = (base && base.hoja && base.hoja.clavePrimaria && base.hoja.clavePrimaria[0]) ? base.hoja.clavePrimaria[0] : "IDCosto-Producto";
+                renderBotonesRelacion(row, columnas, pkColumna);
+            }
+
+            var raw = sessionStorage.getItem(STORAGE_EDIT);
+            var urlParams = getParamsFromUrl();
+            var idFromUrl = (urlParams.id || "").trim();
+
+            if (raw) {
                 var loadConfig = window.COSTO_PRODUCTOS_LOAD_CONFIG;
                 if (!loadConfig) {
                     loadingEl.style.display = "none";
@@ -121,40 +162,58 @@
                     loadConfig().then(function (sheetConfig) {
                         var data;
                         try { data = JSON.parse(raw); } catch (e) { data = {}; }
-                        var headersFromStorage = data.headers || [];
-                        var rowFromStorage = data.row || [];
-                        var columnas = sheetConfig.columnas || [];
-                        var headers = columnas.map(function (c) { return c.nombre; });
-                        var row = mapRowToConfigOrder(rowFromStorage, headersFromStorage, columnas);
-                        if (row.length !== headers.length) {
-                            row = headers.map(function (_, i) { return rowFromStorage[i] != null ? String(rowFromStorage[i]) : ""; });
-                        }
-
-                        loadingEl.style.display = "none";
-                        noDataEl.style.display = "none";
-                        detalleEl.style.display = "block";
-                        actionsEl.style.display = "flex";
-
-                        var html = "<dl class=\"costos-ver-dl\">";
-                        columnas.forEach(function (col, idx) {
-                            var nombre = (col.alias != null ? col.alias : col.nombre || "").trim();
-                            if (!nombre) return;
-                            var val = row[idx] != null ? String(row[idx]).trim() : "—";
-                            html += "<dt class=\"costos-ver-dt\">" + escapeHtml(nombre) + "</dt>";
-                            html += "<dd class=\"costos-ver-dd\">" + escapeHtml(val) + "</dd>";
-                        });
-                        html += "</dl>";
-                        detalleEl.innerHTML = html;
-
-                        var base = window.COSTO_PRODUCTOS_SHEET_BASE;
-                        var pkColumna = (base && base.hoja && base.hoja.clavePrimaria && base.hoja.clavePrimaria[0]) ? base.hoja.clavePrimaria[0] : "IDCosto-Producto";
-                        renderBotonesRelacion(row, columnas, pkColumna);
+                        renderDetalle(sheetConfig, { headers: data.headers || [], row: data.row || [] });
                     }).catch(function (err) {
                         loadingEl.style.display = "none";
                         noDataEl.style.display = "block";
                         noDataEl.textContent = "Error al cargar configuración: " + (err.message || "");
                     });
                 }
+            } else if (idFromUrl) {
+                var loadConfig = window.COSTO_PRODUCTOS_LOAD_CONFIG;
+                if (!loadConfig) {
+                    loadingEl.style.display = "none";
+                    noDataEl.style.display = "block";
+                    noDataEl.textContent = "No se pudo cargar la configuración del módulo.";
+                } else {
+                    var config = window.APP_CONFIG || {};
+                    var appsScriptUrl = (config.appsScriptUrl || "").trim();
+                    if (!appsScriptUrl) {
+                        loadingEl.style.display = "none";
+                        noDataEl.style.display = "block";
+                        noDataEl.textContent = "No se configuró la URL del servidor.";
+                    } else {
+                        loadingEl.textContent = "Cargando costo producto…";
+                        loadConfig().then(function (sheetConfig) {
+                            var urlGet = appsScriptUrl + "?action=get&sheet=Tabla-Costo-Productos&id=" + encodeURIComponent(idFromUrl);
+                            return fetch(urlGet, { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (resp) {
+                                if (!resp || !resp.success || !resp.data) {
+                                    loadingEl.style.display = "none";
+                                    noDataEl.style.display = "block";
+                                    noDataEl.textContent = "No se encontró el costo producto.";
+                                    return null;
+                                }
+                                var columnas = sheetConfig.columnas || [];
+                                var headers = columnas.map(function (c) { return c.nombre; });
+                                var row = headers.map(function (h) { return (resp.data[h] != null && resp.data[h] !== "") ? String(resp.data[h]).trim() : ""; });
+                                sessionStorage.setItem(STORAGE_EDIT, JSON.stringify({ id: idFromUrl, headers: headers, row: row }));
+                                if (window.history && window.history.replaceState) {
+                                    window.history.replaceState({}, "", "ver-costo-producto.html");
+                                }
+                                return { sheetConfig: sheetConfig, data: { headers: headers, row: row } };
+                            });
+                        }).then(function (payload) {
+                            if (payload) renderDetalle(payload.sheetConfig, payload.data);
+                        }).catch(function (err) {
+                            loadingEl.style.display = "none";
+                            noDataEl.style.display = "block";
+                            noDataEl.textContent = "Error al cargar: " + (err.message || "");
+                        });
+                    }
+                }
+            } else {
+                loadingEl.style.display = "none";
+                noDataEl.style.display = "block";
             }
         })();
     </script>

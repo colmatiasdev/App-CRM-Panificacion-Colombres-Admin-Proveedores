@@ -14,6 +14,18 @@
     var config = window.APP_CONFIG || {};
     var appsScriptUrl = (config.appsScriptUrl || "").trim();
 
+    var params = {};
+    try {
+        var q = (window.location.search || "").replace(/^\?/, "").split("&");
+        for (var i = 0; i < q.length; i++) {
+            var p = q[i].split("=");
+            if (p[0]) params[decodeURIComponent(p[0])] = p.length > 1 ? decodeURIComponent((p.slice(1).join("=")).replace(/\+/g, " ")) : "";
+        }
+    } catch (e) {}
+    var asignarCosto = (params.asignarCosto || "").trim() === "1";
+    var idCostoProductoAsignar = (params.idCostoProducto || "").trim();
+    var VER_COSTO_URL = "../Costo-Productos/ver-costo-producto.html";
+
     function escapeHtml(text) {
         if (text == null) return "";
         return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -118,7 +130,7 @@
         return sorted;
     }
 
-    function renderList(container, sheetConfig, headers, rows, filterText, modoAgrupacionColumnas, valorFiltroColumna, indiceColumnaFiltro) {
+    function renderList(container, sheetConfig, headers, rows, filterText, modoAgrupacionColumnas, valorFiltroColumna, indiceColumnaFiltro, modoAsignarCosto, idCostoProducto) {
         if (!container) return;
         var columnas = sheetConfig.columnas || [];
         var clavePrimaria = sheetConfig.clavePrimaria || ["IDProducto"];
@@ -162,6 +174,19 @@
         var grouped = colIndicesAgrupar.length > 0 ? groupRowsBy(visible, colIndicesAgrupar) : null;
         var groupKeys = grouped ? Object.keys(grouped).sort() : null;
 
+        var showVincular = !!(modoAsignarCosto && idCostoProducto);
+        var vincularUrl = VER_COSTO_URL + "?id=" + encodeURIComponent(idCostoProducto || "");
+
+        function cardActionsHtml(id, rowIndex) {
+            var h = "";
+            h += "<a href=\"" + VER_URL + "\" class=\"costos-card-btn costos-card-btn-ver\" data-action=\"ver\" data-id=\"" + escapeHtml(id) + "\" data-row-index=\"" + rowIndex + "\"><i class=\"fa-solid fa-eye\" aria-hidden=\"true\"></i> Ver</a>";
+            h += "<a href=\"" + EDITAR_URL + "\" class=\"costos-card-btn costos-card-btn-editar\" data-action=\"editar\" data-id=\"" + escapeHtml(id) + "\" data-row-index=\"" + rowIndex + "\"><i class=\"fa-solid fa-pen\" aria-hidden=\"true\"></i> Editar</a>";
+            if (showVincular) {
+                h += "<button type=\"button\" class=\"costos-card-btn costos-card-btn-vincular\" data-action=\"vincular\" data-id=\"" + escapeHtml(id) + "\" data-row-index=\"" + rowIndex + "\"><i class=\"fa-solid fa-link\" aria-hidden=\"true\"></i> Vincular</button>";
+            }
+            return h;
+        }
+
         var html = '<div class="costos-cards costos-cards-productos-elaborados">';
         if (grouped && groupKeys && groupKeys.length > 0) {
             groupKeys.forEach(function (key) {
@@ -185,10 +210,7 @@
                     html += "<div class=\"costos-card costos-card-producto-elaborado\">";
                     html += "<div class=\"costos-card-header\"><h3 class=\"costos-card-title\">" + escapeHtml(title) + "</h3></div>";
                     html += "<div class=\"costos-card-body\">" + extraHtml + "</div>";
-                    html += "<div class=\"costos-card-actions\">";
-                    html += "<a href=\"" + VER_URL + "\" class=\"costos-card-btn costos-card-btn-ver\" data-action=\"ver\" data-id=\"" + escapeHtml(id) + "\" data-row-index=\"" + rows.indexOf(row) + "\"><i class=\"fa-solid fa-eye\" aria-hidden=\"true\"></i> Ver</a>";
-                    html += "<a href=\"" + EDITAR_URL + "\" class=\"costos-card-btn costos-card-btn-editar\" data-action=\"editar\" data-id=\"" + escapeHtml(id) + "\" data-row-index=\"" + rows.indexOf(row) + "\"><i class=\"fa-solid fa-pen\" aria-hidden=\"true\"></i> Editar</a>";
-                    html += "</div></div>";
+                    html += "<div class=\"costos-card-actions\">" + cardActionsHtml(id, rows.indexOf(row)) + "</div></div>";
                 });
                 html += "</div></div>";
             });
@@ -209,10 +231,7 @@
                 html += "<div class=\"costos-card costos-card-producto-elaborado\">";
                 html += "<div class=\"costos-card-header\"><h3 class=\"costos-card-title\">" + escapeHtml(title) + "</h3></div>";
                 html += "<div class=\"costos-card-body\">" + extraHtml + "</div>";
-                html += "<div class=\"costos-card-actions\">";
-                html += "<a href=\"" + VER_URL + "\" class=\"costos-card-btn costos-card-btn-ver\" data-action=\"ver\" data-id=\"" + escapeHtml(id) + "\" data-row-index=\"" + rows.indexOf(row) + "\"><i class=\"fa-solid fa-eye\" aria-hidden=\"true\"></i> Ver</a>";
-                html += "<a href=\"" + EDITAR_URL + "\" class=\"costos-card-btn costos-card-btn-editar\" data-action=\"editar\" data-id=\"" + escapeHtml(id) + "\" data-row-index=\"" + rows.indexOf(row) + "\"><i class=\"fa-solid fa-pen\" aria-hidden=\"true\"></i> Editar</a>";
-                html += "</div></div>";
+                html += "<div class=\"costos-card-actions\">" + cardActionsHtml(id, rows.indexOf(row)) + "</div></div>";
             });
         }
         html += "</div>";
@@ -240,6 +259,39 @@
                 goToCardAction(btn);
             });
         });
+
+        if (showVincular && appsScriptUrl && sheetConfig.nombreHoja) {
+            container.querySelectorAll(".costos-card-btn-vincular").forEach(function (btn) {
+                btn.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    var idProducto = (btn.getAttribute("data-id") || "").trim();
+                    if (!idProducto) return;
+                    btn.disabled = true;
+                    if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.show("Vinculando…");
+                    var formBody = new URLSearchParams();
+                    formBody.append("action", "update");
+                    formBody.append("sheet", sheetConfig.nombreHoja);
+                    formBody.append("id", idProducto);
+                    formBody.append("IDCosto-Producto", idCostoProducto);
+                    fetch(appsScriptUrl, { method: "POST", body: formBody })
+                        .then(function (res) { return res.json(); })
+                        .then(function (json) {
+                            if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.hide();
+                            if (json && json.success) {
+                                window.location.href = vincularUrl;
+                            } else {
+                                btn.disabled = false;
+                                alert((json && json.error) ? json.error : "Error al vincular.");
+                            }
+                        })
+                        .catch(function (err) {
+                            if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.hide();
+                            btn.disabled = false;
+                            alert("Error de conexión: " + (err.message || ""));
+                        });
+                });
+            });
+        }
     }
 
     function showMessage(container, text) {
@@ -255,7 +307,13 @@
 
         if (!container) return;
 
+        var bannerAsignarEl = document.getElementById("productos-elaborados-asignar-banner");
+        if (asignarCosto && idCostoProductoAsignar && bannerAsignarEl) {
+            bannerAsignarEl.innerHTML = "<strong>Asignar costo producto a un producto elaborado (1:1).</strong> Elegí un producto y usá <strong>Vincular</strong> para asignar este costo. <a href=\"" + VER_COSTO_URL + "?id=" + encodeURIComponent(idCostoProductoAsignar) + "\" class=\"costos-asignar-banner-back\">Volver sin vincular</a>";
+            bannerAsignarEl.style.display = "block";
+        }
         if (btnNuevo) {
+            if (asignarCosto && idCostoProductoAsignar) btnNuevo.style.display = "none";
             btnNuevo.addEventListener("click", function (e) {
                 e.preventDefault();
                 window.location.href = CREAR_URL;
@@ -411,7 +469,7 @@
                         function redraw() {
                             var modo = getModoActual();
                             var valorFiltro = columnaFiltroValores ? getValorFiltroActual() : "";
-                            renderList(container, sheetConfig, headers, rows, (filterInput && filterInput.value) ? filterInput.value : "", modo, valorFiltro, columnaFiltroValores ? indiceColumnaFiltro : -1);
+                            renderList(container, sheetConfig, headers, rows, (filterInput && filterInput.value) ? filterInput.value : "", modo, valorFiltro, columnaFiltroValores ? indiceColumnaFiltro : -1, asignarCosto, idCostoProductoAsignar);
                         }
 
                         redraw();

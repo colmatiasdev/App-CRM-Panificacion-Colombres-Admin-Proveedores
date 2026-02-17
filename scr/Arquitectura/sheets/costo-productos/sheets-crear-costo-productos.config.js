@@ -47,8 +47,9 @@
       alias: "Producto",
       tipoDato: "text",
       tipoComponente: "text-box",
-      obligatorio: true,
       visible: true,
+      obligatorio: true,
+      descripcion: "Producto.",
       restricciones: { maxLongitud: 500 }
     },
     {
@@ -57,7 +58,7 @@
       tipoDato: "numeric",
       tipoComponente: "text-box",
       decimales: 2,
-      visible: true,
+      visible: false,
       restricciones: { min: 0 }
     },
     {
@@ -66,7 +67,7 @@
       tipoDato: "numeric",
       tipoComponente: "text-box",
       decimales: 2,
-      visible: true,
+      visible: false,
       restricciones: { min: 0 }
     },
     {
@@ -75,7 +76,7 @@
       tipoDato: "numeric",
       tipoComponente: "text-box",
       decimales: 2,
-      visible: true,
+      visible: false,
       restricciones: {}
     },
     {
@@ -84,7 +85,7 @@
       tipoDato: "numeric",
       tipoComponente: "text-box",
       decimales: 0,
-      visible: true,
+      visible: false,
       restricciones: { min: 0, max: 5 }
     },
     {
@@ -93,15 +94,15 @@
       tipoDato: "numeric",
       tipoComponente: "label",
       decimales: 2,
-      visible: true,
+      visible: false,
       restricciones: { min: 0 }
     },
     {
-      nombre: "Tiiempo-Packing-Minutos",
+      nombre: "Tiempo-Packing-Minutos",
       alias: "Tiempo Packing Minutos",
       tipoDato: "numeric",
       tipoComponente: "text-box",
-      visible: true,
+      visible: false,
       restricciones: { min: 0, entero: true }
     },
     {
@@ -110,7 +111,7 @@
       tipoDato: "numeric",
       tipoComponente: "text-box",
       decimales: 2,
-      visible: true,
+      visible: false,
       restricciones: { min: 0 }
     },
     {
@@ -119,7 +120,7 @@
       tipoDato: "numeric",
       tipoComponente: "text-box",
       decimales: 2,
-      visible: true,
+      visible: false,
       restricciones: { min: 0 }
     },
     {
@@ -128,7 +129,7 @@
       tipoDato: "numeric",
       tipoComponente: "text-box",
       decimales: 2,
-      visible: true,
+      visible: false,
       restricciones: { min: 0 }
     },
     {
@@ -136,7 +137,7 @@
       alias: "Habilitado",
       tipoDato: "text",
       tipoComponente: "combo-basico",
-      visible: true,
+      visible: false,
       restricciones: { valoresPermitidos: ["Sí", "No", ""] }
     }
   ];

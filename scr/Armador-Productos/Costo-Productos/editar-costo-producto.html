@@ -142,6 +142,17 @@
                 return (window["COMPONENTE-COMBOS"] && window["COMPONENTE-COMBOS"][refTrim] && Array.isArray(window["COMPONENTE-COMBOS"][refTrim])) ? window["COMPONENTE-COMBOS"][refTrim] : [];
             }
 
+            function buildFormulaLeyenda(formulaCol, columnas) {
+                if (!formulaCol || !Array.isArray(formulaCol.fuentes) || formulaCol.fuentes.length === 0) return "";
+                var op = (formulaCol.operacion || "").toLowerCase();
+                var opLabel = { suma: "Suma", resta: "Resta", multiplicacion: "Multiplicación", division: "División" }[op] || op || "Cálculo";
+                var nombres = formulaCol.fuentes.map(function (nombreCol) {
+                    var c = columnas.filter(function (col) { return (col.nombre || "") === nombreCol; })[0];
+                    return (c && (c.alias != null ? c.alias : c.nombre)) ? String(c.alias || c.nombre).trim() : nombreCol;
+                });
+                return opLabel + " de: " + nombres.join(", ");
+            }
+
             var raw = sessionStorage.getItem(STORAGE_EDIT);
             if (!raw) {
                 loadingEl.style.display = "none";
@@ -209,6 +220,16 @@
                                     ro.textContent = val || (col.descripcion || "—");
                                 }
                                 wrap.appendChild(ro);
+                                if (esFormula) {
+                                    var leyenda = buildFormulaLeyenda(formulaCol, columnas);
+                                    if (leyenda) {
+                                        var leyendaEl = document.createElement("p");
+                                        leyendaEl.className = "costos-edit-formula-leyenda";
+                                        leyendaEl.setAttribute("aria-describedby", ro.id);
+                                        leyendaEl.textContent = leyenda;
+                                        wrap.appendChild(leyendaEl);
+                                    }
+                                }
                                 inputEl = ro;
                             } else if (tipoComp === "combo-basico") {
                                 var valoresCombo = [];

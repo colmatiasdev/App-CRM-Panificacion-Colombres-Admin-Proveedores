@@ -1,9 +1,7 @@
 /**
  * Configuración base compartida del módulo Costo Productos (Tabla-Costo-Productos).
  * PK = IDCosto-Producto.
- * Relación con Listado-Productos-Elaborados: esta tabla es referenciada por IDCosto-Producto (FK).
- * Cardinalidad configurable: "1:1" (un producto elaborado asigna un costo) o "1:N" (varios productos
- * elaborados pueden asignar este costo). Define etiquetas del botón en Ver y URL del listado relacionado.
+ * referenciadoPor: vacío; la asignación producto elaborado ↔ costo se hace desde Editar producto elaborado (botón Ver Costo producto) y desde listado de costos (modo asignar).
  * Debe cargarse antes de cualquier sheets-*-costo-productos.config.js.
  *
  * formulas: campos calculados. Por cada columna: fuentes (nombres de columnas), operacion ("suma" | "resta" | "multiplicacion" | "division"),
@@ -18,7 +16,7 @@ window.COSTO_PRODUCTOS_SHEET_BASE = {
     "clavePrimaria": ["IDCosto-Producto"],
     "columnasPropias": [
       "Orden", "IDCosto-Producto", "Categoria", "Producto", "Costo-Producto-Maestro-Total",
-      "Costo-Packing", "Costos-Fijos", "Merma-Porcentaje", "Merma-Importe", "Tiiempo-Packing-Minutos",
+      "Costo-Packing", "Costos-Fijos", "Merma-Porcentaje", "Merma-Importe", "Tiempo-Packing-Minutos",
       "Costo-Mano-Obra-Packing", "Costo-Producto-Final-Actual", "Costo-Producto-Final-Anterior", "Habilitado"
     ],
     "columnaOrden": "Orden",
@@ -31,24 +29,12 @@ window.COSTO_PRODUCTOS_SHEET_BASE = {
       { "columnas": ["Categoria"], "unico": false },
       { "columnas": ["Habilitado"], "unico": false }
     ],
-    "referenciadoPor": [
-      {
-        "tabla": "Listado-Productos-Elaborados",
-        "nombreHoja": "Listado-Productos-Elaborados",
-        "columnaFK": "IDCosto-Producto",
-        "pkReferencia": "IDCosto-Producto",
-        "cardinalidad": "1:1",
-        "etiquetaBoton1a1": "Asignar productos elaborados",
-        "etiquetaBoton1aN": "Ver productos elaborados asignados",
-        "urlListado": "../Productos-Elaborados/productos-elaborados.html",
-        "parametroFiltroId": "idCostoProducto"
-      }
-    ],
+    "referenciadoPor": [],
     "formulas": {
       "Merma-Importe": {
         "fuentes": ["Costo-Producto-Maestro-Total", "Merma-Porcentaje"],
         "operacion": "multiplicacion",
-        "expresion": "a * b / 100",
+        "expresion": "a * b",
         "decimales": 2
       }
     }
