@@ -15,7 +15,6 @@
       alias: "Orden Lista",
       tipoDato: "numeric",
       tipoComponente: "label",
-      nullable: true,
       visible: true,
       descripcion: "Orden en listados.",
       restricciones: { min: 0, entero: true }
@@ -25,7 +24,6 @@
       alias: "ID Producto",
       tipoDato: "text",
       tipoComponente: "label",
-      nullable: false,
       visible: true,
       descripcion: "Identificador único.",
       restricciones: {}
@@ -35,7 +33,6 @@
       alias: "ID Costo Producto",
       tipoDato: "text",
       tipoComponente: "label",
-      nullable: true,
       visible: true,
       descripcion: "Referencia a Tabla-Costo-Productos (FK).",
       restricciones: { maxLongitud: 100 }
@@ -45,7 +42,6 @@
       alias: "Comercio Sucursal",
       tipoDato: "text",
       tipoComponente: "label",
-      nullable: true,
       visible: true,
       listadoValores: "COMPONENTE-COMBOS.Combo-Comercio-Sucursal",
       descripcion: "Comercio o sucursal.",
@@ -56,7 +52,6 @@
       alias: "Nombre Producto",
       tipoDato: "text",
       tipoComponente: "label",
-      nullable: true,
       visible: true,
       descripcion: "Nombre del producto.",
       restricciones: { maxLongitud: 500 }
@@ -66,7 +61,6 @@
       alias: "Costo Producto Final Actual",
       tipoDato: "numeric",
       tipoComponente: "label",
-      nullable: true,
       decimales: 2,
       visible: true,
       descripcion: "Costo final actual.",
@@ -77,7 +71,6 @@
       alias: "Observaciones",
       tipoDato: "text",
       tipoComponente: "label",
-      nullable: true,
       visible: true,
       restricciones: { maxLongitud: 2000 }
     },
@@ -86,7 +79,6 @@
       alias: "Habilitado",
       tipoDato: "text",
       tipoComponente: "label",
-      nullable: true,
       visible: true,
       descripcion: "Sí / No.",
       restricciones: { valoresPermitidos: ["Sí", "No", ""] }
