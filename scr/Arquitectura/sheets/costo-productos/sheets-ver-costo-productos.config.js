@@ -126,6 +126,7 @@
       clavePrimaria: hoja.clavePrimaria,
       clavesForaneas: hoja.clavesForaneas || [],
       columnasPropias: Array.isArray(hoja.columnasPropias) ? hoja.columnasPropias : [],
+      formulas: hoja.formulas && typeof hoja.formulas === "object" ? hoja.formulas : {},
       columnaOrden: hoja.columnaOrden,
       prefijoId: hoja.prefijoId,
       patronId: hoja.patronId,

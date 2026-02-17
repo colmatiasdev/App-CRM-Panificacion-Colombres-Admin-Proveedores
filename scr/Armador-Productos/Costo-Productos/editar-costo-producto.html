@@ -192,13 +192,22 @@
                             wrap.appendChild(label);
                             var inputEl = null;
                             if (tipoComp === "label") {
+                                var formulaCol = sheetConfig.formulas && sheetConfig.formulas[col.nombre];
+                                var esFormula = formulaCol && formulaCol.fuentes && formulaCol.fuentes.length > 0 && formulaCol.expresion;
                                 var ro = document.createElement("span");
                                 ro.id = "field-" + idx;
                                 ro.className = "costos-edit-input costos-edit-readonly";
                                 ro.setAttribute("data-header-index", String(idx));
                                 ro.setAttribute("data-nombre", col.nombre);
                                 ro.setAttribute("aria-readonly", "true");
-                                ro.textContent = val || (col.descripcion || "—");
+                                if (esFormula) {
+                                    ro.setAttribute("data-formula-expresion", formulaCol.expresion);
+                                    ro.setAttribute("data-formula-decimales", String(formulaCol.decimales != null ? formulaCol.decimales : 2));
+                                    ro.setAttribute("data-formula-fuentes", JSON.stringify(formulaCol.fuentes));
+                                    ro.textContent = val || "0";
+                                } else {
+                                    ro.textContent = val || (col.descripcion || "—");
+                                }
                                 wrap.appendChild(ro);
                                 inputEl = ro;
                             } else if (tipoComp === "combo-basico") {
@@ -258,9 +267,60 @@
                             fieldsContainer.appendChild(wrap);
                         });
 
+                        function getFormValueByNombreEditar(form, nombreColumna) {
+                            var list = form.querySelectorAll("[data-nombre]");
+                            for (var i = 0; i < list.length; i++) {
+                                if (list[i].getAttribute("data-nombre") === nombreColumna) {
+                                    return (list[i].value != null ? String(list[i].value).trim() : String(list[i].textContent || "").trim());
+                                }
+                            }
+                            return "";
+                        }
+                        function applyFormulasCostosEditar(form) {
+                            form.querySelectorAll("[data-formula-expresion]").forEach(function (span) {
+                                var expr = span.getAttribute("data-formula-expresion");
+                                var dec = parseInt(span.getAttribute("data-formula-decimales"), 10) || 2;
+                                var fuentesJson = span.getAttribute("data-formula-fuentes");
+                                if (!expr || !fuentesJson) return;
+                                var fuentes;
+                                try { fuentes = JSON.parse(fuentesJson); } catch (e) { return; }
+                                if (!Array.isArray(fuentes)) return;
+                                var exprEval = expr;
+                                for (var i = 0; i < fuentes.length; i++) {
+                                    var letter = String.fromCharCode(97 + i);
+                                    var val = getFormValueByNombreEditar(form, fuentes[i]);
+                                    var num = parseFloat(String(val).replace(",", ".")) || 0;
+                                    exprEval = exprEval.replace(new RegExp("\\b" + letter + "\\b", "g"), String(num));
+                                }
+                                var result;
+                                try { result = Function("return (" + exprEval + ");")(); } catch (err) { result = 0; }
+                                if (typeof result !== "number" || isNaN(result)) result = 0;
+                                span.textContent = result.toFixed(dec);
+                            });
+                        }
+                        applyFormulasCostosEditar(formEl);
+                        formEl.querySelectorAll("input[data-nombre], select[data-nombre]").forEach(function (input) {
+                            var nombre = input.getAttribute("data-nombre");
+                            if (!nombre) return;
+                            var esFuente = false;
+                            if (sheetConfig.formulas) {
+                                for (var k in sheetConfig.formulas) {
+                                    if (sheetConfig.formulas[k].fuentes && sheetConfig.formulas[k].fuentes.indexOf(nombre) !== -1) {
+                                        esFuente = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (esFuente) {
+                                input.addEventListener("input", function () { applyFormulasCostosEditar(formEl); });
+                                input.addEventListener("change", function () { applyFormulasCostosEditar(formEl); });
+                            }
+                        });
+
                         formEl.addEventListener("submit", function (e) {
                             e.preventDefault();
                             hideEditAlert();
+                            applyFormulasCostosEditar(formEl);
                             var newRow = row.slice ? row.slice() : row.map(function (x) { return x; });
                             formEl.querySelectorAll("[data-header-index]").forEach(function (el) {
                                 var idx = parseInt(el.getAttribute("data-header-index"), 10);

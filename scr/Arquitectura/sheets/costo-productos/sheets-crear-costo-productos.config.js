@@ -83,15 +83,15 @@
       alias: "Merma Porcentaje",
       tipoDato: "numeric",
       tipoComponente: "text-box",
-      decimales: 2,
+      decimales: 0,
       visible: true,
-      restricciones: { min: 0, max: 100 }
+      restricciones: { min: 0, max: 5 }
     },
     {
       nombre: "Merma-Importe",
       alias: "Merma Importe",
       tipoDato: "numeric",
-      tipoComponente: "text-box",
+      tipoComponente: "label",
       decimales: 2,
       visible: true,
       restricciones: { min: 0 }
@@ -149,6 +149,7 @@
       clavePrimaria: hoja.clavePrimaria,
       clavesForaneas: hoja.clavesForaneas || [],
       columnasPropias: Array.isArray(hoja.columnasPropias) ? hoja.columnasPropias : [],
+      formulas: hoja.formulas && typeof hoja.formulas === "object" ? hoja.formulas : {},
       columnaOrden: hoja.columnaOrden,
       prefijoId: hoja.prefijoId,
       patronId: hoja.patronId,

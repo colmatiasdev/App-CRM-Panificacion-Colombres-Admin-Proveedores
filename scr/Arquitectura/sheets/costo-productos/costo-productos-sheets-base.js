@@ -5,6 +5,9 @@
  * Cardinalidad configurable: "1:1" (un producto elaborado asigna un costo) o "1:N" (varios productos
  * elaborados pueden asignar este costo). Define etiquetas del botón en Ver y URL del listado relacionado.
  * Debe cargarse antes de cualquier sheets-*-costo-productos.config.js.
+ *
+ * formulas: campos calculados. Por cada columna: fuentes (nombres de columnas), operacion ("suma" | "resta" | "multiplicacion" | "division"),
+ * expresion (a, b, c = valores de fuentes en orden) y decimales.
  */
 window.COSTO_PRODUCTOS_SHEET_BASE = {
   "modulo": "costo-productos",
@@ -40,6 +43,14 @@ window.COSTO_PRODUCTOS_SHEET_BASE = {
         "urlListado": "../Productos-Elaborados/productos-elaborados.html",
         "parametroFiltroId": "idCostoProducto"
       }
-    ]
+    ],
+    "formulas": {
+      "Merma-Importe": {
+        "fuentes": ["Costo-Producto-Maestro-Total", "Merma-Porcentaje"],
+        "operacion": "multiplicacion",
+        "expresion": "a * b / 100",
+        "decimales": 2
+      }
+    }
   }
 };
