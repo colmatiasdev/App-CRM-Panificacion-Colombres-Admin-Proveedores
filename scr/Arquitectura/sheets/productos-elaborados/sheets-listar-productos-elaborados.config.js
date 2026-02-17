@@ -98,10 +98,10 @@
       indices: hoja.indices,
       columnas: columnas,
       listado: {
-        columnasAgrupacion: ["Comercio-Sucursal"],
+        columnasAgrupacion: ["Categoria"],
         columnaFiltroValores: "Comercio-Sucursal",
         modosAgrupacion: [
-          ["Comercio-Sucursal"],
+          ["Categoria"],  
         ]
       }
     }]

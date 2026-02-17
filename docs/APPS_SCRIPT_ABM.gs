@@ -315,7 +315,7 @@ function propagarCostoProductosAReferenciadores(idCostoProducto, updatedObj) {
   for (var r = 1; r < dataDest.length; r++) {
     var rowVal = (dataDest[r][fkColIdx] != null ? String(dataDest[r][fkColIdx]) : '').trim();
     if (rowVal !== idStr) continue;
-    var rowIndexSheet = r + 2;
+    var rowIndexSheet = r + 1;
     for (var d = 0; d < destColIndexes.length; d++) {
       var val = updatedObj[destColIndexes[d].columnaOrigen];
       var toWrite = val != null && val !== '' ? String(val) : '';
