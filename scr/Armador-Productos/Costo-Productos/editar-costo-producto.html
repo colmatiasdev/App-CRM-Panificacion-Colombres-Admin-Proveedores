@@ -103,8 +103,11 @@
                         columnas.forEach(function (col, idx) {
                             var nombre = (col.alias != null ? col.alias : col.nombre || "").trim();
                             if (!nombre) return;
+                            if (col.visible === false) return;
                             var val = row[idx] != null ? String(row[idx]).trim() : "";
                             var restr = col.restricciones || {};
+                            var tipoComp = col.tipoComponente != null ? col.tipoComponente : col.tipo;
+                            var tipoDato = col.tipoDato != null ? col.tipoDato : col.tipo;
                             var label = document.createElement("label");
                             label.className = "costos-edit-label";
                             label.setAttribute("for", "field-" + idx);
@@ -113,12 +116,28 @@
                             wrap.className = "costos-edit-field";
                             wrap.appendChild(label);
                             var inputEl = null;
-                            if (restr.valoresPermitidos && Array.isArray(restr.valoresPermitidos)) {
+                            if (tipoComp === "label") {
+                                var ro = document.createElement("span");
+                                ro.id = "field-" + idx;
+                                ro.className = "costos-edit-input costos-edit-readonly";
+                                ro.setAttribute("data-header-index", String(idx));
+                                ro.setAttribute("data-nombre", col.nombre);
+                                ro.setAttribute("aria-readonly", "true");
+                                ro.textContent = val || (col.descripcion || "—");
+                                wrap.appendChild(ro);
+                                inputEl = ro;
+                            } else if (tipoComp === "combo-basico" && restr.valoresPermitidos && Array.isArray(restr.valoresPermitidos)) {
                                 var select = document.createElement("select");
                                 select.id = "field-" + idx;
                                 select.className = "costos-edit-input";
                                 select.setAttribute("data-header-index", String(idx));
                                 select.setAttribute("data-nombre", col.nombre);
+                                if (col.obligatorio !== true) {
+                                    var optVacio = document.createElement("option");
+                                    optVacio.value = "";
+                                    optVacio.textContent = "—";
+                                    select.appendChild(optVacio);
+                                }
                                 restr.valoresPermitidos.forEach(function (v) {
                                     var opt = document.createElement("option");
                                     opt.value = v;
@@ -126,9 +145,10 @@
                                     if (val === v) opt.selected = true;
                                     select.appendChild(opt);
                                 });
+                                if (col.obligatorio === true) select.required = true;
                                 wrap.appendChild(select);
                                 inputEl = select;
-                            } else if (col.tipo === "numeric") {
+                            } else if (tipoComp === "text-box" && (tipoDato === "numeric" || col.tipo === "numeric")) {
                                 var input = document.createElement("input");
                                 input.type = "number";
                                 input.step = col.decimales != null ? (Math.pow(10, -col.decimales)) : "0.01";
@@ -138,6 +158,7 @@
                                 input.setAttribute("data-header-index", String(idx));
                                 input.setAttribute("data-nombre", col.nombre);
                                 input.value = val;
+                                if (col.obligatorio === true) input.required = true;
                                 wrap.appendChild(input);
                                 inputEl = input;
                             } else {
@@ -149,24 +170,22 @@
                                 input.setAttribute("data-nombre", col.nombre);
                                 input.value = val;
                                 if (restr.maxLongitud) input.maxLength = restr.maxLongitud;
+                                if (col.obligatorio === true) input.required = true;
                                 wrap.appendChild(input);
                                 inputEl = input;
-                            }
-                            if (col.label === true && inputEl) {
-                                inputEl.disabled = true;
-                                inputEl.setAttribute("title", "Campo autogenerado por el sistema, no editable.");
-                                wrap.classList.add("costos-edit-field--solo-lectura");
                             }
                             fieldsContainer.appendChild(wrap);
                         });
 
                         formEl.addEventListener("submit", function (e) {
                             e.preventDefault();
-                            var newRow = [];
+                            var newRow = row.slice ? row.slice() : row.map(function (x) { return x; });
                             formEl.querySelectorAll("[data-header-index]").forEach(function (el) {
                                 var idx = parseInt(el.getAttribute("data-header-index"), 10);
+                                if (idx < 0) return;
+                                var val = (el.value != null ? String(el.value).trim() : (el.textContent != null ? String(el.textContent).trim() : ""));
                                 while (newRow.length <= idx) newRow.push("");
-                                newRow[idx] = el.value != null ? String(el.value).trim() : "";
+                                newRow[idx] = val;
                             });
                             var body = { action: "update", sheet: nombreHoja, id: id };
                             for (var k = 0; k < headers.length; k++) {

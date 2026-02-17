@@ -86,9 +86,10 @@
                     columnas.forEach(function (col, idx) {
                         var nombre = (col.alias != null ? col.alias : col.nombre || "").trim();
                         if (!nombre) return;
-                        if (col.label === true) return;
-                        if (isClavePrimaria(col.nombre, clavePrimaria)) return;
+                        if (col.visible === false) return;
                         var restr = col.restricciones || {};
+                        var tipoComp = col.tipoComponente != null ? col.tipoComponente : col.tipo;
+                        var tipoDato = col.tipoDato != null ? col.tipoDato : col.tipo;
                         var label = document.createElement("label");
                         label.className = "costos-edit-label";
                         label.setAttribute("for", "field-" + idx);
@@ -96,29 +97,47 @@
                         var wrap = document.createElement("div");
                         wrap.className = "costos-edit-field";
                         wrap.appendChild(label);
-                        if (restr.valoresPermitidos && Array.isArray(restr.valoresPermitidos)) {
+                        if (tipoComp === "label") {
+                            var ro = document.createElement("span");
+                            ro.id = "field-" + idx;
+                            ro.className = "costos-edit-input costos-edit-readonly";
+                            ro.setAttribute("data-header-index", String(idx));
+                            ro.setAttribute("data-nombre", col.nombre);
+                            ro.setAttribute("aria-readonly", "true");
+                            ro.textContent = col.descripcion || "Solo lectura";
+                            wrap.appendChild(ro);
+                        } else if (tipoComp === "combo-basico" && restr.valoresPermitidos && Array.isArray(restr.valoresPermitidos)) {
                             var select = document.createElement("select");
                             select.id = "field-" + idx;
                             select.className = "costos-edit-input";
                             select.setAttribute("data-header-index", String(idx));
                             select.setAttribute("data-nombre", col.nombre);
+                            if (col.obligatorio !== true) {
+                                var optVacio = document.createElement("option");
+                                optVacio.value = "";
+                                optVacio.textContent = "—";
+                                select.appendChild(optVacio);
+                            }
                             restr.valoresPermitidos.forEach(function (v) {
                                 var opt = document.createElement("option");
                                 opt.value = v;
                                 opt.textContent = v === "" ? "—" : v;
                                 select.appendChild(opt);
                             });
+                            if (col.obligatorio === true) select.required = true;
                             wrap.appendChild(select);
-                        } else if (col.tipo === "numeric") {
+                        } else if (tipoComp === "text-box" && (tipoDato === "numeric" || col.tipo === "numeric")) {
                             var input = document.createElement("input");
                             input.type = "number";
                             input.step = col.decimales != null ? (Math.pow(10, -col.decimales)) : "0.01";
                             if (restr.min != null) input.min = restr.min;
+                            if (restr.max != null) input.max = restr.max;
                             input.id = "field-" + idx;
                             input.className = "costos-edit-input";
                             input.setAttribute("data-header-index", String(idx));
                             input.setAttribute("data-nombre", col.nombre);
                             input.placeholder = col.decimales ? "0.00" : "0";
+                            if (col.obligatorio === true) input.required = true;
                             wrap.appendChild(input);
                         } else {
                             var input = document.createElement("input");
@@ -128,6 +147,7 @@
                             input.setAttribute("data-header-index", String(idx));
                             input.setAttribute("data-nombre", col.nombre);
                             if (restr.maxLongitud) input.maxLength = restr.maxLongitud;
+                            if (col.obligatorio === true) input.required = true;
                             wrap.appendChild(input);
                         }
                         fieldsContainer.appendChild(wrap);
