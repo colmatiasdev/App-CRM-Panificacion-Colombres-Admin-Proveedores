@@ -147,14 +147,6 @@
                                 newRow[idColIdx] = window.GENERAR_ID_PARA_HOJA(sheetConfig);
                             }
                         }
-                        var body = { action: "create", sheet: nombreHoja };
-                        for (var k = 0; k < headers.length; k++) {
-                            if (headers[k]) body[headers[k]] = newRow[k] != null ? newRow[k] : "";
-                        }
-                        var formBody = new URLSearchParams();
-                        for (var key in body) {
-                            if (body.hasOwnProperty(key)) formBody.append(key, body[key] != null ? body[key] : "");
-                        }
                         var saveBtn = formEl.querySelector(".costos-edit-btn-save");
                         var btnText = saveBtn ? saveBtn.innerHTML : "";
                         if (saveBtn) {
@@ -162,7 +154,41 @@
                             saveBtn.innerHTML = "<i class=\"fa-solid fa-spinner fa-spin\" aria-hidden=\"true\"></i> Guardando…";
                         }
                         if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.show("Guardando…");
-                        fetch(appsScriptUrl, { method: "POST", body: formBody })
+                        var columnaAutogen = sheetConfig.columnaOrden || null;
+                        var colIdxAutogen = columnaAutogen ? headers.indexOf(columnaAutogen) : -1;
+                        var promesaNewRow = (columnaAutogen && colIdxAutogen >= 0) ? fetch(appsScriptUrl + "?action=list&sheet=" + encodeURIComponent(nombreHoja) + "&limit=10000&_=" + Date.now(), { cache: "no-store" })
+                            .then(function (res) { return res.json(); })
+                            .then(function (json) {
+                                var listHeaders = (json && json.data && json.data.headers) ? json.data.headers : [];
+                                var listRows = (json && json.data && json.data.rows) ? json.data.rows : [];
+                                var idxCol = -1;
+                                for (var h = 0; h < listHeaders.length; h++) {
+                                    if (String(listHeaders[h] || "").trim() === String(columnaAutogen).trim()) { idxCol = h; break; }
+                                }
+                                var maxVal = 0;
+                                if (idxCol >= 0) {
+                                    for (var r = 0; r < listRows.length; r++) {
+                                        var row = listRows[r];
+                                        var v = Array.isArray(row) ? row[idxCol] : (row && listHeaders[idxCol] != null ? row[listHeaders[idxCol]] : null);
+                                        var num = (v != null && v !== "") ? parseFloat(String(v), 10) : NaN;
+                                        if (!isNaN(num) && num > maxVal) maxVal = num;
+                                    }
+                                }
+                                newRow[colIdxAutogen] = String(maxVal + 1);
+                                return newRow;
+                            })
+                            .catch(function () { return newRow; }) : Promise.resolve(newRow);
+                        promesaNewRow.then(function (rowFinal) {
+                            var body = { action: "create", sheet: nombreHoja };
+                            for (var k = 0; k < headers.length; k++) {
+                                if (headers[k]) body[headers[k]] = rowFinal[k] != null ? rowFinal[k] : "";
+                            }
+                            var formBody = new URLSearchParams();
+                            for (var key in body) {
+                                if (body.hasOwnProperty(key)) formBody.append(key, body[key] != null ? body[key] : "");
+                            }
+                            return fetch(appsScriptUrl, { method: "POST", body: formBody });
+                        })
                             .then(function (res) { return res.text(); })
                             .then(function (text) {
                                 var json;

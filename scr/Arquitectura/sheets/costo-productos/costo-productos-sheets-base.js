@@ -13,6 +13,7 @@ window.COSTO_PRODUCTOS_SHEET_BASE = {
     "nombre": "Tabla-Costo-Productos",
     "nombreHoja": "Tabla-Costo-Productos",
     "clavePrimaria": ["IDCosto-Producto"],
+    "columnaOrden": "Orden",
     "clavesForaneas": [],
     "prefijoId": "COSTO-PROD",
     "patronId": 1,

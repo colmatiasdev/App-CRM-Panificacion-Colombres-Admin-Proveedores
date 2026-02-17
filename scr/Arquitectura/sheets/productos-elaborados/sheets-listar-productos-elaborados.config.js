@@ -14,7 +14,6 @@
       alias: "Orden Lista",
       tipo: "numeric",
       nullable: true,
-      autogeneradoOrden: true,
       label: true,
       visible: false,
       descripcion: "Orden de aparición en listados.",
@@ -94,17 +93,17 @@
       nombreHoja: hoja.nombreHoja,
       clavePrimaria: hoja.clavePrimaria,
       clavesForaneas: hoja.clavesForaneas || [],
+      columnaOrden: hoja.columnaOrden,
       prefijoId: hoja.prefijoId,
       patronId: hoja.patronId,
       indices: hoja.indices,
       columnas: columnas,
       listado: {
         columnasAgrupacion: ["Comercio-Sucursal"],
+        /** Columna por cuyos valores distintos se filtra el listado (el select muestra "Todos" + cada valor). */
+        columnaFiltroValores: "Comercio-Sucursal",
         modosAgrupacion: [
-          [],
           ["Comercio-Sucursal"],
-          ["IDCosto-Producto"],
-          ["Comercio-Sucursal", "Habilitado"]
         ]
       }
     }]

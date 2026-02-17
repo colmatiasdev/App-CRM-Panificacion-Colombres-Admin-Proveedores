@@ -88,8 +88,11 @@
                 var configRel = window.COSTO_PRODUCTOS_SHEETS_JSON;
                 if (!configRel || !configRel.hojas || !configRel.hojas[0]) return;
                 var columnasRel = configRel.hojas[0].columnas || [];
-                var urlGet = appsScriptUrl + "?action=get&sheet=Tabla-Costo-Productos&id=" + encodeURIComponent(idCostoProducto);
+                // Mostrar de inmediato la sección con estado de carga (visible mientras tarda el fetch)
+                relacionadoEl.innerHTML = "<h2 class=\"costos-ver-subtitulo\">Costo producto relacionado</h2><p class=\"costos-placeholder\"><i class=\"fa-solid fa-spinner fa-spin\" aria-hidden=\"true\"></i> Cargando datos…</p>";
+                relacionadoEl.style.display = "block";
                 if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.show("Cargando costo relacionado…");
+                var urlGet = appsScriptUrl + "?action=get&sheet=Tabla-Costo-Productos&id=" + encodeURIComponent(idCostoProducto);
                 fetch(urlGet, { cache: "no-store" })
                     .then(function (r) { return r.json(); })
                     .then(function (resp) {

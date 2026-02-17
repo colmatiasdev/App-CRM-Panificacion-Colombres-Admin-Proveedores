@@ -14,6 +14,7 @@ window.PRODUCTOS_ELABORADOS_SHEET_BASE = {
     "nombreHoja": "Listado-Productos-Elaborados",
     "clavePrimaria": ["IDProducto"],
     "columnasPropias": ["Orden-Lista", "IDProducto", "Comercio-Sucursal", "Observaciones", "Habilitado"],
+    "columnaOrden": "Orden-Lista",
     "clavesForaneas": [
       {
         "columna": "IDCosto-Producto",

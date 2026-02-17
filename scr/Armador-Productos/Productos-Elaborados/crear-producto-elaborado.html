@@ -79,17 +79,29 @@
                     var nombreHoja = sheetConfig.nombreHoja;
                     var clavePrimaria = sheetConfig.clavePrimaria || [];
                     var columnas = sheetConfig.columnas || [];
+                    var columnasPropias = sheetConfig.columnasPropias || [];
+                    var nombresPropias = columnasPropias.map(function (n) { return String(n || "").trim(); });
+                    function enColumnasPropias(nombreCol) {
+                        var n = String(nombreCol || "").trim().toLowerCase();
+                        for (var i = 0; i < nombresPropias.length; i++) {
+                            if (String(nombresPropias[i] || "").toLowerCase().replace(/-/g, "") === n.replace(/-/g, "")) return true;
+                        }
+                        return false;
+                    }
                     loadingEl.style.display = "none";
                     formEl.style.display = "block";
                     fieldsContainer.innerHTML = "";
                     var headers = columnas.map(function (c) { return c.nombre; });
+                    var idGeneradoPreview = (window.GENERAR_ID_PARA_HOJA && sheetConfig.clavePrimaria && sheetConfig.clavePrimaria[0]) ? window.GENERAR_ID_PARA_HOJA(sheetConfig) : "";
                     columnas.forEach(function (col, idx) {
+                        var nombreCol = (col.nombre || "").trim();
+                        if (!enColumnasPropias(nombreCol)) return;
+                        if (col.visible === false) return;
                         var nombre = (col.alias != null ? col.alias : col.nombre || "").trim();
                         if (!nombre) return;
-                        if (col.label === true) return;
-                        if (isClavePrimaria(nombre, clavePrimaria)) return;
-                        var nameNorm = norm(nombre);
                         var restr = col.restricciones || {};
+                        var soloLectura = col.label === true;
+                        var esPkAutogenerado = isClavePrimaria(nombreCol, clavePrimaria) && idGeneradoPreview !== "";
                         var label = document.createElement("label");
                         label.className = "costos-edit-label";
                         label.setAttribute("for", "field-" + idx);
@@ -97,12 +109,22 @@
                         var wrap = document.createElement("div");
                         wrap.className = "costos-edit-field";
                         wrap.appendChild(label);
-                        if (restr.valoresPermitidos && Array.isArray(restr.valoresPermitidos)) {
+                        if (soloLectura || esPkAutogenerado) {
+                            var valorMostrar = esPkAutogenerado ? idGeneradoPreview : "";
+                            var ro = document.createElement("span");
+                            ro.id = "field-" + idx;
+                            ro.className = "costos-edit-input costos-edit-readonly";
+                            ro.setAttribute("data-header-index", String(idx));
+                            ro.setAttribute("data-nombre", nombreCol);
+                            ro.setAttribute("aria-readonly", "true");
+                            ro.textContent = valorMostrar || (col.descripcion || "Solo lectura");
+                            wrap.appendChild(ro);
+                        } else if (restr.valoresPermitidos && Array.isArray(restr.valoresPermitidos)) {
                             var select = document.createElement("select");
                             select.id = "field-" + idx;
                             select.className = "costos-edit-input";
                             select.setAttribute("data-header-index", String(idx));
-                            select.setAttribute("data-nombre", nombre);
+                            select.setAttribute("data-nombre", nombreCol);
                             restr.valoresPermitidos.forEach(function (v) {
                                 var opt = document.createElement("option");
                                 opt.value = v;
@@ -113,13 +135,14 @@
                         } else if (col.tipo === "numeric") {
                             var input = document.createElement("input");
                             input.type = "number";
-                            input.step = col.decimales != null ? (Math.pow(10, -col.decimales)) : "0.01";
+                            input.step = (restr.entero === true) ? "1" : (col.decimales != null ? Math.pow(10, -col.decimales) : 0.01);
                             if (restr.min != null) input.min = restr.min;
+                            if (restr.max != null) input.max = restr.max;
                             input.id = "field-" + idx;
                             input.className = "costos-edit-input";
                             input.setAttribute("data-header-index", String(idx));
-                            input.setAttribute("data-nombre", nombre);
-                            input.placeholder = col.decimales ? "0.00" : "0";
+                            input.setAttribute("data-nombre", nombreCol);
+                            input.placeholder = col.decimales != null ? "0." + "0".repeat(col.decimales) : "0";
                             wrap.appendChild(input);
                         } else {
                             var input = document.createElement("input");
@@ -127,8 +150,9 @@
                             input.id = "field-" + idx;
                             input.className = "costos-edit-input";
                             input.setAttribute("data-header-index", String(idx));
-                            input.setAttribute("data-nombre", nombre);
+                            input.setAttribute("data-nombre", nombreCol);
                             if (restr.maxLongitud) input.maxLength = restr.maxLongitud;
+                            if (col.nullable === false) input.required = true;
                             wrap.appendChild(input);
                         }
                         fieldsContainer.appendChild(wrap);
@@ -139,7 +163,9 @@
                         var newRow = headers.map(function () { return ""; });
                         formEl.querySelectorAll("[data-header-index]").forEach(function (el) {
                             var idx = parseInt(el.getAttribute("data-header-index"), 10);
-                            if (idx >= 0 && idx < newRow.length) newRow[idx] = el.value != null ? String(el.value).trim() : "";
+                            if (idx < 0 || idx >= newRow.length) return;
+                            var val = el.value != null ? String(el.value).trim() : (el.textContent != null ? String(el.textContent).trim() : "");
+                            newRow[idx] = val;
                         });
                         if (window.GENERAR_ID_PARA_HOJA && sheetConfig.clavePrimaria && sheetConfig.clavePrimaria[0]) {
                             var idColNombre = sheetConfig.clavePrimaria[0];
@@ -148,14 +174,6 @@
                                 newRow[idColIdx] = window.GENERAR_ID_PARA_HOJA(sheetConfig);
                             }
                         }
-                        var body = { action: "create", sheet: nombreHoja };
-                        for (var k = 0; k < headers.length; k++) {
-                            if (headers[k]) body[headers[k]] = newRow[k] != null ? newRow[k] : "";
-                        }
-                        var formBody = new URLSearchParams();
-                        for (var key in body) {
-                            if (body.hasOwnProperty(key)) formBody.append(key, body[key] != null ? body[key] : "");
-                        }
                         var saveBtn = formEl.querySelector(".costos-edit-btn-save");
                         var btnText = saveBtn ? saveBtn.innerHTML : "";
                         if (saveBtn) {
@@ -163,7 +181,41 @@
                             saveBtn.innerHTML = "<i class=\"fa-solid fa-spinner fa-spin\" aria-hidden=\"true\"></i> Guardando…";
                         }
                         if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.show("Guardando…");
-                        fetch(appsScriptUrl, { method: "POST", body: formBody })
+                        var columnaAutogen = sheetConfig.columnaOrden || null;
+                        var colIdxAutogen = columnaAutogen ? headers.indexOf(columnaAutogen) : -1;
+                        var promesaNewRow = (columnaAutogen && colIdxAutogen >= 0) ? fetch(appsScriptUrl + "?action=list&sheet=" + encodeURIComponent(nombreHoja) + "&limit=10000&_=" + Date.now(), { cache: "no-store" })
+                            .then(function (res) { return res.json(); })
+                            .then(function (json) {
+                                var listHeaders = (json && json.data && json.data.headers) ? json.data.headers : [];
+                                var listRows = (json && json.data && json.data.rows) ? json.data.rows : [];
+                                var idxCol = -1;
+                                for (var h = 0; h < listHeaders.length; h++) {
+                                    if (String(listHeaders[h] || "").trim() === String(columnaAutogen).trim()) { idxCol = h; break; }
+                                }
+                                var maxVal = 0;
+                                if (idxCol >= 0) {
+                                    for (var r = 0; r < listRows.length; r++) {
+                                        var row = listRows[r];
+                                        var v = Array.isArray(row) ? row[idxCol] : (row && listHeaders[idxCol] != null ? row[listHeaders[idxCol]] : null);
+                                        var num = (v != null && v !== "") ? parseFloat(String(v), 10) : NaN;
+                                        if (!isNaN(num) && num > maxVal) maxVal = num;
+                                    }
+                                }
+                                newRow[colIdxAutogen] = String(maxVal + 1);
+                                return newRow;
+                            })
+                            .catch(function () { return newRow; }) : Promise.resolve(newRow);
+                        promesaNewRow.then(function (rowFinal) {
+                            var body = { action: "create", sheet: nombreHoja };
+                            for (var k = 0; k < headers.length; k++) {
+                                if (headers[k]) body[headers[k]] = rowFinal[k] != null ? rowFinal[k] : "";
+                            }
+                            var formBody = new URLSearchParams();
+                            for (var key in body) {
+                                if (body.hasOwnProperty(key)) formBody.append(key, body[key] != null ? body[key] : "");
+                            }
+                            return fetch(appsScriptUrl, { method: "POST", body: formBody });
+                        })
                             .then(function (res) { return res.text(); })
                             .then(function (text) {
                                 var json;

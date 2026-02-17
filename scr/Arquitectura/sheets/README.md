@@ -88,7 +88,7 @@ Cada entrada en `referenciadoPor` incluye: `tabla`, `nombreHoja`, `columnaFK`, `
 
 ## Columnas tipo label (solo lectura / autogeneradas)
 
-En la config de cada acción (p. ej. en `productos-elaborados/sheets-crear-productos-elaborados.config.js`), cada columna puede tener **`"label": true`**: son columnas autogeneradas por el sistema que el usuario no debe modificar (para no perder relaciones). Ejemplos: la columna de orden (`autogeneradoOrden`), la clave primaria (ID). En **crear** no se muestran campos para esas columnas; el ID se genera con la función de Arquitectura. En **editar** se muestran en solo lectura (disabled).
+En la config de cada acción (p. ej. en `productos-elaborados/sheets-crear-productos-elaborados.config.js`), cada columna puede tener **`"label": true`**: son columnas autogeneradas por el sistema que el usuario no debe modificar (para no perder relaciones). Ejemplos: la columna de orden (`autogeneradorID`), la clave primaria (ID). En **crear** no se muestran campos para esas columnas; el ID se genera con la función de Arquitectura. En **editar** se muestran en solo lectura (disabled).
 
 Para la **clave primaria** que es ID autogenerado, la hoja en el **base** define:
 - **`prefijoId`**: cadena fija (ej. `"PROD-ELAB"`).
@@ -100,7 +100,7 @@ La generación está en **scr/Arquitectura/generar-id.js** (`window.GENERAR_ID_P
 
 ## Orden y visibilidad en listado (Productos elaborados)
 
-- **Columna de orden**: La columna con `"autogeneradoOrden": true` (ej. `Orden-Lista`) define el orden de la lista; el módulo ordena las filas por ese campo (numérico).
+- **Columna de orden**: La columna de orden (nombre en `hoja.columnaOrden` en el base, ej. `Orden-Lista`) define el orden de la lista; el módulo ordena las filas por ese campo (numérico). **Solo en la acción Crear** se usa la propiedad **`autogeneradorID`: true** en esa columna (en `sheets-crear-*.config.js`): al crear un registro, el valor se asigna como **máximo valor existente + 1**. En listar, editar y ver no se usa `autogeneradorID` porque el registro ya tiene el valor asignado.
 - **Visibilidad en la card**: Cada columna puede llevar `"visible": true` o `"visible": false`. Solo las que tienen `true` se muestran en el cuerpo de cada tarjeta del listado (el título de la card sigue siendo la columna nombre, p. ej. Nombre-Producto).
 
 ## Listado con agrupación (Productos elaborados)

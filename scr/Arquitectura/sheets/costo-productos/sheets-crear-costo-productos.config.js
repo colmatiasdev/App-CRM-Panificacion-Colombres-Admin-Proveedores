@@ -9,7 +9,7 @@
   }
   var hoja = base.hoja;
   var columnas = [
-    { nombre: "Orden", alias: "Orden", tipo: "numeric", nullable: true, autogeneradoOrden: true, label: true, visible: false, restricciones: { min: 0, entero: true } },
+    { nombre: "Orden", alias: "Orden", tipo: "numeric", nullable: true, autogeneradorID: true, label: true, visible: false, restricciones: { min: 0, entero: true } },
     { nombre: "IDCosto-Producto", alias: "ID Costo Producto", tipo: "text", nullable: false, label: true, visible: false, restricciones: {} },
     { nombre: "Categoria", alias: "Categoría", tipo: "text", nullable: true, visible: true, restricciones: { maxLongitud: 200 } },
     { nombre: "Producto", alias: "Producto", tipo: "text", nullable: true, visible: true, restricciones: { maxLongitud: 500 } },
@@ -32,6 +32,7 @@
       nombreHoja: hoja.nombreHoja,
       clavePrimaria: hoja.clavePrimaria,
       clavesForaneas: hoja.clavesForaneas || [],
+      columnaOrden: hoja.columnaOrden,
       prefijoId: hoja.prefijoId,
       patronId: hoja.patronId,
       indices: hoja.indices,

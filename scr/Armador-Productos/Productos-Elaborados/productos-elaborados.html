@@ -33,14 +33,22 @@
         </div>
         <p class="costos-intro">Listado desde la hoja <strong>Listado-Productos-Elaborados</strong>. Creá o modificá productos.</p>
 
-        <section class="costos-filter-section" aria-label="Filtrar y agrupar listado">
-            <label for="filter-productos-elaborados" class="costos-filter-label">Buscar</label>
-            <input type="search" id="filter-productos-elaborados" class="costos-filter-input" placeholder="Nombre o texto del producto…" autocomplete="off">
+        <section class="costos-filter-section costos-filter-section--stacked" aria-label="Filtrar y agrupar listado">
+            <div class="costos-filter-group-by" id="productos-elaborados-filtrar-wrap" style="display:none;">
+                <label for="filtrar-valores-productos-elaborados" class="costos-filter-label">Filtrar por</label>
+                <select id="filtrar-valores-productos-elaborados" class="costos-filter-select" aria-label="Filtrar por valor">
+                    <!-- opciones (Todos + valores) se llenan por JS -->
+                </select>
+            </div>
             <div class="costos-filter-group-by" id="productos-elaborados-agrupar-wrap" style="display:none;">
                 <label for="agrupar-productos-elaborados" class="costos-filter-label">Agrupar por</label>
                 <select id="agrupar-productos-elaborados" class="costos-filter-select" aria-label="Modo de agrupación">
                     <!-- opciones se llenan por JS según config -->
                 </select>
+            </div>
+            <div class="costos-filter-search">
+                <label for="filter-productos-elaborados" class="costos-filter-label">Buscar</label>
+                <input type="search" id="filter-productos-elaborados" class="costos-filter-input" placeholder="Nombre o texto del producto…" autocomplete="off">
             </div>
             <p class="costos-filter-count" id="productos-elaborados-count" aria-live="polite"></p>
         </section>

@@ -54,11 +54,13 @@
         var clavePrimaria = Array.isArray(hoja.clavePrimaria) ? hoja.clavePrimaria : (hoja.idColumn ? [hoja.idColumn] : ["IDCosto-Producto"]);
         var columnas = hoja.columnas || [];
         var listado = hoja.listado || {};
-        var columnaOrdenLista = null;
-        for (var c = 0; c < columnas.length; c++) {
-            if (columnas[c].autogeneradoOrden === true) {
-                columnaOrdenLista = String(columnas[c].nombre || "").trim();
-                break;
+        var columnaOrden = (hoja.columnaOrden && String(hoja.columnaOrden).trim()) || null;
+        if (!columnaOrden) {
+            for (var c = 0; c < columnas.length; c++) {
+                if (columnas[c].autogeneradorID === true) {
+                    columnaOrden = String(columnas[c].nombre || "").trim();
+                    break;
+                }
             }
         }
         var config = {
@@ -69,7 +71,7 @@
             indicesExtras: hoja.indices || [],
             columnasAgrupacion: Array.isArray(listado.columnasAgrupacion) ? listado.columnasAgrupacion : (listado.columnasAgrupacion ? [listado.columnasAgrupacion] : []),
             modosAgrupacion: Array.isArray(listado.modosAgrupacion) ? listado.modosAgrupacion : [],
-            columnaOrdenLista: columnaOrdenLista || null,
+            columnaOrden: columnaOrden,
             prefijoId: hoja.prefijoId != null ? hoja.prefijoId : null,
             patronId: hoja.patronId != null ? hoja.patronId : 1,
             longitudAlfanum: hoja.longitudAlfanum != null ? hoja.longitudAlfanum : 15,

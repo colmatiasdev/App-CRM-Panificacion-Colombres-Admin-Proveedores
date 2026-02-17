@@ -104,9 +104,9 @@
         return { headers: headers, rows: rows };
     }
 
-    function sortRowsByOrden(rows, headers, columnaOrdenLista) {
-        if (!columnaOrdenLista || !rows.length) return rows;
-        var ordenIdx = findColumnIndex(headers, [norm(columnaOrdenLista)]);
+    function sortRowsByOrden(rows, headers, columnaOrden) {
+        if (!columnaOrden || !rows.length) return rows;
+        var ordenIdx = findColumnIndex(headers, [norm(columnaOrden)]);
         if (ordenIdx < 0) return rows;
         var sorted = rows.slice();
         sorted.sort(function (a, b) {
@@ -440,8 +440,8 @@
                                 return apiHeaders.map(function (k) { return obj[k] != null ? obj[k] : ""; });
                             });
                         }
-                        if (sheetConfig.columnaOrdenLista) {
-                            rows = sortRowsByOrden(rows, headers, sheetConfig.columnaOrdenLista);
+                        if (sheetConfig.columnaOrden) {
+                            rows = sortRowsByOrden(rows, headers, sheetConfig.columnaOrden);
                         }
                         if (!headers.length && !rows.length) {
                             showMessage(container, "La hoja no tiene datos.");
