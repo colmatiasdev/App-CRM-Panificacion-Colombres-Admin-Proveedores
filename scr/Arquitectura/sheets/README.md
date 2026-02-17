@@ -63,6 +63,18 @@ Esta carpeta es **scr/Arquitectura/sheets/**. El módulo Productos elaborados se
 | `enum` | Valores permitidos | `"enum": ["Sí", "No", ""]` |
 | `integer` | Solo enteros | `"integer": true` |
 
+## Columnas tipo label (solo lectura / autogeneradas)
+
+En la config de la hoja (p. ej. en `productos-elaborados-sheets.config.js`), cada columna puede tener **`"label": true`**: son columnas autogeneradas por el sistema que el usuario no debe modificar (para no perder relaciones). Ejemplos: la columna de orden (`autogeneradoOrden`), la clave primaria (ID). En **crear** no se muestran campos para esas columnas; el ID se genera con la función de Arquitectura. En **editar** se muestran en solo lectura (disabled).
+
+Para la **clave primaria** que es ID autogenerado, la hoja debe definir:
+- **`prefijoId`**: cadena fija (ej. `"PROD-ELAB"` o `"PROD-BASE"`).
+- **`patronId`**: 1 o 2.  
+  - **1**: `prefijoId` + "-" + 15 caracteres alfanuméricos (ej. `PROD-ELAB-4g8h6jjk64tg63`).  
+  - **2**: `prefijoId` + "-" + alfanuméricos + "-" + 4 dígitos (ej. `PROD-BASE-s46g4dh4s5aazs-7522`).
+
+La generación está en **scr/Arquitectura/generar-id.js** (`window.GENERAR_ID_PARA_HOJA(hojaConfig)`), para reutilizar en todas las tablas.
+
 ## Orden y visibilidad en listado (Productos elaborados)
 
 - **Columna de orden**: La columna con `"autogeneradoOrden": true` (ej. `Orden-Lista`) define el orden de la lista; el módulo ordena las filas por ese campo (numérico).

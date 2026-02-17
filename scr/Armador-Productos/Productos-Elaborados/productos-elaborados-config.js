@@ -46,7 +46,11 @@
                     indicesExtras: hoja.indices || [],
                     columnasAgrupacion: Array.isArray(listado.columnasAgrupacion) ? listado.columnasAgrupacion : (listado.columnasAgrupacion ? [listado.columnasAgrupacion] : []),
                     modosAgrupacion: Array.isArray(listado.modosAgrupacion) ? listado.modosAgrupacion : [],
-                    columnaOrdenLista: columnaOrdenLista || null
+                    columnaOrdenLista: columnaOrdenLista || null,
+                    prefijoId: hoja.prefijoId != null ? hoja.prefijoId : null,
+                    patronId: hoja.patronId != null ? hoja.patronId : 1,
+                    longitudAlfanum: hoja.longitudAlfanum != null ? hoja.longitudAlfanum : 15,
+                    digitosSufijo: hoja.digitosSufijo != null ? hoja.digitosSufijo : 4
                 };
                 columnas.forEach(function (col, idx) {
                     var nombre = String((col.nombre || "").trim());

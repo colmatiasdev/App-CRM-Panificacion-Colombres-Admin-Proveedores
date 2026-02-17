@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="../../costos/costos.css">
     <script src="../../../config.js"></script>
     <script src="../../Arquitectura/config-sheets.js"></script>
+    <script src="../../Arquitectura/generar-id.js"></script>
     <script src="../../Arquitectura/sheets/productos-elaborados-sheets.config.js"></script>
 </head>
 <body class="costos-page">
@@ -108,6 +109,7 @@
                             var wrap = document.createElement("div");
                             wrap.className = "costos-edit-field";
                             wrap.appendChild(label);
+                            var inputEl = null;
                             if (restr.valoresPermitidos && Array.isArray(restr.valoresPermitidos)) {
                                 var select = document.createElement("select");
                                 select.id = "field-" + idx;
@@ -122,6 +124,7 @@
                                     select.appendChild(opt);
                                 });
                                 wrap.appendChild(select);
+                                inputEl = select;
                             } else if (col.tipo === "numeric") {
                                 var input = document.createElement("input");
                                 input.type = "number";
@@ -133,6 +136,7 @@
                                 input.setAttribute("data-nombre", nombre);
                                 input.value = val;
                                 wrap.appendChild(input);
+                                inputEl = input;
                             } else {
                                 var input = document.createElement("input");
                                 input.type = "text";
@@ -143,6 +147,12 @@
                                 input.value = val;
                                 if (restr.maxLongitud) input.maxLength = restr.maxLongitud;
                                 wrap.appendChild(input);
+                                inputEl = input;
+                            }
+                            if (col.label === true && inputEl) {
+                                inputEl.disabled = true;
+                                inputEl.setAttribute("title", "Campo autogenerado por el sistema, no editable.");
+                                wrap.classList.add("costos-edit-field--solo-lectura");
                             }
                             fieldsContainer.appendChild(wrap);
                         });

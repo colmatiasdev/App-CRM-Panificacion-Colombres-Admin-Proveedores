@@ -14,14 +14,17 @@ window.PRODUCTOS_ELABORADOS_SHEETS_JSON = {
         "IDProducto"
       ],
       "clavesForaneas": [],
+      "prefijoId": "PROD-ELAB",
+      "patronId": 1,
       "columnas": [
         {
           "nombre": "Orden-Lista",
           "tipo": "numeric",
           "nullable": true,
           "autogeneradoOrden": true,
+          "label": true,
           "visible": false,
-          "descripcion": "Orden de aparición en listados. Se puede autogenerar.",
+          "descripcion": "Orden de aparición en listados. Autogenerado por el sistema, no editable.",
           "restricciones": {
             "min": 0,
             "entero": true
@@ -31,8 +34,9 @@ window.PRODUCTOS_ELABORADOS_SHEETS_JSON = {
           "nombre": "IDProducto",
           "tipo": "text",
           "nullable": false,
+          "label": true,
           "visible": false,
-          "descripcion": "Identificador único del producto (clave primaria).",
+          "descripcion": "Identificador único del producto (clave primaria). Autogenerado por el sistema, no editable.",
           "restricciones": {}
         },
         {

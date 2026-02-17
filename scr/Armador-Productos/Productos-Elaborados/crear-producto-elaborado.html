@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="../../costos/costos.css">
     <script src="../../../config.js"></script>
     <script src="../../Arquitectura/config-sheets.js"></script>
+    <script src="../../Arquitectura/generar-id.js"></script>
     <script src="../../Arquitectura/sheets/productos-elaborados-sheets.config.js"></script>
 </head>
 <body class="costos-page">
@@ -80,7 +81,9 @@
                     var headers = columnas.map(function (c) { return c.nombre; });
                     columnas.forEach(function (col, idx) {
                         var nombre = (col.nombre || "").trim();
-                        if (!nombre || isClavePrimaria(nombre, clavePrimaria)) return;
+                        if (!nombre) return;
+                        if (col.label === true) return;
+                        if (isClavePrimaria(nombre, clavePrimaria)) return;
                         var nameNorm = norm(nombre);
                         var restr = col.restricciones || {};
                         var label = document.createElement("label");
@@ -134,6 +137,13 @@
                             var idx = parseInt(el.getAttribute("data-header-index"), 10);
                             if (idx >= 0 && idx < newRow.length) newRow[idx] = el.value != null ? String(el.value).trim() : "";
                         });
+                        if (window.GENERAR_ID_PARA_HOJA && sheetConfig.clavePrimaria && sheetConfig.clavePrimaria[0]) {
+                            var idColNombre = sheetConfig.clavePrimaria[0];
+                            var idColIdx = headers.indexOf(idColNombre);
+                            if (idColIdx >= 0) {
+                                newRow[idColIdx] = window.GENERAR_ID_PARA_HOJA(sheetConfig);
+                            }
+                        }
                         var body = { action: "create", sheet: nombreHoja };
                         for (var k = 0; k < headers.length; k++) {
                             if (headers[k]) body[headers[k]] = newRow[k] != null ? newRow[k] : "";
