@@ -85,7 +85,8 @@
       decimales: 0,
       obligatorio: true,
       visible: true,
-      restricciones: { min: 0, max: 5 }
+      restricciones: { min: 0, max: 5 },
+      formatoVisual: "porcentaje"
     },
     {
       nombre: "Merma-Importe",
@@ -95,7 +96,8 @@
       decimales: 2,
       obligatorio: true,
       visible: true,
-      restricciones: { min: 0 }
+      restricciones: { min: 0 },
+      formatoVisual: "moneda"
     },
     {
       nombre: "Tiempo-Packing-Minutos",
@@ -110,11 +112,12 @@
       nombre: "Costo-Mano-Obra-Packing",
       alias: "Costo Mano Obra Packing",
       tipoDato: "numeric",
-      tipoComponente: "label",  
+      tipoComponente: "label",
       obligatorio: true,
       decimales: 2,
       visible: true,
-      restricciones: { min: 0 }
+      restricciones: { min: 0 },
+      formatoVisual: "moneda"
     },
     {
       nombre: "Costo-Producto-Final-Actual",
@@ -124,7 +127,8 @@
       obligatorio: true,
       decimales: 2,
       visible: true,
-      restricciones: { min: 0 }
+      restricciones: { min: 0 },
+      formatoVisual: "moneda"
     },
     {
       nombre: "Costo-Producto-Final-Anterior",
@@ -134,7 +138,8 @@
       obligatorio: true,
       decimales: 2,
       visible: true,
-      restricciones: { min: 0 }
+      restricciones: { min: 0 },
+      formatoVisual: "moneda"
     },
     {
       nombre: "Habilitado",

@@ -187,11 +187,16 @@
                             var valorMostrar = "";
                             if (esPkAutogenerado) valorMostrar = idGeneradoPreview;
                             else if (tipoComp === "label" && col.autogeneradorID === true && sheetConfig.columnaOrden && String(col.nombre || "").trim() === String(sheetConfig.columnaOrden).trim() && sheetConfig._ordenListaPreview != null) valorMostrar = sheetConfig._ordenListaPreview;
+                            if (col.formatoVisual && typeof window.formatNumeroVisual === "function") {
+                                var numVal = parseFloat(String(valorMostrar).replace(",", "."));
+                                if (!isNaN(numVal)) valorMostrar = window.formatNumeroVisual(numVal, col.formatoVisual, col.decimales != null ? col.decimales : 2);
+                            }
                             var ro = document.createElement("span");
                             ro.id = "field-" + idx;
                             ro.className = "costos-edit-input costos-edit-readonly";
                             ro.setAttribute("data-header-index", String(idx));
                             ro.setAttribute("data-nombre", nombreCol);
+                            if (col.formatoVisual) ro.setAttribute("data-formato-visual", col.formatoVisual);
                             ro.setAttribute("aria-readonly", "true");
                             ro.textContent = valorMostrar || (col.descripcion || "Solo lectura");
                             wrap.appendChild(ro);
@@ -265,6 +270,8 @@
                             var idx = parseInt(el.getAttribute("data-header-index"), 10);
                             if (idx < 0 || idx >= newRow.length) return;
                             var val = el.value != null ? String(el.value).trim() : (el.textContent != null ? String(el.textContent).trim() : "");
+                            var formato = el.getAttribute("data-formato-visual");
+                            if (formato && typeof window.parseNumeroVisual === "function") val = window.parseNumeroVisual(val, formato) || val;
                             newRow[idx] = val;
                         });
                         if (window.GENERAR_ID_PARA_HOJA && sheetConfig.clavePrimaria && sheetConfig.clavePrimaria[0]) {

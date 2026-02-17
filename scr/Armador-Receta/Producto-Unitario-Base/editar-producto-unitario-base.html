@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Editar producto unitario base - Panificación Colombres</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../../costos/costos.css">
+    <script src="../../Arquitectura/config.js"></script>
+    <script src="../../Arquitectura/config-sheets.js"></script>
+    <script src="../../Arquitectura/sheets/producto-unitario-base/producto-unitario-base-sheets-base.js"></script>
+    <script src="../../Arquitectura/sheets/producto-unitario-base/sheets-editar-producto-unitario-base.config.js"></script>
+    <script>window.PRODUCTO_UNITARIO_BASE_ACCION_ACTUAL = "editar";</script>
+</head>
+<body class="costos-page">
+    <nav class="costos-nav" aria-label="Navegación principal">
+        <a href="../../../index.html" class="costos-nav-link">Inicio</a>
+        <a href="../armador-receta.html" class="costos-nav-link">Armador de Receta</a>
+        <a href="producto-unitario-base.html" class="costos-nav-link" data-accion="listar">Producto Unitario Base</a>
+        <a href="../Elaboracion-Productos-Base/elaboracion-productos-base.html" class="costos-nav-link">Elaboración Productos Base</a>
+    </nav>
+    <main class="costos-main">
+        <h1 class="costos-title costos-title--con-icono"><i class="fa-solid fa-pen costos-title-icono" aria-hidden="true"></i> Editar producto unitario base</h1>
+        <p class="costos-intro">Modificá los datos y guardá los cambios.</p>
+        <div id="edit-form-container" class="costos-datos">
+            <div id="costos-edit-alert" class="costos-alert" role="alert" aria-live="polite" style="display:none;"></div>
+            <p id="edit-no-data" class="costos-placeholder" style="display:none;">No hay datos del registro. Volvé al listado y usá «Editar» en una tarjeta.</p>
+            <p id="edit-loading" class="costos-placeholder">Cargando…</p>
+            <form id="costos-edit-form" class="costos-edit-form" style="display:none;">
+                <div id="edit-fields"></div>
+                <div class="costos-edit-actions">
+                    <a href="producto-unitario-base.html" class="costos-edit-btn-cancel">Volver al listado</a>
+                    <button type="submit" class="costos-edit-btn-save" id="costos-edit-btn-save"><i class="fa-solid fa-check" aria-hidden="true"></i> Guardar cambios</button>
+                </div>
+            </form>
+        </div>
+    </main>
+    <script src="../../Arquitectura/sheets/producto-unitario-base/producto-unitario-base-config.js"></script>
+    <script>if (window.PRODUCTO_UNITARIO_BASE_APPLY_NAV) window.PRODUCTO_UNITARIO_BASE_APPLY_NAV();</script>
+    <script>
+        (function () {
+            var STORAGE_EDIT = "costosEditRecordProductoUnitarioBase";
+            var config = window.APP_CONFIG || {};
+            var appsScriptUrl = (config.appsScriptUrl || "").trim();
+            function norm(s) { return String(s != null ? s : "").trim().toLowerCase().replace(/\s+/g, "").replace(/-/g, ""); }
+            function mapRowToConfigOrder(rowFromStorage, headersFromStorage, columnas) {
+                var configNombres = columnas.map(function (c) { return c.nombre; });
+                var out = [];
+                for (var i = 0; i < configNombres.length; i++) {
+                    var nombre = configNombres[i];
+                    var idx = -1;
+                    for (var j = 0; j < headersFromStorage.length; j++) { if (norm(headersFromStorage[j]) === norm(nombre)) { idx = j; break; } }
+                    out.push(idx >= 0 ? (rowFromStorage[idx] != null ? String(rowFromStorage[idx]) : "") : "");
+                }
+                return out;
+            }
+            var noDataEl = document.getElementById("edit-no-data");
+            var loadingEl = document.getElementById("edit-loading");
+            var formEl = document.getElementById("costos-edit-form");
+            var fieldsContainer = document.getElementById("edit-fields");
+            var alertEl = document.getElementById("costos-edit-alert");
+            function showEditAlert(message, type) {
+                if (!alertEl) return;
+                alertEl.textContent = message;
+                alertEl.className = "costos-alert costos-alert--" + (type === "success" ? "success" : "error") + " is-visible";
+                alertEl.style.display = "block";
+                alertEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            }
+            function hideEditAlert() { if (alertEl) { alertEl.className = "costos-alert"; alertEl.style.display = "none"; alertEl.textContent = ""; } }
+            var raw = sessionStorage.getItem(STORAGE_EDIT);
+            if (!raw) { loadingEl.style.display = "none"; noDataEl.style.display = "block"; formEl.style.display = "none"; } else {
+                var loadConfig = window.PRODUCTO_UNITARIO_BASE_LOAD_CONFIG;
+                if (!loadConfig) { loadingEl.style.display = "none"; noDataEl.style.display = "block"; noDataEl.textContent = "No se pudo cargar la configuración."; formEl.style.display = "none"; } else {
+                    function ensureCombo(url, nombreHoja) {
+                        if (window["COMPONENTE-COMBOS"] && Array.isArray(window["COMPONENTE-COMBOS"]["Combo-Comercio-Sucursal"]) && window["COMPONENTE-COMBOS"]["Combo-Comercio-Sucursal"].length > 0) return Promise.resolve();
+                        if (!url || !nombreHoja) return Promise.resolve();
+                        return fetch(url + "?action=list&sheet=" + encodeURIComponent(nombreHoja) + "&limit=10000&_=" + Date.now(), { cache: "no-store" }).then(function (res) { return res.json(); }).then(function (json) {
+                            var headers = (json && json.data && json.data.headers) ? json.data.headers : [];
+                            var rows = (json && json.data && json.data.rows) ? json.data.rows : [];
+                            var colIdx = -1;
+                            for (var h = 0; h < headers.length; h++) { if (String(headers[h] || "").trim() === "Comercio-Sucursal") { colIdx = h; break; } }
+                            var unicos = [], set = {};
+                            if (colIdx >= 0) { for (var r = 0; r < rows.length; r++) { var v = Array.isArray(rows[r]) ? rows[r][colIdx] : (rows[r] && headers[colIdx] != null ? rows[r][headers[colIdx]] : null); var s = (v != null && String(v).trim() !== "") ? String(v).trim() : null; if (s && !set[s]) { set[s] = true; unicos.push(s); } } unicos.sort(); }
+                            if (!window["COMPONENTE-COMBOS"]) window["COMPONENTE-COMBOS"] = {}; window["COMPONENTE-COMBOS"]["Combo-Comercio-Sucursal"] = unicos.length ? unicos : []; }).catch(function () { if (!window["COMPONENTE-COMBOS"]) window["COMPONENTE-COMBOS"] = {}; window["COMPONENTE-COMBOS"]["Combo-Comercio-Sucursal"] = []; });
+                    }
+                    loadConfig().then(function (sheetConfig) { return ensureCombo(appsScriptUrl, sheetConfig.nombreHoja).then(function () { return sheetConfig; }); }).then(function (sheetConfig) {
+                        var data; try { data = JSON.parse(raw); } catch (e) { data = {}; }
+                        var headersFromStorage = data.headers || [];
+                        var rowFromStorage = data.row || [];
+                        var id = data.id != null ? String(data.id) : "";
+                        var nombreHoja = sheetConfig.nombreHoja;
+                        var columnas = sheetConfig.columnas || [];
+                        var headers = columnas.map(function (c) { return c.nombre; });
+                        var row = mapRowToConfigOrder(rowFromStorage, headersFromStorage, columnas);
+                        if (row.length !== headers.length) { row = headers.map(function (_, i) { return rowFromStorage[i] != null ? String(rowFromStorage[i]) : ""; }); }
+                        loadingEl.style.display = "none"; noDataEl.style.display = "none"; formEl.style.display = "block"; fieldsContainer.innerHTML = "";
+                        columnas.forEach(function (col, idx) {
+                            var nombre = (col.alias != null ? col.alias : col.nombre || "").trim();
+                            if (!nombre) return;
+                            if (col.visible === false) return;
+                            var val = row[idx] != null ? String(row[idx]).trim() : "";
+                            var restr = col.restricciones || {};
+                            var tipoComp = col.tipoComponente != null ? col.tipoComponente : col.tipo;
+                            var tipoDato = col.tipoDato != null ? col.tipoDato : col.tipo;
+                            var label = document.createElement("label"); label.className = "costos-edit-label"; label.setAttribute("for", "field-" + idx); label.textContent = nombre;
+                            var wrap = document.createElement("div"); wrap.className = "costos-edit-field"; wrap.appendChild(label);
+                            if (tipoComp === "label" || col.label === true) {
+                                var ro = document.createElement("span"); ro.id = "field-" + idx; ro.className = "costos-edit-input costos-edit-readonly";
+                                ro.setAttribute("data-header-index", String(idx)); ro.setAttribute("data-nombre", col.nombre || nombre);
+                                if (col.formatoVisual) ro.setAttribute("data-formato-visual", col.formatoVisual);
+                                var dispVal = val || "—";
+                                if ((tipoDato === "numeric" || col.tipo === "numeric") && col.formatoVisual && typeof window.formatNumeroVisual === "function" && val !== "") dispVal = window.formatNumeroVisual(val, col.formatoVisual, col.decimales != null ? col.decimales : 2);
+                                ro.textContent = dispVal; wrap.appendChild(ro);
+                            } else if (tipoComp === "combo-basico") {
+                                var valoresCombo = (restr.valoresPermitidos && Array.isArray(restr.valoresPermitidos)) ? restr.valoresPermitidos : (function () { var ref = col.comboListadoValores; if (typeof ref === "string") { var parts = String(ref).trim().split("."); if (parts.length >= 2) { var obj = window[parts[0]]; var key = parts.slice(1).join("."); if (obj && obj[key] && Array.isArray(obj[key])) return obj[key]; } } return []; })();
+                                var select = document.createElement("select"); select.id = "field-" + idx; select.className = "costos-edit-input"; select.setAttribute("data-header-index", String(idx)); select.setAttribute("data-nombre", col.nombre || nombre);
+                                if (col.obligatorio !== true) { var o = document.createElement("option"); o.value = ""; o.textContent = "—"; select.appendChild(o); }
+                                valoresCombo.forEach(function (v) { var o = document.createElement("option"); o.value = (v != null ? String(v) : ""); o.textContent = (v != null && v !== "") ? String(v) : "—"; if (val === (v != null ? String(v) : "")) o.selected = true; select.appendChild(o); });
+                                if (col.obligatorio === true) select.required = true; wrap.appendChild(select);
+                            } else if ((tipoComp === "text-box") && (tipoDato === "numeric" || col.tipo === "numeric")) {
+                                var input = document.createElement("input"); input.type = "number"; input.step = col.decimales != null ? Math.pow(10, -col.decimales) : "0.01";
+                                if (restr.min != null) input.min = restr.min;
+                                input.id = "field-" + idx; input.className = "costos-edit-input"; input.setAttribute("data-header-index", String(idx)); input.setAttribute("data-nombre", col.nombre || nombre); input.value = val; wrap.appendChild(input);
+                            } else {
+                                var input = document.createElement("input"); input.type = "text"; input.id = "field-" + idx; input.className = "costos-edit-input"; input.setAttribute("data-header-index", String(idx)); input.setAttribute("data-nombre", col.nombre || nombre); input.value = val;
+                                if (restr.maxLongitud) input.maxLength = restr.maxLongitud; wrap.appendChild(input);
+                            }
+                            fieldsContainer.appendChild(wrap);
+                        });
+                        var saveBtn = formEl.querySelector(".costos-edit-btn-save");
+                        formEl.addEventListener("submit", function (e) {
+                            e.preventDefault(); hideEditAlert();
+                            var newRow = row.slice ? row.slice() : row.map(function (x) { return x; });
+                            formEl.querySelectorAll("[data-header-index]").forEach(function (el) {
+                                var idx = parseInt(el.getAttribute("data-header-index"), 10);
+                                if (idx < 0) return;
+                                var val = (el.value != null ? String(el.value).trim() : (el.textContent != null ? String(el.textContent).trim() : ""));
+                                var formato = el.getAttribute("data-formato-visual");
+                                if (formato && typeof window.parseNumeroVisual === "function") val = window.parseNumeroVisual(val, formato) || val;
+                                while (newRow.length <= idx) newRow.push("");
+                                newRow[idx] = val;
+                            });
+                            var body = { action: "update", sheet: nombreHoja, id: id };
+                            for (var k = 0; k < headers.length; k++) { if (headers[k]) body[headers[k]] = newRow[k] != null ? newRow[k] : ""; }
+                            var formBody = new URLSearchParams();
+                            for (var key in body) { if (body.hasOwnProperty(key)) formBody.append(key, body[key] != null ? body[key] : ""); }
+                            var btnText = saveBtn ? saveBtn.innerHTML : "";
+                            if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = "<i class=\"fa-solid fa-spinner fa-spin\" aria-hidden=\"true\"></i> Guardando…"; }
+                            if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.show("Guardando…");
+                            fetch(appsScriptUrl, { method: "POST", body: formBody }).then(function (res) { return res.text(); }).then(function (text) {
+                                var json; try { json = JSON.parse(text); } catch (err) { throw new Error("Respuesta no válida"); } return json;
+                            }).then(function (json) {
+                                if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = btnText; }
+                                hideEditAlert();
+                                if (json && json.success) { try { sessionStorage.setItem(STORAGE_EDIT, JSON.stringify({ id: id, headers: headers, row: newRow })); } catch (e) {} window.location.replace("producto-unitario-base.html"); }
+                                else { showEditAlert("Error al guardar: " + ((json && json.error) ? json.error : "Respuesta inválida"), "error"); }
+                            }).catch(function (err) {
+                                if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = btnText; }
+                                showEditAlert("Error de conexión: " + (err.message || ""), "error");
+                            }).finally(function () { if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.hide(); });
+                        });
+                    }).catch(function (err) { loadingEl.style.display = "none"; noDataEl.style.display = "block"; noDataEl.textContent = "Error: " + (err.message || ""); formEl.style.display = "none"; });
+                }
+            }
+        })();
+    </script>
+</body>
+</html>

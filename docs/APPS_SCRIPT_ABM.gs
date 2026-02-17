@@ -111,14 +111,16 @@ var CONFIG = {
       'IDProducto',
       'IDCosto-Producto',
       'Comercio-Sucursal',
+      'Categoria',
       'Nombre-Producto',
       'Costo-Producto-Final-Actual',
+      'Costo-Producto-Final-Anterior',
       'Observaciones',
       'Habilitado'
     ],
     idColumn: 'IDProducto',
     idPrefix: 'PROD-ELAB-',
-    filterColumns: ['IDProducto', 'IDCosto-Producto', 'Comercio-Sucursal', 'Nombre-Producto', 'Habilitado'],
+    filterColumns: ['IDProducto', 'IDCosto-Producto', 'Comercio-Sucursal', 'Categoria', 'Nombre-Producto', 'Habilitado'],
     requiredOnCreate: ['Comercio-Sucursal']
   },
 
@@ -166,6 +168,54 @@ var CONFIG = {
     idColumn: 'MINUTOS',
     filterColumns: ['MINUTOS'],
     requiredOnCreate: ['MINUTOS']
+  },
+
+  /** Hoja Tabla Receta Base (Armador Receta – Producto Unitario Base) – ?sheet=Tabla-Receta-Base
+   * PK = IDCosto-ProductoUnitario. Costo-Elaboracion-Actual = fórmula G+H+I+K. */
+  'tabla-receta-base': {
+    sheetName: 'Tabla-Receta-Base',
+    gid: 0,
+    headers: [
+      'Orden',
+      'IDCosto-ProductoUnitario',
+      'Comercio-Sucursal',
+      'Tipo-Producto',
+      'Nombre-Producto',
+      'IDElaboracion-ProductoBase',
+      'Costo-Produccion-ProductoBase',
+      'Costo-Relleno-Producto',
+      'Costo-Decoracion-Producto',
+      'Tiempo-Elaboracion-Minutos',
+      'Costo-Mano-Obra-Elaboracion',
+      'Costo-Elaboracion-Actual',
+      'Costo-Elaboracion-Anterior',
+      'Habilitado',
+      'Fecha-Registro-Actualizado-Al',
+      'Actualizado'
+    ],
+    idColumn: 'IDCosto-ProductoUnitario',
+    idPrefix: 'RECETA-',
+    filterColumns: ['IDCosto-ProductoUnitario', 'Comercio-Sucursal', 'Tipo-Producto', 'Nombre-Producto', 'Habilitado'],
+    requiredOnCreate: ['Nombre-Producto'],
+    dateUpdatedColumn: 'Fecha-Registro-Actualizado-Al'
+  },
+
+  /** Hoja Tabla Elaboración Productos Base (Armador Receta) – ?sheet=Tabla-Elaboracion-ProductosBase
+   * PK = IDElaboracion-ProductoBase. Relación con Tabla-Receta-Base. */
+  'tabla-elaboracion-productos-base': {
+    sheetName: 'Tabla-Elaboracion-ProductosBase',
+    gid: 0,
+    headers: [
+      'IDElaboracion-ProductoBase',
+      'IDReceta-Base',
+      'Cantidad',
+      'Costo-Produccion-ProductoBase',
+      'Monto'
+    ],
+    idColumn: 'IDElaboracion-ProductoBase',
+    idPrefix: 'ELAB-',
+    filterColumns: ['IDElaboracion-ProductoBase', 'IDReceta-Base', 'Cantidad'],
+    requiredOnCreate: ['IDReceta-Base', 'Cantidad']
   }
 
   // Para agregar otra hoja, copiá un bloque (p.ej. packing), cambiá la clave y sheetName:
@@ -182,7 +232,9 @@ var PROPAGACION_COSTO_PRODUCTOS = {
   columnaClaveForanea: 'IDCosto-Producto',
   columnas: [
     { columnaOrigen: 'Costo-Producto-Final-Actual', columnaDestino: 'Costo-Producto-Final-Actual' },
-    { columnaOrigen: 'Producto', columnaDestino: 'Nombre-Producto' }
+    { columnaOrigen: 'Costo-Producto-Final-Anterior', columnaDestino: 'Costo-Producto-Final-Anterior' },
+    { columnaOrigen: 'Producto', columnaDestino: 'Nombre-Producto' },
+    { columnaOrigen: 'Categoria', columnaDestino: 'Categoria' }
   ]
 };
 
@@ -313,7 +365,7 @@ function propagarCostoProductosAReferenciadores(idCostoProducto, updatedObj) {
   for (var r = 1; r < dataDest.length; r++) {
     var rowVal = (dataDest[r][fkColIdx] != null ? String(dataDest[r][fkColIdx]) : '').trim();
     if (rowVal !== idStr) continue;
-    var rowIndexSheet = r + 2;
+    var rowIndexSheet = r + 1;
     for (var d = 0; d < destColIndexes.length; d++) {
       var val = updatedObj[destColIndexes[d].columnaOrigen];
       var toWrite = val != null && val !== '' ? String(val) : '';

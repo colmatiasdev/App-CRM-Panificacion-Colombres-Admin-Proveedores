@@ -44,6 +44,14 @@
       descripcion: "Comercio o sucursal."
     },
     {
+      nombre: "Categoria",
+      alias: "Categoría",
+      tipoDato: "text",
+      tipoComponente: "label",
+      visible: true,
+      descripcion: "Categoría del producto (desde costo)."
+    },
+    {
       nombre: "Nombre-Producto",
       alias: "Nombre Producto",
       tipoDato: "text",
@@ -58,7 +66,18 @@
       tipoComponente: "label",
       decimales: 2,
       visible: true,
-      descripcion: "Costo final actual."
+      descripcion: "Costo final actual.",
+      formatoVisual: "moneda"
+    },
+    {
+      nombre: "Costo-Producto-Final-Anterior",
+      alias: "Costo Producto Final Anterior",
+      tipoDato: "numeric",
+      tipoComponente: "label",
+      decimales: 2,
+      visible: true,
+      descripcion: "Costo final anterior (propagado desde costo).",
+      formatoVisual: "moneda"
     },
     {
       nombre: "Observaciones",

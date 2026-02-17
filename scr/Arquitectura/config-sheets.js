@@ -11,7 +11,7 @@
     }
 
     /** Apps Script desplegado – ABM (list, get, search, create, update, delete). */
-    c.appsScriptUrl = "https://script.google.com/macros/s/AKfycbxAd4Q15CCMcx0c67dg2BYk7RHJK9-5GNHNBfqHSlVBD4jlMj2O1SSMPAvDx88E801eUQ/exec";
+    c.appsScriptUrl = "https://script.google.com/macros/s/AKfycbzLUVvP-McwWN9z8EWcp338IPY3T_tNxyylGq51gifXWzqem2ne9kJ1y5SP_upX5ktmfQ/exec";
 
     /**
      * Google Sheets – Un solo documento publicado con todas las hojas.
@@ -69,5 +69,49 @@
                 overlay.style.display = "none";
             }
         }
+    };
+
+    /**
+     * Formato visual para valores numéricos en labels (tipoDato numeric + tipoComponente label).
+     * formato: "moneda" → $ 1.254,59 (ARG; punto miles, coma decimal) | "porcentaje" → 3 %
+     * @param {string|number} val - Valor a formatear
+     * @param {string} [formato] - "moneda" | "porcentaje" | omitir (número con decimales)
+     * @param {number} [decimales] - Cantidad de decimales (default 2)
+     * @returns {string}
+     */
+    window.formatNumeroVisual = function (val, formato, decimales) {
+        var num = parseFloat(String(val).replace(",", ".")) || 0;
+        var dec = (decimales != null && !isNaN(decimales)) ? parseInt(decimales, 10) : 2;
+        if (formato === "moneda") {
+            var s = num.toFixed(dec);
+            var parts = s.split(".");
+            var intPart = (parts[0] || "0").replace(/^-/, "");
+            var neg = num < 0;
+            var formattedInt = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            var decPart = (parts[1] || "").length >= dec ? (parts[1] || "").substring(0, dec) : (parts[1] || "").padEnd(dec, "0").substring(0, dec);
+            return (neg ? "-" : "") + "$ " + formattedInt + "," + decPart;
+        }
+        if (formato === "porcentaje") {
+            return num.toFixed(dec) + " %";
+        }
+        return num.toFixed(dec);
+    };
+
+    /**
+     * Convierte un valor mostrado (moneda o porcentaje) de vuelta a número para envío al servidor.
+     * @param {string} val - Texto formateado (ej. "$ 1.254,59" o "3 %")
+     * @param {string} [formato] - "moneda" | "porcentaje"
+     * @returns {string} - Número como string (ej. "1254.59")
+     */
+    window.parseNumeroVisual = function (val, formato) {
+        if (val == null || String(val).trim() === "") return "";
+        var s = String(val).trim();
+        if (formato === "moneda") {
+            s = s.replace(/\$\s*/g, "").replace(/\./g, "").replace(",", ".");
+        } else if (formato === "porcentaje") {
+            s = s.replace(/\s*%\s*$/g, "").trim();
+        }
+        var num = parseFloat(s);
+        return isNaN(num) ? "" : String(num);
     };
 })();

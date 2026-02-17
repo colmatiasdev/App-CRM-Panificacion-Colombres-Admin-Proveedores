@@ -89,8 +89,9 @@
       tipoComponente: "text-box",
       decimales: 0,
       obligatorio: true,
-      visible: true, 
-      restricciones: { min: 0, max: 5 }
+      visible: true,
+      restricciones: { min: 0, max: 10 },
+      formatoVisual: "porcentaje"
     },
     {
       nombre: "Merma-Importe",
@@ -100,13 +101,15 @@
       decimales: 2,
       visible: true,
       obligatorio: true,
-      restricciones: { min: 0 }
+      restricciones: { min: 0 },
+      formatoVisual: "moneda"
     },
     {
       nombre: "Tiempo-Packing-Minutos",
       alias: "Tiempo Packing Minutos",
       tipoDato: "numeric",
-      tipoComponente: "text-box", 
+      tipoComponente: "text-box",
+      decimales: 0,
       obligatorio: true,
       visible: true,
       restricciones: { min: 0, entero: true }
@@ -116,20 +119,22 @@
       alias: "Costo Mano Obra Packing",
       tipoDato: "numeric",
       tipoComponente: "label",
-      decimales: 2, 
+      decimales: 2,
       obligatorio: true,
       visible: false,
-      restricciones: { min: 0 }
+      restricciones: { min: 0 },
+      formatoVisual: "moneda"
     },
     {
       nombre: "Costo-Producto-Final-Actual",
       alias: "Costo Producto Final Actual",
       tipoDato: "numeric",
       tipoComponente: "label",
-      decimales: 2, 
+      decimales: 2,
       obligatorio: true,
       visible: true,
-      restricciones: { min: 0 }
+      restricciones: { min: 0 },
+      formatoVisual: "moneda"
     },
     {
       nombre: "Costo-Producto-Final-Anterior",
@@ -139,7 +144,8 @@
       decimales: 2,
       visible: true,
       obligatorio: true,
-      restricciones: { min: 0 }
+      restricciones: { min: 0 },
+      formatoVisual: "moneda"
     },
     {
       nombre: "Habilitado",

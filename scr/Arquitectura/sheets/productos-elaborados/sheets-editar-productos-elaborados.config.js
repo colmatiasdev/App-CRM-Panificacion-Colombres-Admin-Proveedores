@@ -52,6 +52,16 @@
       restricciones: {}
     },
     {
+      nombre: "Categoria",
+      alias: "Categoría",
+      tipoDato: "text",
+      tipoComponente: "label",
+      visible: true,
+      obligatorio: false,
+      descripcion: "Categoría (propagada desde Tabla-Costo-Productos).",
+      restricciones: {}
+    },
+    {
       nombre: "Nombre-Producto",
       alias: "Nombre Producto",
       tipoDato: "text",
@@ -69,7 +79,20 @@
       visible: true,
       obligatorio: false,
       descripcion: "Costo final actual.",
-      restricciones: { min: 0 }
+      restricciones: { min: 0 },
+      formatoVisual: "moneda"
+    },
+    {
+      nombre: "Costo-Producto-Final-Anterior",
+      alias: "Costo Producto Final Anterior",
+      tipoDato: "numeric",
+      tipoComponente: "label",
+      decimales: 2,
+      visible: true,
+      obligatorio: false,
+      descripcion: "Costo final anterior (propagado desde costo).",
+      restricciones: { min: 0 },
+      formatoVisual: "moneda"
     },
     {
       nombre: "Observaciones",

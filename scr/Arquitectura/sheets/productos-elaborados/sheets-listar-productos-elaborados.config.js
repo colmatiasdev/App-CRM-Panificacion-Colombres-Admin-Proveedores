@@ -44,6 +44,14 @@
       descripcion: "Comercio o sucursal."
     },
     {
+      nombre: "Categoria",
+      alias: "Categoría",
+      tipoDato: "text",
+      tipoComponente: "label",
+      visible: false,
+      descripcion: "Categoría del producto (propagada desde costo)."
+    },
+    {
       nombre: "Nombre-Producto",
       alias: "Nombre Producto",
       tipoDato: "text",
@@ -53,12 +61,23 @@
     },
     {
       nombre: "Costo-Producto-Final-Actual",
-      alias: "Costo Producto Final Actual",
+      alias: "Costo Producto",
       tipoDato: "numeric",
       tipoComponente: "label",
       decimales: 2,
       visible: true,
-      descripcion: "Costo final actual."
+      descripcion: "Costo final actual.",
+      formatoVisual: "moneda"
+    },
+    {
+      nombre: "Costo-Producto-Final-Anterior",
+      alias: "Costo Anterior",
+      tipoDato: "numeric",
+      tipoComponente: "label",
+      decimales: 2,
+      visible: true,
+      descripcion: "Costo final anterior (propagado desde costo).",
+      formatoVisual: "moneda"
     },
     {
       nombre: "Observaciones",
@@ -93,7 +112,7 @@
         columnasAgrupacion: ["Comercio-Sucursal"],
         columnaFiltroValores: "Comercio-Sucursal",
         modosAgrupacion: [
-          ["Comercio-Sucursal"],
+          ["Categoria"],  
         ]
       }
     }]

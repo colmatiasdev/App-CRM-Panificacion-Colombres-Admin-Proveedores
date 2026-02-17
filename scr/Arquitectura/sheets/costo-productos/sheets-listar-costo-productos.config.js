@@ -31,7 +31,7 @@
       alias: "Categoría",
       tipoDato: "text",
       tipoComponente: "label",
-      visible: true,
+      visible: false,
       descripcion: "Categoría."
     },
     {
@@ -48,7 +48,8 @@
       tipoDato: "numeric",
       tipoComponente: "label",
       decimales: 2,
-      visible: false
+      visible: false,
+      formatoVisual: "moneda"
     },
     {
       nombre: "Costo-Packing",
@@ -56,7 +57,8 @@
       tipoDato: "numeric",
       tipoComponente: "label",
       decimales: 2,
-      visible: false
+      visible: false,
+      formatoVisual: "moneda"
     },
     {
       nombre: "Costos-Fijos",
@@ -64,7 +66,8 @@
       tipoDato: "numeric",
       tipoComponente: "label",
       decimales: 2,
-      visible: false
+      visible: false,
+      formatoVisual: "moneda"
     },
     {
       nombre: "Merma-Porcentaje",
@@ -72,7 +75,8 @@
       tipoDato: "numeric",
       tipoComponente: "label",
       decimales: 2,
-      visible: false
+      visible: false,
+      formatoVisual: "porcentaje"
     },
     {
       nombre: "Merma-Importe",
@@ -80,7 +84,8 @@
       tipoDato: "numeric",
       tipoComponente: "label",
       decimales: 2,
-      visible: false
+      visible: false,
+      formatoVisual: "moneda"
     },
     {
       nombre: "Tiempo-Packing-Minutos",
@@ -95,23 +100,26 @@
       tipoDato: "numeric",
       tipoComponente: "label",
       decimales: 2,
-      visible: false
+      visible: false,
+      formatoVisual: "moneda"
     },
     {
       nombre: "Costo-Producto-Final-Actual",
-      alias: "Costo Producto Final Actual",
+      alias: "Costo Actual",
       tipoDato: "numeric",
       tipoComponente: "label",
       decimales: 2,
-      visible: true
+      visible: true,
+      formatoVisual: "moneda"
     },
     {
       nombre: "Costo-Producto-Final-Anterior",
-      alias: "Costo Producto Final Anterior",
+      alias: "Costo Anterior",
       tipoDato: "numeric",
       tipoComponente: "label",
       decimales: 2,
-      visible: false
+      visible: true,
+      formatoVisual: "moneda"
     },
     {
       nombre: "Habilitado",

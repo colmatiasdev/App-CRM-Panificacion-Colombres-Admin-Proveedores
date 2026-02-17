@@ -7,8 +7,8 @@
  * formulas: campos calculados. Por cada columna: fuentes, operacion, expresion, decimales, leyenda (texto del párrafo bajo el campo).
  * lookups: columnas que se rellenan desde otra tabla. Tiempo-Packing-Minutos (FK) → COSTO-EMPLEADOS.MINUTOS;
  *   columnaOrigen: nombre en COSTO-EMPLEADOS (Costo-x-Minutos-Packing o Costo-Mano-Obra-Packing). Si no existe, se prueba columnaDestino. Aplica en crear y editar.
- * valorAnterior: en crear y editar, columnaDestino recibe el valor de columnaOrigen al cargar; si columnaOrigen
- *   cambia, se guarda el valor anterior de columnaOrigen en columnaDestino (resguardar dato). Ej.: Costo-Producto-Final-Actual → Costo-Producto-Final-Anterior.
+ * valorAnterior: en crear y editar, al cargar el formulario columnaDestino recibe el valor de columnaOrigen (valor al ingresar);
+ *   si destino y origen ya son iguales no se modifican. Destino queda como referencia del valor anterior al editar. No se actualiza al cambiar origen.
  * propagacion: al actualizar esta hoja, propagar columnas a tablas que referencian por FK. Sincronizar con CONFIG/PROPAGACION en APPS_SCRIPT_ABM.gs.
  */
 window.COSTO_PRODUCTOS_SHEET_BASE = {
@@ -72,7 +72,9 @@ window.COSTO_PRODUCTOS_SHEET_BASE = {
       "columnaClaveForanea": "IDCosto-Producto",
       "columnas": [
         { "columnaOrigen": "Costo-Producto-Final-Actual", "columnaDestino": "Costo-Producto-Final-Actual" },
-        { "columnaOrigen": "Producto", "columnaDestino": "Nombre-Producto" }
+        { "columnaOrigen": "Costo-Producto-Final-Anterior", "columnaDestino": "Costo-Producto-Final-Anterior" },
+        { "columnaOrigen": "Producto", "columnaDestino": "Nombre-Producto" },
+        { "columnaOrigen": "Categoria", "columnaDestino": "Categoria" }
       ]
     }
   }
