@@ -122,7 +122,7 @@
       formatoVisual: "moneda"
     },
     {
-      nombre: "Costo-Elaboracion-Actual",
+      nombre: "Costo-Elaboracion-Actual [G + H + I + K]",
       alias: "Costo Elaboración Actual",
       tipoDato: "numeric",
       tipoComponente: "label",

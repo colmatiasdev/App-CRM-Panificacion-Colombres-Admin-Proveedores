@@ -3,7 +3,7 @@
  * Un solo archivo: copiá y pegá todo en el editor de Apps Script.
  *
  * Acciones: list | get | search | create | update | delete | fillIds
- * Parámetro sheet: materiaPrima | packing | combos | equivalencias | Listado-Productos-Elaborados | Tabla-Costo-Productos | COSTO-EMPLEADOS
+ * Parámetro sheet: materiaPrima | packing | combos | equivalencias | Listado-Productos-Elaborados | Tabla-Costo-Productos | COSTO-EMPLEADOS | Tabla-Costos-ProductoUnitario | Tabla-Elaboracion-Productos-Base
  *
  * Desplegar: Implementar → Nueva implementación → Aplicación web
  * Ejecutar como: Yo | Quién puede acceder: Cualquier usuario (o según necesites)
@@ -171,7 +171,7 @@ var CONFIG = {
   },
 
   /** Hoja Tabla Receta Base (Armador Receta – Producto Unitario Base) – ?sheet=Tabla-Receta-Base
-   * PK = IDCosto-ProductoUnitario. Costo-Elaboracion-Actual = fórmula G+H+I+K. */
+   * PK = IDCosto-ProductoUnitario. Costo-Elaboracion-Actual [G + H + I + K] = fórmula. */
   'tabla-receta-base': {
     sheetName: 'Tabla-Receta-Base',
     gid: 0,
@@ -187,7 +187,38 @@ var CONFIG = {
       'Costo-Decoracion-Producto',
       'Tiempo-Elaboracion-Minutos',
       'Costo-Mano-Obra-Elaboracion',
-      'Costo-Elaboracion-Actual',
+      'Costo-Elaboracion-Actual [G + H + I + K]',
+      'Costo-Elaboracion-Anterior',
+      'Habilitado',
+      'Fecha-Registro-Actualizado-Al',
+      'Actualizado'
+    ],
+    idColumn: 'IDCosto-ProductoUnitario',
+    idPrefix: 'RECETA-',
+    filterColumns: ['IDCosto-ProductoUnitario', 'Comercio-Sucursal', 'Tipo-Producto', 'Nombre-Producto', 'Habilitado'],
+    requiredOnCreate: ['Nombre-Producto'],
+    dateUpdatedColumn: 'Fecha-Registro-Actualizado-Al'
+  },
+
+  /** Hoja Tabla Costos Producto Unitario (Armador Receta) – ?sheet=Tabla-Costos-ProductoUnitario
+   * Headers deben coincidir con la primera fila de la hoja. PK = IDCosto-ProductoUnitario.
+   * Sincronizar con scr/Arquitectura/sheets/producto-unitario-base/producto-unitario-base-sheets-base.js */
+  'tabla-costos-productounitario': {
+    sheetName: 'Tabla-Costos-ProductoUnitario',
+    gid: 0,
+    headers: [
+      'Orden',
+      'IDCosto-ProductoUnitario',
+      'Comercio-Sucursal',
+      'Tipo-Producto',
+      'Nombre-Producto',
+      'IDElaboracion-ProductoBase',
+      'Costo-Produccion-ProductoBase',
+      'Costo-Relleno-Producto',
+      'Costo-Decoracion-Producto',
+      'Tiempo-Elaboracion-Minutos',
+      'Costo-Mano-Obra-Elaboracion',
+      'Costo-Elaboracion-Actual [G + H + I + K]',
       'Costo-Elaboracion-Anterior',
       'Habilitado',
       'Fecha-Registro-Actualizado-Al',

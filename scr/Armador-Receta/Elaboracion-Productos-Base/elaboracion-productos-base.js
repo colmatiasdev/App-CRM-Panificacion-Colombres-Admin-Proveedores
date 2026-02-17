@@ -81,11 +81,9 @@
         columnas.forEach(function (col) {
             var nombre = col.nombre || "";
             if (!nombre || col.visible !== true) return;
-            var nameNorm = norm(nombre);
-            if (nameNorm !== norm((headers[idColIdx] || "")) && nameNorm !== norm((headers[nameColIdx] || ""))) {
-                var idx = headers.indexOf(nombre);
-                if (idx >= 0) extraIndexes.push(idx);
-            }
+            if (norm(nombre) === norm((headers[idColIdx] || ""))) return;
+            var idx = headers.indexOf(nombre);
+            if (idx >= 0) extraIndexes.push(idx);
         });
 
         function cardActionsHtml(id, rowIndex) {
@@ -100,15 +98,13 @@
             var extra = [];
             extraIndexes.forEach(function (c) {
                 var val = row[c] != null ? String(row[c]).trim() : "";
-                if (val) {
-                    var colConfig = columnas.filter(function (col) { return norm(col.nombre) === norm(headers[c]); })[0];
-                    if (colConfig && colConfig.formatoVisual && typeof window.formatNumeroVisual === "function") {
-                        var num = parseFloat(String(val).replace(",", "."));
-                        if (!isNaN(num)) val = window.formatNumeroVisual(num, colConfig.formatoVisual, colConfig.decimales != null ? colConfig.decimales : 2);
-                    }
-                    var label = (colConfig && colConfig.alias) ? colConfig.alias : headers[c];
-                    extra.push(escapeHtml(label) + ": " + escapeHtml(val));
-                }
+                var colConfig = columnas.filter(function (col) { return norm(col.nombre) === norm(headers[c]); })[0];
+                if (colConfig && colConfig.formatoVisual && typeof window.formatNumeroVisual === "function") {
+                    var num = parseFloat(String(val).replace(",", "."));
+                    val = !isNaN(num) ? window.formatNumeroVisual(num, colConfig.formatoVisual, colConfig.decimales != null ? colConfig.decimales : 2) : (val || "—");
+                } else if (val === "") val = "—";
+                var label = (colConfig && colConfig.alias) ? colConfig.alias : headers[c];
+                extra.push(escapeHtml(label) + ": " + escapeHtml(val));
             });
             var extraHtml = extra.length ? "<ul class=\"costos-card-extra\">" + extra.map(function (item) { return "<li>" + item + "</li>"; }).join("") + "</ul>" : "";
             html += "<div class=\"costos-card costos-card-elaboracion-productos-base\">";

@@ -65,9 +65,9 @@
 
   function buildConfigFromJson(json) {
     var hojas = json.hojas || json.sheets || [];
-    var hoja = getSheetConfig(hojas, "Tabla-Receta-Base");
-    if (!hoja) throw new Error("No se encontró la hoja Tabla-Receta-Base en la configuración.");
-    var nombreHoja = String(hoja.nombreHoja || hoja.nombre || "Tabla-Receta-Base").trim();
+    var hoja = getSheetConfig(hojas, "Tabla-Costos-ProductoUnitario") || getSheetConfig(hojas, "Tabla-Receta-Base") || (hojas[0] || null);
+    if (!hoja) throw new Error("No se encontró la hoja en la configuración (Tabla-Costos-ProductoUnitario o Tabla-Receta-Base).");
+    var nombreHoja = String(hoja.nombreHoja || hoja.nombre || "Tabla-Costos-ProductoUnitario").trim();
     var clavePrimaria = Array.isArray(hoja.clavePrimaria) ? hoja.clavePrimaria : (hoja.idColumn ? [hoja.idColumn] : ["IDCosto-ProductoUnitario"]);
     var columnas = hoja.columnas || [];
     var listado = hoja.listado || {};
