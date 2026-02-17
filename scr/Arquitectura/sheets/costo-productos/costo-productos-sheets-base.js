@@ -24,7 +24,7 @@ window.COSTO_PRODUCTOS_SHEET_BASE = {
     ],
     "columnaOrden": "Orden",
     "clavesForaneas": [],
-    "prefijoId": "COSTO-PROD",
+    "prefijoId": "PROD-COSTO",
     "patronId": 1,
     "indices": [
       { "columnas": ["IDCosto-Producto"], "unico": true },
