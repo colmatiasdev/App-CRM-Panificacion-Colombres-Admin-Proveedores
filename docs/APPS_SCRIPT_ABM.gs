@@ -119,7 +119,7 @@ var CONFIG = {
     idColumn: 'IDProducto',
     idPrefix: 'PROD-ELAB-',
     filterColumns: ['IDProducto', 'IDCosto-Producto', 'Comercio-Sucursal', 'Nombre-Producto', 'Habilitado'],
-    requiredOnCreate: ['Nombre-Producto']
+    requiredOnCreate: ['Comercio-Sucursal']
   },
 
   /** Hoja Tabla Costo Productos (Armador de Productos) – ?sheet=Tabla-Costo-Productos

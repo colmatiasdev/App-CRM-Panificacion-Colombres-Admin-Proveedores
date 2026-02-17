@@ -264,6 +264,31 @@ body.costos-page {
     border: 1px solid var(--border);
     max-width: 560px;
 }
+
+/* Mensajes de error o restricciones en formularios (sin alert nativo) */
+.costos-alert {
+    display: none;
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+    font-size: 0.9rem;
+    line-height: 1.45;
+    max-width: 560px;
+}
+.costos-alert.is-visible {
+    display: block;
+}
+.costos-alert--error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+}
+.costos-alert--success {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #15803d;
+}
+
 .costos-edit-field {
     display: flex;
     flex-direction: column;

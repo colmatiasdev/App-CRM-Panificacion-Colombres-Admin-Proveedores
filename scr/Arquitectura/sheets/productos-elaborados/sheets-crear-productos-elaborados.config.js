@@ -17,6 +17,7 @@
       tipoComponente: "label",
       autogeneradorID: true,
       visible: true,
+      obligatorio: true,
       descripcion: "Orden en listados.",
       restricciones: { min: 0, entero: true }
     },
@@ -26,6 +27,7 @@
       tipoDato: "text",
       tipoComponente: "label",
       visible: true,
+      obligatorio: true,
       descripcion: "ID autogenerado.",
       restricciones: {}
     },
@@ -35,6 +37,7 @@
       tipoDato: "text",
       tipoComponente: "text-box",
       visible: false,
+      obligatorio: true,
       descripcion: "Referencia a Tabla-Costo-Productos (FK).",
       restricciones: { maxLongitud: 100 }
     },
@@ -44,8 +47,8 @@
       tipoDato: "text",
       tipoComponente: "combo-basico",
       comboListadoValores: "COMPONENTE-COMBOS.Combo-Comercio-Sucursal",
-      obligatorio: true,
       visible: true,
+      obligatorio: true,
       descripcion: "Comercio o sucursal.",
       restricciones: {}
     },
@@ -55,6 +58,7 @@
       tipoDato: "text",
       tipoComponente: "text-box",
       visible: false,
+      obligatorio: false,
       descripcion: "Nombre del producto.",
       restricciones: { maxLongitud: 500 }
     },
@@ -65,6 +69,7 @@
       tipoComponente: "text-box",
       decimales: 2,
       visible: false,
+      obligatorio: false,
       descripcion: "Costo final actual.",
       restricciones: { min: 0 }
     },
@@ -74,6 +79,7 @@
       tipoDato: "text",
       tipoComponente: "text-box",
       visible: false,
+      obligatorio: false,
       restricciones: { maxLongitud: 2000 }
     },
     {
@@ -82,6 +88,7 @@
       tipoDato: "text",
       tipoComponente: "combo-basico",
       visible: false,
+      obligatorio: true,
       descripcion: "Sí / No.",
       restricciones: { valoresPermitidos: ["Sí", "No", ""] }
     }

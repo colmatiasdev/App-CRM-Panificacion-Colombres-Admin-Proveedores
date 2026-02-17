@@ -27,6 +27,7 @@
         <h1 class="costos-title costos-title--con-icono"><i class="fa-solid fa-pen costos-title-icono" aria-hidden="true"></i> Editar producto elaborado</h1>
         <p class="costos-intro">Modificá los datos y guardá los cambios.</p>
         <div id="edit-form-container" class="costos-datos">
+            <div id="costos-edit-alert" class="costos-alert" role="alert" aria-live="polite" style="display:none;"></div>
             <p id="edit-no-data" class="costos-placeholder" style="display:none;">No hay datos del registro. Volvé al listado y usá «Editar» en una tarjeta.</p>
             <p id="edit-loading" class="costos-placeholder">Cargando…</p>
             <form id="costos-edit-form" class="costos-edit-form" style="display:none;">
@@ -68,6 +69,23 @@
             var loadingEl = document.getElementById("edit-loading");
             var formEl = document.getElementById("costos-edit-form");
             var fieldsContainer = document.getElementById("edit-fields");
+            var alertEl = document.getElementById("costos-edit-alert");
+
+            function showEditAlert(message, type) {
+                if (!alertEl) return;
+                type = type === "success" ? "success" : "error";
+                alertEl.textContent = message;
+                alertEl.className = "costos-alert costos-alert--" + type + " is-visible";
+                alertEl.style.display = "block";
+                alertEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            }
+            function hideEditAlert() {
+                if (alertEl) {
+                    alertEl.className = "costos-alert";
+                    alertEl.style.display = "none";
+                    alertEl.textContent = "";
+                }
+            }
 
             var raw = sessionStorage.getItem(STORAGE_EDIT);
             if (!raw) {
@@ -234,6 +252,7 @@
 
                         formEl.addEventListener("submit", function (e) {
                             e.preventDefault();
+                            hideEditAlert();
                             var newRow = row.slice ? row.slice() : row.map(function (x) { return x; });
                             formEl.querySelectorAll("[data-header-index]").forEach(function (el) {
                                 var idx = parseInt(el.getAttribute("data-header-index"), 10);
@@ -271,17 +290,18 @@
                                 })
                                 .then(function (json) {
                                     if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = btnText; }
+                                    hideEditAlert();
                                     if (json && json.success) {
                                         try { sessionStorage.setItem(STORAGE_EDIT, JSON.stringify({ id: id, headers: headers, row: newRow })); } catch (e) {}
-                                        alert("Cambios guardados correctamente.");
                                         window.location.replace("productos-elaborados.html");
                                     } else {
-                                        alert("Error al guardar: " + (json && json.error ? json.error : "Respuesta inválida"));
+                                        var errMsg = (json && json.error) ? json.error : "Respuesta inválida";
+                                        showEditAlert("Error al guardar: " + errMsg, "error");
                                     }
                                 })
                                 .catch(function (err) {
                                     if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = btnText; }
-                                    alert("Error de conexión: " + (err.message || "Revisá appsScriptUrl."));
+                                    showEditAlert("Error de conexión: " + (err.message || "Revisá appsScriptUrl."), "error");
                                 })
                                 .finally(function () {
                                     if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.hide();

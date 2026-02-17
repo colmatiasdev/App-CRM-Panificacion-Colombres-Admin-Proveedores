@@ -27,6 +27,7 @@
         <h1 class="costos-title">Crear producto elaborado</h1>
         <p class="costos-intro">Completá los datos del nuevo producto según la estructura de la hoja <strong>Listado-Productos-Elaborados</strong>.</p>
         <div id="edit-form-container" class="costos-datos">
+            <div id="costos-edit-alert" class="costos-alert" role="alert" aria-live="polite" style="display:none;"></div>
             <p id="edit-no-data" class="costos-placeholder" style="display:none;">No se pudo cargar el formulario. Revisá que existan productos-elaborados-sheets-base.js y sheets-crear-productos-elaborados.config.js.</p>
             <p id="edit-loading" class="costos-placeholder">Cargando formulario…</p>
             <form id="costos-edit-form" class="costos-edit-form" style="display:none;">
@@ -62,6 +63,23 @@
             var loadingEl = document.getElementById("edit-loading");
             var formEl = document.getElementById("costos-edit-form");
             var fieldsContainer = document.getElementById("edit-fields");
+            var alertEl = document.getElementById("costos-edit-alert");
+
+            function showEditAlert(message, type) {
+                if (!alertEl) return;
+                type = type === "success" ? "success" : "error";
+                alertEl.textContent = message;
+                alertEl.className = "costos-alert costos-alert--" + type + " is-visible";
+                alertEl.style.display = "block";
+                alertEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            }
+            function hideEditAlert() {
+                if (alertEl) {
+                    alertEl.className = "costos-alert";
+                    alertEl.style.display = "none";
+                    alertEl.textContent = "";
+                }
+            }
 
             function ensureComboYPreviews(sheetConfig, url) {
                 var nombreHoja = sheetConfig && sheetConfig.nombreHoja;
@@ -239,9 +257,10 @@
                         fieldsContainer.appendChild(wrap);
                     });
 
-                    formEl.addEventListener("submit", function (e) {
-                        e.preventDefault();
-                        var newRow = headers.map(function () { return ""; });
+                        formEl.addEventListener("submit", function (e) {
+                            e.preventDefault();
+                            hideEditAlert();
+                            var newRow = headers.map(function () { return ""; });
                         formEl.querySelectorAll("[data-header-index]").forEach(function (el) {
                             var idx = parseInt(el.getAttribute("data-header-index"), 10);
                             if (idx < 0 || idx >= newRow.length) return;
@@ -315,17 +334,18 @@
                             })
                             .then(function (json) {
                                 if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = btnText; }
+                                hideEditAlert();
                                 if (json && json.success) {
-                                    alert("Producto creado correctamente. Seleccioná el costo producto con el que vincularlo.");
                                     var urlCostoProductos = "../Costo-Productos/costo-productos.html?asignarProducto=1&idProductoElaborado=" + encodeURIComponent(idProductoCreado);
                                     window.location.replace(urlCostoProductos);
                                 } else {
-                                    alert("Error al guardar: " + (json && json.error ? json.error : "Respuesta inválida"));
+                                    var errMsg = (json && json.error) ? json.error : "Respuesta inválida";
+                                    showEditAlert("Error al guardar: " + errMsg, "error");
                                 }
                             })
                             .catch(function (err) {
                                 if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = btnText; }
-                                alert("Error de conexión: " + (err.message || "Revisá appsScriptUrl."));
+                                showEditAlert("Error de conexión: " + (err.message || "Revisá appsScriptUrl."), "error");
                             })
                             .finally(function () {
                                 if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.hide();
