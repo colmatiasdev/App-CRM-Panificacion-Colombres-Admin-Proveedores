@@ -1,14 +1,14 @@
 /**
- * Listado de Elaboración Productos Base. Usa sheets-listar-elaboracion-productos-base.config.js
+ * Listado de Receta Base. Usa sheets-listar-receta-base.config.js
  */
 (function () {
-    var STORAGE_EDIT = "costosEditRecordElaboracionProductosBase";
-    var STORAGE_FILTRO = "elaboracionProductosBaseFiltroValor";
-    var ACCIONES = window.ELABORACION_PRODUCTOS_BASE_ACCIONES || {};
-    var LISTAR_URL = (ACCIONES.listar && ACCIONES.listar.url) ? ACCIONES.listar.url : "elaboracion-productos-base.html";
-    var CREAR_URL = (ACCIONES.crear && ACCIONES.crear.url) ? ACCIONES.crear.url : "crear-elaboracion-productos-base.html";
-    var EDITAR_URL = (ACCIONES.editar && ACCIONES.editar.url) ? ACCIONES.editar.url : "editar-elaboracion-productos-base.html";
-    var VER_URL = (ACCIONES.ver && ACCIONES.ver.url) ? ACCIONES.ver.url : "ver-elaboracion-productos-base.html";
+    var STORAGE_EDIT = "costosEditRecordRecetaBase";
+    var STORAGE_FILTRO = "recetaBaseFiltroValor";
+    var ACCIONES = window.RECETA_BASE_ACCIONES || {};
+    var LISTAR_URL = (ACCIONES.listar && ACCIONES.listar.url) ? ACCIONES.listar.url : "receta-base.html";
+    var CREAR_URL = (ACCIONES.crear && ACCIONES.crear.url) ? ACCIONES.crear.url : "crear-receta-base.html";
+    var EDITAR_URL = (ACCIONES.editar && ACCIONES.editar.url) ? ACCIONES.editar.url : "editar-receta-base.html";
+    var VER_URL = (ACCIONES.ver && ACCIONES.ver.url) ? ACCIONES.ver.url : "ver-receta-base.html";
 
     var config = window.APP_CONFIG || {};
     var appsScriptUrl = (config.appsScriptUrl || "").trim();
@@ -37,7 +37,7 @@
 
     function getRowTitle(headers, row, nameColumnIndex) {
         if (nameColumnIndex >= 0 && row[nameColumnIndex] != null) return String(row[nameColumnIndex]).trim();
-        return row[0] != null ? String(row[0]).trim() : "Sin ID";
+        return row[0] != null ? String(row[0]).trim() : "Sin nombre";
     }
 
     function alignRowsToConfig(headersConfig, apiHeaders, apiRows) {
@@ -57,11 +57,11 @@
     function renderList(container, sheetConfig, headers, rows, filterText, valorFiltroColumna, indiceColumnaFiltro) {
         if (!container) return;
         var columnas = sheetConfig.columnas || [];
-        var clavePrimaria = sheetConfig.clavePrimaria || ["IDElaboracion-ProductoBase"];
+        var clavePrimaria = sheetConfig.clavePrimaria || ["IDReceta-Base"];
         var pkNorms = clavePrimaria.map(function (k) { return norm(k); });
         var idColIdx = findColumnIndex(headers, pkNorms);
         if (idColIdx < 0) idColIdx = 0;
-        var nameColIdx = findColumnIndex(headers, ["idelaboracion-productobase", "idreceta-base"]);
+        var nameColIdx = findColumnIndex(headers, ["descripcionmasaproducto", "descripcion-masa-producto", "nombre"]);
         if (nameColIdx < 0) nameColIdx = 0;
 
         var filter = (filterText || "").trim().toLowerCase();
@@ -82,6 +82,7 @@
             var nombre = col.nombre || "";
             if (!nombre || col.visible !== true) return;
             if (norm(nombre) === norm((headers[idColIdx] || ""))) return;
+            if (norm(nombre) === norm((headers[nameColIdx] || ""))) return;
             var idx = headers.indexOf(nombre);
             if (idx >= 0) extraIndexes.push(idx);
         });
@@ -91,7 +92,7 @@
                 "<a href=\"" + EDITAR_URL + "\" class=\"costos-card-btn costos-card-btn-editar\" data-id=\"" + escapeHtml(id) + "\" data-row-index=\"" + rowIndex + "\"><i class=\"fa-solid fa-pen\" aria-hidden=\"true\"></i> Editar</a>";
         }
 
-        var html = '<div class="costos-cards costos-cards-elaboracion-productos-base">';
+        var html = '<div class="costos-cards costos-cards-receta-base">';
         visible.forEach(function (row) {
             var id = getRowId(headers, row, idColIdx);
             var title = getRowTitle(headers, row, nameColIdx);
@@ -107,7 +108,7 @@
                 extra.push(escapeHtml(label) + ": " + escapeHtml(val));
             });
             var extraHtml = extra.length ? "<ul class=\"costos-card-extra\">" + extra.map(function (item) { return "<li>" + item + "</li>"; }).join("") + "</ul>" : "";
-            html += "<div class=\"costos-card costos-card-elaboracion-productos-base\">";
+            html += "<div class=\"costos-card costos-card-receta-base\">";
             html += "<div class=\"costos-card-header\"><h3 class=\"costos-card-title\">" + escapeHtml(title) + "</h3></div>";
             html += "<div class=\"costos-card-body\">" + extraHtml + "</div>";
             html += "<div class=\"costos-card-actions\">" + cardActionsHtml(id, rows.indexOf(row)) + "</div></div>";
@@ -116,7 +117,7 @@
         container.innerHTML = html;
         container.classList.remove("costos-datos-message");
 
-        var countEl = document.getElementById("elaboracion-productos-base-count");
+        var countEl = document.getElementById("receta-base-count");
         if (countEl) countEl.textContent = visible.length + " de " + rows.length + " registro(s)";
 
         function goToCardAction(btn) {
@@ -139,13 +140,13 @@
     }
 
     function run() {
-        var container = document.getElementById("datos-elaboracion-productos-base");
-        var filterInput = document.getElementById("filter-elaboracion-productos-base");
-        var btnNuevo = document.getElementById("btn-nuevo-elaboracion-productos-base");
+        var container = document.getElementById("datos-receta-base");
+        var filterInput = document.getElementById("filter-receta-base");
+        var btnNuevo = document.getElementById("btn-nuevo-receta-base");
         if (!container) return;
         if (btnNuevo) btnNuevo.addEventListener("click", function (e) { e.preventDefault(); window.location.href = CREAR_URL; });
         if (!appsScriptUrl) { showMessage(container, "No está configurada la URL de la API (appsScriptUrl)."); return; }
-        var loadConfig = window.ELABORACION_PRODUCTOS_BASE_LOAD_CONFIG;
+        var loadConfig = window.RECETA_BASE_LOAD_CONFIG;
         if (!loadConfig) { showMessage(container, "No se pudo cargar la configuración del módulo."); return; }
 
         loadConfig().then(function (sheetConfig) {
@@ -153,8 +154,8 @@
             var columnas = sheetConfig.columnas || [];
             var headersConfig = columnas.map(function (c) { return { nombre: c.nombre }; });
             var columnaFiltroValores = sheetConfig.columnaFiltroValores || null;
-            var filtrarWrap = document.getElementById("elaboracion-productos-base-filtrar-wrap");
-            var filtrarSelect = document.getElementById("filtrar-valores-elaboracion-productos-base");
+            var filtrarWrap = document.getElementById("receta-base-filtrar-wrap");
+            var filtrarSelect = document.getElementById("filtrar-valores-receta-base");
 
             var url = appsScriptUrl + "?action=list&sheet=" + encodeURIComponent(nombreHoja) + "&_=" + Date.now();
             if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.show("Cargando…");
@@ -183,7 +184,7 @@
                     }
                 }
 
-                function getValorFiltroActual() { var sel = document.getElementById("filtrar-valores-elaboracion-productos-base"); return sel ? (sel.value || "") : ""; }
+                function getValorFiltroActual() { var sel = document.getElementById("filtrar-valores-receta-base"); return sel ? (sel.value || "") : ""; }
                 function redraw() {
                     var valorFiltro = columnaFiltroValores ? getValorFiltroActual() : "";
                     renderList(container, sheetConfig, headers, rows, (filterInput && filterInput.value) ? filterInput.value : "", valorFiltro, columnaFiltroValores ? indiceColumnaFiltro : -1);

@@ -9,18 +9,24 @@ window.ELABORACION_PRODUCTOS_BASE_SHEET_BASE = {
   descripcion: "Módulo Elaboración Productos Base (Armador Receta). Listado y ABM sobre la hoja Tabla-Elaboracion-ProductosBase.",
   hoja: {
     nombre: "Tabla-Elaboracion-ProductosBase",
-    nombreHoja: "Tabla-Elaboracion-ProductosBase",
+    nombreHoja: "Tabla-Elaboracion-Productos-Base",
     clavePrimaria: ["IDElaboracion-ProductoBase"],
     columnasPropias: [
       "IDElaboracion-ProductoBase",
       "IDReceta-Base",
       "Cantidad",
+      "Descripcion-Masa-Producto",
       "Costo-Produccion-ProductoBase",
       "Monto"
     ],
     columnaOrden: null,
     clavesForaneas: [
-      { columna: "IDReceta-Base", tabla: "Tabla-Receta-Base", pkReferencia: "IDCosto-ProductoUnitario", cardinalidad: "N:1" }
+      {
+        columna: "IDReceta-Base",
+        tabla: "Tabla-Receta-Base",
+        pkReferencia: "IDCosto-ProductoUnitario",
+        cardinalidad: "N:1"
+      }
     ],
     prefijoId: "ELAB-",
     patronId: 1,
