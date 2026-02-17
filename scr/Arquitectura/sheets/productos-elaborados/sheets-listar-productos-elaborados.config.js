@@ -1,6 +1,7 @@
 /**
  * Configuración de la acción Listar. Solo columnas y listado (agrupación).
  * Cargado por productos-elaborados.html. Requiere productos-elaborados-sheets-base.js antes.
+ * tipoDato: tipo de dato. tipoComponente: label, combo-basico, text-box, etc.
  */
 (function () {
   var base = window.PRODUCTOS_ELABORADOS_SHEET_BASE;
@@ -12,9 +13,9 @@
     {
       nombre: "Orden-Lista",
       alias: "Orden Lista",
-      tipo: "numeric",
+      tipoDato: "numeric",
+      tipoComponente: "label",
       nullable: true,
-      label: true,
       visible: false,
       descripcion: "Orden de aparición en listados.",
       restricciones: { min: 0, entero: true }
@@ -22,9 +23,9 @@
     {
       nombre: "IDProducto",
       alias: "ID Producto",
-      tipo: "text",
+      tipoDato: "text",
+      tipoComponente: "label",
       nullable: false,
-      label: true,
       visible: false,
       descripcion: "Identificador único.",
       restricciones: {}
@@ -32,7 +33,8 @@
     {
       nombre: "IDCosto-Producto",
       alias: "ID Costo Producto",
-      tipo: "text",
+      tipoDato: "text",
+      tipoComponente: "label",
       nullable: true,
       visible: false,
       descripcion: "Referencia a Tabla-Costo-Productos (FK).",
@@ -41,7 +43,8 @@
     {
       nombre: "Comercio-Sucursal",
       alias: "Comercio Sucursal",
-      tipo: "text",
+      tipoDato: "text",
+      tipoComponente: "label",
       nullable: true,
       visible: false,
       listadoValores: "COMPONENTE-COMBOS.Combo-Comercio-Sucursal",
@@ -51,7 +54,8 @@
     {
       nombre: "Nombre-Producto",
       alias: "Nombre Producto",
-      tipo: "text",
+      tipoDato: "text",
+      tipoComponente: "label",
       nullable: true,
       visible: true,
       descripcion: "Nombre del producto.",
@@ -60,7 +64,8 @@
     {
       nombre: "Costo-Producto-Final-Actual",
       alias: "Costo Producto Final Actual",
-      tipo: "numeric",
+      tipoDato: "numeric",
+      tipoComponente: "label",
       nullable: true,
       decimales: 2,
       visible: true,
@@ -70,7 +75,8 @@
     {
       nombre: "Observaciones",
       alias: "Observaciones",
-      tipo: "text",
+      tipoDato: "text",
+      tipoComponente: "label",
       nullable: true,
       visible: false,
       restricciones: { maxLongitud: 2000 }
@@ -78,7 +84,8 @@
     {
       nombre: "Habilitado",
       alias: "Habilitado",
-      tipo: "text",
+      tipoDato: "text",
+      tipoComponente: "label",
       nullable: true,
       visible: false,
       descripcion: "Sí / No.",
@@ -100,7 +107,6 @@
       columnas: columnas,
       listado: {
         columnasAgrupacion: ["Comercio-Sucursal"],
-        /** Columna por cuyos valores distintos se filtra el listado (el select muestra "Todos" + cada valor). */
         columnaFiltroValores: "Comercio-Sucursal",
         modosAgrupacion: [
           ["Comercio-Sucursal"],

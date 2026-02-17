@@ -1,0 +1,69 @@
+{
+  "module": "productos-elaborados",
+  "description": "Módulo Productos elaborados (Armador de Productos). Listado y ABM sobre la hoja Listado-Productos-Elaborados.",
+  "sheets": [
+    {
+      "name": "Listado-Productos-Elaborados",
+      "sheetKey": "Listado-Productos-Elaborados",
+      "idColumn": "IDProducto",
+      "idColumnAliases": ["IDProducto", "idproducto", "id"],
+      "fields": [
+        {
+          "name": "Orden-Lista",
+          "type": "number",
+          "required": false,
+          "hiddenInList": false,
+          "description": "Orden de aparición en listados",
+          "restrictions": { "min": 0, "integer": true }
+        },
+        {
+          "name": "IDProducto",
+          "type": "string",
+          "required": false,
+          "hiddenInList": false,
+          "description": "ID único del producto. No se edita en crear (auto en hoja/Apps Script).",
+          "restrictions": {}
+        },
+        {
+          "name": "Comercio-Sucursal",
+          "type": "string",
+          "required": false,
+          "hiddenInList": false,
+          "description": "Comercio o sucursal asociada",
+          "restrictions": { "maxLength": 200 }
+        },
+        {
+          "name": "Nombre-Producto",
+          "type": "string",
+          "required": true,
+          "hiddenInList": false,
+          "description": "Nombre del producto elaborado",
+          "restrictions": { "maxLength": 500 }
+        },
+        {
+          "name": "Costo-Producto-Final-Actual",
+          "type": "number",
+          "required": false,
+          "hiddenInList": false,
+          "description": "Costo final actual del producto",
+          "restrictions": { "min": 0 }
+        },
+        {
+          "name": "Observaciones",
+          "type": "string",
+          "required": false,
+          "hiddenInList": false,
+          "restrictions": { "maxLength": 2000 }
+        },
+        {
+          "name": "Habilitado",
+          "type": "string",
+          "required": false,
+          "hiddenInList": false,
+          "description": "Sí / No",
+          "restrictions": { "enum": ["Sí", "No", ""] }
+        }
+      ]
+    }
+  ]
+}
