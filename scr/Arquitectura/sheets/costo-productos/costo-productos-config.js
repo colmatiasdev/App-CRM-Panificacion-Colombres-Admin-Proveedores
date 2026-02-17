@@ -8,10 +8,34 @@
     var CACHE_MAX_AGE_MS = 5 * 60 * 1000;
 
     var ACCIONES = {
-        listar: { id: "listar", url: "costo-productos.html", label: "Listar", visible: true, componente: "listado" },
-        crear: { id: "crear", url: "crear-costo-producto.html", label: "Crear", visible: true, componente: "formulario" },
-        editar: { id: "editar", url: "editar-costo-producto.html", label: "Editar", visible: true, componente: "formulario" },
-        ver: { id: "ver", url: "ver-costo-producto.html", label: "Ver", visible: true, componente: "detalle" }
+        listar: {
+            id: "listar",
+            url: "costo-productos.html",
+            label: "Listar",
+            visible: true,
+            componente: "listado"
+        },
+        crear: {
+            id: "crear",
+            url: "crear-costo-producto.html",
+            label: "Crear",
+            visible: true,
+            componente: "formulario"
+        },
+        editar: {
+            id: "editar",
+            url: "editar-costo-producto.html",
+            label: "Editar",
+            visible: true,
+            componente: "formulario"
+        },
+        ver: {
+            id: "ver",
+            url: "ver-costo-producto.html",
+            label: "Ver",
+            visible: true,
+            componente: "detalle"
+        }
     };
 
     window.COSTO_PRODUCTOS_ACCIONES = ACCIONES;
