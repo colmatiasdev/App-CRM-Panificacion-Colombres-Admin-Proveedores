@@ -168,6 +168,54 @@ var CONFIG = {
     idColumn: 'MINUTOS',
     filterColumns: ['MINUTOS'],
     requiredOnCreate: ['MINUTOS']
+  },
+
+  /** Hoja Tabla Receta Base (Armador Receta – Producto Unitario Base) – ?sheet=Tabla-Receta-Base
+   * PK = IDCosto-ProductoUnitario. Costo-Elaboracion-Actual = fórmula G+H+I+K. */
+  'tabla-receta-base': {
+    sheetName: 'Tabla-Receta-Base',
+    gid: 0,
+    headers: [
+      'Orden',
+      'IDCosto-ProductoUnitario',
+      'Comercio-Sucursal',
+      'Tipo-Producto',
+      'Nombre-Producto',
+      'IDElaboracion-ProductoBase',
+      'Costo-Produccion-ProductoBase',
+      'Costo-Relleno-Producto',
+      'Costo-Decoracion-Producto',
+      'Tiempo-Elaboracion-Minutos',
+      'Costo-Mano-Obra-Elaboracion',
+      'Costo-Elaboracion-Actual',
+      'Costo-Elaboracion-Anterior',
+      'Habilitado',
+      'Fecha-Registro-Actualizado-Al',
+      'Actualizado'
+    ],
+    idColumn: 'IDCosto-ProductoUnitario',
+    idPrefix: 'RECETA-',
+    filterColumns: ['IDCosto-ProductoUnitario', 'Comercio-Sucursal', 'Tipo-Producto', 'Nombre-Producto', 'Habilitado'],
+    requiredOnCreate: ['Nombre-Producto'],
+    dateUpdatedColumn: 'Fecha-Registro-Actualizado-Al'
+  },
+
+  /** Hoja Tabla Elaboración Productos Base (Armador Receta) – ?sheet=Tabla-Elaboracion-ProductosBase
+   * PK = IDElaboracion-ProductoBase. Relación con Tabla-Receta-Base. */
+  'tabla-elaboracion-productos-base': {
+    sheetName: 'Tabla-Elaboracion-ProductosBase',
+    gid: 0,
+    headers: [
+      'IDElaboracion-ProductoBase',
+      'IDReceta-Base',
+      'Cantidad',
+      'Costo-Produccion-ProductoBase',
+      'Monto'
+    ],
+    idColumn: 'IDElaboracion-ProductoBase',
+    idPrefix: 'ELAB-',
+    filterColumns: ['IDElaboracion-ProductoBase', 'IDReceta-Base', 'Cantidad'],
+    requiredOnCreate: ['IDReceta-Base', 'Cantidad']
   }
 
   // Para agregar otra hoja, copiá un bloque (p.ej. packing), cambiá la clave y sheetName:

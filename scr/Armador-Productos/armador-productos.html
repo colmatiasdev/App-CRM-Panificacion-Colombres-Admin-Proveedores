@@ -23,25 +23,35 @@
         <h1 class="costos-title">Armador de Productos</h1>
         <p class="costos-intro">Módulo para armar y configurar productos.</p>
         <div class="costos-datos">
-            <p class="costos-placeholder">Contenido del módulo Armador de Productos. Aquí se podrá configurar y armar productos.</p>
-            <div style="margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
-                <a href="Productos-Elaborados/productos-elaborados.html" class="costos-calc-btn" style="display: inline-flex; align-items: center; gap: 8px;">
-                    <i class="fa-solid fa-box" aria-hidden="true"></i>
-                    Lista de Productos Elaborados
-                </a>
-                <a href="Productos-Elaborados/productos-elaborados.html" class="costos-edit-btn-editar" style="display: inline-flex; align-items: center; gap: 8px;">
-                    <i class="fa-solid fa-pen" aria-hidden="true"></i>
-                    Editar productos elaborados
-                </a>
-                <a href="Costo-Productos/costo-productos.html" class="costos-calc-btn" style="display: inline-flex; align-items: center; gap: 8px;">
-                    <i class="fa-solid fa-calculator" aria-hidden="true"></i>
-                    Costo productos
-                </a>
-                <a href="Costo-Productos/costo-productos.html" class="costos-edit-btn-editar" style="display: inline-flex; align-items: center; gap: 8px;">
-                    <i class="fa-solid fa-pen" aria-hidden="true"></i>
-                    Editar costo productos
-                </a>
-            </div>
+            <p class="costos-placeholder">Elegí una opción del módulo Armador de Productos.</p>
+
+            <section class="costos-hub-modulo" aria-label="Lista de Productos Elaborados">
+                <h2 class="costos-hub-modulo-titulo"><i class="fa-solid fa-box" aria-hidden="true"></i> Lista de Productos Elaborados</h2>
+                <div class="costos-hub-btns">
+                    <a href="Productos-Elaborados/productos-elaborados.html" class="costos-calc-btn" style="display: inline-flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-list" aria-hidden="true"></i>
+                        Listar
+                    </a>
+                    <a href="Productos-Elaborados/crear-producto-elaborado.html" class="costos-calc-btn" style="display: inline-flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                        Nuevo
+                    </a>
+                </div>
+            </section>
+
+            <section class="costos-hub-modulo" aria-label="Costo productos">
+                <h2 class="costos-hub-modulo-titulo"><i class="fa-solid fa-calculator" aria-hidden="true"></i> Costo productos</h2>
+                <div class="costos-hub-btns">
+                    <a href="Costo-Productos/costo-productos.html" class="costos-calc-btn" style="display: inline-flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-list" aria-hidden="true"></i>
+                        Listar
+                    </a>
+                    <a href="Costo-Productos/crear-costo-producto.html" class="costos-calc-btn" style="display: inline-flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                        Nuevo
+                    </a>
+                </div>
+            </section>
         </div>
     </main>
 </body>
