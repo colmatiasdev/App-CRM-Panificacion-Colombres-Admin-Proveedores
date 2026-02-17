@@ -299,6 +299,12 @@ body.costos-page {
 .costos-edit-field:last-of-type {
     margin-bottom: 0;
 }
+.costos-edit-formula-leyenda {
+    font-size: 0.8rem;
+    color: var(--text-muted, #64748b);
+    margin: 4px 0 0 0;
+    line-height: 1.35;
+}
 .costos-edit-seccion-titulo {
     font-size: 0.95rem;
     font-weight: 700;
@@ -906,6 +912,20 @@ body.costos-page {
     margin: 0;
     color: var(--muted);
 }
+.costos-ver-seccion-titulo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+.costos-ver-seccion-titulo .costos-ver-subtitulo {
+    margin: 0;
+}
+.costos-ver-seccion-actions {
+    margin-top: 1rem;
+}
 .costos-edit-btn-save {
     background: linear-gradient(180deg, var(--logo-orange) 0%, #c2410c 100%);
     color: #fff;
@@ -957,6 +977,30 @@ body.costos-page {
 }
 .costos-edit-btn-cancel:hover {
     text-decoration: underline;
+}
+.costos-edit-actions--ver-costo {
+    margin-bottom: 1rem;
+}
+.costos-edit-btn-ver-costo {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    border-radius: 10px;
+    text-decoration: none;
+    background: var(--logo-teal);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+}
+.costos-edit-btn-ver-costo:hover {
+    background: var(--logo-teal-dark);
+    color: #fff;
+    text-decoration: none;
+    opacity: 0.95;
 }
 
 /* Debug equivalencia (visible si config.costos.debugEquivalencia === true) */

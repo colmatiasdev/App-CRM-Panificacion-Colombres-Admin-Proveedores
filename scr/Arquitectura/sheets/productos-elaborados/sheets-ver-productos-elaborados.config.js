@@ -72,7 +72,7 @@
       alias: "Habilitado",
       tipoDato: "text",
       tipoComponente: "label",
-      visible: true,
+      visible: false,
       descripcion: "Sí / No."
     }
   ];

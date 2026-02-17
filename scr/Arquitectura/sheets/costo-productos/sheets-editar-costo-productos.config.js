@@ -53,6 +53,7 @@
       tipoDato: "numeric",
       tipoComponente: "text-box",
       decimales: 2,
+      obligatorio: true,
       visible: true,
       restricciones: { min: 0 }
     },
@@ -62,6 +63,7 @@
       tipoDato: "numeric",
       tipoComponente: "text-box",
       decimales: 2,
+      obligatorio: true,
       visible: true,
       restricciones: { min: 0 }
     },
@@ -71,6 +73,7 @@
       tipoDato: "numeric",
       tipoComponente: "text-box",
       decimales: 2,
+      obligatorio: true,
       visible: true,
       restricciones: {}
     },
@@ -79,24 +82,27 @@
       alias: "Merma Porcentaje",
       tipoDato: "numeric",
       tipoComponente: "text-box",
-      decimales: 2,
+      decimales: 0,
+      obligatorio: true,
       visible: true,
-      restricciones: { min: 0, max: 100 }
+      restricciones: { min: 0, max: 5 }
     },
     {
       nombre: "Merma-Importe",
       alias: "Merma Importe",
       tipoDato: "numeric",
-      tipoComponente: "text-box",
+      tipoComponente: "label",
       decimales: 2,
+      obligatorio: true,
       visible: true,
       restricciones: { min: 0 }
     },
     {
-      nombre: "Tiiempo-Packing-Minutos",
+      nombre: "Tiempo-Packing-Minutos",
       alias: "Tiempo Packing Minutos",
       tipoDato: "numeric",
       tipoComponente: "text-box",
+      obligatorio: true,
       visible: true,
       restricciones: { min: 0, entero: true }
     },
@@ -104,7 +110,8 @@
       nombre: "Costo-Mano-Obra-Packing",
       alias: "Costo Mano Obra Packing",
       tipoDato: "numeric",
-      tipoComponente: "text-box",
+      tipoComponente: "label",  
+      obligatorio: true,
       decimales: 2,
       visible: true,
       restricciones: { min: 0 }
@@ -113,7 +120,8 @@
       nombre: "Costo-Producto-Final-Actual",
       alias: "Costo Producto Final Actual",
       tipoDato: "numeric",
-      tipoComponente: "text-box",
+      tipoComponente: "label",
+      obligatorio: true,
       decimales: 2,
       visible: true,
       restricciones: { min: 0 }
@@ -122,7 +130,8 @@
       nombre: "Costo-Producto-Final-Anterior",
       alias: "Costo Producto Final Anterior",
       tipoDato: "numeric",
-      tipoComponente: "text-box",
+      tipoComponente: "label",
+      obligatorio: true,
       decimales: 2,
       visible: true,
       restricciones: { min: 0 }
@@ -132,7 +141,7 @@
       alias: "Habilitado",
       tipoDato: "text",
       tipoComponente: "combo-basico",
-      visible: true,
+      visible: false,
       restricciones: { valoresPermitidos: ["Sí", "No", ""] }
     }
   ];
@@ -145,6 +154,10 @@
       clavePrimaria: hoja.clavePrimaria,
       clavesForaneas: hoja.clavesForaneas || [],
       columnasPropias: Array.isArray(hoja.columnasPropias) ? hoja.columnasPropias : [],
+      formulas: hoja.formulas && typeof hoja.formulas === "object" ? hoja.formulas : {},
+      lookups: Array.isArray(hoja.lookups) ? hoja.lookups : [],
+      valorAnterior: Array.isArray(hoja.valorAnterior) ? hoja.valorAnterior : [],
+      propagacion: hoja.propagacion && typeof hoja.propagacion === "object" ? hoja.propagacion : null,
       columnaOrden: hoja.columnaOrden,
       prefijoId: hoja.prefijoId,
       patronId: hoja.patronId,

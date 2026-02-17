@@ -1,0 +1,70 @@
+{
+  "module": "costo-empleados",
+  "description": "Tabla COSTO-EMPLEADOS. Costos por minuto y mano de obra (Producción, Elaboración, Packing). PK = MINUTOS.",
+  "sheets": [
+    {
+      "name": "COSTO-EMPLEADOS",
+      "sheetKey": "COSTO-EMPLEADOS",
+      "idColumn": "MINUTOS",
+      "idColumnAliases": ["MINUTOS", "minutos", "id"],
+      "fields": [
+        {
+          "name": "MINUTOS",
+          "type": "number",
+          "required": true,
+          "hiddenInList": false,
+          "description": "Minutos (clave primaria). Ej: 15, 30, 60.",
+          "restrictions": { "min": 0, "integer": true }
+        },
+        {
+          "name": "Costo-x-Minutos-Produccion",
+          "type": "number",
+          "required": false,
+          "hiddenInList": false,
+          "description": "Costo por minuto de producción",
+          "restrictions": { "min": 0 }
+        },
+        {
+          "name": "Costo-Mano-Obra-Produccion",
+          "type": "number",
+          "required": false,
+          "hiddenInList": false,
+          "description": "Costo mano de obra producción",
+          "restrictions": { "min": 0 }
+        },
+        {
+          "name": "Costo-x-Minutos-Elaboracion",
+          "type": "number",
+          "required": false,
+          "hiddenInList": false,
+          "description": "Costo por minuto de elaboración",
+          "restrictions": { "min": 0 }
+        },
+        {
+          "name": "Costo-Mano-Obra-Elaboracion",
+          "type": "number",
+          "required": false,
+          "hiddenInList": false,
+          "description": "Costo mano de obra elaboración",
+          "restrictions": { "min": 0 }
+        },
+        {
+          "name": "Costo-x-Minutos-Packing",
+          "type": "number",
+          "required": false,
+          "hiddenInList": false,
+          "description": "Costo por minuto de packing",
+          "restrictions": { "min": 0 }
+        },
+        {
+          "name": "Costo-Mano-Obra-Packing",
+          "type": "number",
+          "required": false,
+          "hiddenInList": false,
+          "description": "Costo mano de obra packing",
+          "restrictions": { "min": 0 }
+        }
+      ]
+    }
+  ]
+}

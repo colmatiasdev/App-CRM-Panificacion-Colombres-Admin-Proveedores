@@ -34,7 +34,7 @@
       nombre: "IDCosto-Producto",
       alias: "ID Costo Producto",
       tipoDato: "text",
-      tipoComponente: "text-box",
+      tipoComponente: "label",
       visible: false,
       obligatorio: false,
       descripcion: "Referencia a Tabla-Costo-Productos (FK).",
@@ -55,7 +55,7 @@
       nombre: "Nombre-Producto",
       alias: "Nombre Producto",
       tipoDato: "text",
-      tipoComponente: "text-box",
+      tipoComponente: "label",
       visible: true,
       descripcion: "Nombre del producto.",
       restricciones: { maxLongitud: 500 }
@@ -64,7 +64,7 @@
       nombre: "Costo-Producto-Final-Actual",
       alias: "Costo Producto Final Actual",
       tipoDato: "numeric",
-      tipoComponente: "text-box",
+      tipoComponente: "label",
       decimales: 2,
       visible: true,
       obligatorio: false,
@@ -84,9 +84,9 @@
       nombre: "Habilitado",
       alias: "Habilitado",
       tipoDato: "text",
-      tipoComponente: "combo-basico",
+      tipoComponente: "label",
       visible: false,
-      obligatorio: true,
+      obligatorio: false,
       descripcion: "Sí / No.",
       restricciones: { valoresPermitidos: ["Sí", "No", ""] }
     }

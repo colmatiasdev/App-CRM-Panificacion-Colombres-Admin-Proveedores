@@ -177,6 +177,18 @@
                 return (window["COMPONENTE-COMBOS"] && window["COMPONENTE-COMBOS"][refTrim] && Array.isArray(window["COMPONENTE-COMBOS"][refTrim])) ? window["COMPONENTE-COMBOS"][refTrim] : [];
             }
 
+            /** Construye la leyenda de una fórmula: operación y campos involucrados. */
+            function buildFormulaLeyenda(formulaCol, columnas) {
+                if (!formulaCol || !Array.isArray(formulaCol.fuentes) || formulaCol.fuentes.length === 0) return "";
+                var op = (formulaCol.operacion || "").toLowerCase();
+                var opLabel = { suma: "Suma", resta: "Resta", multiplicacion: "Multiplicación", division: "División", porcentaje: "Porcentaje" }[op] || op || "Cálculo";
+                var nombres = formulaCol.fuentes.map(function (nombreCol) {
+                    var c = columnas.filter(function (col) { return (col.nombre || "") === nombreCol; })[0];
+                    return (c && (c.alias != null ? c.alias : c.nombre)) ? String(c.alias || c.nombre).trim() : nombreCol;
+                });
+                return opLabel + " de: " + nombres.join(", ");
+            }
+
             if (!appsScriptUrl) {
                 loadingEl.style.display = "none";
                 noDataEl.style.display = "block";
@@ -219,10 +231,16 @@
                         wrap.appendChild(label);
                         if (tipoComp === "label") {
                             var valorMostrar = "";
-                            if (isClavePrimaria(col.nombre, clavePrimaria) && idGeneradoPreview) {
+                            var formulaCol = sheetConfig.formulas && sheetConfig.formulas[col.nombre];
+                            var esFormula = formulaCol && formulaCol.fuentes && formulaCol.fuentes.length > 0 && formulaCol.expresion;
+                            if (esFormula) {
+                                valorMostrar = "0";
+                            } else if (isClavePrimaria(col.nombre, clavePrimaria) && idGeneradoPreview) {
                                 valorMostrar = idGeneradoPreview;
                             } else if (col.autogeneradorID === true && sheetConfig.columnaOrden && String(col.nombre || "").trim() === String(sheetConfig.columnaOrden).trim() && sheetConfig._ordenPreview != null) {
                                 valorMostrar = sheetConfig._ordenPreview;
+                            } else {
+                                valorMostrar = col.descripcion || "Solo lectura";
                             }
                             var ro = document.createElement("span");
                             ro.id = "field-" + idx;
@@ -230,8 +248,23 @@
                             ro.setAttribute("data-header-index", String(idx));
                             ro.setAttribute("data-nombre", col.nombre);
                             ro.setAttribute("aria-readonly", "true");
-                            ro.textContent = valorMostrar || (col.descripcion || "Solo lectura");
+                            if (esFormula) {
+                                ro.setAttribute("data-formula-expresion", formulaCol.expresion);
+                                ro.setAttribute("data-formula-decimales", String(formulaCol.decimales != null ? formulaCol.decimales : 2));
+                                ro.setAttribute("data-formula-fuentes", JSON.stringify(formulaCol.fuentes));
+                            }
+                            ro.textContent = valorMostrar;
                             wrap.appendChild(ro);
+                            if (esFormula) {
+                                var leyenda = (formulaCol.leyenda != null && String(formulaCol.leyenda).trim() !== "") ? String(formulaCol.leyenda).trim() : buildFormulaLeyenda(formulaCol, columnas);
+                                if (leyenda) {
+                                    var leyendaEl = document.createElement("p");
+                                    leyendaEl.className = "costos-edit-formula-leyenda";
+                                    leyendaEl.setAttribute("aria-describedby", ro.id);
+                                    leyendaEl.textContent = leyenda;
+                                    wrap.appendChild(leyendaEl);
+                                }
+                            }
                         } else if (tipoComp === "combo-basico") {
                             var valoresCombo = [];
                             if (restr.valoresPermitidos && Array.isArray(restr.valoresPermitidos)) {
@@ -290,13 +323,165 @@
                         fieldsContainer.appendChild(wrap);
                     });
 
+                    function getFormValueByNombre(form, nombreColumna) {
+                        var list = form.querySelectorAll("[data-nombre]");
+                        for (var i = 0; i < list.length; i++) {
+                            if (list[i].getAttribute("data-nombre") === nombreColumna) {
+                                return (list[i].value != null ? String(list[i].value).trim() : String(list[i].textContent || "").trim());
+                            }
+                        }
+                        return "";
+                    }
+                    function setFormValueByNombre(form, nombreColumna, value) {
+                        var list = form.querySelectorAll("[data-nombre]");
+                        for (var i = 0; i < list.length; i++) {
+                            if (list[i].getAttribute("data-nombre") === nombreColumna) {
+                                var str = (value != null && value !== "") ? String(value).trim() : "";
+                                if (list[i].value !== undefined) list[i].value = str;
+                                else list[i].textContent = str;
+                                break;
+                            }
+                        }
+                    }
+                    function applyLookupsCostos(form, sheetConfig, apiUrl) {
+                        if (!sheetConfig.lookups || sheetConfig.lookups.length === 0 || !apiUrl) return Promise.resolve();
+                        var promesas = sheetConfig.lookups.map(function (lookup) {
+                            var claveVal = getFormValueByNombre(form, lookup.columnaClaveLocal);
+                            if (!claveVal) {
+                                setFormValueByNombre(form, lookup.columnaDestino, "");
+                                return Promise.resolve();
+                            }
+                            var url = apiUrl + "?action=get&sheet=" + encodeURIComponent(lookup.tablaOrigen) + "&id=" + encodeURIComponent(claveVal);
+                            return fetch(url, { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (resp) {
+                                if (!resp || !resp.success || !resp.data) {
+                                    setFormValueByNombre(form, lookup.columnaDestino, "");
+                                    return;
+                                }
+                                var data = resp.data;
+                                var val = (data[lookup.columnaOrigen] != null && data[lookup.columnaOrigen] !== "") ? data[lookup.columnaOrigen] : (data[lookup.columnaDestino] != null && data[lookup.columnaDestino] !== "" ? data[lookup.columnaDestino] : null);
+                                var dec = (lookup.decimales != null) ? lookup.decimales : 2;
+                                if (typeof val === "number" && !isNaN(val)) val = val.toFixed(dec);
+                                else if (val != null && val !== "") val = String(val).trim();
+                                else val = "";
+                                setFormValueByNombre(form, lookup.columnaDestino, val);
+                            }).catch(function () { setFormValueByNombre(form, lookup.columnaDestino, ""); });
+                        });
+                        return Promise.all(promesas);
+                    }
+                    function applyFormulasCostos(form) {
+                        form.querySelectorAll("[data-formula-expresion]").forEach(function (span) {
+                            var expr = span.getAttribute("data-formula-expresion");
+                            var dec = parseInt(span.getAttribute("data-formula-decimales"), 10) || 2;
+                            var fuentesJson = span.getAttribute("data-formula-fuentes");
+                            if (!expr || !fuentesJson) return;
+                            var fuentes;
+                            try { fuentes = JSON.parse(fuentesJson); } catch (e) { return; }
+                            if (!Array.isArray(fuentes)) return;
+                            var exprEval = expr;
+                            for (var i = 0; i < fuentes.length; i++) {
+                                var letter = String.fromCharCode(97 + i);
+                                var val = getFormValueByNombre(form, fuentes[i]);
+                                var num = parseFloat(String(val).replace(",", ".")) || 0;
+                                exprEval = exprEval.replace(new RegExp("\\b" + letter + "\\b", "g"), String(num));
+                            }
+                            var result;
+                            try { result = Function("return (" + exprEval + ");")(); } catch (err) { result = 0; }
+                            if (typeof result !== "number" || isNaN(result)) result = 0;
+                            span.textContent = result.toFixed(dec);
+                        });
+                    }
+                    var initialValuesCrear = {};
+                    var checkFormChangesCrear = function () {};
+                    var previousValoresCrear = {};
+                    var applyValorAnteriorCrear = function () {};
+
+                    applyFormulasCostos(formEl);
+                    applyLookupsCostos(formEl, sheetConfig, appsScriptUrl);
+                    formEl.querySelectorAll("input[data-nombre], select[data-nombre]").forEach(function (input) {
+                        var nombre = input.getAttribute("data-nombre");
+                        if (!nombre) return;
+                        var esFuente = false;
+                        if (sheetConfig.formulas) {
+                            for (var k in sheetConfig.formulas) {
+                                if (sheetConfig.formulas[k].fuentes && sheetConfig.formulas[k].fuentes.indexOf(nombre) !== -1) {
+                                    esFuente = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (esFuente) {
+                            input.addEventListener("input", function () { applyFormulasCostos(formEl); applyValorAnteriorCrear(); checkFormChangesCrear(); });
+                            input.addEventListener("change", function () { applyFormulasCostos(formEl); applyValorAnteriorCrear(); checkFormChangesCrear(); });
+                        }
+                        var esClaveLookup = false;
+                        if (sheetConfig.lookups) {
+                            for (var l = 0; l < sheetConfig.lookups.length; l++) {
+                                if (sheetConfig.lookups[l].columnaClaveLocal === nombre) {
+                                    esClaveLookup = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (esClaveLookup) {
+                            input.addEventListener("input", function () { applyLookupsCostos(formEl, sheetConfig, appsScriptUrl).then(checkFormChangesCrear); });
+                            input.addEventListener("change", function () { applyLookupsCostos(formEl, sheetConfig, appsScriptUrl).then(checkFormChangesCrear); });
+                        }
+                    });
+
+                    applyLookupsCostos(formEl, sheetConfig, appsScriptUrl).then(function () {
+                        var saveBtn = formEl.querySelector(".costos-edit-btn-save");
+                        (sheetConfig.valorAnterior || []).forEach(function (r) {
+                            var v = getFormValueByNombre(formEl, r.columnaOrigen);
+                            previousValoresCrear[r.columnaOrigen] = v;
+                            setFormValueByNombre(formEl, r.columnaDestino, v);
+                        });
+                        formEl.querySelectorAll("[data-nombre]").forEach(function (el) {
+                            var n = el.getAttribute("data-nombre");
+                            if (n) initialValuesCrear[n] = (el.value != null ? String(el.value) : String(el.textContent || "")).trim();
+                        });
+                        if (saveBtn) saveBtn.disabled = true;
+                        checkFormChangesCrear = function () {
+                            var has = false;
+                            formEl.querySelectorAll("[data-nombre]").forEach(function (el) {
+                                var n = el.getAttribute("data-nombre");
+                                if (!n) return;
+                                var cur = (el.value != null ? String(el.value) : String(el.textContent || "")).trim();
+                                if (cur !== (initialValuesCrear[n] != null ? initialValuesCrear[n] : "")) has = true;
+                            });
+                            if (saveBtn) saveBtn.disabled = !has;
+                        };
+                        applyValorAnteriorCrear = function () {
+                            (sheetConfig.valorAnterior || []).forEach(function (r) {
+                                setFormValueByNombre(formEl, r.columnaDestino, previousValoresCrear[r.columnaOrigen] != null ? previousValoresCrear[r.columnaOrigen] : "");
+                                previousValoresCrear[r.columnaOrigen] = getFormValueByNombre(formEl, r.columnaOrigen);
+                            });
+                        };
+                        formEl.querySelectorAll("input[data-nombre], select[data-nombre]").forEach(function (input) {
+                            input.addEventListener("input", checkFormChangesCrear);
+                            input.addEventListener("change", checkFormChangesCrear);
+                        });
+                        (sheetConfig.valorAnterior || []).forEach(function (r) {
+                            var elOrigen = formEl.querySelector("[data-nombre=\"" + r.columnaOrigen + "\"]");
+                            if (elOrigen && (elOrigen.tagName === "INPUT" || elOrigen.tagName === "SELECT")) {
+                                elOrigen.addEventListener("input", applyValorAnteriorCrear);
+                                elOrigen.addEventListener("change", applyValorAnteriorCrear);
+                            }
+                        });
+                    });
+
                     formEl.addEventListener("submit", function (e) {
                         e.preventDefault();
                         hideEditAlert();
+                        applyFormulasCostos(formEl);
+                        applyValorAnteriorCrear();
+                        applyLookupsCostos(formEl, sheetConfig, appsScriptUrl).then(function () {
                         var newRow = headers.map(function () { return ""; });
                         formEl.querySelectorAll("[data-header-index]").forEach(function (el) {
                             var idx = parseInt(el.getAttribute("data-header-index"), 10);
-                            if (idx >= 0 && idx < newRow.length) newRow[idx] = el.value != null ? String(el.value).trim() : "";
+                            if (idx >= 0 && idx < newRow.length) {
+                                var v = (el.value != null && el.value !== undefined) ? String(el.value).trim() : String((el.textContent != null ? el.textContent : "")).trim();
+                                newRow[idx] = v;
+                            }
                         });
                         if (window.GENERAR_ID_PARA_HOJA && sheetConfig.clavePrimaria && sheetConfig.clavePrimaria[0]) {
                             var idColNombre = sheetConfig.clavePrimaria[0];
@@ -373,6 +558,7 @@
                             .finally(function () {
                                 if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.hide();
                             });
+                        });
                     });
                 }).catch(function (err) {
                     loadingEl.style.display = "none";

@@ -83,7 +83,7 @@
       visible: false
     },
     {
-      nombre: "Tiiempo-Packing-Minutos",
+      nombre: "Tiempo-Packing-Minutos",
       alias: "Tiempo Packing Minutos",
       tipoDato: "numeric",
       tipoComponente: "label",
@@ -118,7 +118,7 @@
       alias: "Habilitado",
       tipoDato: "text",
       tipoComponente: "label",
-      visible: true
+      visible: false
     }
   ];
   window.COSTO_PRODUCTOS_SHEETS_JSON = {
@@ -130,6 +130,8 @@
       clavePrimaria: hoja.clavePrimaria,
       clavesForaneas: hoja.clavesForaneas || [],
       columnasPropias: Array.isArray(hoja.columnasPropias) ? hoja.columnasPropias : [],
+      formulas: hoja.formulas && typeof hoja.formulas === "object" ? hoja.formulas : {},
+      lookups: Array.isArray(hoja.lookups) ? hoja.lookups : [],
       columnaOrden: hoja.columnaOrden,
       prefijoId: hoja.prefijoId,
       patronId: hoja.patronId,

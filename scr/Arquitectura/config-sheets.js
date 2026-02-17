@@ -11,7 +11,7 @@
     }
 
     /** Apps Script desplegado – ABM (list, get, search, create, update, delete). */
-    c.appsScriptUrl = "https://script.google.com/macros/s/AKfycbx5dfxqyBgx3dIXQCzyaGZ43uJZs7hcl0z9NuE32vw6JgKTYxnA-lx8SitYcK66Ctu0vw/exec";
+    c.appsScriptUrl = "https://script.google.com/macros/s/AKfycbxAd4Q15CCMcx0c67dg2BYk7RHJK9-5GNHNBfqHSlVBD4jlMj2O1SSMPAvDx88E801eUQ/exec";
 
     /**
      * Google Sheets – Un solo documento publicado con todas las hojas.
@@ -27,7 +27,9 @@
         /** Hoja Listado-Productos-Elaborados (módulo Productos elaborados). Apps Script: sheet=Listado-Productos-Elaborados. FK: IDCosto-Producto → Tabla-Costo-Productos */
         listadoProductosElaborados: "Listado-Productos-Elaborados",
         /** Hoja Tabla-Costo-Productos (módulo Costo productos). Apps Script: sheet=Tabla-Costo-Productos. PK: IDCosto-Producto */
-        tablaCostoProductos: "Tabla-Costo-Productos"
+        tablaCostoProductos: "Tabla-Costo-Productos",
+        /** Hoja COSTO-EMPLEADOS. Apps Script: sheet=COSTO-EMPLEADOS. PK: MINUTOS. Costos por minuto y mano de obra. */
+        costoEmpleados: "COSTO-EMPLEADOS"
     };
 
     /** URLs CSV por hoja (se rellenan a continuación desde googleSheet). */

@@ -35,7 +35,6 @@
             <div id="ver-relacionado" class="costos-ver-relacionado" style="display:none;"></div>
             <div id="ver-actions" class="costos-edit-actions" style="display:none;">
                 <a href="productos-elaborados.html" class="costos-edit-btn-cancel">Volver al listado</a>
-                <a href="editar-producto-elaborado.html" id="ver-btn-editar" class="costos-edit-btn-editar"><i class="fa-solid fa-pen" aria-hidden="true"></i> Editar</a>
             </div>
         </div>
     </main>
@@ -101,16 +100,33 @@
                             return;
                         }
                         var obj = resp.data;
-                        var htmlRel = "<h2 class=\"costos-ver-subtitulo\">Costo producto relacionado</h2><dl class=\"costos-ver-dl\">";
+                        var headersRel = columnasRel.map(function (c) { return c.nombre; });
+                        var rowRel = headersRel.map(function (h) { return (obj[h] != null && obj[h] !== "") ? String(obj[h]).trim() : ""; });
+                        var idCostoRel = (obj["IDCosto-Producto"] != null && obj["IDCosto-Producto"] !== "") ? String(obj["IDCosto-Producto"]).trim() : idCostoProducto;
+                        var htmlRel = "<div class=\"costos-ver-seccion-titulo\"><h2 class=\"costos-ver-subtitulo\">Costo producto relacionado</h2><a href=\"../Costo-Productos/editar-costo-producto.html\" class=\"costos-edit-btn-editar ver-btn-editar-costo\" title=\"Editar\" aria-label=\"Editar\"><i class=\"fa-solid fa-pen\" aria-hidden=\"true\"></i></a></div>";
+                        htmlRel += "<dl class=\"costos-ver-dl\">";
                         columnasRel.forEach(function (col) {
                             var nombre = (col.alias != null ? col.alias : col.nombre || "").trim();
                             if (!nombre) return;
+                            if (col.visible === false) return;
                             var val = (obj[col.nombre] != null && obj[col.nombre] !== "") ? String(obj[col.nombre]).trim() : "—";
                             htmlRel += "<dt class=\"costos-ver-dt\">" + escapeHtml(nombre) + "</dt>";
                             htmlRel += "<dd class=\"costos-ver-dd\">" + escapeHtml(val) + "</dd>";
                         });
                         htmlRel += "</dl>";
                         relacionadoEl.innerHTML = htmlRel;
+                        var btnEditarCosto = relacionadoEl.querySelector(".ver-btn-editar-costo");
+                        if (btnEditarCosto) {
+                            (function (idRel, h, r) {
+                                btnEditarCosto.addEventListener("click", function (e) {
+                                    e.preventDefault();
+                                    try {
+                                        sessionStorage.setItem("costosEditRecordCostoProductos", JSON.stringify({ id: idRel, headers: h, row: r }));
+                                    } catch (err) {}
+                                    window.location.href = "../Costo-Productos/editar-costo-producto.html";
+                                });
+                            })(idCostoRel, headersRel, rowRel);
+                        }
                         relacionadoEl.style.display = "block";
                     })
                     .catch(function () {
@@ -149,12 +165,14 @@
                         detalleEl.style.display = "block";
                         actionsEl.style.display = "flex";
 
-                        var html = "<dl class=\"costos-ver-dl\">";
+                        var html = "<div class=\"costos-ver-seccion-titulo\"><h2 class=\"costos-ver-subtitulo\">Datos del producto elaborado</h2><a href=\"editar-producto-elaborado.html\" class=\"costos-edit-btn-editar\" title=\"Editar\" aria-label=\"Editar\"><i class=\"fa-solid fa-pen\" aria-hidden=\"true\"></i></a></div>";
+                        html += "<dl class=\"costos-ver-dl\">";
                         var idxIDCostoProducto = -1;
                         columnas.forEach(function (col, idx) {
                             if (col.nombre === "IDCosto-Producto") idxIDCostoProducto = idx;
                             var nombre = (col.alias != null ? col.alias : col.nombre || "").trim();
                             if (!nombre) return;
+                            if (col.visible === false) return;
                             var val = row[idx] != null ? String(row[idx]).trim() : "—";
                             html += "<dt class=\"costos-ver-dt\">" + escapeHtml(nombre) + "</dt>";
                             html += "<dd class=\"costos-ver-dd\">" + escapeHtml(val) + "</dd>";

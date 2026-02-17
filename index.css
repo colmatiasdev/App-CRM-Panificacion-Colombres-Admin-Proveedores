@@ -158,6 +158,36 @@ body {
     transform: scale(0.98);
 }
 
+/* Botón Armador de Receta — módulo Armador-Recetas (ámbar/dorado) */
+.armador-recetas-btn {
+    grid-column: 1 / -1;
+    min-height: var(--touch-min);
+    padding: 14px 12px;
+    border-radius: 16px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    transition: transform 0.2s, background 0.2s, color 0.2s, border-color 0.2s;
+    -webkit-tap-highlight-color: transparent;
+    border: 2px solid #d97706;
+    background: transparent;
+    color: #b45309;
+}
+
+.armador-recetas-btn:hover {
+    background: #d97706;
+    color: white;
+    border-color: #d97706;
+}
+
+.armador-recetas-btn:active {
+    transform: scale(0.98);
+}
+
 /* Botón Productos elaborados — listado y ABM desde hoja Listado-Productos-Elaborados */
 .productos-elaborados-btn {
     grid-column: 1 / -1;

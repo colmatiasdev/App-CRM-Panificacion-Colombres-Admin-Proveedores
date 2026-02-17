@@ -3,7 +3,7 @@
  * Un solo archivo: copiá y pegá todo en el editor de Apps Script.
  *
  * Acciones: list | get | search | create | update | delete | fillIds
- * Parámetro sheet: materiaPrima | packing | combos | equivalencias | Listado-Productos-Elaborados | Tabla-Costo-Productos
+ * Parámetro sheet: materiaPrima | packing | combos | equivalencias | Listado-Productos-Elaborados | Tabla-Costo-Productos | COSTO-EMPLEADOS
  *
  * Desplegar: Implementar → Nueva implementación → Aplicación web
  * Ejecutar como: Yo | Quién puede acceder: Cualquier usuario (o según necesites)
@@ -137,7 +137,7 @@ var CONFIG = {
       'Costos-Fijos',
       'Merma-Porcentaje',
       'Merma-Importe',
-      'Tiiempo-Packing-Minutos',
+      'Tiempo-Packing-Minutos',
       'Costo-Mano-Obra-Packing',
       'Costo-Producto-Final-Actual',
       'Costo-Producto-Final-Anterior',
@@ -147,10 +147,43 @@ var CONFIG = {
     idPrefix: 'COSTO-PROD-',
     filterColumns: ['IDCosto-Producto', 'Categoria', 'Producto', 'Habilitado'],
     requiredOnCreate: ['Producto']
+  },
+
+  /** Hoja Costo Empleados – ?sheet=COSTO-EMPLEADOS
+   * PK = MINUTOS (ej. 15, 30, 60). Costos por minuto y mano de obra por actividad. */
+  'costo-empleados': {
+    sheetName: 'COSTO-EMPLEADOS',
+    gid: 0,
+    headers: [
+      'MINUTOS',
+      'Costo-x-Minutos-Produccion',
+      'Costo-Mano-Obra-Produccion',
+      'Costo-x-Minutos-Elaboracion',
+      'Costo-Mano-Obra-Elaboracion',
+      'Costo-x-Minutos-Packing',
+      'Costo-Mano-Obra-Packing'
+    ],
+    idColumn: 'MINUTOS',
+    filterColumns: ['MINUTOS'],
+    requiredOnCreate: ['MINUTOS']
   }
 
   // Para agregar otra hoja, copiá un bloque (p.ej. packing), cambiá la clave y sheetName:
   // otraHoja: { sheetName: 'PRECIO-Otra', headers: [...], idColumn: 'idotra', idPrefix: 'COSTO-XX-', ... }
+};
+
+/**
+ * Propagación al actualizar Tabla-Costo-Productos: copiar columnas resultado a filas de Listado-Productos-Elaborados
+ * que referencian este ID. Sincronizar con scr/Arquitectura/sheets/costo-productos/costo-productos-sheets-base.js → hoja.propagacion
+ */
+var PROPAGACION_COSTO_PRODUCTOS = {
+  soloEnUpdate: false,
+  tablaDestino: 'listado-productos-elaborados',
+  columnaClaveForanea: 'IDCosto-Producto',
+  columnas: [
+    { columnaOrigen: 'Costo-Producto-Final-Actual', columnaDestino: 'Costo-Producto-Final-Actual' },
+    { columnaOrigen: 'Producto', columnaDestino: 'Nombre-Producto' }
+  ]
 };
 
 var ACTIONS = {
@@ -252,6 +285,41 @@ function getSheetConfig(sheetKey) {
   if (CONFIG[key]) return CONFIG[key];
   if (key === 'combo') return CONFIG.combos;
   return CONFIG.materiaPrima;
+}
+
+/**
+ * Tras actualizar Tabla-Costo-Productos, propaga los valores indicados en PROPAGACION_COSTO_PRODUCTOS
+ * a las filas de la tabla destino (Listado-Productos-Elaborados) donde la FK coincide con idCostoProducto.
+ */
+function propagarCostoProductosAReferenciadores(idCostoProducto, updatedObj) {
+  if (!PROPAGACION_COSTO_PRODUCTOS || !PROPAGACION_COSTO_PRODUCTOS.tablaDestino || !PROPAGACION_COSTO_PRODUCTOS.columnas || PROPAGACION_COSTO_PRODUCTOS.columnas.length === 0) return;
+  var configDest = getSheetConfig(PROPAGACION_COSTO_PRODUCTOS.tablaDestino);
+  if (!configDest) return;
+  var sheetDest = getSheet(configDest);
+  if (!sheetDest) return;
+  var dataDest = sheetDest.getDataRange().getValues();
+  if (dataDest.length < 2) return;
+  var headerRowDest = (dataDest[0] || []).map(function (c) { return (c != null ? String(c) : '').trim(); });
+  var fkColIdx = headerRowDest.indexOf(PROPAGACION_COSTO_PRODUCTOS.columnaClaveForanea);
+  if (fkColIdx === -1) return;
+  var idStr = (idCostoProducto || '').toString().trim();
+  var destColIndexes = [];
+  for (var c = 0; c < PROPAGACION_COSTO_PRODUCTOS.columnas.length; c++) {
+    var colDest = PROPAGACION_COSTO_PRODUCTOS.columnas[c].columnaDestino;
+    var idx = headerRowDest.indexOf(colDest);
+    if (idx !== -1) destColIndexes.push({ columnaOrigen: PROPAGACION_COSTO_PRODUCTOS.columnas[c].columnaOrigen, destIdx: idx });
+  }
+  if (destColIndexes.length === 0) return;
+  for (var r = 1; r < dataDest.length; r++) {
+    var rowVal = (dataDest[r][fkColIdx] != null ? String(dataDest[r][fkColIdx]) : '').trim();
+    if (rowVal !== idStr) continue;
+    var rowIndexSheet = r + 2;
+    for (var d = 0; d < destColIndexes.length; d++) {
+      var val = updatedObj[destColIndexes[d].columnaOrigen];
+      var toWrite = val != null && val !== '' ? String(val) : '';
+      sheetDest.getRange(rowIndexSheet, destColIndexes[d].destIdx + 1).setValue(toWrite);
+    }
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -393,6 +461,11 @@ function handleRequest(params) {
       }
       var newRow = objectToRow(headerRow, newObj);
       sheet.appendRow(newRow);
+      if (sheetKey === 'tabla-costo-productos' && PROPAGACION_COSTO_PRODUCTOS && PROPAGACION_COSTO_PRODUCTOS.columnas && PROPAGACION_COSTO_PRODUCTOS.columnas.length > 0 && PROPAGACION_COSTO_PRODUCTOS.soloEnUpdate !== true) {
+        try {
+          propagarCostoProductosAReferenciadores(newObj[configSheet.idColumn] || '', newObj);
+        } catch (errProp) {}
+      }
       return jsonResponse(true, newObj);
     }
 
@@ -422,6 +495,13 @@ function handleRequest(params) {
       }
       var upRow = objectToRow(headerRow, updatedObj);
       sheet.getRange(rowIndex, 1, 1, upRow.length).setValues([upRow]);
+      if (sheetKey === 'tabla-costo-productos' && PROPAGACION_COSTO_PRODUCTOS && PROPAGACION_COSTO_PRODUCTOS.columnas && PROPAGACION_COSTO_PRODUCTOS.columnas.length > 0) {
+        try {
+          propagarCostoProductosAReferenciadores(idUp, updatedObj);
+        } catch (errProp) {
+          // No fallar el update si la propagación falla; se puede revisar en logs
+        }
+      }
       return jsonResponse(true, updatedObj);
     }
 
