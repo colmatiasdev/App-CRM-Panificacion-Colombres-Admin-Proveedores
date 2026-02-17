@@ -181,7 +181,8 @@ var PROPAGACION_COSTO_PRODUCTOS = {
   tablaDestino: 'listado-productos-elaborados',
   columnaClaveForanea: 'IDCosto-Producto',
   columnas: [
-    { columnaOrigen: 'Costo-Producto-Final-Actual', columnaDestino: 'Costo-Producto-Final-Actual' }
+    { columnaOrigen: 'Costo-Producto-Final-Actual', columnaDestino: 'Costo-Producto-Final-Actual' },
+    { columnaOrigen: 'Producto', columnaDestino: 'Nombre-Producto' }
   ]
 };
 
