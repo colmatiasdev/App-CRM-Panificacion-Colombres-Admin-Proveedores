@@ -112,6 +112,7 @@
         indices: hoja.indices,
         formulas: hoja.formulas || {},
         lookups: Array.isArray(hoja.lookups) ? hoja.lookups : [],
+        propagacionDesdeInsumo: hoja.propagacionDesdeInsumo && typeof hoja.propagacionDesdeInsumo === "object" ? hoja.propagacionDesdeInsumo : null,
         columnas: columnas
       }
     ]

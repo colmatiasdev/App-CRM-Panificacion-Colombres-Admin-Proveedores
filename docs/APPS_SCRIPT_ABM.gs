@@ -292,6 +292,20 @@ var PROPAGACION_COSTO_PRODUCTOS = {
   ]
 };
 
+/**
+ * Al crear/actualizar Tabla-Receta-Base-Detalle, rellenar columnas desde PRECIO-Materia-Prima
+ * cuando IDInsumo-MateriaPrima está definido. Sincronizar con receta-detalle-sheets-base.js → hoja.propagacionDesdeInsumo
+ */
+var PROPAGACION_RECETA_DETALLE_DESDE_INSUMO = {
+  tablaOrigen: 'materiaPrima',
+  columnaClaveForanea: 'IDInsumo-MateriaPrima',
+  columnas: [
+    { columnaOrigen: 'Nombre-Producto', columnaDestino: 'Nombre-Insumo' },
+    { columnaOrigen: 'Presentacion-Unidad', columnaDestino: 'Unidad-Medida' },
+    { columnaOrigen: 'Precio-Equivalencia-x-Unidad', columnaDestino: 'Precio-Equivalencia-x-Unidad' }
+  ]
+};
+
 var ACTIONS = {
   LIST: 'list',
   GET: 'get',
@@ -452,6 +466,39 @@ function propagarCostoProductosAReferenciadores(idCostoProducto, updatedObj) {
   }
 }
 
+/**
+ * Rellena el objeto de Receta-Detalle con columnas propagadas desde PRECIO-Materia-Prima
+ * cuando IDInsumo-MateriaPrima está definido. Modifica obj in-place.
+ */
+function rellenarRecetaDetalleDesdeInsumo(obj) {
+  if (!PROPAGACION_RECETA_DETALLE_DESDE_INSUMO || !PROPAGACION_RECETA_DETALLE_DESDE_INSUMO.columnas || PROPAGACION_RECETA_DETALLE_DESDE_INSUMO.columnas.length === 0) return;
+  var fkVal = (obj[PROPAGACION_RECETA_DETALLE_DESDE_INSUMO.columnaClaveForanea] || '').toString().trim();
+  if (!fkVal) return;
+  var configOrigen = getSheetConfig(PROPAGACION_RECETA_DETALLE_DESDE_INSUMO.tablaOrigen);
+  if (!configOrigen) return;
+  var sheetOrigen = getSheet(configOrigen);
+  if (!sheetOrigen) return;
+  var dataOrigen = sheetOrigen.getDataRange().getValues();
+  if (dataOrigen.length < 2) return;
+  var headerOrigen = (dataOrigen[0] || []).map(function (c) { return (c != null ? String(c) : '').trim(); });
+  var idColIdx = headerOrigen.indexOf(configOrigen.idColumn);
+  if (idColIdx === -1) return;
+  var insumoRow = null;
+  for (var r = 1; r < dataOrigen.length; r++) {
+    if (String(dataOrigen[r][idColIdx] || '').trim() === fkVal) {
+      insumoRow = rowToObject(headerOrigen, dataOrigen[r]);
+      break;
+    }
+  }
+  if (!insumoRow) return;
+  for (var c = 0; c < PROPAGACION_RECETA_DETALLE_DESDE_INSUMO.columnas.length; c++) {
+    var co = PROPAGACION_RECETA_DETALLE_DESDE_INSUMO.columnas[c].columnaOrigen;
+    var cd = PROPAGACION_RECETA_DETALLE_DESDE_INSUMO.columnas[c].columnaDestino;
+    var val = insumoRow[co];
+    obj[cd] = val != null && val !== '' ? (typeof val === 'number' ? val : String(val).trim()) : '';
+  }
+}
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // ENTRADA HTTP (doGet / doPost)
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -602,6 +649,9 @@ function handleRequest(params) {
       if (configSheet.dateUpdatedColumn) {
         newObj[configSheet.dateUpdatedColumn] = new Date().toISOString().slice(0, 10);
       }
+      if (sheetKey === 'tabla-receta-base-detalle' && PROPAGACION_RECETA_DETALLE_DESDE_INSUMO && PROPAGACION_RECETA_DETALLE_DESDE_INSUMO.columnas && PROPAGACION_RECETA_DETALLE_DESDE_INSUMO.columnas.length > 0) {
+        try { rellenarRecetaDetalleDesdeInsumo(newObj); } catch (errRelleno) {}
+      }
       var newObjForSheet = normalizeRowToConfigHeaders(newObj, headerRow);
       var newRow = objectToRow(headerRow, newObjForSheet);
       sheet.appendRow(newRow);
@@ -636,6 +686,9 @@ function handleRequest(params) {
       });
       if (configSheet.dateUpdatedColumn) {
         updatedObj[configSheet.dateUpdatedColumn] = new Date().toISOString().slice(0, 10);
+      }
+      if (sheetKey === 'tabla-receta-base-detalle' && PROPAGACION_RECETA_DETALLE_DESDE_INSUMO && PROPAGACION_RECETA_DETALLE_DESDE_INSUMO.columnas && PROPAGACION_RECETA_DETALLE_DESDE_INSUMO.columnas.length > 0) {
+        try { rellenarRecetaDetalleDesdeInsumo(updatedObj); } catch (errRelleno) {}
       }
       var updatedObjForSheet = normalizeRowToConfigHeaders(updatedObj, headerRow);
       var upRow = objectToRow(headerRow, updatedObjForSheet);
