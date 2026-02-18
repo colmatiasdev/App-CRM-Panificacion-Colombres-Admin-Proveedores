@@ -61,7 +61,8 @@
         var pkNorms = clavePrimaria.map(function (k) { return norm(k); });
         var idColIdx = findColumnIndex(headers, pkNorms);
         if (idColIdx < 0) idColIdx = 0;
-        var nameColIdx = findColumnIndex(headers, ["descripcionmasaproducto", "descripcion-masa-producto", "nombre"]);
+        var nameColIdx = headers.indexOf("Descripcion-Masa-Producto");
+        if (nameColIdx < 0) nameColIdx = findColumnIndex(headers, ["descripcionmasaproducto", "descripcion-masa-producto", "nombre"]);
         if (nameColIdx < 0) nameColIdx = 0;
 
         var filter = (filterText || "").trim().toLowerCase();
@@ -95,7 +96,7 @@
         var html = '<div class="costos-cards costos-cards-receta-base">';
         visible.forEach(function (row) {
             var id = getRowId(headers, row, idColIdx);
-            var title = getRowTitle(headers, row, nameColIdx);
+            var title = (nameColIdx >= 0 && row[nameColIdx] != null && String(row[nameColIdx]).trim() !== "") ? String(row[nameColIdx]).trim() : "—";
             var extra = [];
             extraIndexes.forEach(function (c) {
                 var val = row[c] != null ? String(row[c]).trim() : "";
@@ -150,7 +151,8 @@
         if (!loadConfig) { showMessage(container, "No se pudo cargar la configuración del módulo."); return; }
 
         loadConfig().then(function (sheetConfig) {
-            var nombreHoja = sheetConfig.nombreHoja;
+            var nombreHoja = (sheetConfig && sheetConfig.nombreHoja) ? String(sheetConfig.nombreHoja).trim() : "";
+            if (!nombreHoja) { showMessage(container, "Configuración incorrecta: no se especificó la hoja (Tabla-Receta-Base)."); return; }
             var columnas = sheetConfig.columnas || [];
             var headersConfig = columnas.map(function (c) { return { nombre: c.nombre }; });
             var columnaFiltroValores = sheetConfig.columnaFiltroValores || null;
