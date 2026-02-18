@@ -57,6 +57,21 @@ window.PRECIO_PACKING_CONFIG = {
     separator: " · ",
     highlight: ["Nombre-Producto"]
   },
+  /** Subleyenda: se muestra al final de la card, antes de las acciones. */
+  listSubLeyenda: {
+    columns: ["Marca", "Lugar"],
+    separator: " · ",
+    highlight: []
+  },
+  /** Columnas por las que se filtra al escribir en la caja de búsqueda. */
+  listSearchColumns: [
+    "Nombre-Producto",
+    "Categoria",
+    "Presentacion-Tipo",
+    "Presentacion-Unidad",
+    "Marca",
+    "Lugar"
+  ],
   headers: [
     "idpacking",
     "Categoria",

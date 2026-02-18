@@ -181,21 +181,61 @@
     .portada-logo-line4 { font-size: 1.1rem; }
 }
 
-/* ===== Variante: gradiente animado (colores del logo) ===== */
+/* ===== Variante: gradiente animado — manchas con colores del logo que se mueven y se mezclan ===== */
 .portada-logo[data-portada-variant="gradient"] {
-    background: linear-gradient(
-        120deg,
-        var(--logo-red),
-        var(--logo-orange),
-        var(--logo-yellow),
-        var(--logo-teal),
-        var(--logo-green),
-        var(--logo-blue),
-        var(--logo-purple),
-        var(--logo-red)
+    position: relative;
+    overflow: hidden;
+    /* Fondo mezcla suave para que se noten todos los tonos (cálidos y fríos) */
+    background: linear-gradient(135deg, var(--logo-orange) 0%, var(--logo-teal) 35%, var(--logo-blue) 65%, var(--logo-purple) 100%);
+}
+/* Mancha cálida del logo (naranja, amarillo, rojo). Más grande y opaca para que se vean bien en pantalla. */
+.portada-logo[data-portada-variant="gradient"]::before {
+    content: "";
+    position: absolute;
+    width: 220%;
+    height: 220%;
+    top: -60%;
+    left: -60%;
+    background: radial-gradient(
+        ellipse 62% 55% at 50% 50%,
+        var(--logo-orange) 0%,
+        var(--logo-yellow) 22%,
+        var(--logo-red) 45%,
+        rgba(220, 38, 38, 0.6) 62%,
+        rgba(220, 38, 38, 0.2) 78%,
+        transparent 90%
     );
-    background-size: 400% 400%;
-    animation: portada-gradient-shift 12s ease infinite;
+    opacity: 0.94;
+    animation: portada-blob1 12s ease-in-out infinite;
+    z-index: 1;
+}
+/* Mancha fría del logo (teal, verde, azul, violeta). Menos opacidad para que naranja/amarillo/violeta compartan protagonismo. */
+.portada-logo[data-portada-variant="gradient"]::after {
+    content: "";
+    position: absolute;
+    width: 220%;
+    height: 220%;
+    top: -60%;
+    left: -60%;
+    background: radial-gradient(
+        ellipse 55% 58% at 50% 50%,
+        var(--logo-teal) 0%,
+        var(--logo-green) 25%,
+        var(--logo-blue) 48%,
+        var(--logo-purple) 68%,
+        rgba(139, 92, 246, 0.6) 80%,
+        rgba(139, 92, 246, 0.2) 90%,
+        transparent 96%
+    );
+    opacity: 0.72;
+    animation: portada-blob2 14s ease-in-out infinite;
+    z-index: 0;
+}
+.portada-logo[data-portada-variant="gradient"] .portada-logo-inner,
+.portada-logo[data-portada-variant="gradient"] .portada-logo-arc-top,
+.portada-logo[data-portada-variant="gradient"] .portada-logo-arc-bottom {
+    position: relative;
+    z-index: 2;
 }
 .portada-logo[data-portada-variant="gradient"] .portada-logo-line1 { color: rgba(255,255,255,0.95); }
 .portada-logo[data-portada-variant="gradient"] .portada-logo-line2 {
@@ -211,9 +251,17 @@
     background: rgba(255,255,255,0.25);
     backdrop-filter: blur(4px);
 }
-@keyframes portada-gradient-shift {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
+/* Movimiento contenido para no mostrar nunca el borde del pseudo-elemento (evitar línea recta cortada) */
+@keyframes portada-blob1 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    25%      { transform: translate(4%, 5%) scale(1.04); }
+    50%      { transform: translate(-5%, -3%) scale(0.97); }
+    75%      { transform: translate(3%, -4%) scale(1.02); }
+}
+@keyframes portada-blob2 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33%      { transform: translate(-5%, -6%) scale(1.05); }
+    66%      { transform: translate(5%, 4%) scale(0.96); }
 }
 
 /* ===== Variante: minimal (tercera opción, placeholder) ===== */
