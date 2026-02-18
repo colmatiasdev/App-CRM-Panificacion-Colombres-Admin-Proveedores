@@ -1,5 +1,6 @@
 /**
  * Configuración de la acción Editar para Receta Detalle (Tabla-Receta-Base-Detalle).
+ * FK IDReceta-Base → Tabla-Receta-Base; FK IDInsumo-MateriaPrima → PRECIO-Materia-Prima.
  */
 (function () {
   var base = window.RECETA_DETALLE_SHEET_BASE;
@@ -20,30 +21,32 @@
       nombre: "IDReceta-Base",
       alias: "ID Receta Base",
       tipoDato: "text",
-      tipoComponente: "text-box",
+      tipoComponente: "combo-desde-api",
       visible: true,
       obligatorio: true,
-      descripcion: "ID de la receta base.",
-      restricciones: { maxLongitud: 100 }
+      descripcion: "Receta base (Tabla-Receta-Base).",
+      restricciones: { maxLongitud: 100 },
+      comboDesdeApi: { sheet: "Tabla-Receta-Base", valorColumna: "IDReceta-Base", etiquetaColumna: "Descripcion-Masa-Producto" }
     },
     {
       nombre: "IDInsumo-MateriaPrima",
-      alias: "ID Insumo Materia Prima",
+      alias: "Insumo (Materia Prima)",
       tipoDato: "text",
-      tipoComponente: "text-box",
+      tipoComponente: "combo-desde-api",
       visible: true,
       obligatorio: true,
-      descripcion: "ID del insumo.",
-      restricciones: { maxLongitud: 100 }
+      descripcion: "Insumo desde PRECIO-Materia-Prima.",
+      restricciones: { maxLongitud: 100 },
+      comboDesdeApi: { sheet: "PRECIO-Materia-Prima", valorColumna: "idmateria-prima", etiquetaColumna: "Nombre-Producto" }
     },
     {
       nombre: "Nombre-Insumo",
       alias: "Nombre Insumo",
       tipoDato: "text",
-      tipoComponente: "text-box",
+      tipoComponente: "label",
       visible: true,
       obligatorio: false,
-      descripcion: "Nombre del insumo.",
+      descripcion: "Completado por relación con PRECIO-Materia-Prima.",
       restricciones: { maxLongitud: 200 }
     },
     {
@@ -61,10 +64,10 @@
       nombre: "Unidad-Medida",
       alias: "Unidad Medida",
       tipoDato: "text",
-      tipoComponente: "text-box",
+      tipoComponente: "label",
       visible: true,
       obligatorio: false,
-      descripcion: "Unidad de medida.",
+      descripcion: "Completado por relación con PRECIO-Materia-Prima.",
       restricciones: { maxLongitud: 50 }
     },
     {

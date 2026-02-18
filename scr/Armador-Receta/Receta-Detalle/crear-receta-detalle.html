@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Nueva Línea Receta Detalle - Panificación Colombres</title>
+    <title>Nuevo Detalle de la Receta - Panificación Colombres</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -26,7 +26,7 @@
         <a href="../Elaboracion-Productos-Base/elaboracion-productos-base.html" class="costos-nav-link">Elaboración Productos Base</a>
     </nav>
     <main class="costos-main">
-        <h1 class="costos-title">Nueva Línea Receta Detalle</h1>
+        <h1 class="costos-title">Nuevo Detalle de la Receta</h1>
         <p class="costos-intro">Completá los datos según la hoja <strong>Tabla-Receta-Base-Detalle</strong>.</p>
         <div id="edit-form-container" class="costos-datos">
             <div id="costos-edit-alert" class="costos-alert" role="alert" style="display:none;"></div>
@@ -84,6 +84,21 @@
                         if (col.formatoVisual && typeof window.formatNumeroVisual === "function") { var numVal = parseFloat(String(valorMostrar).replace(",", ".")); if (!isNaN(numVal)) valorMostrar = window.formatNumeroVisual(numVal, col.formatoVisual, col.decimales != null ? col.decimales : 2); }
                         var ro = document.createElement("span"); ro.id = "field-" + idx; ro.className = "costos-edit-input costos-edit-readonly"; ro.setAttribute("data-header-index", String(idx)); ro.setAttribute("data-nombre", nombreCol);
                         if (col.formatoVisual) ro.setAttribute("data-formato-visual", col.formatoVisual); if (col.descripcion) ro.title = col.descripcion; ro.setAttribute("aria-readonly", "true"); ro.textContent = valorMostrar; wrap.appendChild(ro);
+                    } else if (tipoComp === "combo-desde-api" && col.comboDesdeApi) {
+                        var apiConf = col.comboDesdeApi;
+                        var select = document.createElement("select");
+                        select.id = "field-" + idx;
+                        select.className = "costos-edit-input";
+                        select.setAttribute("data-header-index", String(idx));
+                        select.setAttribute("data-nombre", nombreCol);
+                        if (col.descripcion) select.title = col.descripcion;
+                        if (col.obligatorio !== true) {
+                            var opt0 = document.createElement("option"); opt0.value = ""; opt0.textContent = "—"; select.appendChild(opt0);
+                        }
+                        select.setAttribute("data-combo-sheet", apiConf.sheet || "");
+                        select.setAttribute("data-combo-valor", apiConf.valorColumna || "");
+                        select.setAttribute("data-combo-etiqueta", apiConf.etiquetaColumna || "");
+                        wrap.appendChild(select);
                     } else if (tipoComp === "text-box" && (tipoDato === "numeric" || col.tipo === "numeric")) {
                         var input = document.createElement("input"); input.type = "number"; input.step = (restr.entero === true) ? "1" : (col.decimales != null ? Math.pow(10, -col.decimales) : "0.01");
                         if (restr.min != null) input.min = restr.min; if (restr.max != null) input.max = restr.max;
@@ -96,13 +111,51 @@
                     }
                     fieldsContainer.appendChild(wrap);
                 });
-                var idRecetaBasePrefill = "";
-                try { idRecetaBasePrefill = sessionStorage.getItem("recetaBaseIdForNewItem") || ""; } catch (e) {}
-                if (idRecetaBasePrefill) {
-                    var fieldIdReceta = formEl.querySelector("[data-nombre=\"IDReceta-Base\"]");
-                    if (fieldIdReceta && fieldIdReceta.value !== undefined) { fieldIdReceta.value = idRecetaBasePrefill; }
-                    try { sessionStorage.removeItem("recetaBaseIdForNewItem"); } catch (e) {}
+                function loadCombosDesdeApi(form, apiUrl) {
+                    var selects = form.querySelectorAll("select[data-combo-sheet]");
+                    var promesas = [];
+                    selects.forEach(function (sel) {
+                        var sheet = (sel.getAttribute("data-combo-sheet") || "").trim();
+                        var valorCol = (sel.getAttribute("data-combo-valor") || "").trim();
+                        var etiquetaCol = (sel.getAttribute("data-combo-etiqueta") || "").trim();
+                        if (!sheet || !valorCol || !apiUrl) return;
+                        var url = apiUrl + "?action=list&sheet=" + encodeURIComponent(sheet) + "&limit=2000&_=" + Date.now();
+                        promesas.push(fetch(url, { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (json) {
+                            if (!json || !json.success || !json.data) return;
+                            var h = json.data.headers || [];
+                            var rows = json.data.rows || [];
+                            var idxVal = h.indexOf(valorCol);
+                            var idxEtq = h.indexOf(etiquetaCol);
+                            if (idxVal === -1) return;
+                            var frag = document.createDocumentFragment();
+                            for (var i = 0; i < rows.length; i++) {
+                                var row = Array.isArray(rows[i]) ? rows[i] : [];
+                                var v = (idxVal >= 0 && row[idxVal] != null) ? String(row[idxVal]).trim() : "";
+                                var t = (idxEtq >= 0 && row[idxEtq] != null) ? String(row[idxEtq]).trim() : v;
+                                if (v === "") continue;
+                                var opt = document.createElement("option"); opt.value = v; opt.textContent = t || v; frag.appendChild(opt);
+                            }
+                            var optVacío = sel.querySelector("option[value=\"\"]");
+                            while (sel.options.length > 0) sel.remove(0);
+                            if (optVacío) sel.appendChild(optVacío);
+                            sel.appendChild(frag);
+                        }).catch(function () {}));
+                    });
+                    return Promise.all(promesas);
                 }
+                loadCombosDesdeApi(formEl, appsScriptUrl).then(function () {
+                    var idRecetaBasePrefill = "";
+                    try { idRecetaBasePrefill = sessionStorage.getItem("recetaBaseIdForNewItem") || ""; } catch (e) {}
+                    if (idRecetaBasePrefill) {
+                        var fieldIdReceta = formEl.querySelector("[data-nombre=\"IDReceta-Base\"]");
+                        if (fieldIdReceta && fieldIdReceta.value !== undefined) { fieldIdReceta.value = idRecetaBasePrefill; }
+                        try { sessionStorage.removeItem("recetaBaseIdForNewItem"); } catch (e) {}
+                    }
+                    applyLookups(formEl, sheetConfig, appsScriptUrl).then(function () {
+                        applyFormulas(formEl, sheetConfig);
+                        updateCreateButton();
+                    });
+                });
                 var saveBtnCrear = formEl.querySelector(".costos-edit-btn-save");
                 function hasFormContent() {
                     var has = false;
@@ -218,7 +271,6 @@
                         el.textContent = (typeof window.formatNumeroVisual === "function" && formato) ? window.formatNumeroVisual(result, formato, dec) : result.toFixed(dec);
                     });
                 }
-                applyLookups(formEl, sheetConfig, appsScriptUrl).then(function () { applyFormulas(formEl, sheetConfig); });
                 formEl.querySelectorAll("input[data-nombre], select[data-nombre]").forEach(function (input) {
                     var nombre = input.getAttribute("data-nombre");
                     if (!nombre) return;

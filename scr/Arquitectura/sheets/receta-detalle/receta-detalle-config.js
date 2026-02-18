@@ -6,7 +6,7 @@
   var CACHE_MAX_AGE_MS = 5 * 60 * 1000;
   var ACCIONES = {
     listar: { id: "listar", url: "receta-detalle.html", label: "Listar", visible: true, componente: "listado" },
-    crear: { id: "crear", url: "crear-receta-detalle.html", label: "Nueva Línea", visible: true, componente: "formulario" },
+    crear: { id: "crear", url: "crear-receta-detalle.html", label: "Nuevo Detalle de la Receta", visible: true, componente: "formulario" },
     editar: { id: "editar", url: "editar-receta-detalle.html", label: "Editar", visible: true, componente: "formulario" },
     ver: { id: "ver", url: "ver-receta-detalle.html", label: "Ver Receta", visible: true, componente: "detalle" }
   };

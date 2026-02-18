@@ -251,7 +251,8 @@ var CONFIG = {
   },
 
   /** Hoja Tabla Receta Base Detalle (Armador Receta – módulo Receta Detalle) – ?sheet=Tabla-Receta-Base-Detalle
-   * PK = IDReceta-Base-Detalle. FK = IDReceta-Base. Importe = Cantidad * Precio-Equivalencia-x-Unidad. */
+   * PK = IDReceta-Base-Detalle. FK IDReceta-Base → Tabla-Receta-Base. FK IDInsumo-MateriaPrima → PRECIO-Materia-Prima (idmateria-prima).
+   * Importe = Cantidad * Precio-Equivalencia-x-Unidad. */
   'tabla-receta-base-detalle': {
     sheetName: 'Tabla-Receta-Base-Detalle',
     gid: 0,

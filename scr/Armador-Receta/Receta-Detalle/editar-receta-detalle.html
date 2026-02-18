@@ -88,6 +88,20 @@
                                 var dispVal = val || "—";
                                 if ((tipoDato === "numeric") && col.formatoVisual && typeof window.formatNumeroVisual === "function" && val !== "") dispVal = window.formatNumeroVisual(parseFloat(String(val).replace(",", ".")), col.formatoVisual, col.decimales != null ? col.decimales : 2);
                                 ro.textContent = dispVal; wrap.appendChild(ro);
+                            } else if (tipoComp === "combo-desde-api" && col.comboDesdeApi) {
+                                var apiConf = col.comboDesdeApi;
+                                var select = document.createElement("select");
+                                select.id = "field-" + idx;
+                                select.className = "costos-edit-input";
+                                select.setAttribute("data-header-index", String(idx));
+                                select.setAttribute("data-nombre", col.nombre || nombre);
+                                if (col.descripcion) select.title = col.descripcion;
+                                if (col.obligatorio !== true) { var opt0 = document.createElement("option"); opt0.value = ""; opt0.textContent = "—"; select.appendChild(opt0); }
+                                select.setAttribute("data-combo-sheet", apiConf.sheet || "");
+                                select.setAttribute("data-combo-valor", apiConf.valorColumna || "");
+                                select.setAttribute("data-combo-etiqueta", apiConf.etiquetaColumna || "");
+                                select.setAttribute("data-combo-valor-inicial", val || "");
+                                wrap.appendChild(select);
                             } else if (tipoComp === "text-box" && (tipoDato === "numeric" || col.tipo === "numeric")) {
                                 var input = document.createElement("input"); input.type = "number";
                                 input.step = (restr.entero === true) ? "1" : (col.decimales != null ? Math.pow(10, -col.decimales) : "0.01");
@@ -101,6 +115,41 @@
                             }
                             fieldsContainer.appendChild(wrap);
                         });
+                        function loadCombosDesdeApi(form, apiUrl) {
+                            var selects = form.querySelectorAll("select[data-combo-sheet]");
+                            var promesas = [];
+                            selects.forEach(function (sel) {
+                                var sheet = (sel.getAttribute("data-combo-sheet") || "").trim();
+                                var valorCol = (sel.getAttribute("data-combo-valor") || "").trim();
+                                var etiquetaCol = (sel.getAttribute("data-combo-etiqueta") || "").trim();
+                                if (!sheet || !valorCol || !apiUrl) return;
+                                var url = apiUrl + "?action=list&sheet=" + encodeURIComponent(sheet) + "&limit=2000&_=" + Date.now();
+                                promesas.push(fetch(url, { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (json) {
+                                    if (!json || !json.success || !json.data) return;
+                                    var h = json.data.headers || [];
+                                    var rows = json.data.rows || [];
+                                    var idxVal = h.indexOf(valorCol);
+                                    var idxEtq = h.indexOf(etiquetaCol);
+                                    if (idxVal === -1) return;
+                                    var frag = document.createDocumentFragment();
+                                    for (var i = 0; i < rows.length; i++) {
+                                        var row = Array.isArray(rows[i]) ? rows[i] : [];
+                                        var v = (idxVal >= 0 && row[idxVal] != null) ? String(row[idxVal]).trim() : "";
+                                        var t = (idxEtq >= 0 && row[idxEtq] != null) ? String(row[idxEtq]).trim() : v;
+                                        if (v === "") continue;
+                                        var opt = document.createElement("option"); opt.value = v; opt.textContent = t || v; frag.appendChild(opt);
+                                    }
+                                    var optVacio = sel.querySelector("option[value=\"\"]");
+                                    while (sel.options.length > 0) sel.remove(0);
+                                    if (optVacio) sel.appendChild(optVacio);
+                                    sel.appendChild(frag);
+                                    var inicial = (sel.getAttribute("data-combo-valor-inicial") || "").trim();
+                                    if (inicial) sel.value = inicial;
+                                    sel.removeAttribute("data-combo-valor-inicial");
+                                }).catch(function () {}));
+                            });
+                            return Promise.all(promesas);
+                        }
                         function getFormValueByNombre(form, nombreColumna) {
                             var list = form.querySelectorAll("[data-nombre]");
                             for (var i = 0; i < list.length; i++) {
@@ -239,9 +288,11 @@
                         formEl.addEventListener("input", updateSaveButton);
                         formEl.addEventListener("change", updateSaveButton);
                         if (saveBtn) saveBtn.disabled = true;
-                        applyLookups(formEl, sheetConfig, appsScriptUrl).then(function () {
-                            applyFormulas(formEl, sheetConfig);
-                            initialRow = getCurrentRowFromForm();
+                        loadCombosDesdeApi(formEl, appsScriptUrl).then(function () {
+                            applyLookups(formEl, sheetConfig, appsScriptUrl).then(function () {
+                                applyFormulas(formEl, sheetConfig);
+                                initialRow = getCurrentRowFromForm();
+                            });
                         });
                         formEl.addEventListener("submit", function (e) {
                             e.preventDefault(); hideEditAlert();
