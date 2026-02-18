@@ -42,6 +42,16 @@
     if (!listLeyenda && sheetKey === "packing" && window.PRECIO_PACKING_CONFIG && window.PRECIO_PACKING_CONFIG.listLeyenda) listLeyenda = window.PRECIO_PACKING_CONFIG.listLeyenda;
     var LEYENDA_CONFIG = listLeyenda && listLeyenda.columns && listLeyenda.columns.length ? listLeyenda : null;
 
+    var listSubLeyenda = config.listSubLeyenda;
+    if (!listSubLeyenda && sheetKey === "materiaPrima" && window.PRECIO_MATERIA_PRIMA_CONFIG && window.PRECIO_MATERIA_PRIMA_CONFIG.listSubLeyenda) listSubLeyenda = window.PRECIO_MATERIA_PRIMA_CONFIG.listSubLeyenda;
+    if (!listSubLeyenda && sheetKey === "packing" && window.PRECIO_PACKING_CONFIG && window.PRECIO_PACKING_CONFIG.listSubLeyenda) listSubLeyenda = window.PRECIO_PACKING_CONFIG.listSubLeyenda;
+    var SUB_LEYENDA_CONFIG = listSubLeyenda && listSubLeyenda.columns && listSubLeyenda.columns.length ? listSubLeyenda : null;
+
+    var listSearchColumns = config.listSearchColumns;
+    if (!listSearchColumns && sheetKey === "materiaPrima" && window.PRECIO_MATERIA_PRIMA_CONFIG && window.PRECIO_MATERIA_PRIMA_CONFIG.listSearchColumns) listSearchColumns = window.PRECIO_MATERIA_PRIMA_CONFIG.listSearchColumns;
+    if (!listSearchColumns && sheetKey === "packing" && window.PRECIO_PACKING_CONFIG && window.PRECIO_PACKING_CONFIG.listSearchColumns) listSearchColumns = window.PRECIO_PACKING_CONFIG.listSearchColumns;
+    var SEARCH_COLUMNS = Array.isArray(listSearchColumns) ? listSearchColumns : [];
+
     var appsScriptUrl = (window.APP_CONFIG && window.APP_CONFIG.appsScriptUrl) ? String(window.APP_CONFIG.appsScriptUrl).trim() : "";
     var container = document.getElementById(dataContainerId);
 
@@ -70,8 +80,8 @@
         return colIndexes.map(function (i) { return String((i < rowArr.length ? rowArr[i] : null) != null ? rowArr[i] : "").trim(); });
     }
 
-    /** Ordena filas por columnas de agrupación. */
-    function sortRowsByGroup(headers, rows, groupByIndexes) {
+    /** Ordena filas por columnas de agrupación; si nameColIdx >= 0, desempata por nombre alfabético. */
+    function sortRowsByGroup(headers, rows, groupByIndexes, nameColIdx) {
         if (!groupByIndexes.length) return rows.slice();
         return rows.slice().sort(function (a, b) {
             var arrA = Array.isArray(a) ? a : [];
@@ -82,7 +92,24 @@
                 var c = vA.localeCompare(vB, undefined, { sensitivity: "base" });
                 if (c !== 0) return c;
             }
+            if (nameColIdx >= 0) {
+                var nA = (nameColIdx < arrA.length && arrA[nameColIdx] != null) ? String(arrA[nameColIdx]).trim() : "";
+                var nB = (nameColIdx < arrB.length && arrB[nameColIdx] != null) ? String(arrB[nameColIdx]).trim() : "";
+                return nA.localeCompare(nB, undefined, { sensitivity: "base" });
+            }
             return 0;
+        });
+    }
+
+    /** Ordena filas alfabéticamente por la columna nombre (nameColIdx). */
+    function sortRowsByName(headers, rows, nameColIdx) {
+        if (nameColIdx < 0) return rows.slice();
+        return rows.slice().sort(function (a, b) {
+            var arrA = Array.isArray(a) ? a : [];
+            var arrB = Array.isArray(b) ? b : [];
+            var nA = (nameColIdx < arrA.length && arrA[nameColIdx] != null) ? String(arrA[nameColIdx]).trim() : "";
+            var nB = (nameColIdx < arrB.length && arrB[nameColIdx] != null) ? String(arrB[nameColIdx]).trim() : "";
+            return nA.localeCompare(nB, undefined, { sensitivity: "base" });
         });
     }
 
@@ -149,33 +176,38 @@
         var dataRows = rows;
         if (GROUP_BY_COLUMNS.length) {
             groupByIndexes = getGroupByIndexes(headers);
-            dataRows = sortRowsByGroup(headers, rows, groupByIndexes);
+            dataRows = sortRowsByGroup(headers, rows, groupByIndexes, titleColIdx);
             groups = partitionIntoGroups(headers, dataRows, groupByIndexes);
+        } else {
+            dataRows = sortRowsByName(headers, rows, titleColIdx);
         }
 
         var html = "<div class=\"costos-cards-wrap\">";
 
-        function buildLeyendaHtml(headers, rowArr) {
-            if (!LEYENDA_CONFIG || !LEYENDA_CONFIG.columns.length) return "";
-            var sep = (LEYENDA_CONFIG.separator != null ? String(LEYENDA_CONFIG.separator) : " · ");
+        function buildLeyendaFromConfig(headers, rowArr, leyendaConfig, highlightClass) {
+            if (!leyendaConfig || !leyendaConfig.columns.length) return "";
+            var sep = (leyendaConfig.separator != null ? String(leyendaConfig.separator) : " · ");
+            var resaltadoClass = (highlightClass && String(highlightClass).trim()) ? String(highlightClass).trim() : "insumos-leyenda-resaltado";
             var highlightSet = {};
-            if (LEYENDA_CONFIG.highlight && Array.isArray(LEYENDA_CONFIG.highlight)) {
-                LEYENDA_CONFIG.highlight.forEach(function (c) { highlightSet[norm(c)] = true; });
+            if (leyendaConfig.highlight && Array.isArray(leyendaConfig.highlight)) {
+                leyendaConfig.highlight.forEach(function (c) { highlightSet[norm(c)] = true; });
             }
             var parts = [];
-            for (var l = 0; l < LEYENDA_CONFIG.columns.length; l++) {
-                var colName = LEYENDA_CONFIG.columns[l];
+            for (var l = 0; l < leyendaConfig.columns.length; l++) {
+                var colName = leyendaConfig.columns[l];
                 var colIdx = -1;
                 for (var hi = 0; hi < headers.length; hi++) {
                     if (norm(headers[hi]) === norm(colName)) { colIdx = hi; break; }
                 }
                 var val = (colIdx >= 0 && colIdx < rowArr.length && rowArr[colIdx] != null) ? String(rowArr[colIdx]).trim() : "";
                 var safe = escapeHtml(val || "—");
-                if (highlightSet[norm(colName)]) safe = "<span class=\"insumos-leyenda-resaltado\">" + safe + "</span>";
+                if (highlightSet[norm(colName)]) safe = "<span class=\"" + resaltadoClass + "\">" + safe + "</span>";
                 parts.push(safe);
             }
             return parts.join(sep);
         }
+        function buildLeyendaHtml(headers, rowArr) { return buildLeyendaFromConfig(headers, rowArr, LEYENDA_CONFIG); }
+        function buildSubLeyendaHtml(headers, rowArr) { return buildLeyendaFromConfig(headers, rowArr, SUB_LEYENDA_CONFIG, "insumos-subleyenda-resaltado"); }
 
         function renderCard(row, rowIndex) {
             var rowArr = Array.isArray(row) ? row : [];
@@ -196,6 +228,8 @@
                 html += "<div class=\"insumos-card-row\"><span class=\"insumos-card-label\">" + escapeHtml(label) + "</span> <span class=\"insumos-card-value\">" + escapeHtml(valStr) + "</span></div>";
             }
             html += "</div>";
+            var subLeyendaHtml = buildSubLeyendaHtml(headers, rowArr);
+            if (subLeyendaHtml) html += "<div class=\"insumos-card-subleyenda\">" + subLeyendaHtml + "</div>";
             html += "<div class=\"costos-card-actions\">";
             if (modoSeleccion) {
                 html += "<a href=\"#\" class=\"costos-card-btn costos-card-btn-seleccionar\" data-row-index=\"" + rowIndex + "\">Seleccionar</a>";
@@ -292,9 +326,22 @@
     function applyFilter(headers, rows, filterText) {
         if (!filterText || !filterText.trim()) return rows;
         var words = filterText.trim().toLowerCase().split(/\s+/).filter(Boolean);
+        var searchIndexes = [];
+        if (SEARCH_COLUMNS.length) {
+            for (var s = 0; s < SEARCH_COLUMNS.length; s++) {
+                for (var h = 0; h < headers.length; h++) {
+                    if (norm(headers[h]) === norm(SEARCH_COLUMNS[s])) { searchIndexes.push(h); break; }
+                }
+            }
+        }
         return rows.filter(function (row) {
             var rowArr = Array.isArray(row) ? row : [];
-            var concat = rowArr.map(function (c) { return String(c != null ? c : ""); }).join(" ").toLowerCase();
+            var concat;
+            if (searchIndexes.length) {
+                concat = searchIndexes.map(function (idx) { return (idx < rowArr.length && rowArr[idx] != null) ? String(rowArr[idx]) : ""; }).join(" ").toLowerCase();
+            } else {
+                concat = rowArr.map(function (c) { return String(c != null ? c : ""); }).join(" ").toLowerCase();
+            }
             return words.every(function (w) { return concat.indexOf(w) !== -1; });
         });
     }

@@ -10,12 +10,10 @@ window.PRECIO_MATERIA_PRIMA_CONFIG = {
   /** Columnas que se muestran en la lista (orden de aparición). */
   listColumns: [
     "Nombre-Producto",
-
-
     "Precio-Actual",
     "Fecha-Actualizada-Al",
     "Marca",
-
+    "Lugar",
   ],
   /** Alias para mostrar en la UI (nombre interno de columna → texto a mostrar). */
   listColumnAliases: {
@@ -56,10 +54,24 @@ window.PRECIO_MATERIA_PRIMA_CONFIG = {
    * - highlight: columnas cuyos valores se muestran resaltados en la leyenda
    */
   listLeyenda: {
-    columns: ["Categoria", "Nombre-Producto", "Presentacion-Tipo", "Presentacion-Unidad"],
-    separator: " · ",
-    highlight: ["Nombre-Producto"]
+    columns: ["Presentacion-Tipo", "Presentacion-Cantidad-Medida", "Presentacion-Unidad"],
+    separator: " ",
+    highlight: ["Presentacion-Tipo"]
   },
+  listSubLeyenda: {
+    columns: ["Marca", "Lugar"],
+    separator: " · ",
+    highlight: ["Lugar"]
+  },
+  /** Columnas por las que se filtra al escribir en la caja de búsqueda. */
+  listSearchColumns: [
+    "Nombre-Producto",
+    "Categoria",
+    "Presentacion-Tipo",
+    "Presentacion-Unidad",
+    "Marca",
+    "Lugar"
+  ],
   headers: [
     "idmateria-prima",
     "Categoria",
