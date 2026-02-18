@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Nueva Línea Receta Detalle - Panificación Colombres</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../../costos/costos.css">
+    <script src="../../Arquitectura/config.js"></script>
+    <script src="../../Arquitectura/config-sheets.js"></script>
+    <script src="../../Arquitectura/generar-id.js"></script>
+    <script src="../../Arquitectura/sheets/receta-detalle/receta-detalle-sheets-base.js"></script>
+    <script src="../../Arquitectura/sheets/receta-detalle/sheets-crear-receta-detalle.config.js"></script>
+    <script>window.RECETA_DETALLE_ACCION_ACTUAL = "crear";</script>
+</head>
+<body class="costos-page">
+    <nav class="costos-nav" aria-label="Navegación principal">
+        <a href="../../../index.html" class="costos-nav-link">Inicio</a>
+        <a href="../armador-receta.html" class="costos-nav-link">Armador de Receta</a>
+        <a href="../Receta-Base/receta-base.html" class="costos-nav-link">Receta Base</a>
+        <a href="receta-detalle.html" class="costos-nav-link" data-accion="listar">Receta Detalle</a>
+        <a href="../Producto-Unitario-Base/producto-unitario-base.html" class="costos-nav-link">Producto Unitario Base</a>
+        <a href="../Elaboracion-Productos-Base/elaboracion-productos-base.html" class="costos-nav-link">Elaboración Productos Base</a>
+    </nav>
+    <main class="costos-main">
+        <h1 class="costos-title">Nueva Línea Receta Detalle</h1>
+        <p class="costos-intro">Completá los datos según la hoja <strong>Tabla-Receta-Base-Detalle</strong>.</p>
+        <div id="edit-form-container" class="costos-datos">
+            <div id="costos-edit-alert" class="costos-alert" role="alert" style="display:none;"></div>
+            <p id="edit-no-data" class="costos-placeholder" style="display:none;">No se pudo cargar el formulario.</p>
+            <p id="edit-loading" class="costos-placeholder">Cargando formulario…</p>
+            <form id="costos-edit-form" class="costos-edit-form" style="display:none;">
+                <div id="edit-fields"></div>
+                <div class="costos-edit-actions">
+                    <a href="receta-detalle.html" class="costos-edit-btn-cancel">Volver al listado</a>
+                    <button type="submit" class="costos-edit-btn-save"><i class="fa-solid fa-plus" aria-hidden="true"></i> Crear</button>
+                </div>
+            </form>
+        </div>
+    </main>
+    <script src="../../Arquitectura/sheets/receta-detalle/receta-detalle-config.js"></script>
+    <script>if (window.RECETA_DETALLE_APPLY_NAV) window.RECETA_DETALLE_APPLY_NAV();</script>
+    <script>
+        (function () {
+            var STORAGE_EDIT = "costosEditRecordRecetaDetalle";
+            var config = window.APP_CONFIG || {};
+            var appsScriptUrl = (config.appsScriptUrl || "").trim();
+            function norm(s) { return String(s != null ? s : "").trim().toLowerCase().replace(/\s+/g, "").replace(/-/g, ""); }
+            function isClavePrimaria(nombre, clavePrimaria) { var n = norm(nombre); for (var i = 0; i < (clavePrimaria || []).length; i++) { if (norm(clavePrimaria[i]) === n) return true; } return false; }
+            var noDataEl = document.getElementById("edit-no-data"); var loadingEl = document.getElementById("edit-loading"); var formEl = document.getElementById("costos-edit-form"); var fieldsContainer = document.getElementById("edit-fields"); var alertEl = document.getElementById("costos-edit-alert");
+            function showEditAlert(message, type) { if (!alertEl) return; alertEl.textContent = message; alertEl.className = "costos-alert costos-alert--" + (type === "success" ? "success" : "error"); alertEl.style.display = "block"; }
+            function hideEditAlert() { if (alertEl) { alertEl.style.display = "none"; alertEl.textContent = ""; alertEl.className = "costos-alert"; } }
+            if (!appsScriptUrl) { loadingEl.style.display = "none"; noDataEl.style.display = "block"; noDataEl.textContent = "No está configurada la URL de la API."; return; }
+            var loadConfig = window.RECETA_DETALLE_LOAD_CONFIG;
+            if (!loadConfig) { loadingEl.style.display = "none"; noDataEl.style.display = "block"; noDataEl.textContent = "No se pudo cargar la configuración."; return; }
+            loadConfig().then(function (sheetConfig) {
+                var nombreHoja = sheetConfig.nombreHoja;
+                var clavePrimaria = sheetConfig.clavePrimaria || [];
+                var columnas = sheetConfig.columnas || [];
+                var columnasPropias = sheetConfig.columnasPropias || [];
+                var nombresPropias = columnasPropias.map(function (n) { return String(n || "").trim(); });
+                function enColumnasPropias(nombreCol) { var n = String(nombreCol || "").trim().toLowerCase(); for (var i = 0; i < nombresPropias.length; i++) { if (String(nombresPropias[i] || "").toLowerCase().replace(/-/g, "") === n.replace(/-/g, "")) return true; } return false; }
+                loadingEl.style.display = "none"; formEl.style.display = "block"; fieldsContainer.innerHTML = "";
+                var headers = columnas.map(function (c) { return c.nombre; });
+                var idGeneradoPreview = (window.GENERAR_ID_PARA_HOJA && sheetConfig.clavePrimaria && sheetConfig.clavePrimaria[0]) ? window.GENERAR_ID_PARA_HOJA(sheetConfig) : "";
+                columnas.forEach(function (col, idx) {
+                    var nombreCol = (col.nombre || "").trim();
+                    if (!enColumnasPropias(nombreCol) || col.visible === false) return;
+                    var nombre = (col.alias != null ? col.alias : col.nombre || "").trim();
+                    if (!nombre) return;
+                    var val = "";
+                    var restr = col.restricciones || {};
+                    var tipoComp = col.tipoComponente != null ? col.tipoComponente : col.tipo;
+                    var tipoDato = col.tipoDato != null ? col.tipoDato : col.tipo;
+                    var soloLectura = tipoComp === "label";
+                    var esPkAutogenerado = isClavePrimaria(nombreCol, clavePrimaria) && idGeneradoPreview !== "";
+                    var label = document.createElement("label"); label.className = "costos-edit-label"; label.setAttribute("for", "field-" + idx); label.textContent = nombre;
+                    var wrap = document.createElement("div"); wrap.className = "costos-edit-field"; wrap.appendChild(label);
+                    if (soloLectura || esPkAutogenerado) {
+                        var valorMostrar = esPkAutogenerado ? idGeneradoPreview : (col.descripcion || "Solo lectura");
+                        if (col.formatoVisual && typeof window.formatNumeroVisual === "function") { var numVal = parseFloat(String(valorMostrar).replace(",", ".")); if (!isNaN(numVal)) valorMostrar = window.formatNumeroVisual(numVal, col.formatoVisual, col.decimales != null ? col.decimales : 2); }
+                        var ro = document.createElement("span"); ro.id = "field-" + idx; ro.className = "costos-edit-input costos-edit-readonly"; ro.setAttribute("data-header-index", String(idx)); ro.setAttribute("data-nombre", nombreCol);
+                        if (col.formatoVisual) ro.setAttribute("data-formato-visual", col.formatoVisual); if (col.descripcion) ro.title = col.descripcion; ro.setAttribute("aria-readonly", "true"); ro.textContent = valorMostrar; wrap.appendChild(ro);
+                    } else if (tipoComp === "text-box" && (tipoDato === "numeric" || col.tipo === "numeric")) {
+                        var input = document.createElement("input"); input.type = "number"; input.step = (restr.entero === true) ? "1" : (col.decimales != null ? Math.pow(10, -col.decimales) : "0.01");
+                        if (restr.min != null) input.min = restr.min; if (restr.max != null) input.max = restr.max;
+                        if (col.obligatorio === true) input.required = true; if (col.formatoVisual) input.setAttribute("data-formato-visual", col.formatoVisual); if (col.descripcion) input.title = col.descripcion;
+                        input.placeholder = col.decimales != null ? "0." + "0".repeat(col.decimales) : "0";
+                        input.id = "field-" + idx; input.className = "costos-edit-input"; input.setAttribute("data-header-index", String(idx)); input.setAttribute("data-nombre", nombreCol); wrap.appendChild(input);
+                    } else {
+                        var input = document.createElement("input"); input.type = "text"; input.id = "field-" + idx; input.className = "costos-edit-input"; input.setAttribute("data-header-index", String(idx)); input.setAttribute("data-nombre", nombreCol);
+                        if (restr.maxLongitud) input.maxLength = restr.maxLongitud; if (col.obligatorio === true) input.required = true; if (col.descripcion) input.title = col.descripcion; wrap.appendChild(input);
+                    }
+                    fieldsContainer.appendChild(wrap);
+                });
+                var idRecetaBasePrefill = "";
+                try { idRecetaBasePrefill = sessionStorage.getItem("recetaBaseIdForNewItem") || ""; } catch (e) {}
+                if (idRecetaBasePrefill) {
+                    var fieldIdReceta = formEl.querySelector("[data-nombre=\"IDReceta-Base\"]");
+                    if (fieldIdReceta && fieldIdReceta.value !== undefined) { fieldIdReceta.value = idRecetaBasePrefill; }
+                    try { sessionStorage.removeItem("recetaBaseIdForNewItem"); } catch (e) {}
+                }
+                var saveBtnCrear = formEl.querySelector(".costos-edit-btn-save");
+                function hasFormContent() {
+                    var has = false;
+                    formEl.querySelectorAll("input[data-header-index], select[data-header-index]").forEach(function (el) {
+                        var v = (el.value != null ? String(el.value).trim() : "");
+                        if (v !== "") has = true;
+                    });
+                    return has;
+                }
+                function updateCreateButton() { if (saveBtnCrear) saveBtnCrear.disabled = !hasFormContent(); }
+                updateCreateButton();
+                function getFormValueByNombre(form, nombreColumna) {
+                    var list = form.querySelectorAll("[data-nombre]");
+                    for (var i = 0; i < list.length; i++) {
+                        if (list[i].getAttribute("data-nombre") === nombreColumna) {
+                            return (list[i].value != null ? String(list[i].value).trim() : String(list[i].textContent || "").trim());
+                        }
+                    }
+                    return "";
+                }
+                function setFormValueByNombre(form, nombreColumna, value, decimalesOptional) {
+                    var list = form.querySelectorAll("[data-nombre]");
+                    for (var i = 0; i < list.length; i++) {
+                        if (list[i].getAttribute("data-nombre") === nombreColumna) {
+                            var str = (value != null && value !== "") ? String(value).trim() : "";
+                            if (list[i].value !== undefined) {
+                                list[i].value = str;
+                            } else {
+                                var formato = list[i].getAttribute("data-formato-visual");
+                                if (formato && str !== "" && typeof window.formatNumeroVisual === "function") {
+                                    var num = parseFloat(String(str).replace(",", "."));
+                                    if (!isNaN(num)) str = window.formatNumeroVisual(num, formato, decimalesOptional != null ? decimalesOptional : 2);
+                                }
+                                list[i].textContent = str || "—";
+                            }
+                            break;
+                        }
+                    }
+                }
+                function applyLookups(form, sheetConfig, apiUrl) {
+                    if (!sheetConfig.lookups || sheetConfig.lookups.length === 0 || !apiUrl) return Promise.resolve();
+                    var promesas = sheetConfig.lookups.map(function (lookup) {
+                        var claveVal = getFormValueByNombre(form, lookup.columnaClaveLocal);
+                        if (!claveVal) { setFormValueByNombre(form, lookup.columnaDestino, ""); return Promise.resolve(); }
+                        var url = apiUrl + "?action=get&sheet=" + encodeURIComponent(lookup.tablaOrigen) + "&id=" + encodeURIComponent(claveVal);
+                        return fetch(url, { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (resp) {
+                            if (!resp || !resp.success || !resp.data) { setFormValueByNombre(form, lookup.columnaDestino, ""); return; }
+                            var data = resp.data;
+                            var val = (data[lookup.columnaOrigen] != null && data[lookup.columnaOrigen] !== "") ? data[lookup.columnaOrigen] : (data[lookup.columnaDestino] != null ? data[lookup.columnaDestino] : null);
+                            var dec = (lookup.decimales != null) ? lookup.decimales : 2;
+                            if (typeof val === "number" && !isNaN(val)) val = val.toFixed(dec);
+                            else if (val != null && val !== "") val = String(val).trim();
+                            else val = "";
+                            setFormValueByNombre(form, lookup.columnaDestino, val, dec);
+                        }).catch(function () { setFormValueByNombre(form, lookup.columnaDestino, ""); });
+                    });
+                    return Promise.all(promesas);
+                }
+                function ordenFormulasPorDependencias(formulas) {
+                    if (!formulas || typeof formulas !== "object") return [];
+                    var nombres = Object.keys(formulas);
+                    var orden = []; var restantes = nombres.slice();
+                    while (restantes.length > 0) {
+                        var agregado = false;
+                        for (var r = 0; r < restantes.length; r++) {
+                            var nom = restantes[r];
+                            var f = formulas[nom];
+                            if (!f || !Array.isArray(f.fuentes)) { orden.push(nom); restantes.splice(r, 1); agregado = true; break; }
+                            var depsCumplidas = true;
+                            for (var d = 0; d < f.fuentes.length; d++) {
+                                if (nombres.indexOf(f.fuentes[d]) !== -1 && orden.indexOf(f.fuentes[d]) === -1) { depsCumplidas = false; break; }
+                            }
+                            if (depsCumplidas) { orden.push(nom); restantes.splice(r, 1); agregado = true; break; }
+                        }
+                        if (!agregado) break;
+                    }
+                    return orden.concat(restantes);
+                }
+                function applyFormulas(form, sheetConfig) {
+                    var columnas = (sheetConfig && sheetConfig.columnas) ? sheetConfig.columnas : [];
+                    var formulas = (sheetConfig && sheetConfig.formulas) ? sheetConfig.formulas : {};
+                    var orden = ordenFormulasPorDependencias(formulas);
+                    orden.forEach(function (nombreCol) {
+                        var el = null;
+                        form.querySelectorAll("[data-nombre]").forEach(function (e) { if (e.getAttribute("data-nombre") === nombreCol) el = e; });
+                        if (!el || el.value !== undefined) return;
+                        var f = formulas[nombreCol];
+                        if (!f || !f.fuentes || !f.expresion) return;
+                        var expr = f.expresion;
+                        var dec = (f.decimales != null) ? f.decimales : 2;
+                        var fuentes = f.fuentes;
+                        var exprEval = expr;
+                        for (var i = 0; i < fuentes.length; i++) {
+                            var letter = String.fromCharCode(97 + i);
+                            var val = getFormValueByNombre(form, fuentes[i]);
+                            var colFuente = columnas.filter(function (c) { return (c.nombre || "") === fuentes[i]; })[0] || null;
+                            var num;
+                            if (colFuente && colFuente.formatoVisual && typeof window.parseNumeroVisual === "function") {
+                                var raw = window.parseNumeroVisual(val, colFuente.formatoVisual);
+                                num = parseFloat(raw) || 0;
+                            } else {
+                                num = parseFloat(String(val).replace(",", ".")) || 0;
+                            }
+                            num = Math.round(num * 100) / 100;
+                            exprEval = exprEval.replace(new RegExp("\\b" + letter + "\\b", "g"), String(num));
+                        }
+                        var result;
+                        try { result = Function("return (" + exprEval + ");")(); } catch (err) { result = 0; }
+                        if (typeof result !== "number" || isNaN(result)) result = 0;
+                        result = Math.round(result * 100) / 100;
+                        var col = columnas.filter(function (c) { return (c.nombre || "") === nombreCol; })[0] || null;
+                        var formato = (col && col.formatoVisual) ? col.formatoVisual : null;
+                        el.textContent = (typeof window.formatNumeroVisual === "function" && formato) ? window.formatNumeroVisual(result, formato, dec) : result.toFixed(dec);
+                    });
+                }
+                applyLookups(formEl, sheetConfig, appsScriptUrl).then(function () { applyFormulas(formEl, sheetConfig); });
+                formEl.querySelectorAll("input[data-nombre], select[data-nombre]").forEach(function (input) {
+                    var nombre = input.getAttribute("data-nombre");
+                    if (!nombre) return;
+                    var esFuente = false;
+                    if (sheetConfig.formulas) {
+                        for (var k in sheetConfig.formulas) {
+                            if (sheetConfig.formulas[k].fuentes && sheetConfig.formulas[k].fuentes.indexOf(nombre) !== -1) { esFuente = true; break; }
+                        }
+                    }
+                    if (esFuente) {
+                        input.addEventListener("input", function () { applyFormulas(formEl, sheetConfig); });
+                        input.addEventListener("change", function () { applyFormulas(formEl, sheetConfig); });
+                    }
+                    var esClaveLookup = false;
+                    if (sheetConfig.lookups && sheetConfig.lookups.length) {
+                        for (var l = 0; l < sheetConfig.lookups.length; l++) {
+                            if (sheetConfig.lookups[l].columnaClaveLocal === nombre) { esClaveLookup = true; break; }
+                        }
+                    }
+                    if (esClaveLookup) {
+                        input.addEventListener("input", function () { applyLookups(formEl, sheetConfig, appsScriptUrl).then(function () { applyFormulas(formEl, sheetConfig); }); });
+                        input.addEventListener("change", function () { applyLookups(formEl, sheetConfig, appsScriptUrl).then(function () { applyFormulas(formEl, sheetConfig); }); });
+                    }
+                });
+                if (saveBtnCrear) saveBtnCrear.disabled = !hasFormContent();
+                formEl.addEventListener("input", updateCreateButton);
+                formEl.addEventListener("change", updateCreateButton);
+                formEl.addEventListener("submit", function (e) {
+                    e.preventDefault(); hideEditAlert();
+                    applyFormulas(formEl, sheetConfig);
+                    var newRow = headers.map(function () { return ""; });
+                    formEl.querySelectorAll("[data-header-index]").forEach(function (el) {
+                        var idx = parseInt(el.getAttribute("data-header-index"), 10);
+                        if (idx < 0 || idx >= newRow.length) return;
+                        var val = el.value != null ? String(el.value).trim() : (el.textContent != null ? String(el.textContent).trim() : "");
+                        var formato = el.getAttribute("data-formato-visual");
+                        if (formato && typeof window.parseNumeroVisual === "function") val = window.parseNumeroVisual(val, formato) || val;
+                        newRow[idx] = val;
+                    });
+                    if (window.GENERAR_ID_PARA_HOJA && sheetConfig.clavePrimaria && sheetConfig.clavePrimaria[0]) { var idColIdx = headers.indexOf(sheetConfig.clavePrimaria[0]); if (idColIdx >= 0) newRow[idColIdx] = window.GENERAR_ID_PARA_HOJA(sheetConfig); }
+                    var saveBtn = formEl.querySelector(".costos-edit-btn-save"); var btnText = saveBtn ? saveBtn.innerHTML : "";
+                    if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = "<i class=\"fa-solid fa-spinner fa-spin\" aria-hidden=\"true\"></i> Guardando…"; }
+                    if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.show("Guardando…");
+                    var body = { action: "create", sheet: nombreHoja };
+                    for (var k = 0; k < headers.length; k++) { if (headers[k]) body[headers[k]] = newRow[k] != null ? newRow[k] : ""; }
+                    var formBody = new URLSearchParams();
+                    for (var key in body) { if (body.hasOwnProperty(key)) formBody.append(key, body[key] != null ? body[key] : ""); }
+                    fetch(appsScriptUrl, { method: "POST", body: formBody }).then(function (res) { return res.text(); }).then(function (text) {
+                        var json; try { json = JSON.parse(text); } catch (err) { throw new Error("Respuesta no válida"); } return json;
+                    }).then(function (json) {
+                        if (saveBtn) { saveBtn.disabled = !hasFormContent(); saveBtn.innerHTML = btnText; }
+                        hideEditAlert();
+                        if (json && json.success) {
+                            var idColIdx = sheetConfig.clavePrimaria && sheetConfig.clavePrimaria[0] ? headers.indexOf(sheetConfig.clavePrimaria[0]) : 0;
+                            if (idColIdx < 0) idColIdx = 0;
+                            var idGuardado = (newRow[idColIdx] != null && String(newRow[idColIdx]).trim() !== "") ? String(newRow[idColIdx]).trim() : (json.data && json.data[sheetConfig.clavePrimaria && sheetConfig.clavePrimaria[0] ? sheetConfig.clavePrimaria[0] : "IDReceta-Base-Detalle"]) || "";
+                            try { sessionStorage.setItem(STORAGE_EDIT, JSON.stringify({ id: idGuardado, headers: headers, row: newRow })); } catch (e) {}
+                            window.location.replace("ver-receta-detalle.html");
+                        } else {
+                            showEditAlert("Error al guardar: " + ((json && json.error) ? json.error : "Respuesta inválida"), "error");
+                        }
+                    }).catch(function (err) {
+                        if (saveBtn) { saveBtn.disabled = !hasFormContent(); saveBtn.innerHTML = btnText; }
+                        showEditAlert("Error: " + (err.message || ""), "error");
+                    }).finally(function () { if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.hide(); });
+                });
+            }).catch(function (err) { loadingEl.style.display = "none"; noDataEl.style.display = "block"; noDataEl.textContent = "Error: " + (err.message || ""); });
+        })();
+    </script>
+</body>
+</html>

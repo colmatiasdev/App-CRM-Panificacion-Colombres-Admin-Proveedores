@@ -287,6 +287,7 @@
                             select.className = "costos-edit-input";
                             select.setAttribute("data-header-index", String(idx));
                             select.setAttribute("data-nombre", col.nombre);
+                            if (col.descripcion) select.title = col.descripcion;
                             if (col.obligatorio !== true) {
                                 var optVacio = document.createElement("option");
                                 optVacio.value = "";
@@ -311,11 +312,12 @@
                             }
                             if (restr.min != null) input.min = restr.min;
                             if (restr.max != null) input.max = restr.max;
+                            if (col.formatoVisual) input.setAttribute("data-formato-visual", col.formatoVisual); if (col.descripcion) input.title = col.descripcion;
+                            input.placeholder = col.decimales != null ? "0." + "0".repeat(col.decimales) : "0";
                             input.id = "field-" + idx;
                             input.className = "costos-edit-input";
                             input.setAttribute("data-header-index", String(idx));
                             input.setAttribute("data-nombre", col.nombre);
-                            input.placeholder = col.decimales ? "0.00" : "0";
                             if (col.obligatorio === true) input.required = true;
                             wrap.appendChild(input);
                         } else {
@@ -326,7 +328,7 @@
                             input.setAttribute("data-header-index", String(idx));
                             input.setAttribute("data-nombre", col.nombre);
                             if (restr.maxLongitud) input.maxLength = restr.maxLongitud;
-                            if (col.obligatorio === true) input.required = true;
+                            if (col.obligatorio === true) input.required = true; if (col.descripcion) input.title = col.descripcion;
                             wrap.appendChild(input);
                         }
                         fieldsContainer.appendChild(wrap);

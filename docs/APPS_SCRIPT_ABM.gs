@@ -248,6 +248,27 @@ var CONFIG = {
     idPrefix: 'ELAB-',
     filterColumns: ['IDElaboracion-ProductoBase', 'IDReceta-Base', 'Cantidad', 'Descripcion-Masa-Producto'],
     requiredOnCreate: ['IDReceta-Base', 'Cantidad']
+  },
+
+  /** Hoja Tabla Receta Base Detalle (Armador Receta – módulo Receta Detalle) – ?sheet=Tabla-Receta-Base-Detalle
+   * PK = IDReceta-Base-Detalle. FK = IDReceta-Base. Importe = Cantidad * Precio-Equivalencia-x-Unidad. */
+  'tabla-receta-base-detalle': {
+    sheetName: 'Tabla-Receta-Base-Detalle',
+    gid: 0,
+    headers: [
+      'IDReceta-Base-Detalle',
+      'IDReceta-Base',
+      'IDInsumo-MateriaPrima',
+      'Nombre-Insumo',
+      'Cantidad',
+      'Unidad-Medida',
+      'Precio-Equivalencia-x-Unidad',
+      'Importe'
+    ],
+    idColumn: 'IDReceta-Base-Detalle',
+    idPrefix: 'RECDET-',
+    filterColumns: ['IDReceta-Base-Detalle', 'IDReceta-Base', 'Nombre-Insumo', 'Unidad-Medida'],
+    requiredOnCreate: ['IDReceta-Base', 'IDInsumo-MateriaPrima', 'Cantidad']
   }
 
   // Para agregar otra hoja, copiá un bloque (p.ej. packing), cambiá la clave y sheetName:
@@ -617,7 +638,8 @@ function handleRequest(params) {
       }
       var updatedObjForSheet = normalizeRowToConfigHeaders(updatedObj, headerRow);
       var upRow = objectToRow(headerRow, updatedObjForSheet);
-      sheet.getRange(rowIndex, 1, rowIndex, upRow.length).setValues([upRow]);
+      // getRange(filaInicio, colInicio, numFilas, numCols): 3er parámetro = CANTIDAD de filas (1), no la fila final
+      sheet.getRange(rowIndex, 1, 1, upRow.length).setValues([upRow]);
       if (sheetKey === 'tabla-costo-productos' && PROPAGACION_COSTO_PRODUCTOS && PROPAGACION_COSTO_PRODUCTOS.columnas && PROPAGACION_COSTO_PRODUCTOS.columnas.length > 0) {
         try {
           propagarCostoProductosAReferenciadores(idUp, updatedObj);

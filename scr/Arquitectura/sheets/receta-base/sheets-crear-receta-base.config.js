@@ -11,14 +11,14 @@
       alias: "ID Receta Base",
       tipoDato: "text",
       tipoComponente: "label",
-      visible: true,
+      visible: false,
       obligatorio: true,
       descripcion: "ID autogenerado.",
       restricciones: {}
     },
     {
       nombre: "Descripcion-Masa-Producto",
-      alias: "Descripción Masa Producto",
+      alias: "Descripción de la masa de producto a crear",
       tipoDato: "text",
       tipoComponente: "text-box",
       visible: true,
@@ -30,10 +30,10 @@
       nombre: "Costo-Directo-Receta",
       alias: "Costo Directo",
       tipoDato: "numeric",
-      tipoComponente: "text-box",
+      tipoComponente: "label",
       decimales: 2,
-      visible: true,
-      obligatorio: false,
+      visible: false,
+      obligatorio: true,
       descripcion: "Costo directo receta.",
       restricciones: { min: 0 },
       formatoVisual: "moneda"
@@ -43,18 +43,18 @@
       alias: "Tiempo (min)",
       tipoDato: "numeric",
       tipoComponente: "text-box",
-      visible: true,
-      obligatorio: false,
+      visible: false,
+      obligatorio: true,
       descripcion: "Tiempo producción minutos.",
-      restricciones: { min: 0 }
+      restricciones: { min: 0, entero: true  }
     },
     {
       nombre: "Costo-Mano-Obra-Produccion",
       alias: "Costo Mano Obra",
       tipoDato: "numeric",
-      tipoComponente: "text-box",
+      tipoComponente: "label",
       decimales: 2,
-      visible: true,
+      visible: false,
       obligatorio: false,
       descripcion: "Costo mano de obra.",
       restricciones: { min: 0 },
@@ -66,7 +66,7 @@
       tipoDato: "numeric",
       tipoComponente: "label",
       decimales: 2,
-      visible: true,
+      visible: false,
       obligatorio: false,
       descripcion: "Fórmula (solo lectura).",
       formatoVisual: "moneda"
@@ -77,7 +77,7 @@
       tipoDato: "numeric",
       tipoComponente: "text-box",
       decimales: 2,
-      visible: true,
+      visible: false,
       obligatorio: true,
       descripcion: "Rendimiento cantidad.",
       restricciones: { min: 0 }
@@ -86,8 +86,9 @@
       nombre: "Rendimiento-UnidadMedida",
       alias: "Rendimiento U.M.",
       tipoDato: "text",
-      tipoComponente: "text-box",
-      visible: true,
+      tipoComponente: "combo-basico",
+      comboListadoValores: "COMBO.UNIDADES-MEDIDA-RENDIMIENTO",
+      visible: false,
       obligatorio: false,
       descripcion: "Unidad de medida.",
       restricciones: { maxLongitud: 50 }
@@ -98,7 +99,7 @@
       tipoDato: "numeric",
       tipoComponente: "label",
       decimales: 2,
-      visible: true,
+      visible: false,
       obligatorio: false,
       descripcion: "Fórmula (solo lectura).",
       formatoVisual: "moneda"
@@ -117,6 +118,8 @@
       prefijoId: hoja.prefijoId,
       patronId: hoja.patronId,
       indices: hoja.indices,
+      formulas: hoja.formulas || {},
+      lookups: Array.isArray(hoja.lookups) ? hoja.lookups : [],
       columnas: columnas
     }]
   };

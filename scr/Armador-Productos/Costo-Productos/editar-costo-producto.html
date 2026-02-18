@@ -247,6 +247,7 @@
                                 select.className = "costos-edit-input";
                                 select.setAttribute("data-header-index", String(idx));
                                 select.setAttribute("data-nombre", col.nombre);
+                                if (col.descripcion) select.title = col.descripcion;
                                 if (col.obligatorio !== true) {
                                     var optVacio = document.createElement("option");
                                     optVacio.value = "";
@@ -273,6 +274,8 @@
                                 }
                                 if (restr.min != null) input.min = restr.min;
                                 if (restr.max != null) input.max = restr.max;
+                                if (col.formatoVisual) input.setAttribute("data-formato-visual", col.formatoVisual); if (col.descripcion) input.title = col.descripcion;
+                                input.placeholder = col.decimales != null ? "0." + "0".repeat(col.decimales) : "0";
                                 input.id = "field-" + idx;
                                 input.className = "costos-edit-input";
                                 input.setAttribute("data-header-index", String(idx));
@@ -290,7 +293,7 @@
                                 input.setAttribute("data-nombre", col.nombre);
                                 input.value = val;
                                 if (restr.maxLongitud) input.maxLength = restr.maxLongitud;
-                                if (col.obligatorio === true) input.required = true;
+                                if (col.obligatorio === true) input.required = true; if (col.descripcion) input.title = col.descripcion;
                                 wrap.appendChild(input);
                                 inputEl = input;
                             }
@@ -526,7 +529,7 @@
                                     return json;
                                 })
                                 .then(function (json) {
-                                    if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = btnText; }
+                                    if (saveBtn) { checkFormChangesEditar(); saveBtn.innerHTML = btnText; }
                                     if (json && json.success) {
                                         try { sessionStorage.setItem(STORAGE_EDIT, JSON.stringify({ id: id, headers: headers, row: newRow })); } catch (e) {}
                                         window.location.replace("costo-productos.html");
@@ -535,7 +538,7 @@
                                     }
                                 })
                                 .catch(function (err) {
-                                    if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = btnText; }
+                                    if (saveBtn) { checkFormChangesEditar(); saveBtn.innerHTML = btnText; }
                                     showEditAlert("Error de conexión: " + (err.message || "Revisá appsScriptUrl."), "error");
                                 })
                                 .finally(function () {

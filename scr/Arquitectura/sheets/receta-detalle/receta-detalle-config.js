@@ -1,22 +1,22 @@
 /**
- * Configuración del módulo Receta Base (Armador Receta).
- * Lee la config desde window.RECETA_BASE_SHEETS_JSON.
+ * Configuración del módulo Receta Detalle (Armador Receta).
+ * Lee la config desde window.RECETA_DETALLE_SHEETS_JSON.
  */
 (function () {
   var CACHE_MAX_AGE_MS = 5 * 60 * 1000;
   var ACCIONES = {
-    listar: { id: "listar", url: "receta-base.html", label: "Listar", visible: true, componente: "listado" },
-    crear: { id: "crear", url: "crear-receta-base.html", label: "Nueva Receta", visible: true, componente: "formulario" },
-    editar: { id: "editar", url: "editar-receta-base.html", label: "Editar", visible: true, componente: "formulario" },
-    ver: { id: "ver", url: "ver-receta-base.html", label: "Ver", visible: true, componente: "detalle" }
+    listar: { id: "listar", url: "receta-detalle.html", label: "Listar", visible: true, componente: "listado" },
+    crear: { id: "crear", url: "crear-receta-detalle.html", label: "Nueva Línea", visible: true, componente: "formulario" },
+    editar: { id: "editar", url: "editar-receta-detalle.html", label: "Editar", visible: true, componente: "formulario" },
+    ver: { id: "ver", url: "ver-receta-detalle.html", label: "Ver Receta", visible: true, componente: "detalle" }
   };
-  window.RECETA_BASE_ACCIONES = ACCIONES;
+  window.RECETA_DETALLE_ACCIONES = ACCIONES;
 
   function getAccionActual() {
-    var id = (window.RECETA_BASE_ACCION_ACTUAL || "").toLowerCase();
+    var id = (window.RECETA_DETALLE_ACCION_ACTUAL || "").toLowerCase();
     return ACCIONES[id] || ACCIONES.listar;
   }
-  window.RECETA_BASE_GET_ACCION_ACTUAL = getAccionActual;
+  window.RECETA_DETALLE_GET_ACCION_ACTUAL = getAccionActual;
 
   function applyNavAccion() {
     var accion = getAccionActual();
@@ -26,7 +26,7 @@
       a.classList.toggle("is-active", !!activo);
     });
   }
-  window.RECETA_BASE_APPLY_NAV = applyNavAccion;
+  window.RECETA_DETALLE_APPLY_NAV = applyNavAccion;
 
   function getSheetConfig(hojas, nombreHoja) {
     if (!hojas || !nombreHoja) return null;
@@ -38,10 +38,10 @@
 
   function buildConfigFromJson(json) {
     var hojas = json.hojas || json.sheets || [];
-    var hoja = getSheetConfig(hojas, "Tabla-Receta-Base") || (hojas[0] || null);
-    if (!hoja) throw new Error("No se encontró la hoja Tabla-Receta-Base en la configuración.");
-    var nombreHoja = String(hoja.nombreHoja || hoja.nombre || "Tabla-Receta-Base").trim();
-    var clavePrimaria = Array.isArray(hoja.clavePrimaria) ? hoja.clavePrimaria : (hoja.idColumn ? [hoja.idColumn] : ["IDReceta-Base"]);
+    var hoja = getSheetConfig(hojas, "Tabla-Receta-Base-Detalle") || (hojas[0] || null);
+    if (!hoja) throw new Error("No se encontró la hoja Tabla-Receta-Base-Detalle en la configuración.");
+    var nombreHoja = String(hoja.nombreHoja || hoja.nombre || "Tabla-Receta-Base-Detalle").trim();
+    var clavePrimaria = Array.isArray(hoja.clavePrimaria) ? hoja.clavePrimaria : (hoja.idColumn ? [hoja.idColumn] : ["IDReceta-Base-Detalle"]);
     var columnas = hoja.columnas || [];
     var listado = hoja.listado || {};
     var config = {
@@ -66,21 +66,21 @@
       var nombre = String((col.nombre || "").trim());
       if (nombre) config.columnasPorNombre[nombre] = { index: idx, col: col };
     });
-    window._recetaBaseConfigCache = { config: config, timestamp: Date.now() };
-    window.RECETA_BASE_CONFIG = config;
+    window._recetaDetalleConfigCache = { config: config, timestamp: Date.now() };
+    window.RECETA_DETALLE_CONFIG = config;
     return config;
   }
 
   function loadConfig() {
-    var cached = window._recetaBaseConfigCache;
+    var cached = window._recetaDetalleConfigCache;
     if (cached && cached.timestamp && (Date.now() - cached.timestamp < CACHE_MAX_AGE_MS)) return Promise.resolve(cached.config);
-    var json = window.RECETA_BASE_SHEETS_JSON;
-    if (!json) return Promise.reject(new Error("Falta la configuración del módulo. Cargá el script de la acción antes de receta-base-config.js."));
+    var json = window.RECETA_DETALLE_SHEETS_JSON;
+    if (!json) return Promise.reject(new Error("Falta la configuración del módulo. Cargá el script de la acción antes de receta-detalle-config.js."));
     try {
       return Promise.resolve(buildConfigFromJson(json));
     } catch (e) {
       return Promise.reject(e);
     }
   }
-  window.RECETA_BASE_LOAD_CONFIG = loadConfig;
+  window.RECETA_DETALLE_LOAD_CONFIG = loadConfig;
 })();
