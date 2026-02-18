@@ -91,7 +91,7 @@
       visible: true,
       obligatorio: true,
       descripcion: "Unidad de medida.",
-      restricciones: { maxLongitud: 50 }
+      restricciones: {}
     },
     {
       nombre: "Costo-Produccion-ProductoBase [F/G]",
@@ -118,6 +118,8 @@
       prefijoId: hoja.prefijoId,
       patronId: hoja.patronId,
       indices: hoja.indices,
+      formulas: hoja.formulas || {},
+      lookups: Array.isArray(hoja.lookups) ? hoja.lookups : [],
       columnas: columnas
     }]
   };

@@ -255,6 +255,20 @@ body.costos-page {
     font-style: italic;
 }
 
+/* Bloque leyenda + botón antes del formulario (ej. Nuevo detalle receta — Seleccionar Insumo) */
+.costos-edit-leyenda-insumo {
+    margin-bottom: 1.25rem;
+    text-align: center;
+}
+.costos-edit-leyenda-insumo .costos-edit-leyenda-texto {
+    margin-bottom: 0.75rem;
+}
+.costos-edit-leyenda-insumo .costos-calc-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
 /* Página Editar materia prima — formulario con datos del registro */
 .costos-edit-form {
     background: var(--surface);
@@ -1485,6 +1499,14 @@ body.costos-page {
     background: var(--logo-orange);
     color: #fff;
 }
+.costos-card-btn-seleccionar {
+    background: var(--logo-teal);
+    color: #fff;
+}
+.costos-card-btn-seleccionar:hover {
+    background: #0d9488;
+    color: #fff;
+}
 .costos-card-deshabilitado {
     opacity: 0.82;
     border-left: 3px solid #94a3b8;
@@ -1900,6 +1922,59 @@ body.costos-page {
 }
 .costos-table tr.costos-table-categoria:hover td {
     background: linear-gradient(90deg, #d1fae5 0%, #a7f3d0 100%);
+}
+
+/* Cards lista insumos: meta (label-value) */
+.insumos-card-meta {
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: var(--text-muted, #64748b);
+}
+.insumos-card-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 4px;
+}
+.insumos-card-row:last-child {
+    margin-bottom: 0;
+}
+.insumos-card-label {
+    font-weight: 600;
+    color: var(--text-muted, #64748b);
+    min-width: 0;
+}
+.insumos-card-value {
+    color: var(--text, #1e293b);
+}
+
+/* Leyenda concatenada por columnas (lista insumos) */
+.insumos-card-leyenda {
+    font-size: 0.85rem;
+    color: var(--text-muted, #64748b);
+    margin-top: 6px;
+    line-height: 1.35;
+}
+.insumos-card-leyenda .insumos-leyenda-resaltado {
+    font-weight: 700;
+    color: var(--logo-orange, #ea580c);
+    background: rgba(234, 88, 12, 0.08);
+    padding: 1px 6px;
+    border-radius: 4px;
+}
+
+/* Encabezado de grupo en listas (ej. Armador Insumos listGroupBy) */
+.costos-table tr.insumos-group-header td {
+    background: linear-gradient(90deg, #eff6ff 0%, #dbeafe 100%);
+    color: #1e40af;
+    font-weight: 700;
+    font-size: 0.95rem;
+    padding: 10px 16px;
+    border-bottom: 1px solid #93c5fd;
+    letter-spacing: 0.02em;
+}
+.costos-table tr.insumos-group-header:hover td {
+    background: linear-gradient(90deg, #dbeafe 0%, #bfdbfe 100%);
 }
 
 /* Días transcurridos: badges sutiles por antigüedad */

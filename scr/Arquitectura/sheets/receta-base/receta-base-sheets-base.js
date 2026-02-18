@@ -24,7 +24,7 @@ window.RECETA_BASE_SHEET_BASE = {
     ],
     columnaOrden: null,
     clavesForaneas: [],
-    prefijoId: "RECBASE-",
+    prefijoId: "RECETA",
     patronId: 1,
     indices: [
       { columnas: ["IDReceta-Base"], unico: true }
@@ -44,6 +44,16 @@ window.RECETA_BASE_SHEET_BASE = {
         decimales: 2,
         leyenda: "Costo producción total / Rendimiento cantidad"
       }
-    }
+    },
+    "lookups": [
+      {
+        "columnaClaveLocal": "Tiempo-Produccion-Minutos",
+        "tablaOrigen": "COSTO-EMPLEADOS",
+        "columnaClaveRemota": "MINUTOS",
+        "columnaOrigen": "Costo-Mano-Obra-Produccion",
+        "columnaDestino": "Costo-Mano-Obra-Produccion",
+        "decimales": 2
+      }
+    ],
   }
 };

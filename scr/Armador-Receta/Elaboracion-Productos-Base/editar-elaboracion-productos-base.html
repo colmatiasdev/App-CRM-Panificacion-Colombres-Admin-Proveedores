@@ -82,20 +82,39 @@
                             var wrap = document.createElement("div"); wrap.className = "costos-edit-field"; wrap.appendChild(label);
                             if (tipoComp === "label") {
                                 var ro = document.createElement("span"); ro.id = "field-" + idx; ro.className = "costos-edit-input costos-edit-readonly"; ro.setAttribute("data-header-index", String(idx)); ro.setAttribute("data-nombre", col.nombre || nombre);
+                                if (col.formatoVisual) ro.setAttribute("data-formato-visual", col.formatoVisual); if (col.descripcion) ro.title = col.descripcion;
                                 var dispVal = val || "—";
                                 if ((tipoDato === "numeric") && col.formatoVisual && typeof window.formatNumeroVisual === "function" && val !== "") dispVal = window.formatNumeroVisual(val, col.formatoVisual, col.decimales != null ? col.decimales : 2);
                                 ro.textContent = dispVal; wrap.appendChild(ro);
+                            } else if (tipoComp === "combo-basico") {
+                                function getValoresCombo(ref) { if (typeof ref !== "string") return []; var parts = ref.trim().split("."); if (parts.length < 2) return []; var obj = window[parts[0]]; var key = parts.slice(1).join("."); if (obj && obj[key] && Array.isArray(obj[key])) return obj[key]; return []; }
+                                var valoresCombo = (restr.valoresPermitidos && Array.isArray(restr.valoresPermitidos)) ? restr.valoresPermitidos : getValoresCombo(col.comboListadoValores);
+                                var select = document.createElement("select"); select.id = "field-" + idx; select.className = "costos-edit-input"; select.setAttribute("data-header-index", String(idx)); select.setAttribute("data-nombre", col.nombre || nombre);
+                                if (col.descripcion) select.title = col.descripcion; if (col.obligatorio !== true) { var o = document.createElement("option"); o.value = ""; o.textContent = "—"; select.appendChild(o); }
+                                valoresCombo.forEach(function (v) { var o = document.createElement("option"); o.value = (v != null ? String(v) : ""); o.textContent = (v != null && v !== "") ? String(v) : "—"; if (val === (v != null ? String(v) : "")) o.selected = true; select.appendChild(o); });
+                                if (col.obligatorio === true) select.required = true; wrap.appendChild(select);
                             } else if (tipoComp === "text-box" && (tipoDato === "numeric" || col.tipo === "numeric")) {
-                                var input = document.createElement("input"); input.type = "number"; input.step = col.decimales != null ? Math.pow(10, -col.decimales) : "0.01";
-                                if (restr.min != null) input.min = restr.min;
+                                var input = document.createElement("input"); input.type = "number";
+                                input.step = (restr.entero === true) ? "1" : (col.decimales != null ? Math.pow(10, -col.decimales) : "0.01");
+                                if (restr.min != null) input.min = restr.min; if (restr.max != null) input.max = restr.max;
+                                if (col.obligatorio === true) input.required = true; if (col.formatoVisual) input.setAttribute("data-formato-visual", col.formatoVisual); if (col.descripcion) input.title = col.descripcion;
+                                input.placeholder = col.decimales != null ? "0." + "0".repeat(col.decimales) : "0";
                                 input.id = "field-" + idx; input.className = "costos-edit-input"; input.setAttribute("data-header-index", String(idx)); input.setAttribute("data-nombre", col.nombre || nombre); input.value = val; wrap.appendChild(input);
                             } else {
                                 var input = document.createElement("input"); input.type = "text"; input.id = "field-" + idx; input.className = "costos-edit-input"; input.setAttribute("data-header-index", String(idx)); input.setAttribute("data-nombre", col.nombre || nombre); input.value = val;
-                                if (restr.maxLongitud) input.maxLength = restr.maxLongitud; wrap.appendChild(input);
+                                if (restr.maxLongitud) input.maxLength = restr.maxLongitud; if (col.obligatorio === true) input.required = true; if (col.descripcion) input.title = col.descripcion; wrap.appendChild(input);
                             }
                             fieldsContainer.appendChild(wrap);
                         });
                         var saveBtn = formEl.querySelector(".costos-edit-btn-save");
+                        function getCurrentRowFromForm() {
+                            var out = []; for (var i = 0; i < headers.length; i++) out[i] = ""; formEl.querySelectorAll("[data-header-index]").forEach(function (el) { var idx = parseInt(el.getAttribute("data-header-index"), 10); if (idx < 0) return; var val = (el.value != null ? String(el.value).trim() : (el.textContent != null ? String(el.textContent).trim() : "")); var formato = el.getAttribute("data-formato-visual"); if (formato && typeof window.parseNumeroVisual === "function") val = window.parseNumeroVisual(val, formato) || val; if (idx < out.length) out[idx] = val; }); return out;
+                        }
+                        var initialRow = getCurrentRowFromForm();
+                        if (saveBtn) saveBtn.disabled = true;
+                        function hasFormChanged() { var cur = getCurrentRowFromForm(); for (var i = 0; i < headers.length; i++) { if ((cur[i] || "") !== (initialRow[i] || "")) return true; } return false; }
+                        function updateSaveButton() { if (saveBtn) saveBtn.disabled = !hasFormChanged(); }
+                        formEl.addEventListener("input", updateSaveButton); formEl.addEventListener("change", updateSaveButton);
                         formEl.addEventListener("submit", function (e) {
                             e.preventDefault(); hideEditAlert();
                             var newRow = row.slice ? row.slice() : row.map(function (x) { return x; });
@@ -118,12 +137,12 @@
                             fetch(appsScriptUrl, { method: "POST", body: formBody }).then(function (res) { return res.text(); }).then(function (text) {
                                 var json; try { json = JSON.parse(text); } catch (err) { throw new Error("Respuesta no válida"); } return json;
                             }).then(function (json) {
-                                if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = btnText; }
+                                if (saveBtn) { saveBtn.disabled = !hasFormChanged(); saveBtn.innerHTML = btnText; }
                                 hideEditAlert();
                                 if (json && json.success) { try { sessionStorage.setItem(STORAGE_EDIT, JSON.stringify({ id: id, headers: headers, row: newRow })); } catch (e) {} window.location.replace("elaboracion-productos-base.html"); }
                                 else showEditAlert("Error al guardar: " + ((json && json.error) ? json.error : "Respuesta inválida"), "error");
                             }).catch(function (err) {
-                                if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = btnText; }
+                                if (saveBtn) { saveBtn.disabled = !hasFormChanged(); saveBtn.innerHTML = btnText; }
                                 showEditAlert("Error: " + (err.message || ""), "error");
                             }).finally(function () { if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.hide(); });
                         });

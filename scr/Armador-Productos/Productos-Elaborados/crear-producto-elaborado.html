@@ -196,7 +196,7 @@
                             ro.className = "costos-edit-input costos-edit-readonly";
                             ro.setAttribute("data-header-index", String(idx));
                             ro.setAttribute("data-nombre", nombreCol);
-                            if (col.formatoVisual) ro.setAttribute("data-formato-visual", col.formatoVisual);
+                            if (col.formatoVisual) ro.setAttribute("data-formato-visual", col.formatoVisual); if (col.descripcion) ro.title = col.descripcion;
                             ro.setAttribute("aria-readonly", "true");
                             ro.textContent = valorMostrar || (col.descripcion || "Solo lectura");
                             wrap.appendChild(ro);
@@ -222,6 +222,7 @@
                             select.className = "costos-edit-input";
                             select.setAttribute("data-header-index", String(idx));
                             select.setAttribute("data-nombre", nombreCol);
+                            if (col.descripcion) select.title = col.descripcion;
                             if (col.obligatorio !== true && !(restr.valoresPermitidos && Array.isArray(restr.valoresPermitidos))) {
                                 var optVacio = document.createElement("option");
                                 optVacio.value = "";
@@ -239,9 +240,10 @@
                         } else if (tipoComp === "text-box" && (tipoDato === "numeric" || col.tipo === "numeric")) {
                             var input = document.createElement("input");
                             input.type = "number";
-                            input.step = (restr.entero === true) ? "1" : (col.decimales != null ? Math.pow(10, -col.decimales) : 0.01);
+                            input.step = (restr.entero === true) ? "1" : (col.decimales != null ? Math.pow(10, -col.decimales) : "0.01");
                             if (restr.min != null) input.min = restr.min;
                             if (restr.max != null) input.max = restr.max;
+                            if (col.obligatorio === true) input.required = true; if (col.formatoVisual) input.setAttribute("data-formato-visual", col.formatoVisual); if (col.descripcion) input.title = col.descripcion;
                             input.id = "field-" + idx;
                             input.className = "costos-edit-input";
                             input.setAttribute("data-header-index", String(idx));
@@ -256,7 +258,7 @@
                             input.setAttribute("data-header-index", String(idx));
                             input.setAttribute("data-nombre", nombreCol);
                             if (restr.maxLongitud) input.maxLength = restr.maxLongitud;
-                            if (col.obligatorio === true) input.required = true;
+                            if (col.obligatorio === true) input.required = true; if (col.descripcion) input.title = col.descripcion;
                             wrap.appendChild(input);
                         }
                         fieldsContainer.appendChild(wrap);

@@ -79,14 +79,23 @@
                         var valorMostrar = esPkAutogenerado ? idGeneradoPreview : (col.descripcion || "Solo lectura");
                         if (col.formatoVisual && typeof window.formatNumeroVisual === "function") { var numVal = parseFloat(String(valorMostrar).replace(",", ".")); if (!isNaN(numVal)) valorMostrar = window.formatNumeroVisual(numVal, col.formatoVisual, col.decimales != null ? col.decimales : 2); }
                         var ro = document.createElement("span"); ro.id = "field-" + idx; ro.className = "costos-edit-input costos-edit-readonly"; ro.setAttribute("data-header-index", String(idx)); ro.setAttribute("data-nombre", nombreCol);
-                        if (col.formatoVisual) ro.setAttribute("data-formato-visual", col.formatoVisual); ro.setAttribute("aria-readonly", "true"); ro.textContent = valorMostrar; wrap.appendChild(ro);
+                        if (col.formatoVisual) ro.setAttribute("data-formato-visual", col.formatoVisual); if (col.descripcion) ro.title = col.descripcion; ro.setAttribute("aria-readonly", "true"); ro.textContent = valorMostrar; wrap.appendChild(ro);
+                    } else if (tipoComp === "combo-basico") {
+                        function getValoresCombo(ref) { if (typeof ref !== "string") return []; var parts = ref.trim().split("."); if (parts.length < 2) return []; var obj = window[parts[0]]; var key = parts.slice(1).join("."); if (obj && obj[key] && Array.isArray(obj[key])) return obj[key]; return []; }
+                        var valoresCombo = (restr.valoresPermitidos && Array.isArray(restr.valoresPermitidos)) ? restr.valoresPermitidos : getValoresCombo(col.comboListadoValores);
+                        var select = document.createElement("select"); select.id = "field-" + idx; select.className = "costos-edit-input"; select.setAttribute("data-header-index", String(idx)); select.setAttribute("data-nombre", nombreCol);
+                        if (col.descripcion) select.title = col.descripcion; if (col.obligatorio !== true) { var o = document.createElement("option"); o.value = ""; o.textContent = "—"; select.appendChild(o); }
+                        valoresCombo.forEach(function (v) { var o = document.createElement("option"); o.value = (v != null ? String(v) : ""); o.textContent = (v != null && v !== "") ? String(v) : "—"; select.appendChild(o); });
+                        if (col.obligatorio === true) select.required = true; wrap.appendChild(select);
                     } else if (tipoComp === "text-box" && (tipoDato === "numeric" || col.tipo === "numeric")) {
-                        var input = document.createElement("input"); input.type = "number"; input.step = (restr.entero === true) ? "1" : (col.decimales != null ? Math.pow(10, -col.decimales) : 0.01);
+                        var input = document.createElement("input"); input.type = "number"; input.step = (restr.entero === true) ? "1" : (col.decimales != null ? Math.pow(10, -col.decimales) : "0.01");
                         if (restr.min != null) input.min = restr.min; if (restr.max != null) input.max = restr.max;
-                        input.id = "field-" + idx; input.className = "costos-edit-input"; input.setAttribute("data-header-index", String(idx)); input.setAttribute("data-nombre", nombreCol); input.placeholder = "0"; wrap.appendChild(input);
+                        if (col.obligatorio === true) input.required = true; if (col.formatoVisual) input.setAttribute("data-formato-visual", col.formatoVisual); if (col.descripcion) input.title = col.descripcion;
+                        input.placeholder = col.decimales != null ? "0." + "0".repeat(col.decimales) : "0";
+                        input.id = "field-" + idx; input.className = "costos-edit-input"; input.setAttribute("data-header-index", String(idx)); input.setAttribute("data-nombre", nombreCol); wrap.appendChild(input);
                     } else {
                         var input = document.createElement("input"); input.type = "text"; input.id = "field-" + idx; input.className = "costos-edit-input"; input.setAttribute("data-header-index", String(idx)); input.setAttribute("data-nombre", nombreCol);
-                        if (restr.maxLongitud) input.maxLength = restr.maxLongitud; if (col.obligatorio === true) input.required = true; wrap.appendChild(input);
+                        if (restr.maxLongitud) input.maxLength = restr.maxLongitud; if (col.obligatorio === true) input.required = true; if (col.descripcion) input.title = col.descripcion; wrap.appendChild(input);
                     }
                     fieldsContainer.appendChild(wrap);
                 });

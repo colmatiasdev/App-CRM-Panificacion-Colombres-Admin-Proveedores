@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Armador Insumos - Packing - Panificación Colombres</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../costos/costos.css">
+    <script src="../Arquitectura/config.js"></script>
+    <script src="../Arquitectura/config-sheets.js"></script>
+    <script src="config/precio-packing.config.js"></script>
+    <script>
+        window.INSUMOS_LIST_CONFIG = {
+            sheet: "packing",
+            idColumn: "idpacking",
+            storageKeyEdit: "costosEditRecordPacking",
+            storageKeyVisualizar: "costosVisualizarRecordPacking",
+            editUrl: "../costos/Packing/editar-packing.html",
+            visualizarUrl: "../costos/Packing/visualizar-packing.html",
+            filterInputId: "filter-insumos-packing",
+            countId: "insumos-packing-count",
+            dataContainerId: "datos-insumos-packing"
+        };
+    </script>
+</head>
+<body class="costos-page">
+    <nav class="costos-nav" aria-label="Navegación principal">
+        <a href="../../index.html" class="costos-nav-link">Inicio</a>
+        <a href="insumos.html" class="costos-nav-link">Armador Insumos</a>
+        <a href="lista-insumos-materia-prima.html" class="costos-nav-link">Lista Materia Prima</a>
+        <a href="lista-insumos-packing.html" class="costos-nav-link is-active">Lista Packing</a>
+    </nav>
+    <main class="costos-main">
+        <div class="costos-title-row">
+            <h1 class="costos-title">Armador Insumos - Packing</h1>
+            <a href="../costos/Packing/packing.html" class="costos-calc-btn" style="display: inline-flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-external-link-alt" aria-hidden="true"></i>
+                Ir a Packing (costos)
+            </a>
+        </div>
+        <p class="costos-intro">Vista de lista desde <strong>PRECIO-Packing</strong>. Ver y editar abren el módulo Costos.</p>
+        <section class="costos-filter-section costos-filter-section--stacked" aria-label="Filtrar listado">
+            <div class="costos-filter-search">
+                <label for="filter-insumos-packing" class="costos-filter-label">Buscar</label>
+                <input type="search" id="filter-insumos-packing" class="costos-filter-input" placeholder="Categoría o nombre de producto…" autocomplete="off">
+            </div>
+            <p class="costos-filter-count" id="insumos-packing-count" aria-live="polite"></p>
+        </section>
+        <div id="datos-insumos-packing" class="costos-datos">
+            <p class="costos-loading">Cargando datos…</p>
+        </div>
+    </main>
+    <script src="insumos-list.js"></script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Armador Insumos - Materia Prima - Panificación Colombres</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../costos/costos.css">
+    <script src="../Arquitectura/config.js"></script>
+    <script src="../Arquitectura/config-sheets.js"></script>
+    <script src="config/precio-materia-prima.config.js"></script>
+    <script>
+        (function () {
+            var params = new URLSearchParams(window.location.search || "");
+            var returnTo = params.get("returnTo") || "";
+            window.INSUMOS_LIST_CONFIG = {
+                sheet: "materiaPrima",
+                idColumn: "idmateria-prima",
+                storageKeyEdit: "costosEditRecord",
+                storageKeyVisualizar: "costosVisualizarRecord",
+                editUrl: "../costos/Materia-Prima/editar-materia-prima.html",
+                visualizarUrl: "../costos/Materia-Prima/visualizar-materia-prima.html",
+                filterInputId: "filter-insumos-materia",
+                countId: "insumos-materia-count",
+                dataContainerId: "datos-insumos-materia"
+            };
+            if (returnTo) {
+                window.INSUMOS_LIST_CONFIG.returnToUrl = returnTo;
+                window.INSUMOS_LIST_CONFIG.storageKeySeleccion = "insumoSeleccionadoParaRecetaDetalle";
+            }
+        })();
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var params = new URLSearchParams(window.location.search || "");
+            if (params.get("returnTo")) {
+                var intro = document.getElementById("intro-lista-materia");
+                var leyenda = document.getElementById("leyenda-modo-seleccion");
+                if (intro) intro.style.display = "none";
+                if (leyenda) leyenda.style.display = "block";
+            }
+        });
+    </script>
+</head>
+<body class="costos-page">
+    <nav class="costos-nav" aria-label="Navegación principal">
+        <a href="../../index.html" class="costos-nav-link">Inicio</a>
+        <a href="insumos.html" class="costos-nav-link">Armador Insumos</a>
+        <a href="lista-insumos-materia-prima.html" class="costos-nav-link is-active">Lista Materia Prima</a>
+        <a href="lista-insumos-packing.html" class="costos-nav-link">Lista Packing</a>
+    </nav>
+    <main class="costos-main">
+        <div class="costos-title-row">
+            <h1 class="costos-title">Armador Insumos - Materia Prima</h1>
+            <a href="../costos/Materia-Prima/materia-prima.html" class="costos-calc-btn" style="display: inline-flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-external-link-alt" aria-hidden="true"></i>
+                Ir a Materia prima (costos)
+            </a>
+        </div>
+        <p class="costos-intro" id="intro-lista-materia">Vista de lista desde <strong>PRECIO-Materia-Prima</strong>. Ver y editar abren el módulo Costos.</p>
+        <p class="costos-alert costos-alert--success" id="leyenda-modo-seleccion" style="display:none; margin-bottom: 1rem;">Elegí un insumo y hacé clic en <strong>Seleccionar</strong> para usarlo en la línea de la receta. Serás redirigido al formulario con el insumo ya cargado.</p>
+        <section class="costos-filter-section costos-filter-section--stacked" aria-label="Filtrar listado">
+            <div class="costos-filter-search">
+                <label for="filter-insumos-materia" class="costos-filter-label">Buscar</label>
+                <input type="search" id="filter-insumos-materia" class="costos-filter-input" placeholder="Categoría o nombre de producto…" autocomplete="off">
+            </div>
+            <p class="costos-filter-count" id="insumos-materia-count" aria-live="polite"></p>
+        </section>
+        <div id="datos-insumos-materia" class="costos-datos">
+            <p class="costos-loading">Cargando datos…</p>
+        </div>
+    </main>
+    <script src="insumos-list.js"></script>
+</body>
+</html>

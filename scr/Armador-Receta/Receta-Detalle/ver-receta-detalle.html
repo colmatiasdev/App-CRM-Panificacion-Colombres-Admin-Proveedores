@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Ver Receta - Panificación Colombres</title>
+    <title>Ver Receta Detalle - Panificación Colombres</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -11,37 +11,37 @@
     <link rel="stylesheet" href="../../costos/costos.css">
     <script src="../../Arquitectura/config.js"></script>
     <script src="../../Arquitectura/config-sheets.js"></script>
-    <script src="../../Arquitectura/sheets/receta-base/receta-base-sheets-base.js"></script>
-    <script src="../../Arquitectura/sheets/receta-base/sheets-ver-receta-base.config.js"></script>
-    <script>window.RECETA_BASE_ACCION_ACTUAL = "ver";</script>
+    <script src="../../Arquitectura/sheets/receta-detalle/receta-detalle-sheets-base.js"></script>
+    <script src="../../Arquitectura/sheets/receta-detalle/sheets-ver-receta-detalle.config.js"></script>
+    <script>window.RECETA_DETALLE_ACCION_ACTUAL = "ver";</script>
 </head>
 <body class="costos-page">
     <nav class="costos-nav" aria-label="Navegación principal">
         <a href="../../../index.html" class="costos-nav-link">Inicio</a>
         <a href="../armador-receta.html" class="costos-nav-link">Armador de Receta</a>
-        <a href="receta-base.html" class="costos-nav-link" data-accion="listar">Receta Base</a>
+        <a href="../Receta-Base/receta-base.html" class="costos-nav-link">Receta Base</a>
+        <a href="receta-detalle.html" class="costos-nav-link" data-accion="listar">Receta Detalle</a>
         <a href="../Producto-Unitario-Base/producto-unitario-base.html" class="costos-nav-link">Producto Unitario Base</a>
         <a href="../Elaboracion-Productos-Base/elaboracion-productos-base.html" class="costos-nav-link">Elaboración Productos Base</a>
     </nav>
     <main class="costos-main">
-        <h1 class="costos-title costos-title--con-icono"><i class="fa-solid fa-eye costos-title-icono" aria-hidden="true"></i> Ver Receta</h1>
+        <h1 class="costos-title costos-title--con-icono"><i class="fa-solid fa-eye costos-title-icono" aria-hidden="true"></i> Ver Receta Detalle</h1>
         <p class="costos-intro">Datos del registro. Solo visualización.</p>
         <div id="ver-container" class="costos-datos">
             <p id="ver-no-data" class="costos-placeholder" style="display:none;">No hay datos del registro. Volvé al listado y usá «Ver».</p>
             <p id="ver-loading" class="costos-placeholder">Cargando…</p>
             <div id="ver-detalle" class="costos-ver-detalle" style="display:none;"></div>
             <div id="ver-actions" class="costos-edit-actions" style="display:none;">
-                <a href="receta-base.html" class="costos-edit-btn-cancel">Volver al listado</a>
-                <a href="#" id="btn-agregar-item-receta" class="costos-edit-btn-save" style="margin-left: auto;"><i class="fa-solid fa-plus" aria-hidden="true"></i> Agregar Item de la Receta</a>
-                <a href="editar-receta-base.html" class="costos-edit-btn-save"><i class="fa-solid fa-pen" aria-hidden="true"></i> Editar</a>
+                <a href="receta-detalle.html" class="costos-edit-btn-cancel">Volver al listado</a>
+                <a href="editar-receta-detalle.html" class="costos-edit-btn-save"><i class="fa-solid fa-pen" aria-hidden="true"></i> Editar</a>
             </div>
         </div>
     </main>
-    <script src="../../Arquitectura/sheets/receta-base/receta-base-config.js"></script>
-    <script>if (window.RECETA_BASE_APPLY_NAV) window.RECETA_BASE_APPLY_NAV();</script>
+    <script src="../../Arquitectura/sheets/receta-detalle/receta-detalle-config.js"></script>
+    <script>if (window.RECETA_DETALLE_APPLY_NAV) window.RECETA_DETALLE_APPLY_NAV();</script>
     <script>
         (function () {
-            var STORAGE_EDIT = "costosEditRecordRecetaBase";
+            var STORAGE_EDIT = "costosEditRecordRecetaDetalle";
             function norm(s) { return String(s != null ? s : "").trim().toLowerCase().replace(/\s+/g, "").replace(/-/g, ""); }
             function mapRowToConfigOrder(rowFromStorage, headersFromStorage, columnas) {
                 var configNombres = columnas.map(function (c) { return c.nombre; });
@@ -58,7 +58,7 @@
             var noDataEl = document.getElementById("ver-no-data"); var loadingEl = document.getElementById("ver-loading"); var detalleEl = document.getElementById("ver-detalle"); var actionsEl = document.getElementById("ver-actions");
             var raw = sessionStorage.getItem(STORAGE_EDIT);
             if (!raw) { loadingEl.style.display = "none"; noDataEl.style.display = "block"; } else {
-                var loadConfig = window.RECETA_BASE_LOAD_CONFIG;
+                var loadConfig = window.RECETA_DETALLE_LOAD_CONFIG;
                 if (!loadConfig) { loadingEl.style.display = "none"; noDataEl.style.display = "block"; noDataEl.textContent = "No se pudo cargar la configuración."; } else {
                     loadConfig().then(function (sheetConfig) {
                         var data; try { data = JSON.parse(raw); } catch (e) { data = {}; }
@@ -79,22 +79,6 @@
                         });
                         html += "</dl>";
                         detalleEl.innerHTML = html;
-                        var idRecetaBase = data.id != null ? String(data.id).trim() : "";
-                        if (!idRecetaBase && headersFromStorage.length && rowFromStorage.length) {
-                            var idxId = -1;
-                            for (var h = 0; h < headersFromStorage.length; h++) { if (norm(headersFromStorage[h]) === "idreceta-base") { idxId = h; break; } }
-                            if (idxId >= 0 && rowFromStorage[idxId] != null) idRecetaBase = String(rowFromStorage[idxId]).trim();
-                        }
-                        var btnAgregar = document.getElementById("btn-agregar-item-receta");
-                        if (btnAgregar) {
-                            btnAgregar.addEventListener("click", function (e) {
-                                e.preventDefault();
-                                try {
-                                    if (idRecetaBase) sessionStorage.setItem("recetaBaseIdForNewItem", idRecetaBase);
-                                } catch (err) {}
-                                window.location.href = "../Receta-Detalle/crear-receta-detalle.html";
-                            });
-                        }
                     }).catch(function (err) { loadingEl.style.display = "none"; noDataEl.style.display = "block"; noDataEl.textContent = "Error: " + (err.message || ""); });
                 }
             }

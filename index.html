@@ -11,6 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Dancing+Script:wght@500;600;700&family=Oswald:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="index.css">
+    <script src="config-portada.js"></script>
     <style>
 :root {
     /* Paleta del logo (arcos superior e inferior) */
@@ -179,10 +180,63 @@
     .portada-logo-line3 { font-size: 1.25rem; }
     .portada-logo-line4 { font-size: 1.1rem; }
 }
+
+/* ===== Variante: gradiente animado (colores del logo) ===== */
+.portada-logo[data-portada-variant="gradient"] {
+    background: linear-gradient(
+        120deg,
+        var(--logo-red),
+        var(--logo-orange),
+        var(--logo-yellow),
+        var(--logo-teal),
+        var(--logo-green),
+        var(--logo-blue),
+        var(--logo-purple),
+        var(--logo-red)
+    );
+    background-size: 400% 400%;
+    animation: portada-gradient-shift 12s ease infinite;
+}
+.portada-logo[data-portada-variant="gradient"] .portada-logo-line1 { color: rgba(255,255,255,0.95); }
+.portada-logo[data-portada-variant="gradient"] .portada-logo-line2 {
+    background: linear-gradient(90deg, #fff 0%, #fef3c7 50%, #fff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+.portada-logo[data-portada-variant="gradient"] .portada-logo-line3,
+.portada-logo[data-portada-variant="gradient"] .portada-logo-line4 { color: rgba(255,255,255,0.9); }
+.portada-logo[data-portada-variant="gradient"] .portada-logo-arc-top,
+.portada-logo[data-portada-variant="gradient"] .portada-logo-arc-bottom {
+    background: rgba(255,255,255,0.25);
+    backdrop-filter: blur(4px);
+}
+@keyframes portada-gradient-shift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* ===== Variante: minimal (tercera opción, placeholder) ===== */
+.portada-logo[data-portada-variant="minimal"] {
+    background: var(--logo-dark);
+}
+.portada-logo[data-portada-variant="minimal"] .portada-logo-line1 { color: var(--logo-orange); }
+.portada-logo[data-portada-variant="minimal"] .portada-logo-line2 {
+    background: linear-gradient(90deg, var(--logo-white), #e0f2fe);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+.portada-logo[data-portada-variant="minimal"] .portada-logo-line3,
+.portada-logo[data-portada-variant="minimal"] .portada-logo-line4 { color: rgba(255,255,255,0.85); }
+.portada-logo[data-portada-variant="minimal"] .portada-logo-arc-top,
+.portada-logo[data-portada-variant="minimal"] .portada-logo-arc-bottom {
+    background: var(--logo-arc-warm);
+}
     </style>
 </head>
 <body>
-<section class="portada-logo portada-logo-first">
+<section class="portada-logo portada-logo-first" id="portada-logo" data-portada-variant="default">
     <div class="portada-logo-arc portada-logo-arc-top"></div>
     <div class="portada-logo-inner">
         <p class="portada-logo-line1">PANIFICACIÓN</p>
@@ -216,5 +270,15 @@
         <div class="footer-meta">© 2026  Todos los derechos reservados.</div>
     </div>
 </footer>
+<script>
+(function () {
+    var config = window.PORTADA_CONFIG || {};
+    var variant = (config.headerVariant && String(config.headerVariant).toLowerCase()) || "default";
+    var allowed = { default: 1, gradient: 1, minimal: 1 };
+    if (!allowed[variant]) variant = "default";
+    var section = document.getElementById("portada-logo") || document.querySelector(".portada-logo.portada-logo-first");
+    if (section) section.setAttribute("data-portada-variant", variant);
+})();
+</script>
 </body>
 </html>
