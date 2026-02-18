@@ -121,15 +121,14 @@
     {
       "name": "Combos",
       "sheetKey": "combos",
-      "description": "Hoja auxiliar para valores de listas desplegables (categorías, marcas, lugares, presentaciones, etc.). Solo lectura desde la app.",
-      "idColumn": null,
+      "description": "Hoja auxiliar para valores de listas desplegables (unidades de medida, presentación, categoría, rendimiento). Solo lectura desde la app.",
+      "idColumn": "TIPO-UNIDAD-MEDIDA",
       "fields": [
-        { "name": "Categoria", "type": "string", "required": false, "restrictions": {} },
-        { "name": "Marca", "type": "string", "required": false, "restrictions": {} },
-        { "name": "Lugar", "type": "string", "required": false, "restrictions": {} },
-        { "name": "Presentacion-Unidad", "type": "string", "required": false, "restrictions": {} },
-        { "name": "Presentacion-Tipo", "type": "string", "required": false, "restrictions": {} },
-        { "name": "Tipo-Unidad-Medida", "type": "string", "required": false, "restrictions": {} }
+        { "name": "TIPO-UNIDAD-MEDIDA", "type": "string", "required": false, "restrictions": {} },
+        { "name": "CONVERTIR-UNIDAD-MEDIDA", "type": "string", "required": false, "restrictions": {} },
+        { "name": "TIPO-PRESENTACION", "type": "string", "required": false, "restrictions": {} },
+        { "name": "COMBO-CATEGORIA", "type": "string", "required": false, "restrictions": {} },
+        { "name": "UNIDADES-MEDIDA-RENDIMIENTO", "type": "string", "required": false, "restrictions": {} }
       ]
     },
     {

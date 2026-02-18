@@ -81,13 +81,20 @@ var CONFIG = {
     dateUpdatedColumn: 'Fecha-Actualizada-Al'
   },
 
-  /** Hoja Combos – listas para combos – ?sheet=combos o ?sheet=COMBO */
+  /** Hoja Combos – listas para combos – ?sheet=combos o ?sheet=COMBO
+   * Columnas: TIPO-UNIDAD-MEDIDA, CONVERTIR-UNIDAD-MEDIDA, TIPO-PRESENTACION, COMBO-CATEGORIA, UNIDADES-MEDIDA-RENDIMIENTO */
   combos: {
     sheetName: 'COMBOS',
     gid: 0,
-    headers: ['TIPO-UNIDAD-MEDIDA', 'CONVERTIR-UNIDAD-MEDIDA', 'TIPO-PRESENTACION', 'COMBO-CATEGORIA'],
+    headers: [
+      'TIPO-UNIDAD-MEDIDA',
+      'CONVERTIR-UNIDAD-MEDIDA',
+      'TIPO-PRESENTACION',
+      'COMBO-CATEGORIA',
+      'UNIDADES-MEDIDA-RENDIMIENTO'
+    ],
     idColumn: 'TIPO-UNIDAD-MEDIDA',
-    filterColumns: ['TIPO-UNIDAD-MEDIDA', 'CONVERTIR-UNIDAD-MEDIDA', 'TIPO-PRESENTACION', 'COMBO-CATEGORIA']
+    filterColumns: ['TIPO-UNIDAD-MEDIDA', 'CONVERTIR-UNIDAD-MEDIDA', 'TIPO-PRESENTACION', 'COMBO-CATEGORIA', 'UNIDADES-MEDIDA-RENDIMIENTO']
   },
 
   /** Hoja Equivalencias – unidades y factores para conversión – ?sheet=equivalencias
@@ -467,7 +474,9 @@ function doPost(e) {
 
 function handleRequest(params) {
   var action = (params.action || params['action'] || '').toString().toLowerCase();
-  var sheetKey = (params.sheet || params['sheet'] || 'materiaPrima').toLowerCase();
+  var sheetParam = params.sheet || params['sheet'];
+  if (Array.isArray(sheetParam)) sheetParam = sheetParam.length > 0 ? sheetParam[0] : '';
+  var sheetKey = (sheetParam != null && String(sheetParam).trim() !== '' ? String(sheetParam).trim() : 'materiaPrima').toLowerCase();
   var configSheet = getSheetConfig(sheetKey);
   var headers = configSheet.headers;
   var sheet = getSheet(configSheet);

@@ -9,15 +9,87 @@
   }
   var hoja = base.hoja;
   var columnas = [
-    { nombre: "IDReceta-Base", alias: "ID Receta Base", tipoDato: "text", tipoComponente: "label", visible: true, descripcion: "Identificador único." },
-    { nombre: "Descripcion-Masa-Producto", alias: "Descripción Masa Producto", tipoDato: "text", tipoComponente: "label", visible: true, descripcion: "Descripción de la masa." },
-    { nombre: "Costo-Directo-Receta", alias: "Costo Directo", tipoDato: "numeric", tipoComponente: "label", decimales: 2, visible: true, descripcion: "Costo directo receta.", formatoVisual: "moneda" },
-    { nombre: "Tiempo-Produccion-Minutos", alias: "Tiempo (min)", tipoDato: "numeric", tipoComponente: "label", visible: true, descripcion: "Tiempo de producción en minutos." },
-    { nombre: "Costo-Mano-Obra-Produccion", alias: "Costo Mano Obra", tipoDato: "numeric", tipoComponente: "label", decimales: 2, visible: true, descripcion: "Costo mano de obra.", formatoVisual: "moneda" },
-    { nombre: "Costo-Produccion[C+E]", alias: "Costo Producción [C+E]", tipoDato: "numeric", tipoComponente: "label", decimales: 2, visible: true, descripcion: "Fórmula: Costo directo + Mano obra.", formatoVisual: "moneda" },
-    { nombre: "Rendimiento-Cantidad", alias: "Rendimiento Cantidad", tipoDato: "numeric", tipoComponente: "label", decimales: 2, visible: true, descripcion: "Rendimiento cantidad." },
-    { nombre: "Rendimiento-UnidadMedida", alias: "Rendimiento U.M.", tipoDato: "text", tipoComponente: "label", visible: true, descripcion: "Unidad de medida del rendimiento." },
-    { nombre: "Costo-Produccion-ProductoBase [F/G]", alias: "Costo Base [F/G]", tipoDato: "numeric", tipoComponente: "label", decimales: 2, visible: true, descripcion: "Fórmula: Costo producción / Rendimiento.", formatoVisual: "moneda" }
+    {
+      nombre: "IDReceta-Base",
+      alias: "ID Receta Base",
+      tipoDato: "text",
+      tipoComponente: "label",
+      visible: true,
+      descripcion: "Identificador único."
+    },
+    {
+      nombre: "Descripcion-Masa-Producto",
+      alias: "Descripción Masa Producto",
+      tipoDato: "text",
+      tipoComponente: "label",
+      visible: true,
+      descripcion: "Descripción de la masa."
+    },
+    {
+      nombre: "Costo-Directo-Receta",
+      alias: "Costo Directo",
+      tipoDato: "numeric",
+      tipoComponente: "label",
+      decimales: 2,
+      visible: true,
+      descripcion: "Costo directo receta.",
+      formatoVisual: "moneda"
+    },
+    {
+      nombre: "Tiempo-Produccion-Minutos",
+      alias: "Tiempo (min)",
+      tipoDato: "numeric",
+      tipoComponente: "label",
+      visible: true,
+      descripcion: "Tiempo de producción en minutos."
+    },
+    {
+      nombre: "Costo-Mano-Obra-Produccion",
+      alias: "Costo Mano Obra",
+      tipoDato: "numeric",
+      tipoComponente: "label",
+      decimales: 2,
+      visible: true,
+      descripcion: "Costo mano de obra.",
+      formatoVisual: "moneda"
+    },
+    {
+      nombre: "Costo-Produccion[C+E]",
+      alias: "Costo Producción [C+E]",
+      tipoDato: "numeric",
+      tipoComponente: "label",
+      decimales: 2,
+      visible: true,
+      descripcion: "Fórmula: Costo directo + Mano obra.",
+      formatoVisual: "moneda"
+    },
+    {
+      nombre: "Rendimiento-Cantidad",
+      alias: "Rendimiento Cantidad",
+      tipoDato: "numeric",
+      tipoComponente: "label",
+      decimales: 2,
+      visible: true,
+      descripcion: "Rendimiento cantidad."
+    },
+    {
+      nombre: "Rendimiento-UnidadMedida",
+      alias: "Rendimiento U.M.",
+      tipoDato: "text",
+      tipoComponente: "label",
+      visible: true,
+      descripcion: "Unidad de medida del rendimiento."
+    },
+    {
+      nombre: "Costo-Produccion-ProductoBase [F/G]",
+      alias: "Costo Base [F/G]",
+      tipoDato: "numeric",
+      tipoComponente: "label",
+      decimales: 2,
+      visible: true,
+      descripcion: "Fórmula: Costo producción / Rendimiento.",
+      formatoVisual: "moneda"
+    }
   ];
   window.RECETA_BASE_SHEETS_JSON = {
     modulo: base.modulo,
