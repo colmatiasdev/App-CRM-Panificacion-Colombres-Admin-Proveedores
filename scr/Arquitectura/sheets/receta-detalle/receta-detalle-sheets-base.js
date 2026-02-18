@@ -67,6 +67,20 @@ window.RECETA_DETALLE_SHEET_BASE = {
         columnaDestino: "Precio-Equivalencia-x-Unidad",
         decimales: 2
       }
-    ]
+    ],
+    /**
+     * Propagación desde insumo: al elegir un insumo (PRECIO-Materia-Prima), copiar estas columnas
+     * al formulario/fila de Tabla-Receta-Base-Detalle. Sincronizar con PROPAGACION_RECETA_DETALLE_DESDE_INSUMO en APPS_SCRIPT_ABM.gs.
+     * tablaOrigen = clave de hoja en API (materiaPrima); columnaClaveForanea = FK en esta tabla.
+     */
+    propagacionDesdeInsumo: {
+      tablaOrigen: "materiaPrima",
+      columnaClaveForanea: "IDInsumo-MateriaPrima",
+      columnas: [
+        { columnaOrigen: "Nombre-Producto", columnaDestino: "Nombre-Insumo" },
+        { columnaOrigen: "Presentacion-Unidad", columnaDestino: "Unidad-Medida" },
+        { columnaOrigen: "Precio-Equivalencia-x-Unidad", columnaDestino: "Precio-Equivalencia-x-Unidad" }
+      ]
+    }
   }
 };

@@ -188,14 +188,36 @@
                         try {
                             var data = JSON.parse(insumoSeleccionado);
                             var idInsumo = (data && data.id != null) ? String(data.id).trim() : "";
+                            var headersInsumo = (data && data.headers) ? data.headers : [];
+                            var rowInsumo = (data && data.row && Array.isArray(data.row)) ? data.row : [];
                             sessionStorage.removeItem("insumoSeleccionadoParaRecetaDetalle");
                             if (idInsumo) {
                                 var fieldInsumo = formEl.querySelector("[data-nombre=\"IDInsumo-MateriaPrima\"]");
                                 if (fieldInsumo && fieldInsumo.value !== undefined) { fieldInsumo.value = idInsumo; }
-                                applyLookups(formEl, sheetConfig, appsScriptUrl).then(function () {
+                                var prop = sheetConfig.propagacionDesdeInsumo;
+                                if (prop && prop.columnas && prop.columnas.length && headersInsumo.length && rowInsumo.length) {
+                                    function normH(s) { return String(s != null ? s : "").trim().toLowerCase().replace(/\s+/g, "").replace(/-/g, ""); }
+                                    for (var p = 0; p < prop.columnas.length; p++) {
+                                        var co = prop.columnas[p].columnaOrigen;
+                                        var cd = prop.columnas[p].columnaDestino;
+                                        var idx = -1;
+                                        for (var hi = 0; hi < headersInsumo.length; hi++) {
+                                            if (normH(headersInsumo[hi]) === normH(co)) { idx = hi; break; }
+                                        }
+                                        var val = (idx >= 0 && idx < rowInsumo.length && rowInsumo[idx] != null && rowInsumo[idx] !== "") ? rowInsumo[idx] : "";
+                                        if (typeof val === "number" && !isNaN(val)) val = (prop.columnas[p].decimales != null) ? val.toFixed(prop.columnas[p].decimales) : String(val);
+                                        else if (val != null && val !== "") val = String(val).trim();
+                                        else val = "";
+                                        setFormValueByNombre(formEl, cd, val, (prop.columnas[p].decimales != null) ? prop.columnas[p].decimales : 2);
+                                    }
                                     applyFormulas(formEl, sheetConfig);
                                     updateCreateButton();
-                                });
+                                } else {
+                                    applyLookups(formEl, sheetConfig, appsScriptUrl).then(function () {
+                                        applyFormulas(formEl, sheetConfig);
+                                        updateCreateButton();
+                                    });
+                                }
                                 return;
                             }
                         } catch (err) {}

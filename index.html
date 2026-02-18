@@ -181,14 +181,20 @@
     .portada-logo-line4 { font-size: 1.1rem; }
 }
 
-/* ===== Variante: gradiente animado — manchas con colores del logo que se mueven y se mezclan ===== */
+/* ===== Variante: gradiente animado — manchas suaves, homogéneas y estéticamente coloridas ===== */
 .portada-logo[data-portada-variant="gradient"] {
     position: relative;
     overflow: hidden;
-    /* Fondo mezcla suave para que se noten todos los tonos (cálidos y fríos) */
-    background: linear-gradient(135deg, var(--logo-orange) 0%, var(--logo-teal) 35%, var(--logo-blue) 65%, var(--logo-purple) 100%);
+    /* Fondo base suave y homogéneo para toda la gama */
+    background: linear-gradient(145deg,
+        var(--logo-orange) 0%,
+        var(--logo-yellow) 20%,
+        var(--logo-teal) 45%,
+        var(--logo-blue) 70%,
+        var(--logo-purple) 100%
+    );
 }
-/* Mancha cálida del logo (naranja, amarillo, rojo). Más grande y opaca para que se vean bien en pantalla. */
+/* Mancha cálida: gradiente muy suave para transiciones limpias */
 .portada-logo[data-portada-variant="gradient"]::before {
     content: "";
     position: absolute;
@@ -197,19 +203,18 @@
     top: -60%;
     left: -60%;
     background: radial-gradient(
-        ellipse 62% 55% at 50% 50%,
+        ellipse 70% 65% at 50% 50%,
         var(--logo-orange) 0%,
-        var(--logo-yellow) 22%,
-        var(--logo-red) 45%,
-        rgba(220, 38, 38, 0.6) 62%,
-        rgba(220, 38, 38, 0.2) 78%,
-        transparent 90%
+        var(--logo-yellow) 18%,
+        var(--logo-red) 38%,
+        rgba(220, 38, 38, 0.5) 55%,
+        rgba(220, 38, 38, 0.12) 75%,
+        transparent 92%
     );
-    opacity: 0.94;
-    animation: portada-blob1 12s ease-in-out infinite;
-    z-index: 1;
+    animation: portada-blob1 18s ease-in-out infinite, portada-opacity-calida 22s ease-in-out infinite;
+    z-index: 0;
 }
-/* Mancha fría del logo (teal, verde, azul, violeta). Menos opacidad para que naranja/amarillo/violeta compartan protagonismo. */
+/* Mancha fría: gradiente muy suave para mezcla homogénea */
 .portada-logo[data-portada-variant="gradient"]::after {
     content: "";
     position: absolute;
@@ -218,50 +223,94 @@
     top: -60%;
     left: -60%;
     background: radial-gradient(
-        ellipse 55% 58% at 50% 50%,
+        ellipse 68% 62% at 50% 50%,
         var(--logo-teal) 0%,
-        var(--logo-green) 25%,
-        var(--logo-blue) 48%,
-        var(--logo-purple) 68%,
-        rgba(139, 92, 246, 0.6) 80%,
-        rgba(139, 92, 246, 0.2) 90%,
-        transparent 96%
+        var(--logo-green) 22%,
+        var(--logo-blue) 42%,
+        var(--logo-purple) 62%,
+        rgba(139, 92, 246, 0.5) 78%,
+        rgba(139, 92, 246, 0.1) 90%,
+        transparent 98%
     );
-    opacity: 0.72;
-    animation: portada-blob2 14s ease-in-out infinite;
+    animation: portada-blob2 20s ease-in-out infinite, portada-opacity-fria 22s ease-in-out infinite;
     z-index: 0;
 }
+/* Contenido y texto siempre delante del gradiente (z-index alto y sombra para legibilidad) */
 .portada-logo[data-portada-variant="gradient"] .portada-logo-inner,
 .portada-logo[data-portada-variant="gradient"] .portada-logo-arc-top,
 .portada-logo[data-portada-variant="gradient"] .portada-logo-arc-bottom {
     position: relative;
-    z-index: 2;
+    z-index: 10;
 }
-.portada-logo[data-portada-variant="gradient"] .portada-logo-line1 { color: rgba(255,255,255,0.95); }
+.portada-logo[data-portada-variant="gradient"] .portada-logo-line1,
+.portada-logo[data-portada-variant="gradient"] .portada-logo-line3,
+.portada-logo[data-portada-variant="gradient"] .portada-logo-line4 {
+    position: relative;
+    z-index: 2;
+    color: #fff;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.25), 0 0 24px rgba(0,0,0,0.15);
+}
 .portada-logo[data-portada-variant="gradient"] .portada-logo-line2 {
-    background: linear-gradient(90deg, #fff 0%, #fef3c7 50%, #fff 100%);
+    position: relative;
+    z-index: 2;
+    background: linear-gradient(90deg, #fff 0%, #fef9e7 50%, #fff 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3)) drop-shadow(0 0 16px rgba(0,0,0,0.12));
 }
-.portada-logo[data-portada-variant="gradient"] .portada-logo-line3,
-.portada-logo[data-portada-variant="gradient"] .portada-logo-line4 { color: rgba(255,255,255,0.9); }
 .portada-logo[data-portada-variant="gradient"] .portada-logo-arc-top,
 .portada-logo[data-portada-variant="gradient"] .portada-logo-arc-bottom {
-    background: rgba(255,255,255,0.25);
-    backdrop-filter: blur(4px);
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(6px);
 }
-/* Movimiento contenido para no mostrar nunca el borde del pseudo-elemento (evitar línea recta cortada) */
+/* Centro que recorre la gama con gradiente suave y homogéneo */
+.portada-logo[data-portada-variant="gradient"] .portada-logo-inner::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 180%;
+    height: 180%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(
+        ellipse 55% 55% at 50% 50%,
+        var(--logo-red) 0%,
+        rgba(220, 38, 38, 0.7) 30%,
+        rgba(220, 38, 38, 0.35) 55%,
+        rgba(220, 38, 38, 0.08) 80%,
+        transparent 100%
+    );
+    animation: portada-centro-gama 24s ease-in-out infinite;
+}
+/* Movimiento muy suave de las manchas (transiciones limpias) */
 @keyframes portada-blob1 {
     0%, 100% { transform: translate(0, 0) scale(1); }
-    25%      { transform: translate(4%, 5%) scale(1.04); }
-    50%      { transform: translate(-5%, -3%) scale(0.97); }
-    75%      { transform: translate(3%, -4%) scale(1.02); }
+    25%      { transform: translate(2%, 3%) scale(1.02); }
+    50%      { transform: translate(-3%, -2%) scale(0.98); }
+    75%      { transform: translate(2%, -2%) scale(1.01); }
 }
 @keyframes portada-blob2 {
     0%, 100% { transform: translate(0, 0) scale(1); }
-    33%      { transform: translate(-5%, -6%) scale(1.05); }
-    66%      { transform: translate(5%, 4%) scale(0.96); }
+    33%      { transform: translate(-3%, -4%) scale(1.03); }
+    66%      { transform: translate(3%, 3%) scale(0.98); }
+}
+/* Ciclo de opacidad suave para recorrer la gama sin cortes */
+@keyframes portada-opacity-calida {
+    0%, 100%   { opacity: 0.88; }
+    50%        { opacity: 0.48; }
+}
+@keyframes portada-opacity-fria {
+    0%, 100%   { opacity: 0.42; }
+    50%        { opacity: 0.88; }
+}
+/* Centro: ciclo fluido por toda la gama (transición suave) */
+@keyframes portada-centro-gama {
+    from { filter: hue-rotate(0deg); }
+    to   { filter: hue-rotate(360deg); }
 }
 
 /* ===== Variante: minimal (tercera opción, placeholder) ===== */
