@@ -32,10 +32,17 @@
             <div id="costos-edit-alert" class="costos-alert" role="alert" style="display:none;"></div>
             <p id="edit-no-data" class="costos-placeholder" style="display:none;">No se pudo cargar el formulario.</p>
             <p id="edit-loading" class="costos-placeholder">Cargando formulario…</p>
+            <div id="leyenda-seleccionar-insumo" class="costos-edit-leyenda-insumo" style="display:none;" aria-describedby="leyenda-seleccionar-insumo-texto">
+                <p id="leyenda-seleccionar-insumo-texto" class="costos-intro costos-edit-leyenda-texto">Agregá la materia prima seleccionando el insumo necesario para esta línea de la receta.</p>
+                <button type="button" id="btn-seleccionar-insumo" class="costos-calc-btn" aria-describedby="leyenda-seleccionar-insumo-texto">
+                    <i class="fa-solid fa-box-open" aria-hidden="true"></i>
+                    <span>Seleccionar Insumo</span>
+                </button>
+            </div>
             <form id="costos-edit-form" class="costos-edit-form" style="display:none;">
                 <div id="edit-fields"></div>
                 <div class="costos-edit-actions">
-                    <a href="receta-detalle.html" class="costos-edit-btn-cancel">Volver al listado</a>
+                    <a href="receta-detalle.html" id="crear-receta-detalle-btn-volver" class="costos-edit-btn-cancel">Volver al listado</a>
                     <button type="submit" class="costos-edit-btn-save"><i class="fa-solid fa-plus" aria-hidden="true"></i> Crear</button>
                 </div>
             </form>
@@ -63,7 +70,23 @@
                 var columnasPropias = sheetConfig.columnasPropias || [];
                 var nombresPropias = columnasPropias.map(function (n) { return String(n || "").trim(); });
                 function enColumnasPropias(nombreCol) { var n = String(nombreCol || "").trim().toLowerCase(); for (var i = 0; i < nombresPropias.length; i++) { if (String(nombresPropias[i] || "").toLowerCase().replace(/-/g, "") === n.replace(/-/g, "")) return true; } return false; }
-                loadingEl.style.display = "none"; formEl.style.display = "block"; fieldsContainer.innerHTML = "";
+                loadingEl.style.display = "none";
+                var leyendaInsumo = document.getElementById("leyenda-seleccionar-insumo");
+                if (leyendaInsumo) leyendaInsumo.style.display = "block";
+                formEl.style.display = "block";
+                var btnVolver = document.getElementById("crear-receta-detalle-btn-volver");
+                if (btnVolver) {
+                    var recetaBaseStorage = "";
+                    try { recetaBaseStorage = sessionStorage.getItem("costosEditRecordRecetaBase") || ""; } catch (e) {}
+                    if (recetaBaseStorage) {
+                        btnVolver.href = "../Receta-Base/ver-receta-base.html";
+                        btnVolver.textContent = "Volver a la Receta";
+                    } else {
+                        btnVolver.href = "receta-detalle.html";
+                        btnVolver.textContent = "Volver al listado";
+                    }
+                }
+                fieldsContainer.innerHTML = "";
                 var headers = columnas.map(function (c) { return c.nombre; });
                 var idGeneradoPreview = (window.GENERAR_ID_PARA_HOJA && sheetConfig.clavePrimaria && sheetConfig.clavePrimaria[0]) ? window.GENERAR_ID_PARA_HOJA(sheetConfig) : "";
                 columnas.forEach(function (col, idx) {
@@ -143,6 +166,14 @@
                     });
                     return Promise.all(promesas);
                 }
+                var btnSeleccionarInsumo = document.getElementById("btn-seleccionar-insumo");
+                if (btnSeleccionarInsumo) {
+                    btnSeleccionarInsumo.addEventListener("click", function (e) {
+                        e.preventDefault();
+                        var returnTo = "../Armador-Receta/Receta-Detalle/crear-receta-detalle.html";
+                        window.location.href = "../../insumos/lista-insumos-materia-prima.html?returnTo=" + encodeURIComponent(returnTo);
+                    });
+                }
                 loadCombosDesdeApi(formEl, appsScriptUrl).then(function () {
                     var idRecetaBasePrefill = "";
                     try { idRecetaBasePrefill = sessionStorage.getItem("recetaBaseIdForNewItem") || ""; } catch (e) {}
@@ -150,6 +181,24 @@
                         var fieldIdReceta = formEl.querySelector("[data-nombre=\"IDReceta-Base\"]");
                         if (fieldIdReceta && fieldIdReceta.value !== undefined) { fieldIdReceta.value = idRecetaBasePrefill; }
                         try { sessionStorage.removeItem("recetaBaseIdForNewItem"); } catch (e) {}
+                    }
+                    var insumoSeleccionado = "";
+                    try { insumoSeleccionado = sessionStorage.getItem("insumoSeleccionadoParaRecetaDetalle") || ""; } catch (e) {}
+                    if (insumoSeleccionado) {
+                        try {
+                            var data = JSON.parse(insumoSeleccionado);
+                            var idInsumo = (data && data.id != null) ? String(data.id).trim() : "";
+                            sessionStorage.removeItem("insumoSeleccionadoParaRecetaDetalle");
+                            if (idInsumo) {
+                                var fieldInsumo = formEl.querySelector("[data-nombre=\"IDInsumo-MateriaPrima\"]");
+                                if (fieldInsumo && fieldInsumo.value !== undefined) { fieldInsumo.value = idInsumo; }
+                                applyLookups(formEl, sheetConfig, appsScriptUrl).then(function () {
+                                    applyFormulas(formEl, sheetConfig);
+                                    updateCreateButton();
+                                });
+                                return;
+                            }
+                        } catch (err) {}
                     }
                     applyLookups(formEl, sheetConfig, appsScriptUrl).then(function () {
                         applyFormulas(formEl, sheetConfig);

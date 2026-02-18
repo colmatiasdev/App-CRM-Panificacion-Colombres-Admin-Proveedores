@@ -59,7 +59,7 @@
       visible: true,
       obligatorio: true,
       descripcion: "Cantidad.",
-      restricciones: { min: 0 }
+      restricciones: { min: 0, entero: true } 
     },
     {
       nombre: "Unidad-Medida",
@@ -67,18 +67,18 @@
       tipoDato: "text",
       tipoComponente: "label",
       visible: true,
-      obligatorio: false,
+      obligatorio: true,
       descripcion: "Completado por relación con PRECIO-Materia-Prima.",
       restricciones: { maxLongitud: 50 }
     },
     {
       nombre: "Precio-Equivalencia-x-Unidad",
-      alias: "Precio x Unidad",
+      alias: "Costo del Insumo",
       tipoDato: "numeric",
-      tipoComponente: "text-box",
+      tipoComponente: "label",
       decimales: 2,
       visible: true,
-      obligatorio: false,
+      obligatorio: true,
       descripcion: "Precio equivalencia por unidad (se completa desde insumo, editable).",
       restricciones: { min: 0 },
       formatoVisual: "moneda"
