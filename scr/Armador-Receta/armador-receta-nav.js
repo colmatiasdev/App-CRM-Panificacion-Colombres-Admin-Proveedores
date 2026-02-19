@@ -31,8 +31,26 @@
         linkHub.textContent = "Armador de Receta";
         nav.appendChild(linkHub);
 
+        var listaOcultar = config.submodulosSinOpcionesMenu && Array.isArray(config.submodulosSinOpcionesMenu) ? config.submodulosSinOpcionesMenu : [];
+        var ocultarOpciones = listaOcultar.indexOf(submoduloActual) !== -1;
+        if (!ocultarOpciones && typeof global.location !== "undefined" && global.location.pathname) {
+            var path = global.location.pathname || "";
+            if (path.indexOf("Producto-Unitario-Base") !== -1 || path.indexOf("Elaboracion-Productos-Base") !== -1) ocultarOpciones = true;
+        }
+        if (ocultarOpciones) return;
+
+        var menuOpcionesMap = {};
+        if (config.menuOpciones && config.menuOpciones.length) {
+            config.menuOpciones.forEach(function (op) {
+                if (op.href) menuOpcionesMap[op.href] = op;
+            });
+        }
+
         config.subModulos.forEach(function (sub) {
             if (!sub.visibleEnMenu) return;
+            var hrefFromHub = sub.carpeta && sub.listar ? sub.carpeta + "/" + sub.listar : "";
+            var opcionHub = hrefFromHub ? menuOpcionesMap[hrefFromHub] : null;
+            if (opcionHub && opcionHub.visible === false) return;
             var a = document.createElement("a");
             if (sub.carpeta && sub.listar) {
                 a.href = sub.id === submoduloActual ? sub.listar : ("../" + sub.carpeta + "/" + sub.listar);

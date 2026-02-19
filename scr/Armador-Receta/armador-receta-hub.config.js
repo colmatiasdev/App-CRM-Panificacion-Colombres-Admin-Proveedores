@@ -12,13 +12,19 @@
         pathHub: "armador-receta.html",
 
         /**
+         * IDs de submódulos donde no se muestran los enlaces a otros submódulos en el menú.
+         * En esas páginas el nav solo muestra Inicio y Armador de Receta.
+         */
+        submodulosSinOpcionesMenu: ["producto-unitario-base", "elaboracion-productos-base"],
+
+        /**
          * Opciones del menú en la página principal (hub). Definidas por vínculo (href).
          */
         menuOpciones: [
-            { href: "Receta-Base/receta-base.html", label: "Receta Base", visible: true },
-            { href: "Receta-Detalle/receta-detalle.html", label: "Receta Detalle", visible: true },
-            { href: "Producto-Unitario-Base/producto-unitario-base.html", label: "Producto Unitario Base", visible: true },
-            { href: "Elaboracion-Productos-Base/elaboracion-productos-base.html", label: "Elaboración Productos Base", visible: true }
+            { href: "Receta-Base/receta-base.html", label: "Listado de Recetas [Base de la Masa]", visible: false },
+            { href: "Receta-Detalle/receta-detalle.html", label: "Receta Detalle", visible: false },
+            { href: "Producto-Unitario-Base/producto-unitario-base.html", label: "Producto Unitario Base", visible: false },
+            { href: "Elaboracion-Productos-Base/elaboracion-productos-base.html", label: "Elaboración Productos Base", visible: false }
         ],
 
         /**
@@ -30,7 +36,7 @@
         subModulos: [
             {
                 id: "receta-base",
-                label: "Receta Base",
+                label: "Listado de Recetas [Base de la Masa]",
                 carpeta: "Receta-Base",
                 listar: "receta-base.html",
                 visibleEnMenu: true,
@@ -41,7 +47,7 @@
                 label: "Receta Detalle",
                 carpeta: "Receta-Detalle",
                 listar: "receta-detalle.html",
-                visibleEnMenu: true,
+                visibleEnMenu: false,
                 botones: { listar: true, nuevo: true }
             },
             {
@@ -49,7 +55,7 @@
                 label: "Producto Unitario Base",
                 carpeta: "Producto-Unitario-Base",
                 listar: "producto-unitario-base.html",
-                visibleEnMenu: true,
+                visibleEnMenu: false,
                 botones: { listar: true, nuevo: true }
             },
             {
@@ -57,7 +63,7 @@
                 label: "Elaboración Productos Base",
                 carpeta: "Elaboracion-Productos-Base",
                 listar: "elaboracion-productos-base.html",
-                visibleEnMenu: true,
+                visibleEnMenu: false,
                 botones: { listar: true, nuevo: true }
             }
         ],
@@ -71,7 +77,7 @@
         modulos: [
             {
                 id: "receta-base",
-                label: "Receta Base",
+                label: "Listado de Recetas [Base de la Masa]",
                 icono: "fa-book",
                 visible: true,
                 rutaListar: "Receta-Base/receta-base.html",

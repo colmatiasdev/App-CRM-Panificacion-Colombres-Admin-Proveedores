@@ -104,8 +104,9 @@
                         html += "</dl>";
                         detalleEl.innerHTML = html;
                         var idRecetaBase = "";
-                        var ddId = detalleEl.querySelector("dd[data-nombre=\"IDReceta-Base\"]");
-                        if (ddId && ddId.textContent) idRecetaBase = String(ddId.textContent).trim();
+                        var idxIdCol = -1;
+                        for (var i = 0; i < columnas.length; i++) { if ((columnas[i].nombre || "").trim() === "IDReceta-Base") { idxIdCol = i; break; } }
+                        if (idxIdCol >= 0 && row[idxIdCol] != null && row[idxIdCol] !== "") idRecetaBase = String(row[idxIdCol]).trim();
                         if (idRecetaBase === "—") idRecetaBase = "";
                         var btnAgregar = document.getElementById("btn-agregar-item-receta");
                         if (btnAgregar) {

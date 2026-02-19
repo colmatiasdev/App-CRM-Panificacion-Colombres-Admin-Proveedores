@@ -28,7 +28,6 @@
             <form id="costos-edit-form" class="costos-edit-form" style="display:none;">
                 <div id="edit-fields"></div>
                 <div class="costos-edit-actions">
-                    <a href="receta-base.html" class="costos-edit-btn-cancel">Volver al listado</a>
                     <button type="submit" class="costos-edit-btn-save"><i class="fa-solid fa-check" aria-hidden="true"></i> Guardar cambios</button>
                 </div>
             </form>
@@ -312,7 +311,7 @@
                             }).then(function (json) {
                                 if (saveBtn) { saveBtn.disabled = !hasFormChanged(); saveBtn.innerHTML = btnText; }
                                 hideEditAlert();
-                                if (json && json.success) { try { sessionStorage.setItem(STORAGE_EDIT, JSON.stringify({ id: id, headers: headers, row: newRow })); } catch (e) {} window.location.replace("receta-base.html"); }
+                                if (json && json.success) { try { sessionStorage.setItem(STORAGE_EDIT, JSON.stringify({ id: id, headers: headers, row: newRow })); } catch (e) {} window.location.replace("ver-receta-base.html"); }
                                 else showEditAlert("Error al guardar: " + ((json && json.error) ? json.error : "Respuesta inválida"), "error");
                             }).catch(function (err) {
                                 if (saveBtn) { saveBtn.disabled = !hasFormChanged(); saveBtn.innerHTML = btnText; }

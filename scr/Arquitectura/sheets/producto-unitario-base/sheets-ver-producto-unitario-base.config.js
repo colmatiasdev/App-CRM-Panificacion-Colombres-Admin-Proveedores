@@ -15,14 +15,14 @@
       alias: "Orden",
       tipoDato: "numeric",
       tipoComponente: "label",
-      visible: true
+      visible: false
     },
     {
       nombre: "IDCosto-ProductoUnitario",
       alias: "ID Costo Producto Unitario",
       tipoDato: "text",
       tipoComponente: "label",
-      visible: true
+      visible: false
     },
     {
       nombre: "Comercio-Sucursal",
@@ -118,14 +118,14 @@
       alias: "Habilitado",
       tipoDato: "text",
       tipoComponente: "label",
-      visible: true
+      visible: false
     },
     {
       nombre: "Fecha-Registro-Actualizado-Al",
       alias: "Actualizado",
       tipoDato: "text",
       tipoComponente: "label",
-      visible: true
+      visible: false
     }
   ];
   window.PRODUCTO_UNITARIO_BASE_SHEETS_JSON = {

@@ -817,6 +817,7 @@ body.costos-page {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+    justify-content: center;
     gap: 12px;
     margin-top: 20px;
     padding-top: 16px;

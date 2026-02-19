@@ -11,7 +11,7 @@
       alias: "ID Receta Base",
       tipoDato: "text",
       tipoComponente: "label",
-      visible: true,
+      visible: false,
       descripcion: "Identificador único."
     },
     {
