@@ -1,17 +1,18 @@
 /**
  * Configuración del hub y menú del módulo Armador de Receta.
- * Controla qué secciones del hub se muestran, qué botones por sección y qué enlaces en la cabecera.
- * Las opciones del menú se controlan por vínculo (href) en menuOpciones.
- * Ubicación: nivel de carpeta del módulo (Armador-Receta).
+ * Módulo principal: Armador-Receta. Submódulos: Receta-Base, Receta-Detalle, Producto-Unitario-Base, Elaboracion-Productos-Base.
+ * Controla hub, menú del hub y menú de las páginas de cada submódulo (visibleEnMenu, botones).
  */
 (function (global) {
     "use strict";
 
     global.ARMADOR_RECETA_HUB_CONFIG = {
+        /** Rutas desde la carpeta del módulo (Armador-Receta) hacia índice y hub */
+        pathIndex: "../../index.html",
+        pathHub: "armador-receta.html",
+
         /**
-         * Opciones del menú de navegación, definidas por vínculo (href).
-         * Orden y habilitación se controlan aquí: visible = true para mostrar en la cabecera.
-         * Se pueden agregar más enlaces (ej. a páginas concretas) o reordenar.
+         * Opciones del menú en la página principal (hub). Definidas por vínculo (href).
          */
         menuOpciones: [
             { href: "Receta-Base/receta-base.html", label: "Receta Base", visible: true },
@@ -21,7 +22,48 @@
         ],
 
         /**
-         * Módulos del hub. Cada uno puede mostrarse u ocultarse en el hub.
+         * Submódulos: definen el menú lateral en las páginas dentro de cada submódulo.
+         * visibleEnMenu: si el ítem aparece en la barra de navegación de las subpáginas.
+         * botones: habilitar/deshabilitar botones "Listar" y "Nuevo" en las vistas del submódulo.
+         * carpeta: nombre de la carpeta (ej. Receta-Base). listar: nombre del archivo listar (ej. receta-base.html).
+         */
+        subModulos: [
+            {
+                id: "receta-base",
+                label: "Receta Base",
+                carpeta: "Receta-Base",
+                listar: "receta-base.html",
+                visibleEnMenu: true,
+                botones: { listar: true, nuevo: true }
+            },
+            {
+                id: "receta-detalle",
+                label: "Receta Detalle",
+                carpeta: "Receta-Detalle",
+                listar: "receta-detalle.html",
+                visibleEnMenu: true,
+                botones: { listar: true, nuevo: true }
+            },
+            {
+                id: "producto-unitario-base",
+                label: "Producto Unitario Base",
+                carpeta: "Producto-Unitario-Base",
+                listar: "producto-unitario-base.html",
+                visibleEnMenu: true,
+                botones: { listar: true, nuevo: true }
+            },
+            {
+                id: "elaboracion-productos-base",
+                label: "Elaboración Productos Base",
+                carpeta: "Elaboracion-Productos-Base",
+                listar: "elaboracion-productos-base.html",
+                visibleEnMenu: true,
+                botones: { listar: true, nuevo: true }
+            }
+        ],
+
+        /**
+         * Módulos del hub (secciones en armador-receta.html). Cada uno puede mostrarse u ocultarse en el hub.
          * botones: visibilidad y texto de cada botón (listar, nuevo, etc.).
          * ocultarSiReferrerContiene: si está definido, la sección del hub se oculta cuando
          *   el referrer contiene alguna de estas cadenas (ej. llegada desde receta-base).
