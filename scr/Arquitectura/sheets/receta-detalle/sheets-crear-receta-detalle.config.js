@@ -13,7 +13,7 @@
       alias: "ID Detalle",
       tipoDato: "text",
       tipoComponente: "label",
-      visible: false,
+      visible: true,
       obligatorio: true,
       descripcion: "ID autogenerado.",
       restricciones: {}
@@ -22,23 +22,21 @@
       nombre: "IDReceta-Base",
       alias: "ID Receta Base",
       tipoDato: "text",
-      tipoComponente: "combo-desde-api",
+      tipoComponente: "label",
       visible: true,
       obligatorio: true,
       descripcion: "Receta base (Tabla-Receta-Base).",
       restricciones: { maxLongitud: 100 },
-      comboDesdeApi: { sheet: "Tabla-Receta-Base", valorColumna: "IDReceta-Base", etiquetaColumna: "Descripcion-Masa-Producto" }
     },
     {
       nombre: "IDInsumo-MateriaPrima",
       alias: "Insumo (Materia Prima)",
       tipoDato: "text",
-      tipoComponente: "combo-desde-api",
+      tipoComponente: "label",
       visible: true,
       obligatorio: true,
-      descripcion: "Insumo desde PRECIO-Materia-Prima (idmateria-prima).",
+      descripcion: "Insumo de los Precios Materia-Prima.",
       restricciones: { maxLongitud: 100 },
-      comboDesdeApi: { sheet: "PRECIO-Materia-Prima", valorColumna: "idmateria-prima", etiquetaColumna: "Nombre-Producto" }
     },
     {
       nombre: "Nombre-Insumo",
@@ -46,7 +44,7 @@
       tipoDato: "text",
       tipoComponente: "label",
       visible: true,
-      obligatorio: false,
+      obligatorio: true,
       descripcion: "Completado por relación con PRECIO-Materia-Prima.",
       restricciones: { maxLongitud: 200 }
     },

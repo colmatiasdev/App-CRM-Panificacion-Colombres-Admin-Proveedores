@@ -66,14 +66,16 @@
       var nombre = String((col.nombre || "").trim());
       if (nombre) config.columnasPorNombre[nombre] = { index: idx, col: col };
     });
-    window._recetaDetalleConfigCache = { config: config, timestamp: Date.now() };
+    var accionId = (window.RECETA_DETALLE_GET_ACCION_ACTUAL && window.RECETA_DETALLE_GET_ACCION_ACTUAL()) ? window.RECETA_DETALLE_GET_ACCION_ACTUAL().id : "";
+    window._recetaDetalleConfigCache = { config: config, timestamp: Date.now(), accionId: accionId };
     window.RECETA_DETALLE_CONFIG = config;
     return config;
   }
 
   function loadConfig() {
+    var accionId = (window.RECETA_DETALLE_GET_ACCION_ACTUAL && window.RECETA_DETALLE_GET_ACCION_ACTUAL()) ? window.RECETA_DETALLE_GET_ACCION_ACTUAL().id : "";
     var cached = window._recetaDetalleConfigCache;
-    if (cached && cached.timestamp && (Date.now() - cached.timestamp < CACHE_MAX_AGE_MS)) return Promise.resolve(cached.config);
+    if (cached && cached.accionId === accionId && cached.timestamp && (Date.now() - cached.timestamp < CACHE_MAX_AGE_MS)) return Promise.resolve(cached.config);
     var json = window.RECETA_DETALLE_SHEETS_JSON;
     if (!json) return Promise.reject(new Error("Falta la configuración del módulo. Cargá el script de la acción antes de receta-detalle-config.js."));
     try {

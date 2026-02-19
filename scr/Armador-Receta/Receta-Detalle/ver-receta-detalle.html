@@ -65,9 +65,10 @@
                         var headersFromStorage = data.headers || []; var rowFromStorage = data.row || [];
                         var columnas = sheetConfig.columnas || []; var row = mapRowToConfigOrder(rowFromStorage, headersFromStorage, columnas);
                         loadingEl.style.display = "none"; detalleEl.style.display = "block"; actionsEl.style.display = "block";
+                        function columnaVisible(col) { if (col == null) return false; if (col.visible === false || col.visible === "false") return false; return true; }
                         var html = "<dl class=\"costos-ver-dl\">";
                         columnas.forEach(function (col, idx) {
-                            if (col.visible === false) return;
+                            if (!columnaVisible(col)) return;
                             var nombre = (col.alias != null ? col.alias : col.nombre || "").trim();
                             if (!nombre) return;
                             var val = (row[idx] != null && row[idx] !== "") ? String(row[idx]).trim() : "—";

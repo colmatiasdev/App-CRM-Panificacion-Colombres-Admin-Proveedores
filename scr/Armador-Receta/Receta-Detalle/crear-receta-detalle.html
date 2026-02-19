@@ -33,6 +33,7 @@
             <p id="edit-no-data" class="costos-placeholder" style="display:none;">No se pudo cargar el formulario.</p>
             <p id="edit-loading" class="costos-placeholder">Cargando formulario…</p>
             <div id="leyenda-seleccionar-insumo" class="costos-edit-leyenda-insumo" style="display:none;" aria-describedby="leyenda-seleccionar-insumo-texto">
+                <p id="leyenda-seleccionar-insumo-titulo" class="costos-edit-leyenda-titulo-receta" style="display:none;"></p>
                 <p id="leyenda-seleccionar-insumo-texto" class="costos-intro costos-edit-leyenda-texto">Agregá la materia prima seleccionando el insumo necesario para esta línea de la receta.</p>
                 <button type="button" id="btn-seleccionar-insumo" class="costos-calc-btn" aria-describedby="leyenda-seleccionar-insumo-texto">
                     <i class="fa-solid fa-box-open" aria-hidden="true"></i>
@@ -42,7 +43,7 @@
             <form id="costos-edit-form" class="costos-edit-form" style="display:none;">
                 <div id="edit-fields"></div>
                 <div class="costos-edit-actions">
-                    <a href="receta-detalle.html" id="crear-receta-detalle-btn-volver" class="costos-edit-btn-cancel">Volver al listado</a>
+                    <a href="receta-detalle.html" id="crear-receta-detalle-btn-volver" class="costos-edit-btn-cancel">Cancelar</a>
                     <button type="submit" class="costos-edit-btn-save"><i class="fa-solid fa-plus" aria-hidden="true"></i> Crear</button>
                 </div>
             </form>
@@ -70,9 +71,17 @@
                 var columnasPropias = sheetConfig.columnasPropias || [];
                 var nombresPropias = columnasPropias.map(function (n) { return String(n || "").trim(); });
                 function enColumnasPropias(nombreCol) { var n = String(nombreCol || "").trim().toLowerCase(); for (var i = 0; i < nombresPropias.length; i++) { if (String(nombresPropias[i] || "").toLowerCase().replace(/-/g, "") === n.replace(/-/g, "")) return true; } return false; }
+                function columnaVisible(col) { if (col == null) return false; if (col.visible === false || col.visible === "false") return false; return true; }
                 loadingEl.style.display = "none";
                 var leyendaInsumo = document.getElementById("leyenda-seleccionar-insumo");
+                var leyendaTitulo = document.getElementById("leyenda-seleccionar-insumo-titulo");
                 if (leyendaInsumo) leyendaInsumo.style.display = "block";
+                var descripcionReceta = "";
+                try { descripcionReceta = sessionStorage.getItem("recetaBaseDescripcionForNewItem") || ""; } catch (e) {}
+                if (leyendaTitulo && descripcionReceta) {
+                    leyendaTitulo.textContent = descripcionReceta;
+                    leyendaTitulo.style.display = "block";
+                }
                 formEl.style.display = "block";
                 var btnVolver = document.getElementById("crear-receta-detalle-btn-volver");
                 if (btnVolver) {
@@ -80,18 +89,17 @@
                     try { recetaBaseStorage = sessionStorage.getItem("costosEditRecordRecetaBase") || ""; } catch (e) {}
                     if (recetaBaseStorage) {
                         btnVolver.href = "../Receta-Base/ver-receta-base.html";
-                        btnVolver.textContent = "Volver a la Receta";
                     } else {
                         btnVolver.href = "receta-detalle.html";
-                        btnVolver.textContent = "Volver al listado";
                     }
+                    btnVolver.textContent = "Cancelar";
                 }
                 fieldsContainer.innerHTML = "";
                 var headers = columnas.map(function (c) { return c.nombre; });
                 var idGeneradoPreview = (window.GENERAR_ID_PARA_HOJA && sheetConfig.clavePrimaria && sheetConfig.clavePrimaria[0]) ? window.GENERAR_ID_PARA_HOJA(sheetConfig) : "";
                 columnas.forEach(function (col, idx) {
                     var nombreCol = (col.nombre || "").trim();
-                    if (!enColumnasPropias(nombreCol) || col.visible === false) return;
+                    if (!enColumnasPropias(nombreCol) || !columnaVisible(col)) return;
                     var nombre = (col.alias != null ? col.alias : col.nombre || "").trim();
                     if (!nombre) return;
                     var val = "";
@@ -104,6 +112,23 @@
                     var wrap = document.createElement("div"); wrap.className = "costos-edit-field"; wrap.appendChild(label);
                     if (soloLectura || esPkAutogenerado) {
                         var valorMostrar = esPkAutogenerado ? idGeneradoPreview : (col.descripcion || "Solo lectura");
+                        if (nombreCol === "IDReceta-Base") {
+                            var idRbStorage = "";
+                            try { idRbStorage = sessionStorage.getItem("recetaBaseIdForNewItem") || ""; } catch (e) {}
+                            if (!idRbStorage || idRbStorage.trim() === "") {
+                                try {
+                                    var rbRaw = sessionStorage.getItem("costosEditRecordRecetaBase");
+                                    if (rbRaw) {
+                                        var rbData = JSON.parse(rbRaw);
+                                        var hRb = rbData.headers || [];
+                                        var rRb = rbData.row || [];
+                                        var idxRb = hRb.indexOf("IDReceta-Base");
+                                        if (idxRb >= 0 && rRb[idxRb] != null && String(rRb[idxRb]).trim() !== "") idRbStorage = String(rRb[idxRb]).trim();
+                                    }
+                                } catch (err) {}
+                            }
+                            if (idRbStorage && idRbStorage.trim() !== "") valorMostrar = idRbStorage.trim();
+                        }
                         if (col.formatoVisual && typeof window.formatNumeroVisual === "function") { var numVal = parseFloat(String(valorMostrar).replace(",", ".")); if (!isNaN(numVal)) valorMostrar = window.formatNumeroVisual(numVal, col.formatoVisual, col.decimales != null ? col.decimales : 2); }
                         var ro = document.createElement("span"); ro.id = "field-" + idx; ro.className = "costos-edit-input costos-edit-readonly"; ro.setAttribute("data-header-index", String(idx)); ro.setAttribute("data-nombre", nombreCol);
                         if (col.formatoVisual) ro.setAttribute("data-formato-visual", col.formatoVisual); if (col.descripcion) ro.title = col.descripcion; ro.setAttribute("aria-readonly", "true"); ro.textContent = valorMostrar; wrap.appendChild(ro);
@@ -170,16 +195,34 @@
                 if (btnSeleccionarInsumo) {
                     btnSeleccionarInsumo.addEventListener("click", function (e) {
                         e.preventDefault();
+                        var fieldRb = formEl.querySelector("[data-nombre=\"IDReceta-Base\"]");
+                        var valRb = fieldRb ? (fieldRb.value !== undefined ? String(fieldRb.value).trim() : String(fieldRb.textContent || "").trim()) : "";
+                        if (valRb && valRb !== "—") {
+                            try { sessionStorage.setItem("recetaBaseIdForNewItem", valRb); } catch (err) {}
+                        }
+                        var tituloEl = document.getElementById("leyenda-seleccionar-insumo-titulo");
+                        if (tituloEl && tituloEl.textContent && String(tituloEl.textContent).trim() !== "") {
+                            try { sessionStorage.setItem("recetaBaseDescripcionForNewItem", String(tituloEl.textContent).trim()); } catch (err) {}
+                        }
                         var returnTo = "../Armador-Receta/Receta-Detalle/crear-receta-detalle.html";
                         window.location.href = "../../insumos/lista-insumos-materia-prima.html?returnTo=" + encodeURIComponent(returnTo);
                     });
                 }
                 loadCombosDesdeApi(formEl, appsScriptUrl).then(function () {
                     var idRecetaBasePrefill = "";
+                    var descripcionRecetaPrefill = "";
                     try { idRecetaBasePrefill = sessionStorage.getItem("recetaBaseIdForNewItem") || ""; } catch (e) {}
+                    try { descripcionRecetaPrefill = sessionStorage.getItem("recetaBaseDescripcionForNewItem") || ""; } catch (e) {}
                     if (idRecetaBasePrefill) {
                         var fieldIdReceta = formEl.querySelector("[data-nombre=\"IDReceta-Base\"]");
-                        if (fieldIdReceta && fieldIdReceta.value !== undefined) { fieldIdReceta.value = idRecetaBasePrefill; }
+                        if (fieldIdReceta) {
+                            if (fieldIdReceta.value !== undefined) {
+                                fieldIdReceta.value = idRecetaBasePrefill;
+                            } else if (fieldIdReceta.tagName === "SPAN") {
+                                fieldIdReceta.textContent = idRecetaBasePrefill;
+                                if (descripcionRecetaPrefill) fieldIdReceta.setAttribute("title", descripcionRecetaPrefill);
+                            }
+                        }
                         try { sessionStorage.removeItem("recetaBaseIdForNewItem"); } catch (e) {}
                     }
                     var insumoSeleccionado = "";
@@ -193,7 +236,10 @@
                             sessionStorage.removeItem("insumoSeleccionadoParaRecetaDetalle");
                             if (idInsumo) {
                                 var fieldInsumo = formEl.querySelector("[data-nombre=\"IDInsumo-MateriaPrima\"]");
-                                if (fieldInsumo && fieldInsumo.value !== undefined) { fieldInsumo.value = idInsumo; }
+                                if (fieldInsumo) {
+                                    if (fieldInsumo.value !== undefined) { fieldInsumo.value = idInsumo; }
+                                    else if (fieldInsumo.tagName === "SPAN") { fieldInsumo.textContent = idInsumo; }
+                                }
                                 var prop = sheetConfig.propagacionDesdeInsumo;
                                 if (prop && prop.columnas && prop.columnas.length && headersInsumo.length && rowInsumo.length) {
                                     function normH(s) { return String(s != null ? s : "").trim().toLowerCase().replace(/\s+/g, "").replace(/-/g, ""); }
@@ -372,21 +418,45 @@
                 formEl.addEventListener("submit", function (e) {
                     e.preventDefault(); hideEditAlert();
                     applyFormulas(formEl, sheetConfig);
-                    var newRow = headers.map(function () { return ""; });
-                    formEl.querySelectorAll("[data-header-index]").forEach(function (el) {
-                        var idx = parseInt(el.getAttribute("data-header-index"), 10);
-                        if (idx < 0 || idx >= newRow.length) return;
-                        var val = el.value != null ? String(el.value).trim() : (el.textContent != null ? String(el.textContent).trim() : "");
-                        var formato = el.getAttribute("data-formato-visual");
-                        if (formato && typeof window.parseNumeroVisual === "function") val = window.parseNumeroVisual(val, formato) || val;
-                        newRow[idx] = val;
-                    });
-                    if (window.GENERAR_ID_PARA_HOJA && sheetConfig.clavePrimaria && sheetConfig.clavePrimaria[0]) { var idColIdx = headers.indexOf(sheetConfig.clavePrimaria[0]); if (idColIdx >= 0) newRow[idColIdx] = window.GENERAR_ID_PARA_HOJA(sheetConfig); }
+                    var body = { action: "create", sheet: nombreHoja };
+                    for (var k = 0; k < headers.length; k++) {
+                        var colName = headers[k];
+                        if (!colName) continue;
+                        var el = formEl.querySelector("[data-nombre=\"" + String(colName).replace(/\\/g, "\\\\").replace(/"/g, "\\\"") + "\"]");
+                        var val = "";
+                        if (el) {
+                            val = el.value != null ? String(el.value).trim() : (el.textContent != null ? String(el.textContent).trim() : "");
+                            var formato = el.getAttribute("data-formato-visual");
+                            if (formato && typeof window.parseNumeroVisual === "function" && val !== "") { var parsed = window.parseNumeroVisual(val, formato); if (parsed !== undefined && parsed !== null) val = (typeof parsed === "number" ? (parsed.toFixed && !Number.isInteger(parsed) ? parsed.toFixed(2) : String(parsed)) : String(parsed)); }
+                        }
+                        body[colName] = val != null ? val : "";
+                    }
+                    var idRecetaBaseBody = (body["IDReceta-Base"] || "").trim();
+                    if (idRecetaBaseBody && idRecetaBaseBody.indexOf("RECETA-") !== 0) {
+                        var idRbFallback = "";
+                        try { idRbFallback = sessionStorage.getItem("recetaBaseIdForNewItem") || ""; } catch (e) {}
+                        if (!idRbFallback || idRbFallback.trim() === "") {
+                            try {
+                                var rbRaw = sessionStorage.getItem("costosEditRecordRecetaBase");
+                                if (rbRaw) {
+                                    var rbParsed = JSON.parse(rbRaw);
+                                    var hRb = rbParsed.headers || [];
+                                    var rRb = rbParsed.row || [];
+                                    var idxRb = hRb.indexOf("IDReceta-Base");
+                                    if (idxRb >= 0 && rRb[idxRb] != null && String(rRb[idxRb]).trim() !== "") idRbFallback = String(rRb[idxRb]).trim();
+                                }
+                            } catch (err) {}
+                        }
+                        if (idRbFallback) body["IDReceta-Base"] = idRbFallback;
+                    }
+                    if (sheetConfig.clavePrimaria && sheetConfig.clavePrimaria[0]) {
+                        var pkName = sheetConfig.clavePrimaria[0];
+                        if (!body[pkName] || String(body[pkName]).trim() === "") body[pkName] = (window.GENERAR_ID_PARA_HOJA && window.GENERAR_ID_PARA_HOJA(sheetConfig)) || "";
+                    }
+                    var newRow = headers.map(function (h) { return body[h] != null ? body[h] : ""; });
                     var saveBtn = formEl.querySelector(".costos-edit-btn-save"); var btnText = saveBtn ? saveBtn.innerHTML : "";
                     if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = "<i class=\"fa-solid fa-spinner fa-spin\" aria-hidden=\"true\"></i> Guardando…"; }
                     if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.show("Guardando…");
-                    var body = { action: "create", sheet: nombreHoja };
-                    for (var k = 0; k < headers.length; k++) { if (headers[k]) body[headers[k]] = newRow[k] != null ? newRow[k] : ""; }
                     var formBody = new URLSearchParams();
                     for (var key in body) { if (body.hasOwnProperty(key)) formBody.append(key, body[key] != null ? body[key] : ""); }
                     fetch(appsScriptUrl, { method: "POST", body: formBody }).then(function (res) { return res.text(); }).then(function (text) {
@@ -399,7 +469,39 @@
                             if (idColIdx < 0) idColIdx = 0;
                             var idGuardado = (newRow[idColIdx] != null && String(newRow[idColIdx]).trim() !== "") ? String(newRow[idColIdx]).trim() : (json.data && json.data[sheetConfig.clavePrimaria && sheetConfig.clavePrimaria[0] ? sheetConfig.clavePrimaria[0] : "IDReceta-Base-Detalle"]) || "";
                             try { sessionStorage.setItem(STORAGE_EDIT, JSON.stringify({ id: idGuardado, headers: headers, row: newRow })); } catch (e) {}
-                            window.location.replace("ver-receta-detalle.html");
+                            var idRecetaBase = (body["IDReceta-Base"] || "").trim();
+                            function irAVerRecetaBase() {
+                                window.location.replace("../Receta-Base/ver-receta-base.html");
+                            }
+                            if (!idRecetaBase) {
+                                irAVerRecetaBase();
+                                return;
+                            }
+                            var rawRecetaBase = null;
+                            try { rawRecetaBase = sessionStorage.getItem("costosEditRecordRecetaBase"); } catch (err) {}
+                            if (rawRecetaBase) {
+                                try {
+                                    var parsedRb = JSON.parse(rawRecetaBase);
+                                    var headersRb = parsedRb.headers || [];
+                                    var rowRb = parsedRb.row || [];
+                                    var idxId = headersRb.indexOf("IDReceta-Base");
+                                    var existingId = (idxId >= 0 && rowRb[idxId] != null) ? String(rowRb[idxId]).trim() : "";
+                                    if (existingId === idRecetaBase) {
+                                        irAVerRecetaBase();
+                                        return;
+                                    }
+                                } catch (err) {}
+                            }
+                            var urlGetRb = appsScriptUrl + "?action=get&sheet=Tabla-Receta-Base&id=" + encodeURIComponent(idRecetaBase);
+                            fetch(urlGetRb, { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (jsonRb) {
+                                if (jsonRb && jsonRb.success && jsonRb.data && typeof jsonRb.data === "object") {
+                                    var dataRb = jsonRb.data;
+                                    var headersRb = Object.keys(dataRb);
+                                    var rowRb = headersRb.map(function (h) { return (dataRb[h] != null && dataRb[h] !== "") ? String(dataRb[h]).trim() : ""; });
+                                    try { sessionStorage.setItem("costosEditRecordRecetaBase", JSON.stringify({ id: idRecetaBase, headers: headersRb, row: rowRb })); } catch (err) {}
+                                }
+                                irAVerRecetaBase();
+                            }).catch(function () { irAVerRecetaBase(); });
                         } else {
                             showEditAlert("Error al guardar: " + ((json && json.error) ? json.error : "Respuesta inválida"), "error");
                         }

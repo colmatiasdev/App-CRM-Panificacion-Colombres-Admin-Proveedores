@@ -301,7 +301,7 @@ var PROPAGACION_RECETA_DETALLE_DESDE_INSUMO = {
   columnaClaveForanea: 'IDInsumo-MateriaPrima',
   columnas: [
     { columnaOrigen: 'Nombre-Producto', columnaDestino: 'Nombre-Insumo' },
-    { columnaOrigen: 'Presentacion-Unidad', columnaDestino: 'Unidad-Medida' },
+    { columnaOrigen: 'Equivalencia-Tipo-Unidad-Medida', columnaDestino: 'Unidad-Medida' },
     { columnaOrigen: 'Precio-Equivalencia-x-Unidad', columnaDestino: 'Precio-Equivalencia-x-Unidad' }
   ]
 };
@@ -494,6 +494,8 @@ function rellenarRecetaDetalleDesdeInsumo(obj) {
   for (var c = 0; c < PROPAGACION_RECETA_DETALLE_DESDE_INSUMO.columnas.length; c++) {
     var co = PROPAGACION_RECETA_DETALLE_DESDE_INSUMO.columnas[c].columnaOrigen;
     var cd = PROPAGACION_RECETA_DETALLE_DESDE_INSUMO.columnas[c].columnaDestino;
+    var actual = (obj[cd] != null ? String(obj[cd]) : '').trim();
+    if (actual !== '') continue;
     var val = insumoRow[co];
     obj[cd] = val != null && val !== '' ? (typeof val === 'number' ? val : String(val).trim()) : '';
   }

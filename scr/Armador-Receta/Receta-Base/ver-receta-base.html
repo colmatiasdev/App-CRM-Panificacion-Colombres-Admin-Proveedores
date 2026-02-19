@@ -35,6 +35,17 @@
                 <a href="#" id="btn-agregar-item-receta" class="costos-edit-btn-save" style="margin-left: auto;"><i class="fa-solid fa-plus" aria-hidden="true"></i> Agregar Item de la Receta</a>
                 <a href="editar-receta-base.html" class="costos-edit-btn-save"><i class="fa-solid fa-pen" aria-hidden="true"></i> Editar</a>
             </div>
+            <section id="ver-items-receta" class="costos-datos costos-ver-items-receta" style="display:none; margin-top: 2rem;">
+                <h2 class="costos-subtitle">Items de la receta</h2>
+                <p id="ver-items-loading" class="costos-placeholder">Cargando ítems…</p>
+                <p id="ver-items-empty" class="costos-placeholder" style="display:none;">No hay ítems en esta receta. Usá «Agregar Item de la Receta» para cargar materia prima.</p>
+                <div id="ver-items-container" class="costos-table-wrap" style="display:none;">
+                    <table class="costos-table costos-ver-items-table" aria-label="Items de la receta (Tabla-Receta-Base-Detalle)">
+                        <thead id="ver-items-thead"></thead>
+                        <tbody id="ver-items-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
         </div>
     </main>
     <script src="../../Arquitectura/sheets/receta-base/receta-base-config.js"></script>
@@ -67,7 +78,7 @@
                         loadingEl.style.display = "none"; detalleEl.style.display = "block"; actionsEl.style.display = "block";
                         var html = "<dl class=\"costos-ver-dl\">";
                         columnas.forEach(function (col, idx) {
-                            if (col.visible === false) return;
+                            if (col.visible === false || col.visible === "false") return;
                             var nombre = (col.alias != null ? col.alias : col.nombre || "").trim();
                             if (!nombre) return;
                             var val = (row[idx] != null && row[idx] !== "") ? String(row[idx]).trim() : "—";
@@ -75,25 +86,90 @@
                                 var num = parseFloat(String(val).replace(",", "."));
                                 if (!isNaN(num)) val = window.formatNumeroVisual(num, col.formatoVisual, col.decimales != null ? col.decimales : 2);
                             }
-                            html += "<dt class=\"costos-ver-dt\">" + escapeHtml(nombre) + "</dt><dd class=\"costos-ver-dd\">" + escapeHtml(val) + "</dd>";
+                            var nombreCol = (col.nombre || "").trim();
+                            html += "<dt class=\"costos-ver-dt\">" + escapeHtml(nombre) + "</dt><dd class=\"costos-ver-dd\" data-nombre=\"" + escapeHtml(nombreCol) + "\">" + escapeHtml(val) + "</dd>";
                         });
                         html += "</dl>";
                         detalleEl.innerHTML = html;
-                        var idRecetaBase = data.id != null ? String(data.id).trim() : "";
-                        if (!idRecetaBase && headersFromStorage.length && rowFromStorage.length) {
-                            var idxId = -1;
-                            for (var h = 0; h < headersFromStorage.length; h++) { if (norm(headersFromStorage[h]) === "idreceta-base") { idxId = h; break; } }
-                            if (idxId >= 0 && rowFromStorage[idxId] != null) idRecetaBase = String(rowFromStorage[idxId]).trim();
-                        }
+                        var idRecetaBase = "";
+                        var ddId = detalleEl.querySelector("dd[data-nombre=\"IDReceta-Base\"]");
+                        if (ddId && ddId.textContent) idRecetaBase = String(ddId.textContent).trim();
+                        if (idRecetaBase === "—") idRecetaBase = "";
                         var btnAgregar = document.getElementById("btn-agregar-item-receta");
                         if (btnAgregar) {
                             btnAgregar.addEventListener("click", function (e) {
                                 e.preventDefault();
+                                var descripcionMasaProducto = "";
+                                var ddDesc = detalleEl.querySelector("dd[data-nombre=\"Descripcion-Masa-Producto\"]");
+                                if (ddDesc && ddDesc.textContent) descripcionMasaProducto = String(ddDesc.textContent).trim();
+                                if (descripcionMasaProducto === "—") descripcionMasaProducto = "";
                                 try {
                                     if (idRecetaBase) sessionStorage.setItem("recetaBaseIdForNewItem", idRecetaBase);
+                                    if (descripcionMasaProducto) sessionStorage.setItem("recetaBaseDescripcionForNewItem", descripcionMasaProducto);
                                 } catch (err) {}
                                 window.location.href = "../Receta-Detalle/crear-receta-detalle.html";
                             });
+                        }
+                        var sectionItems = document.getElementById("ver-items-receta");
+                        var itemsLoading = document.getElementById("ver-items-loading");
+                        var itemsEmpty = document.getElementById("ver-items-empty");
+                        var itemsContainer = document.getElementById("ver-items-container");
+                        var thead = document.getElementById("ver-items-thead");
+                        var tbody = document.getElementById("ver-items-tbody");
+                        if (sectionItems && idRecetaBase) {
+                            sectionItems.style.display = "block";
+                            var config = window.APP_CONFIG || {};
+                            var appsScriptUrl = (config.appsScriptUrl || "").trim();
+                            if (appsScriptUrl && thead && tbody) {
+                                var urlItems = appsScriptUrl + "?action=search&sheet=Tabla-Receta-Base-Detalle&IDReceta-Base=" + encodeURIComponent(idRecetaBase) + "&limit=500&_=" + Date.now();
+                                fetch(urlItems, { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (json) {
+                                    if (itemsLoading) itemsLoading.style.display = "none";
+                                    if (!json || !json.success || !json.data) {
+                                        if (itemsEmpty) { itemsEmpty.style.display = "block"; itemsEmpty.textContent = "No se pudieron cargar los ítems."; }
+                                        return;
+                                    }
+                                    var headers = json.data.headers || [];
+                                    var rows = json.data.rows || [];
+                                    if (rows.length === 0) {
+                                        if (itemsEmpty) itemsEmpty.style.display = "block";
+                                        return;
+                                    }
+                                    var columnasVer = [
+                                        { nombre: "Nombre-Insumo", alias: "Nombre Insumo" },
+                                        { nombre: "Cantidad", alias: "Cantidad" },
+                                        { nombre: "Unidad-Medida", alias: "Unidad Medida" },
+                                        { nombre: "Precio-Equivalencia-x-Unidad", alias: "Precio x Unidad" },
+                                        { nombre: "Importe", alias: "Importe" }
+                                    ];
+                                    var idxCols = columnasVer.map(function (c) { return headers.indexOf(c.nombre); });
+                                    thead.innerHTML = "<tr>" + columnasVer.map(function (c) { return "<th scope=\"col\">" + escapeHtml(c.alias) + "</th>"; }).join("") + "</tr>";
+                                    tbody.innerHTML = "";
+                                    for (var r = 0; r < rows.length; r++) {
+                                        var rowRaw = rows[r];
+                                        var rowArr = Array.isArray(rowRaw) ? rowRaw : [];
+                                        var rowObj = (typeof rowRaw === "object" && rowRaw !== null && !Array.isArray(rowRaw)) ? rowRaw : null;
+                                        var cells = [];
+                                        for (var c = 0; c < idxCols.length; c++) {
+                                            var val = "—";
+                                            if (rowObj && rowObj[columnasVer[c].nombre] != null && rowObj[columnasVer[c].nombre] !== "") val = String(rowObj[columnasVer[c].nombre]).trim();
+                                            else if (rowArr.length) { var idx = idxCols[c]; if (idx >= 0 && idx < rowArr.length && rowArr[idx] != null && rowArr[idx] !== "") val = String(rowArr[idx]).trim(); }
+                                            if (val !== "—" && (columnasVer[c].nombre === "Cantidad" || columnasVer[c].nombre === "Precio-Equivalencia-x-Unidad" || columnasVer[c].nombre === "Importe")) {
+                                                var num = parseFloat(String(val).replace(",", "."));
+                                                if (!isNaN(num) && typeof window.formatNumeroVisual === "function") val = window.formatNumeroVisual(num, "moneda", 2);
+                                            }
+                                            cells.push("<td>" + escapeHtml(val) + "</td>");
+                                        }
+                                        tbody.innerHTML += "<tr>" + cells.join("") + "</tr>";
+                                    }
+                                    if (itemsContainer) itemsContainer.style.display = "block";
+                                }).catch(function (err) {
+                                    if (itemsLoading) itemsLoading.style.display = "none";
+                                    if (itemsEmpty) { itemsEmpty.style.display = "block"; itemsEmpty.textContent = "Error al cargar ítems: " + (err.message || ""); }
+                                });
+                            } else {
+                                if (itemsLoading) itemsLoading.style.display = "none";
+                                if (itemsEmpty) itemsEmpty.style.display = "block";
+                            }
                         }
                     }).catch(function (err) { loadingEl.style.display = "none"; noDataEl.style.display = "block"; noDataEl.textContent = "Error: " + (err.message || ""); });
                 }

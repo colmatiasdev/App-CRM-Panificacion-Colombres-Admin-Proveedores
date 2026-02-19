@@ -72,10 +72,11 @@
                         var nombreHoja = sheetConfig.nombreHoja; var columnas = sheetConfig.columnas || []; var headers = columnas.map(function (c) { return c.nombre; });
                         var row = mapRowToConfigOrder(rowFromStorage, headersFromStorage, columnas);
                         if (row.length !== headers.length) row = headers.map(function (_, i) { return rowFromStorage[i] != null ? String(rowFromStorage[i]) : ""; });
+                        function columnaVisible(col) { if (col == null) return false; if (col.visible === false || col.visible === "false") return false; return true; }
                         loadingEl.style.display = "none"; noDataEl.style.display = "none"; formEl.style.display = "block"; fieldsContainer.innerHTML = "";
                         columnas.forEach(function (col, idx) {
                             var nombre = (col.alias != null ? col.alias : col.nombre || "").trim();
-                            if (!nombre || col.visible === false) return;
+                            if (!nombre || !columnaVisible(col)) return;
                             var val = row[idx] != null ? String(row[idx]).trim() : "";
                             var restr = col.restricciones || {};
                             var tipoComp = col.tipoComponente != null ? col.tipoComponente : col.tipo;

@@ -32,7 +32,7 @@ window.RECETA_DETALLE_SHEET_BASE = {
       { columna: "IDInsumo-MateriaPrima", tabla: "PRECIO-Materia-Prima", pkReferencia: "idmateria-prima" }
     ],
     columnaOrden: null,
-    prefijoId: "RECDET-",
+    prefijoId: "RECETA-DET",
     patronId: 1,
     indices: [
       { columnas: ["IDReceta-Base-Detalle"], unico: true }
@@ -57,7 +57,7 @@ window.RECETA_DETALLE_SHEET_BASE = {
       {
         columnaClaveLocal: "IDInsumo-MateriaPrima",
         tablaOrigen: "PRECIO-Materia-Prima",
-        columnaOrigen: "Presentacion-Unidad",
+        columnaOrigen: "Equivalencia-Tipo-Unidad-Medida",
         columnaDestino: "Unidad-Medida"
       },
       {
@@ -78,7 +78,7 @@ window.RECETA_DETALLE_SHEET_BASE = {
       columnaClaveForanea: "IDInsumo-MateriaPrima",
       columnas: [
         { columnaOrigen: "Nombre-Producto", columnaDestino: "Nombre-Insumo" },
-        { columnaOrigen: "Presentacion-Unidad", columnaDestino: "Unidad-Medida" },
+        { columnaOrigen: "Equivalencia-Tipo-Unidad-Medida", columnaDestino: "Unidad-Medida" },
         { columnaOrigen: "Precio-Equivalencia-x-Unidad", columnaDestino: "Precio-Equivalencia-x-Unidad" }
       ]
     }

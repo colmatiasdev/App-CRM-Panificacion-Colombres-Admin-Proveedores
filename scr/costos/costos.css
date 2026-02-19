@@ -260,6 +260,12 @@ body.costos-page {
     margin-bottom: 1.25rem;
     text-align: center;
 }
+.costos-edit-leyenda-insumo .costos-edit-leyenda-titulo-receta {
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    color: var(--text, #1a1a2e);
+}
 .costos-edit-leyenda-insumo .costos-edit-leyenda-texto {
     margin-bottom: 0.75rem;
 }
@@ -2183,6 +2189,14 @@ body.costos-page {
     .costos-table td.costos-cell-producto::before {
         color: var(--logo-teal-dark);
     }
+    /* Items de la receta: mantener modo tabla detalle (no convertir en cards) */
+    .costos-ver-items-table { display: table; min-width: 100%; }
+    .costos-ver-items-table thead { display: table-header-group; }
+    .costos-ver-items-table tbody { display: table-row-group; }
+    .costos-ver-items-table tr { display: table-row; margin-bottom: 0; box-shadow: none; border: none; border-radius: 0; }
+    .costos-ver-items-table th,
+    .costos-ver-items-table td { display: table-cell; }
+    .costos-ver-items-table td::before { display: none !important; content: none !important; }
 }
 
 /* ——— Móvil: ajustes de espacio y toques ——— */
