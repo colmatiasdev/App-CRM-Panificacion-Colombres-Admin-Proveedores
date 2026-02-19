@@ -3,39 +3,382 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Ver producto unitario base - Panificación Colombres</title>
+    <title>Estructura de Costos por Unidad del Producto - Panificación Colombres</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="../../costos/costos.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="../../Arquitectura/config.js"></script>
     <script src="../../Arquitectura/config-sheets.js"></script>
     <script src="../../Arquitectura/sheets/producto-unitario-base/producto-unitario-base-sheets-base.js"></script>
     <script src="../../Arquitectura/sheets/producto-unitario-base/sheets-ver-producto-unitario-base.config.js"></script>
-    <script>window.PRODUCTO_UNITARIO_BASE_ACCION_ACTUAL = "ver";</script>
+    <script src="../armador-receta-hub.config.js"></script>
+    <script>window.PRODUCTO_UNITARIO_BASE_ACCION_ACTUAL = "ver"; window.ARMADOR_RECETA_SUBMODULO_ACTUAL = "producto-unitario-base";</script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:        #f5f6f8;
+            --surface:   #ffffff;
+            --surface-2: #f0f1f4;
+            --border:    #e2e5ec;
+            --border-2:  #d0d4dd;
+            --accent:      #2563eb;
+            --accent-dim:  rgba(37,99,235,0.07);
+            --accent-light:#eff4ff;
+            --red:       #dc2626;
+            --red-dim:   rgba(220,38,38,0.08);
+            --green:     #16a34a;
+            --green-dim: rgba(22,163,74,0.08);
+            --c-base:    #2563eb;
+            --c-relleno: #7c3aed;
+            --c-deco:    #0891b2;
+            --c-mo:      #d97706;
+            --text-primary:   #111827;
+            --text-secondary: #4b5563;
+            --text-muted:     #9ca3af;
+            --font-display: 'DM Serif Display', Georgia, serif;
+            --font-mono:    'IBM Plex Mono', monospace;
+            --font-body:    'Inter', sans-serif;
+            --radius: 8px;
+            --shadow: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --safe-top: env(safe-area-inset-top, 0);
+            --safe-right: env(safe-area-inset-right, 0);
+            --safe-bottom: env(safe-area-inset-bottom, 0);
+            --safe-left: env(safe-area-inset-left, 0);
+        }
+
+        html { -webkit-text-size-adjust: 100%; }
+        body {
+            background: var(--bg);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            font-size: 14px;
+            min-height: 100vh;
+            -webkit-tap-highlight-color: rgba(37,99,235,0.12);
+        }
+
+        .nav {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 1rem;
+            padding-left: max(1rem, calc(1rem + var(--safe-left)));
+            padding-right: max(1rem, calc(1rem + var(--safe-right)));
+            padding-top: var(--safe-top);
+            min-height: 44px;
+            display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap;
+        }
+        .nav a {
+            color: var(--text-secondary); text-decoration: none;
+            font-size: 0.75rem; font-weight: 500;
+            letter-spacing: 0.02em; transition: color 0.15s;
+            padding: 0.5rem 0.4rem;
+            min-height: 44px;
+            display: inline-flex; align-items: center;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .nav a:hover { color: var(--accent); }
+        .nav a.is-active { color: var(--accent); font-weight: 600; }
+
+        .page {
+            max-width: 780px;
+            margin: 0 auto;
+            padding: 1.25rem 1rem 3rem;
+            padding-left: max(1rem, calc(1rem + var(--safe-left)));
+            padding-right: max(1rem, calc(1rem + var(--safe-right)));
+            padding-bottom: max(3rem, calc(3rem + var(--safe-bottom)));
+        }
+
+        .header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+            animation: fadeUp 0.35s ease both;
+        }
+        .header-left { flex: 1; min-width: 0; }
+
+        .meta-row {
+            display: flex; align-items: center; gap: 0.4rem;
+            margin-bottom: 0.45rem; flex-wrap: wrap;
+        }
+        .badge {
+            display: inline-flex; align-items: center; gap: 0.3rem;
+            font-size: 0.68rem; font-weight: 600;
+            letter-spacing: 0.05em; text-transform: uppercase;
+            padding: 0.18rem 0.5rem; border-radius: 4px; border: 1px solid;
+        }
+        .badge--store {
+            color: var(--text-secondary);
+            border-color: var(--border-2);
+            background: var(--surface-2);
+        }
+        .badge--cat {
+            color: var(--accent);
+            border-color: rgba(37,99,235,0.25);
+            background: var(--accent-light);
+        }
+
+        .product-name {
+            font-family: var(--font-display);
+            font-size: clamp(1.25rem, 3.5vw, 1.9rem);
+            font-weight: 400;
+            line-height: 1.15;
+            color: var(--text-primary);
+            margin-bottom: 0.3rem;
+        }
+        .product-id {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            display: flex; align-items: center; gap: 0.3rem;
+        }
+
+        .header-hero {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 0.85rem 1rem;
+            box-shadow: var(--shadow);
+            text-align: right;
+            flex-shrink: 0;
+            min-width: 150px;
+            position: relative;
+            overflow: hidden;
+        }
+        .header-hero::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: var(--accent);
+        }
+        .hero-label {
+            font-size: 0.65rem; font-weight: 600;
+            letter-spacing: 0.07em; text-transform: uppercase;
+            color: var(--text-muted); margin-bottom: 0.2rem;
+        }
+        .hero-value {
+            font-family: var(--font-display);
+            font-size: clamp(1.4rem, 4vw, 1.75rem);
+            color: var(--accent);
+            line-height: 1;
+            margin-bottom: 0.4rem;
+        }
+        .hero-var {
+            display: inline-flex; align-items: center; gap: 0.3rem;
+            font-family: var(--font-mono);
+            font-size: 0.68rem; font-weight: 600;
+            padding: 0.2rem 0.45rem; border-radius: 3px;
+        }
+        .hero-var--up   { color: var(--red);   background: var(--red-dim); }
+        .hero-var--down { color: var(--green); background: var(--green-dim); }
+        .hero-ant {
+            font-size: 0.65rem; color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+        .hero-ant span { font-family: var(--font-mono); color: var(--text-secondary); }
+
+        .divider {
+            height: 1px; background: var(--border);
+            margin-bottom: 1.1rem;
+        }
+
+        .sec-label {
+            font-size: 0.65rem; font-weight: 600;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            color: var(--text-muted);
+            display: flex; align-items: center; gap: 0.4rem;
+            margin-bottom: 0.65rem;
+        }
+        .sec-label::after {
+            content: ''; flex: 1; height: 1px; background: var(--border);
+        }
+
+        .comp-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.6rem;
+            margin-bottom: 0.6rem;
+        }
+        @media (max-width: 560px) {
+            .comp-grid { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+            .header { flex-direction: column; }
+            .header-hero { text-align: left; width: 100%; min-width: 0; }
+            .wf-row { flex-wrap: wrap; padding: 0.5rem 0.65rem; gap: 0.4rem; }
+            .wf-concept { font-size: 0.74rem; }
+            .wf-val { min-width: 0; font-size: 0.78rem; }
+        }
+        @media (max-width: 480px) {
+            .page { padding: 1rem 0.75rem 2.5rem; padding-left: max(0.75rem, calc(0.75rem + var(--safe-left))); padding-right: max(0.75rem, calc(0.75rem + var(--safe-right))); }
+            .nav { padding-left: max(0.75rem, calc(0.75rem + var(--safe-left))); padding-right: max(0.75rem, calc(0.75rem + var(--safe-right))); }
+            .nav a { padding: 0.5rem 0.35rem; font-size: 0.7rem; }
+        }
+        @media (max-width: 380px) {
+            .page { padding: 0.85rem 0.6rem 2rem; padding-left: max(0.6rem, calc(0.6rem + var(--safe-left))); padding-right: max(0.6rem, calc(0.6rem + var(--safe-right))); }
+            .comp-valor { font-size: 0.9rem; }
+            .hero-value { font-size: 1.2rem; }
+        }
+
+        .comp-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 0.7rem 0.8rem 0.65rem;
+            box-shadow: var(--shadow);
+            position: relative;
+            transition: box-shadow 0.15s, border-color 0.15s;
+            animation: fadeUp 0.35s ease both;
+        }
+        .comp-card:hover { box-shadow: var(--shadow-md); border-color: var(--border-2); }
+        .comp-card:nth-child(1) { animation-delay: 0.05s; border-top: 2px solid var(--c-base); }
+        .comp-card:nth-child(2) { animation-delay: 0.1s;  border-top: 2px solid var(--c-relleno); }
+        .comp-card:nth-child(3) { animation-delay: 0.15s; border-top: 2px solid var(--c-deco); }
+        .comp-card:nth-child(4) { animation-delay: 0.2s;  border-top: 2px solid var(--c-mo); }
+
+        .comp-nombre {
+            font-size: 0.65rem; font-weight: 600;
+            letter-spacing: 0.04em; text-transform: uppercase;
+            color: var(--text-muted); margin-bottom: 0.3rem;
+        }
+        .comp-valor {
+            font-family: var(--font-mono);
+            font-size: 1rem; font-weight: 600;
+            color: var(--text-primary); margin-bottom: 0.45rem;
+        }
+        .comp-bar-wrap {
+            height: 3px; background: var(--border); border-radius: 2px; overflow: hidden;
+        }
+        .comp-bar { height: 100%; border-radius: 2px; transition: width 0.7s cubic-bezier(.4,0,.2,1); }
+        .comp-pct {
+            font-family: var(--font-mono);
+            font-size: 0.6rem; color: var(--text-muted); margin-top: 0.3rem;
+        }
+
+        .tiempo-bar {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 0.55rem 0.9rem;
+            display: flex; align-items: center;
+            justify-content: space-between; gap: 1rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 1rem;
+            animation: fadeUp 0.35s ease 0.25s both;
+        }
+        .tiempo-left { display: flex; align-items: center; gap: 0.55rem; }
+        .tiempo-icon {
+            width: 28px; height: 28px; border-radius: 6px;
+            background: var(--accent-light);
+            border: 1px solid rgba(37,99,235,0.15);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--accent); font-size: 0.75rem; flex-shrink: 0;
+        }
+        .tiempo-lbl { font-size: 0.65rem; color: var(--text-muted); margin-bottom: 0.1rem; }
+        .tiempo-val {
+            font-family: var(--font-mono);
+            font-size: 0.85rem; font-weight: 600; color: var(--text-primary);
+        }
+        .tiempo-val small { font-weight: 400; color: var(--text-muted); font-size: 0.7rem; }
+        .tiempo-note {
+            font-size: 0.65rem; color: var(--text-muted);
+            font-style: italic; text-align: right;
+            max-width: 200px; line-height: 1.4;
+        }
+        @media (max-width: 560px) {
+            .tiempo-bar { flex-direction: column; align-items: flex-start; }
+            .tiempo-note { max-width: none; }
+        }
+
+        .waterfall {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            margin-bottom: 1.25rem;
+            animation: fadeUp 0.35s ease 0.3s both;
+        }
+        .wf-row {
+            display: flex; align-items: center;
+            justify-content: space-between;
+            padding: 0.55rem 0.9rem;
+            border-bottom: 1px solid var(--border);
+            gap: 0.75rem;
+        }
+        .wf-row:last-child { border-bottom: none; }
+        .wf-row--total {
+            background: var(--accent-light);
+            border-top: 1px solid rgba(37,99,235,0.15);
+        }
+        .wf-concept {
+            display: flex; align-items: center; gap: 0.5rem;
+            font-size: 0.78rem; color: var(--text-secondary);
+        }
+        .wf-dot {
+            width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+        }
+        .wf-right { display: flex; align-items: center; gap: 0.6rem; }
+        .wf-op {
+            font-family: var(--font-mono);
+            font-size: 0.7rem; color: var(--text-muted);
+            width: 12px; text-align: center; flex-shrink: 0;
+        }
+        .wf-val {
+            font-family: var(--font-mono);
+            font-size: 0.82rem; font-weight: 600;
+            color: var(--text-primary); min-width: 72px; text-align: right;
+        }
+        .wf-row--total .wf-concept { font-weight: 600; color: var(--accent); font-size: 0.8rem; }
+        .wf-row--total .wf-val     { color: var(--accent); font-size: 0.9rem; }
+
+        .back-link {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            color: var(--text-secondary); text-decoration: none;
+            font-size: 0.75rem; font-weight: 500;
+            padding: 0.5rem 0.85rem;
+            min-height: 44px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--surface);
+            box-shadow: var(--shadow);
+            transition: all 0.15s;
+            animation: fadeUp 0.35s ease 0.4s both;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .back-link:hover {
+            color: var(--accent);
+            border-color: rgba(37,99,235,0.3);
+            background: var(--accent-light);
+        }
+
+        .costos-placeholder {
+            padding: 1.5rem; text-align: center; color: var(--text-muted);
+            background: var(--surface); border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </head>
-<body class="costos-page">
-    <nav class="costos-nav" aria-label="Navegación principal">
-        <a href="../../../index.html" class="costos-nav-link">Inicio</a>
-        <a href="../armador-receta.html" class="costos-nav-link">Armador de Receta</a>
-        <a href="producto-unitario-base.html" class="costos-nav-link" data-accion="listar">Producto Unitario Base</a>
-        <a href="../Elaboracion-Productos-Base/elaboracion-productos-base.html" class="costos-nav-link">Elaboración Productos Base</a>
-    </nav>
-    <main class="costos-main">
-        <h1 class="costos-title costos-title--con-icono"><i class="fa-solid fa-eye costos-title-icono" aria-hidden="true"></i> Ver producto unitario base</h1>
-        <p class="costos-intro">Datos del registro. Solo visualización.</p>
-        <div id="ver-container" class="costos-datos">
+<body>
+    <nav class="nav costos-nav" id="armador-receta-nav" aria-label="Navegación principal"></nav>
+
+    <main class="page">
+        <div id="ver-container">
             <p id="ver-no-data" class="costos-placeholder" style="display:none;">No hay datos del registro. Volvé al listado y usá «Ver» en una tarjeta.</p>
             <p id="ver-loading" class="costos-placeholder">Cargando…</p>
-            <div id="ver-detalle" class="costos-ver-detalle" style="display:none;"></div>
-            <div id="ver-actions" class="costos-edit-actions" style="display:none;">
-                <a href="producto-unitario-base.html" class="costos-edit-btn-cancel">Volver al listado</a>
-            </div>
+            <div id="ver-detalle" style="display:none;"></div>
         </div>
     </main>
+
+    <script src="../armador-receta-nav.js"></script>
     <script src="../../Arquitectura/sheets/producto-unitario-base/producto-unitario-base-config.js"></script>
-    <script>if (window.PRODUCTO_UNITARIO_BASE_APPLY_NAV) window.PRODUCTO_UNITARIO_BASE_APPLY_NAV();</script>
     <script>
         (function () {
             var STORAGE_EDIT = "costosEditRecordProductoUnitarioBase";
@@ -51,42 +394,135 @@
                 }
                 return out;
             }
+            function getVal(columnas, row, nombreCol) {
+                for (var i = 0; i < columnas.length; i++) {
+                    if (norm(columnas[i].nombre) === norm(nombreCol)) return row[i] != null ? String(row[i]).trim() : "";
+                }
+                return "";
+            }
+            function getNum(columnas, row, nombreCol) {
+                var s = getVal(columnas, row, nombreCol);
+                if (!s || s === "—") return 0;
+                return parseFloat(String(s).replace(",", ".")) || 0;
+            }
+            function fmtMoneda(num) {
+                if (typeof window.formatNumeroVisual === "function") return window.formatNumeroVisual(num, "moneda", 2);
+                return (num == null || isNaN(num)) ? "—" : num.toFixed(2).replace(".", ",");
+            }
             function escapeHtml(text) { if (text == null) return ""; return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+
             var noDataEl = document.getElementById("ver-no-data");
             var loadingEl = document.getElementById("ver-loading");
             var detalleEl = document.getElementById("ver-detalle");
-            var actionsEl = document.getElementById("ver-actions");
             var raw = sessionStorage.getItem(STORAGE_EDIT);
-            if (!raw) { loadingEl.style.display = "none"; noDataEl.style.display = "block"; } else {
-                var loadConfig = window.PRODUCTO_UNITARIO_BASE_LOAD_CONFIG;
-                if (!loadConfig) { loadingEl.style.display = "none"; noDataEl.style.display = "block"; noDataEl.textContent = "No se pudo cargar la configuración."; } else {
-                    loadConfig().then(function (sheetConfig) {
-                        var data; try { data = JSON.parse(raw); } catch (e) { data = {}; }
-                        var headersFromStorage = data.headers || [];
-                        var rowFromStorage = data.row || [];
-                        var columnas = sheetConfig.columnas || [];
-                        var row = mapRowToConfigOrder(rowFromStorage, headersFromStorage, columnas);
-                        loadingEl.style.display = "none";
-                        detalleEl.style.display = "block";
-                        actionsEl.style.display = "block";
-                        var html = "<dl class=\"costos-ver-dl\">";
-                        columnas.forEach(function (col, idx) {
-                            if (col.visible === false) return;
-                            var nombre = (col.alias != null ? col.alias : col.nombre || "").trim();
-                            if (!nombre) return;
-                            var val = (row[idx] != null && row[idx] !== "") ? String(row[idx]).trim() : "—";
-                            if ((col.tipoDato === "numeric" || col.tipo === "numeric") && col.formatoVisual && typeof window.formatNumeroVisual === "function" && val !== "—") {
-                                var num = parseFloat(String(val).replace(",", "."));
-                                if (!isNaN(num)) val = window.formatNumeroVisual(num, col.formatoVisual, col.decimales != null ? col.decimales : 2);
-                            }
-                            html += "<dt class=\"costos-ver-dt\">" + escapeHtml(nombre) + "</dt>";
-                            html += "<dd class=\"costos-ver-dd\">" + escapeHtml(val) + "</dd>";
-                        });
-                        html += "</dl>";
-                        detalleEl.innerHTML = html;
-                    }).catch(function (err) { loadingEl.style.display = "none"; noDataEl.style.display = "block"; noDataEl.textContent = "Error: " + (err.message || ""); });
-                }
+
+            if (!raw) {
+                loadingEl.style.display = "none";
+                noDataEl.style.display = "block";
+                return;
             }
+
+            var loadConfig = window.PRODUCTO_UNITARIO_BASE_LOAD_CONFIG;
+            if (!loadConfig) {
+                loadingEl.style.display = "none";
+                noDataEl.style.display = "block";
+                noDataEl.textContent = "No se pudo cargar la configuración.";
+                return;
+            }
+
+            loadConfig().then(function (sheetConfig) {
+                var data;
+                try { data = JSON.parse(raw); } catch (e) { data = {}; }
+                var headersFromStorage = data.headers || [];
+                var rowFromStorage = data.row || [];
+                var columnas = sheetConfig.columnas || [];
+                var row = mapRowToConfigOrder(rowFromStorage, headersFromStorage, columnas);
+
+                loadingEl.style.display = "none";
+                detalleEl.style.display = "block";
+
+                var nombreProducto = getVal(columnas, row, "Nombre-Producto") || "—";
+                var idProducto = getVal(columnas, row, "IDCosto-ProductoUnitario") || "";
+                var comercio = getVal(columnas, row, "Comercio-Sucursal") || "Panificación Colombres";
+                var tipoProducto = getVal(columnas, row, "Tipo-Producto") || "";
+
+                var costoBase = getNum(columnas, row, "Costo-Produccion-ProductoBase");
+                var costoRelleno = getNum(columnas, row, "Costo-Relleno-Producto");
+                var costoDeco = getNum(columnas, row, "Costo-Decoracion-Producto");
+                var costoMO = getNum(columnas, row, "Costo-Mano-Obra-Elaboracion");
+                var costoActual = getNum(columnas, row, "Costo-Elaboracion-Actual [G + H + I + K]");
+                if (costoActual === 0) costoActual = costoBase + costoRelleno + costoDeco + costoMO;
+                var costoAnterior = getNum(columnas, row, "Costo-Elaboracion-Anterior");
+                var tiempoMin = getNum(columnas, row, "Tiempo-Elaboracion-Minutos");
+
+                var pctBase = costoActual > 0 ? (costoBase / costoActual * 100) : 0;
+                var pctRelleno = costoActual > 0 ? (costoRelleno / costoActual * 100) : 0;
+                var pctDeco = costoActual > 0 ? (costoDeco / costoActual * 100) : 0;
+                var pctMO = costoActual > 0 ? (costoMO / costoActual * 100) : 0;
+
+                var varPct = "";
+                var varClass = "";
+                if (costoAnterior > 0 && costoActual !== costoAnterior) {
+                    var pct = ((costoActual - costoAnterior) / costoAnterior * 100);
+                    varPct = (pct > 0 ? "+" : "") + pct.toFixed(1).replace(".", ",") + "%";
+                    varClass = pct > 0 ? "hero-var--up" : "hero-var--down";
+                }
+
+                var tiempoSeg = Math.round(tiempoMin * 60);
+                var heroAntHtml = costoAnterior > 0 ? "<div class=\"hero-ant\">Anterior: <span>" + escapeHtml(fmtMoneda(costoAnterior)) + "</span></div>" : "";
+
+                var html =
+                    "<header class=\"header\">" +
+                    "  <div class=\"header-left\">" +
+                    "    <div class=\"meta-row\">" +
+                    "      <span class=\"badge badge--store\"><i class=\"fa-solid fa-store\"></i> " + escapeHtml(comercio) + "</span>" +
+                    (tipoProducto ? "      <span class=\"badge badge--cat\"><i class=\"fa-solid fa-tag\"></i> " + escapeHtml(tipoProducto) + "</span>" : "") +
+                    "    </div>" +
+                    "    <h1 class=\"product-name\">" + escapeHtml(nombreProducto) + "</h1>" +
+                    (idProducto ? "    <div class=\"product-id\"><i class=\"fa-solid fa-fingerprint\"></i> " + escapeHtml(idProducto) + "</div>" : "") +
+                    "  </div>" +
+                    "  <div class=\"header-hero\">" +
+                    "    <div class=\"hero-label\">Costo Actual</div>" +
+                    "    <div class=\"hero-value\">" + escapeHtml(fmtMoneda(costoActual)) + "</div>" +
+                    (varPct ? "    <div><span class=\"hero-var " + varClass + "\"><i class=\"fa-solid fa-arrow-trend-" + (varClass === "hero-var--up" ? "up" : "down") + "\"></i> " + escapeHtml(varPct) + "</span></div>" : "") +
+                    heroAntHtml +
+                    "  </div>" +
+                    "</header>" +
+                    "<div class=\"divider\"></div>" +
+                    "<div class=\"sec-label\"><i class=\"fa-solid fa-layer-group\"></i> Composición del costo</div>" +
+                    "<div class=\"comp-grid\">" +
+                    "  <div class=\"comp-card\"><div class=\"comp-nombre\">Prod. Base</div><div class=\"comp-valor\">$ " + escapeHtml(fmtMoneda(costoBase)) + "</div><div class=\"comp-bar-wrap\"><div class=\"comp-bar\" style=\"background:var(--c-base); width:" + pctBase + "%;\"></div></div><div class=\"comp-pct\">" + pctBase.toFixed(1) + "%</div></div>" +
+                    "  <div class=\"comp-card\"><div class=\"comp-nombre\">Relleno</div><div class=\"comp-valor\">$ " + escapeHtml(fmtMoneda(costoRelleno)) + "</div><div class=\"comp-bar-wrap\"><div class=\"comp-bar\" style=\"background:var(--c-relleno); width:" + pctRelleno + "%;\"></div></div><div class=\"comp-pct\">" + pctRelleno.toFixed(1) + "%</div></div>" +
+                    "  <div class=\"comp-card\"><div class=\"comp-nombre\">Decoración</div><div class=\"comp-valor\">$ " + escapeHtml(fmtMoneda(costoDeco)) + "</div><div class=\"comp-bar-wrap\"><div class=\"comp-bar\" style=\"background:var(--c-deco); width:" + pctDeco + "%;\"></div></div><div class=\"comp-pct\">" + pctDeco.toFixed(1) + "%</div></div>" +
+                    "  <div class=\"comp-card\"><div class=\"comp-nombre\">Mano de Obra</div><div class=\"comp-valor\">$ " + escapeHtml(fmtMoneda(costoMO)) + "</div><div class=\"comp-bar-wrap\"><div class=\"comp-bar\" style=\"background:var(--c-mo); width:" + pctMO + "%;\"></div></div><div class=\"comp-pct\">" + pctMO.toFixed(1) + "%</div></div>" +
+                    "</div>" +
+                    "<div class=\"tiempo-bar\">" +
+                    "  <div class=\"tiempo-left\"><div class=\"tiempo-icon\"><i class=\"fa-regular fa-clock\"></i></div><div><div class=\"tiempo-lbl\">Tiempo de elaboración</div><div class=\"tiempo-val\">" + escapeHtml(String(tiempoMin).replace(".", ",")) + " min <small>(" + tiempoSeg + " seg)</small></div></div></div>" +
+                    "  <div class=\"tiempo-note\">Base de cálculo para el costo de Mano de Obra.</div>" +
+                    "</div>" +
+                    "<div class=\"sec-label\"><i class=\"fa-solid fa-sigma\"></i> Desglose acumulado</div>" +
+                    "<div class=\"waterfall\">" +
+                    "  <div class=\"wf-row\"><div class=\"wf-concept\"><span class=\"wf-dot\" style=\"background:var(--c-base);\"></span>Costo Producción Base</div><div class=\"wf-right\"><span class=\"wf-op\">+</span><span class=\"wf-val\">" + escapeHtml(fmtMoneda(costoBase)) + "</span></div></div>" +
+                    "  <div class=\"wf-row\"><div class=\"wf-concept\"><span class=\"wf-dot\" style=\"background:var(--c-relleno);\"></span>Costo Relleno</div><div class=\"wf-right\"><span class=\"wf-op\">+</span><span class=\"wf-val\">" + escapeHtml(fmtMoneda(costoRelleno)) + "</span></div></div>" +
+                    "  <div class=\"wf-row\"><div class=\"wf-concept\"><span class=\"wf-dot\" style=\"background:var(--c-deco);\"></span>Costo Decoración</div><div class=\"wf-right\"><span class=\"wf-op\">+</span><span class=\"wf-val\">" + escapeHtml(fmtMoneda(costoDeco)) + "</span></div></div>" +
+                    "  <div class=\"wf-row\"><div class=\"wf-concept\"><span class=\"wf-dot\" style=\"background:var(--c-mo);\"></span>Mano de Obra <span style=\"color:var(--text-muted);font-size:0.7rem;\">(" + escapeHtml(String(tiempoMin).replace(".", ",")) + " min)</span></div><div class=\"wf-right\"><span class=\"wf-op\">+</span><span class=\"wf-val\">" + escapeHtml(fmtMoneda(costoMO)) + "</span></div></div>" +
+                    "  <div class=\"wf-row wf-row--total\"><div class=\"wf-concept\"><i class=\"fa-solid fa-equals\" style=\"font-size:0.7rem;\"></i>Costo de Elaboración Actual</div><div class=\"wf-right\"><span class=\"wf-op\" style=\"color:var(--accent);\">=</span><span class=\"wf-val\">" + escapeHtml(fmtMoneda(costoActual)) + "</span></div></div>" +
+                    "</div>" +
+                    "<a href=\"producto-unitario-base.html\" class=\"back-link\"><i class=\"fa-solid fa-arrow-left\"></i> Volver al listado</a>";
+
+                detalleEl.innerHTML = html;
+
+                var bars = detalleEl.querySelectorAll(".comp-bar");
+                var widths = Array.from(bars).map(function (b) { return b.style.width; });
+                bars.forEach(function (b) { b.style.width = "0%"; });
+                setTimeout(function () {
+                    bars.forEach(function (b, i) { b.style.width = widths[i] || "0%"; });
+                }, 300);
+            }).catch(function (err) {
+                loadingEl.style.display = "none";
+                noDataEl.style.display = "block";
+                noDataEl.textContent = "Error: " + (err.message || "");
+            });
         })();
     </script>
 </body>

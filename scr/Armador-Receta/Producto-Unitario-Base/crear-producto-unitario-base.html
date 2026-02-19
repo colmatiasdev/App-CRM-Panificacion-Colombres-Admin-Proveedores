@@ -14,15 +14,11 @@
     <script src="../../Arquitectura/generar-id.js"></script>
     <script src="../../Arquitectura/sheets/producto-unitario-base/producto-unitario-base-sheets-base.js"></script>
     <script src="../../Arquitectura/sheets/producto-unitario-base/sheets-crear-producto-unitario-base.config.js"></script>
-    <script>window.PRODUCTO_UNITARIO_BASE_ACCION_ACTUAL = "crear";</script>
+    <script src="../armador-receta-hub.config.js"></script>
+    <script>window.PRODUCTO_UNITARIO_BASE_ACCION_ACTUAL = "crear"; window.ARMADOR_RECETA_SUBMODULO_ACTUAL = "producto-unitario-base";</script>
 </head>
 <body class="costos-page">
-    <nav class="costos-nav" aria-label="Navegación principal">
-        <a href="../../../index.html" class="costos-nav-link">Inicio</a>
-        <a href="../armador-receta.html" class="costos-nav-link">Armador de Receta</a>
-        <a href="producto-unitario-base.html" class="costos-nav-link" data-accion="listar">Producto Unitario Base</a>
-        <a href="../Elaboracion-Productos-Base/elaboracion-productos-base.html" class="costos-nav-link">Elaboración Productos Base</a>
-    </nav>
+    <nav class="costos-nav" id="armador-receta-nav" aria-label="Navegación principal"></nav>
     <main class="costos-main">
         <h1 class="costos-title">Crear producto unitario base</h1>
         <p class="costos-intro">Completá los datos según la estructura de la hoja <strong>Tabla-Receta-Base</strong>.</p>
@@ -39,8 +35,8 @@
             </form>
         </div>
     </main>
+    <script src="../armador-receta-nav.js"></script>
     <script src="../../Arquitectura/sheets/producto-unitario-base/producto-unitario-base-config.js"></script>
-    <script>if (window.PRODUCTO_UNITARIO_BASE_APPLY_NAV) window.PRODUCTO_UNITARIO_BASE_APPLY_NAV();</script>
     <script>
         (function () {
             var config = window.APP_CONFIG || {};

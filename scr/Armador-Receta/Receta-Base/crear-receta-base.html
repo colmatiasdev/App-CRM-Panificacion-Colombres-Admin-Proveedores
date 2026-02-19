@@ -14,18 +14,13 @@
     <script src="../../Arquitectura/generar-id.js"></script>
     <script src="../../Arquitectura/sheets/receta-base/receta-base-sheets-base.js"></script>
     <script src="../../Arquitectura/sheets/receta-base/sheets-crear-receta-base.config.js"></script>
-    <script>window.RECETA_BASE_ACCION_ACTUAL = "crear";</script>
+    <script src="../armador-receta-hub.config.js"></script>
+    <script>window.RECETA_BASE_ACCION_ACTUAL = "crear"; window.ARMADOR_RECETA_SUBMODULO_ACTUAL = "receta-base";</script>
 </head>
 <body class="costos-page">
-    <nav class="costos-nav" aria-label="Navegación principal">
-        <a href="../../../index.html" class="costos-nav-link">Inicio</a>
-        <a href="../armador-receta.html" class="costos-nav-link">Armador de Receta</a>
-        <a href="receta-base.html" class="costos-nav-link" data-accion="listar">Receta Base</a>
-        <a href="../Producto-Unitario-Base/producto-unitario-base.html" class="costos-nav-link">Producto Unitario Base</a>
-        <a href="../Elaboracion-Productos-Base/elaboracion-productos-base.html" class="costos-nav-link">Elaboración Productos Base</a>
-    </nav>
+    <nav class="costos-nav" id="armador-receta-nav" aria-label="Navegación principal"></nav>
     <main class="costos-main">
-        <h1 class="costos-title">Nueva Receta</h1>
+        <h1 class="costos-title">Crear una nueva receta</h1>
         <p class="costos-intro">Completá los datos según la hoja <strong>Tabla-Receta-Base</strong>.</p>
         <div id="edit-form-container" class="costos-datos">
             <div id="costos-edit-alert" class="costos-alert" role="alert" style="display:none;"></div>
@@ -34,14 +29,13 @@
             <form id="costos-edit-form" class="costos-edit-form" style="display:none;">
                 <div id="edit-fields"></div>
                 <div class="costos-edit-actions">
-                    <a href="receta-base.html" class="costos-edit-btn-cancel">Volver al listado</a>
-                    <button type="submit" class="costos-edit-btn-save"><i class="fa-solid fa-plus" aria-hidden="true"></i> Crear</button>
+                    <button type="submit" class="costos-edit-btn-save"><i class="fa-solid fa-plus" aria-hidden="true"></i> NUEVA RECETA</button>
                 </div>
             </form>
         </div>
     </main>
+    <script src="../armador-receta-nav.js"></script>
     <script src="../../Arquitectura/sheets/receta-base/receta-base-config.js"></script>
-    <script>if (window.RECETA_BASE_APPLY_NAV) window.RECETA_BASE_APPLY_NAV();</script>
     <script>
         (function () {
             var STORAGE_EDIT = "costosEditRecordRecetaBase";
