@@ -3,260 +3,847 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Ver Receta - Panificación Colombres</title>
+    <title>Ver Receta — Panificación Colombres</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="../../costos/costos.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="../../Arquitectura/config.js"></script>
     <script src="../../Arquitectura/config-sheets.js"></script>
     <script src="../../Arquitectura/sheets/receta-base/receta-base-sheets-base.js"></script>
     <script src="../../Arquitectura/sheets/receta-base/sheets-ver-receta-base.config.js"></script>
     <script src="../armador-receta-hub.config.js"></script>
     <script>window.RECETA_BASE_ACCION_ACTUAL = "ver"; window.ARMADOR_RECETA_SUBMODULO_ACTUAL = "receta-base";</script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:          #f5f6f8;
+            --surface:     #ffffff;
+            --surface-2:   #f0f1f4;
+            --border:      #e2e5ec;
+            --border-2:    #d0d4dd;
+            --accent:      #2563eb;
+            --accent-dim:  rgba(37,99,235,0.07);
+            --accent-light:#eff4ff;
+            --red:         #dc2626;
+            --red-dim:     rgba(220,38,38,0.08);
+            --green:       #16a34a;
+            --green-dim:   rgba(22,163,74,0.08);
+            --amber:       #d97706;
+            --amber-dim:   rgba(217,119,6,0.08);
+            --text-primary:   #111827;
+            --text-secondary: #4b5563;
+            --text-muted:     #9ca3af;
+            --font-display: 'DM Serif Display', Georgia, serif;
+            --font-mono:    'IBM Plex Mono', monospace;
+            --font-body:    'Inter', sans-serif;
+            --radius: 8px;
+            --shadow:    0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --safe-top: env(safe-area-inset-top, 0);
+            --safe-right: env(safe-area-inset-right, 0);
+            --safe-bottom: env(safe-area-inset-bottom, 0);
+            --safe-left: env(safe-area-inset-left, 0);
+        }
+
+        html { -webkit-text-size-adjust: 100%; }
+        body {
+            background: var(--bg);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            font-size: 14px;
+            min-height: 100vh;
+            -webkit-tap-highlight-color: rgba(37,99,235,0.12);
+        }
+
+        .nav {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 1rem;
+            padding-left: max(1rem, calc(1rem + var(--safe-left)));
+            padding-right: max(1rem, calc(1rem + var(--safe-right)));
+            padding-top: var(--safe-top);
+            min-height: 44px;
+            display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;
+        }
+        .nav a {
+            color: var(--text-secondary); text-decoration: none;
+            font-size: 0.75rem; font-weight: 500; transition: color 0.15s;
+            padding: 0.5rem 0.4rem;
+            min-height: 44px;
+            display: inline-flex; align-items: center;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .nav a:hover { color: var(--accent); }
+        .nav a.is-active { color: var(--accent); font-weight: 600; }
+
+        .page {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 1.25rem 1rem 3rem;
+            padding-left: max(1rem, calc(1rem + var(--safe-left)));
+            padding-right: max(1rem, calc(1rem + var(--safe-right)));
+            padding-bottom: max(3rem, calc(3rem + var(--safe-bottom)));
+        }
+
+        .header {
+            display: flex; align-items: flex-start;
+            justify-content: space-between; gap: 1rem;
+            margin-bottom: 1.1rem;
+            animation: fadeUp 0.35s ease both;
+        }
+        .header-left { flex: 1; min-width: 0; }
+        .meta-row {
+            display: flex; align-items: center; gap: 0.4rem;
+            margin-bottom: 0.4rem; flex-wrap: wrap;
+        }
+        .badge {
+            display: inline-flex; align-items: center; gap: 0.3rem;
+            font-size: 0.67rem; font-weight: 600;
+            letter-spacing: 0.05em; text-transform: uppercase;
+            padding: 0.16rem 0.5rem; border-radius: 4px; border: 1px solid;
+        }
+        .badge--store { color: var(--text-secondary); border-color: var(--border-2); background: var(--surface-2); }
+        .badge--cat   { color: var(--accent); border-color: rgba(37,99,235,0.25); background: var(--accent-light); }
+
+        .recipe-name {
+            font-family: var(--font-display);
+            font-size: clamp(1.25rem, 3.5vw, 1.85rem);
+            font-weight: 400; line-height: 1.15;
+            color: var(--text-primary); margin-bottom: 0.25rem;
+        }
+        .recipe-id {
+            font-family: var(--font-mono); font-size: 0.65rem;
+            color: var(--text-muted);
+            display: flex; align-items: center; gap: 0.3rem;
+        }
+
+        .header-hero {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 0.8rem 1rem;
+            box-shadow: var(--shadow);
+            text-align: right; flex-shrink: 0; min-width: 155px;
+            position: relative; overflow: hidden;
+        }
+        .header-hero::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: var(--accent);
+        }
+        .hero-label {
+            font-size: 0.64rem; font-weight: 600; letter-spacing: 0.07em;
+            text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.15rem;
+        }
+        .hero-value {
+            font-family: var(--font-display);
+            font-size: clamp(1.3rem, 4vw, 1.65rem);
+            color: var(--accent); line-height: 1; margin-bottom: 0.2rem;
+        }
+        .hero-sub { font-size: 0.65rem; color: var(--text-muted); line-height: 1.4; }
+        .hero-sub span { font-family: var(--font-mono); color: var(--text-secondary); }
+
+        .divider { height: 1px; background: var(--border); margin-bottom: 1rem; }
+        .sec-label {
+            font-size: 0.64rem; font-weight: 600; letter-spacing: 0.1em;
+            text-transform: uppercase; color: var(--text-muted);
+            display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.6rem;
+        }
+        .sec-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.55rem;
+            margin-bottom: 0.55rem;
+        }
+        .kpi-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 0.65rem 0.75rem 0.6rem;
+            box-shadow: var(--shadow);
+            transition: box-shadow 0.15s;
+            animation: fadeUp 0.35s ease both;
+        }
+        .kpi-card:hover { box-shadow: var(--shadow-md); }
+        .kpi-card:nth-child(1) { animation-delay:.05s; border-top: 2px solid var(--accent); }
+        .kpi-card:nth-child(2) { animation-delay:.1s;  border-top: 2px solid var(--amber); }
+        .kpi-card:nth-child(3) { animation-delay:.15s; border-top: 2px solid var(--green); }
+        .kpi-card:nth-child(4) { animation-delay:.2s;  border-top: 2px solid #7c3aed; }
+        .kpi-nombre-wrap { margin-bottom: 0.28rem; }
+        .kpi-nombre {
+            font-size: 0.63rem; font-weight: 600; letter-spacing: 0.04em;
+            text-transform: uppercase; color: var(--text-muted);
+            display: block; line-height: 1.2;
+        }
+        .kpi-etapa {
+            font-size: 0.58rem; font-weight: 500; letter-spacing: 0.02em;
+            color: var(--amber); text-transform: none;
+            display: block; margin-top: 0.06rem; font-style: italic;
+        }
+        .kpi-valor {
+            font-family: var(--font-mono); font-size: 1rem; font-weight: 600;
+            color: var(--text-primary); margin-bottom: 0.4rem;
+        }
+        .kpi-bar-wrap { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+        .kpi-bar { height: 100%; border-radius: 2px; transition: width 0.7s cubic-bezier(.4,0,.2,1); }
+        .kpi-pct { font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-muted); margin-top: 0.28rem; }
+
+        .info-row {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 0.55rem;
+            margin-bottom: 1rem;
+        }
+        .info-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 0.55rem 0.85rem;
+            display: flex; align-items: center; gap: 0.55rem;
+            box-shadow: var(--shadow);
+            animation: fadeUp 0.35s ease 0.25s both;
+        }
+        .info-icon {
+            width: 28px; height: 28px; border-radius: 6px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem;
+        }
+        .info-icon--tiempo { background: var(--accent-light); border: 1px solid rgba(37,99,235,0.15); color: var(--accent); }
+        .info-icon--rend   { background: rgba(22,163,74,0.08); border: 1px solid rgba(22,163,74,0.15); color: var(--green); }
+        .info-content { flex: 1; min-width: 0; }
+        .info-lbl { font-size: 0.63rem; color: var(--text-muted); margin-bottom: 0.08rem; }
+        .info-val {
+            font-family: var(--font-mono); font-size: 0.88rem; font-weight: 600;
+            color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .info-val small { font-weight: 400; color: var(--text-muted); font-size: 0.68rem; }
+        .info-note { font-size: 0.62rem; color: var(--text-muted); font-style: italic; line-height: 1.35; text-align: right; }
+
+        .waterfall {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); overflow: hidden;
+            box-shadow: var(--shadow); margin-bottom: 1.1rem;
+            animation: fadeUp 0.35s ease 0.3s both;
+        }
+        .wf-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0.5rem 0.85rem; border-bottom: 1px solid var(--border); gap: 0.75rem;
+        }
+        .wf-row:last-child { border-bottom: none; }
+        .wf-row--total { background: var(--accent-light); border-top: 1px solid rgba(37,99,235,0.15); }
+        .wf-row--costo,
+        .wf-row--verde { background: rgba(22,163,74,0.06); border-top: 1px solid rgba(22,163,74,0.15); }
+        .wf-concept {
+            display: flex; align-items: center; gap: 0.45rem;
+            font-size: 0.77rem; color: var(--text-secondary);
+        }
+        .wf-concept-stack { display: flex; flex-direction: column; gap: 0.05rem; }
+        .wf-concept-main  { font-size: 0.77rem; color: var(--text-secondary); }
+        .wf-concept-sub   { font-size: 0.62rem; color: var(--amber); font-style: italic; }
+        .wf-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+        .wf-right { display: flex; align-items: center; gap: 0.55rem; }
+        .wf-op {
+            font-family: var(--font-mono); font-size: 0.7rem;
+            color: var(--text-muted); width: 12px; text-align: center; flex-shrink: 0;
+        }
+        .wf-val {
+            font-family: var(--font-mono); font-size: 0.82rem; font-weight: 600;
+            color: var(--text-primary); min-width: 72px; text-align: right;
+        }
+        .wf-row--total .wf-concept-main { font-weight: 600; color: var(--accent); font-size: 0.79rem; }
+        .wf-row--total .wf-val     { color: var(--accent); font-size: 0.88rem; }
+        .wf-row--costo .wf-concept-main,
+        .wf-row--verde .wf-concept-main { font-weight: 600; color: var(--green); font-size: 0.79rem; }
+        .wf-row--costo .wf-val,
+        .wf-row--verde .wf-val     { color: var(--green); font-size: 0.88rem; }
+
+        .items-section { animation: fadeUp 0.35s ease 0.35s both; }
+        .items-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 0.6rem; gap: 0.75rem;
+        }
+        .btn-agregar {
+            display: inline-flex; align-items: center; gap: 0.35rem;
+            font-size: 0.75rem; font-weight: 600;
+            padding: 0.5rem 0.85rem;
+            min-height: 44px;
+            border-radius: 6px; border: none; cursor: pointer;
+            background: var(--accent); color: #fff;
+            text-decoration: none;
+            box-shadow: 0 1px 3px rgba(37,99,235,0.25);
+            transition: background 0.15s, box-shadow 0.15s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .btn-agregar:hover { background: #1d4ed8; box-shadow: 0 3px 8px rgba(37,99,235,0.3); }
+        .btn-agregar:disabled,
+        .btn-agregar.is-disabled { opacity: 0.55; cursor: not-allowed; pointer-events: none; }
+
+        .table-wrap {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .table-wrap table { width: 100%; min-width: 320px; border-collapse: collapse; }
+        .table-wrap thead tr { background: var(--surface-2); }
+        .table-wrap thead th {
+            padding: 0.5rem 0.75rem; text-align: left;
+            font-size: 0.65rem; font-weight: 600;
+            letter-spacing: 0.07em; text-transform: uppercase;
+            color: var(--text-muted); border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+        .table-wrap thead th.th-r,
+        .table-wrap thead th:last-child { text-align: right; }
+        .table-wrap tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+        .table-wrap tbody tr:last-child { border-bottom: none; }
+        .table-wrap tbody tr:hover { background: var(--surface-2); }
+        .table-wrap tbody td {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.8rem; color: var(--text-primary);
+        }
+        .table-wrap tbody td.td-insumo { font-weight: 500; }
+        .table-wrap tbody td.td-num,
+        .table-wrap tbody td.td-cant,
+        .table-wrap tbody td.td-precio {
+            font-family: var(--font-mono); font-size: 0.78rem;
+            text-align: right; color: var(--text-secondary);
+        }
+        .table-wrap tbody td.td-importe {
+            font-family: var(--font-mono); font-size: 0.8rem;
+            font-weight: 600; text-align: right; color: var(--text-primary);
+        }
+        .table-wrap .td-um { font-size: 0.72rem; color: var(--text-muted); }
+        .table-wrap tfoot tr { background: var(--accent-light); border-top: 1px solid rgba(37,99,235,0.15); }
+        .table-wrap tfoot td {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.78rem; font-weight: 600; color: var(--accent);
+        }
+        .table-wrap tfoot td.tf-total {
+            font-family: var(--font-mono); text-align: right; font-size: 0.85rem;
+        }
+
+        .placeholder {
+            padding: 1.5rem; text-align: center; color: var(--text-muted);
+            background: var(--surface); border-radius: var(--radius);
+            border: 1px solid var(--border); font-size: 0.82rem;
+        }
+
+        .mock-banner {
+            display: flex; align-items: center; gap: 0.5rem;
+            background: rgba(217,119,6,0.08); border: 1px solid rgba(217,119,6,0.25);
+            border-radius: 6px; padding: 0.45rem 0.85rem;
+            font-size: 0.72rem; color: var(--amber); font-weight: 500;
+            margin-bottom: 1rem;
+        }
+        .mock-banner i { font-size: 0.7rem; }
+
+        .actions-row {
+            display: flex; align-items: center; gap: 0.6rem;
+            margin-top: 1.1rem; flex-wrap: wrap;
+            animation: fadeUp 0.35s ease 0.45s both;
+        }
+        .btn-back,
+        .btn-edit {
+            min-height: 44px;
+            padding: 0.5rem 0.85rem;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .btn-back {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            color: var(--text-secondary); text-decoration: none;
+            font-size: 0.75rem; font-weight: 500;
+            border: 1px solid var(--border); border-radius: 6px;
+            background: var(--surface); box-shadow: var(--shadow);
+            transition: all 0.15s;
+        }
+        .btn-back:hover { color: var(--accent); border-color: rgba(37,99,235,0.3); background: var(--accent-light); }
+        .btn-edit {
+            display: inline-flex; align-items: center; gap: 0.35rem;
+            color: var(--text-secondary); text-decoration: none;
+            font-size: 0.75rem; font-weight: 500;
+            border: 1px solid var(--border-2); border-radius: 6px;
+            background: var(--surface); box-shadow: var(--shadow);
+            transition: all 0.15s;
+        }
+        .btn-edit:hover { color: var(--accent); border-color: rgba(37,99,235,0.3); background: var(--accent-light); }
+        .btn-edit.is-disabled { opacity: 0.55; pointer-events: none; }
+
+        @media (max-width: 580px) {
+            .header       { flex-direction: column; }
+            .header-hero  { text-align: left; width: 100%; min-width: 0; }
+            .kpi-grid     { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+            .info-row     { grid-template-columns: 1fr; }
+            .items-header { flex-wrap: wrap; gap: 0.5rem; }
+            .wf-row       { flex-wrap: wrap; padding: 0.5rem 0.65rem; gap: 0.4rem; }
+            .wf-concept   { font-size: 0.72rem; }
+            .wf-val       { min-width: 0; font-size: 0.78rem; width: 100%; text-align: right; }
+        }
+        @media (max-width: 480px) {
+            .page   { padding: 1rem 0.75rem 2.5rem; padding-left: max(0.75rem, calc(0.75rem + var(--safe-left))); padding-right: max(0.75rem, calc(0.75rem + var(--safe-right))); }
+            .nav    { padding-left: max(0.75rem, calc(0.75rem + var(--safe-left))); padding-right: max(0.75rem, calc(0.75rem + var(--safe-right))); }
+            .nav a  { padding: 0.5rem 0.35rem; font-size: 0.7rem; }
+            .table-wrap thead th, .table-wrap tbody td, .table-wrap tfoot td { padding: 0.45rem 0.5rem; font-size: 0.75rem; }
+            .table-wrap thead th { font-size: 0.6rem; }
+            .actions-row { gap: 0.5rem; margin-top: 0.9rem; }
+        }
+        @media (max-width: 380px) {
+            .page   { padding: 0.85rem 0.6rem 2rem; padding-left: max(0.6rem, calc(0.6rem + var(--safe-left))); padding-right: max(0.6rem, calc(0.6rem + var(--safe-right))); }
+            .kpi-valor { font-size: 0.9rem; }
+            .hero-value { font-size: 1.2rem; }
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </head>
-<body class="costos-page">
-    <nav class="costos-nav" id="armador-receta-nav" aria-label="Navegación principal"></nav>
-    <main class="costos-main">
-        <h1 class="costos-title costos-title--con-icono"><i class="fa-solid fa-eye costos-title-icono" aria-hidden="true"></i> Ver Receta</h1>
-        <p class="costos-intro">Datos del registro. Solo visualización.</p>
-        <div id="ver-container" class="costos-datos">
-            <p id="ver-no-data" class="costos-placeholder" style="display:none;">No hay datos del registro. Volvé al listado y usá «Ver».</p>
-            <p id="ver-loading" class="costos-placeholder">Cargando…</p>
-            <div id="ver-detalle" class="costos-ver-detalle" style="display:none;"></div>
-            <div id="ver-actions" class="costos-edit-actions" style="display:none;">
-                <a href="receta-base.html" class="costos-edit-btn-cancel">Volver al listado</a>
-                <a href="#" id="btn-agregar-item-receta" class="costos-edit-btn-save" style="margin-left: auto;"><i class="fa-solid fa-plus" aria-hidden="true"></i> Agregar Item de la Receta</a>
-                <a href="editar-receta-base.html" class="costos-edit-btn-save"><i class="fa-solid fa-pen" aria-hidden="true"></i> Editar</a>
-            </div>
-            <section id="ver-items-receta" class="costos-datos costos-ver-items-receta" style="display:none; margin-top: 2rem;">
-                <h2 class="costos-subtitle">Items de la receta</h2>
-                <p id="ver-items-loading" class="costos-placeholder">Cargando ítems…</p>
-                <p id="ver-items-empty" class="costos-placeholder" style="display:none;">No hay ítems en esta receta. Usá «Agregar Item de la Receta» para cargar materia prima.</p>
-                <div id="ver-items-container" class="costos-table-wrap" style="display:none;">
-                    <table class="costos-table costos-ver-items-table" aria-label="Items de la receta (Tabla-Receta-Base-Detalle)">
-                        <thead id="ver-items-thead"></thead>
-                        <tbody id="ver-items-tbody"></tbody>
-                    </table>
-                </div>
-            </section>
+<body>
+
+<nav class="nav costos-nav" id="armador-receta-nav" aria-label="Navegación principal"></nav>
+
+<main class="page">
+
+    <p id="ver-loading" class="placeholder">Cargando…</p>
+    <p id="ver-no-data" class="placeholder" style="display:none;">No hay datos. Volvé al listado y usá «Ver».</p>
+
+    <div id="ver-detalle" style="display:none;">
+
+        <div class="mock-banner" id="mock-banner" style="display:none;">
+            <i class="fa-solid fa-flask"></i>
+            Modo previsualización — datos de ejemplo. En producción se reemplazan con los datos reales del registro.
         </div>
-    </main>
-    <script src="../armador-receta-nav.js"></script>
-    <script src="../../Arquitectura/sheets/receta-base/receta-base-config.js"></script>
-    <script>
-        (function () {
-            var STORAGE_EDIT = "costosEditRecordRecetaBase";
-            function norm(s) { return String(s != null ? s : "").trim().toLowerCase().replace(/\s+/g, "").replace(/-/g, ""); }
-            function mapRowToConfigOrder(rowFromStorage, headersFromStorage, columnas) {
-                var configNombres = columnas.map(function (c) { return c.nombre; });
-                var out = [];
-                for (var i = 0; i < configNombres.length; i++) {
-                    var nombre = configNombres[i];
-                    var idx = -1;
-                    for (var j = 0; j < headersFromStorage.length; j++) { if (norm(headersFromStorage[j]) === norm(nombre)) { idx = j; break; } }
-                    out.push(idx >= 0 ? (rowFromStorage[idx] != null ? String(rowFromStorage[idx]) : "") : "");
-                }
-                return out;
+
+        <header class="header">
+            <div class="header-left">
+                <div class="meta-row">
+                    <span class="badge badge--store" id="badge-comercio"><i class="fa-solid fa-store"></i> Panificación Colombres</span>
+                    <span class="badge badge--cat" id="badge-cat" style="display:none;"><i class="fa-solid fa-tag"></i> <span id="badge-cat-text"></span></span>
+                </div>
+                <h1 class="recipe-name" id="recipe-name">—</h1>
+                <div class="recipe-id" id="recipe-id" style="display:none;">
+                    <i class="fa-solid fa-fingerprint"></i>
+                    <span id="recipe-id-val"></span>
+                </div>
+            </div>
+            <div class="header-hero">
+                <div class="hero-label">Costo / Unidad</div>
+                <div class="hero-value" id="hero-costo-unidad">—</div>
+                <div class="hero-sub">
+                    Rendimiento: <span id="hero-rendimiento">—</span><br>
+                    <span id="hero-um">—</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="divider"></div>
+
+        <div class="sec-label"><i class="fa-solid fa-layer-group"></i> Composición del costo</div>
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-nombre-wrap"><span class="kpi-nombre">Costo Directo</span></div>
+                <div class="kpi-valor" id="val-directo">—</div>
+                <div class="kpi-bar-wrap"><div class="kpi-bar" id="bar-directo" style="background:var(--accent);width:0%;"></div></div>
+                <div class="kpi-pct" id="pct-directo">—</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-nombre-wrap">
+                    <span class="kpi-nombre">Mano de Obra</span>
+                    <span class="kpi-etapa"><i class="fa-solid fa-circle-dot" style="font-size:.5rem;"></i> Etapa de Producción</span>
+                </div>
+                <div class="kpi-valor" id="val-mo">—</div>
+                <div class="kpi-bar-wrap"><div class="kpi-bar" id="bar-mo" style="background:var(--amber);width:0%;"></div></div>
+                <div class="kpi-pct" id="pct-mo">—</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-nombre-wrap"><span class="kpi-nombre">Costo Producción</span></div>
+                <div class="kpi-valor" id="val-prod">—</div>
+                <div class="kpi-bar-wrap"><div class="kpi-bar" id="bar-prod" style="background:var(--green);width:100%;"></div></div>
+                <div class="kpi-pct" id="pct-prod">= Directo + M.O.</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-nombre-wrap"><span class="kpi-nombre">Por Unidad</span></div>
+                <div class="kpi-valor" id="val-unidad">—</div>
+                <div class="kpi-bar-wrap"><div class="kpi-bar" id="bar-unidad" style="background:#7c3aed;width:100%;"></div></div>
+                <div class="kpi-pct" id="pct-unidad">Prod. ÷ Rendimiento</div>
+            </div>
+        </div>
+
+        <div class="info-row">
+            <div class="info-card">
+                <div class="info-icon info-icon--tiempo"><i class="fa-regular fa-clock"></i></div>
+                <div class="info-content">
+                    <div class="info-lbl">Tiempo de elaboración</div>
+                    <div class="info-val" id="val-tiempo">— <small></small></div>
+                </div>
+                <div class="info-note">Base de cálculo del<br>costo M.O. Producción.</div>
+            </div>
+            <div class="info-card">
+                <div class="info-icon info-icon--rend"><i class="fa-solid fa-scale-balanced"></i></div>
+                <div class="info-content">
+                    <div class="info-lbl">Rendimiento de la receta</div>
+                    <div class="info-val" id="val-rendimiento">—</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sec-label"><i class="fa-solid fa-sigma"></i> Desglose acumulado</div>
+        <div class="waterfall">
+            <div class="wf-row">
+                <div class="wf-concept">
+                    <span class="wf-dot" style="background:var(--accent);"></span>
+                    <div class="wf-concept-stack"><span class="wf-concept-main">Costo Directo (Σ insumos)</span></div>
+                </div>
+                <div class="wf-right"><span class="wf-op">+</span><span class="wf-val" id="wf-directo">—</span></div>
+            </div>
+            <div class="wf-row">
+                <div class="wf-concept">
+                    <span class="wf-dot" style="background:var(--amber);"></span>
+                    <div class="wf-concept-stack">
+                        <span class="wf-concept-main">Mano de Obra <span style="color:var(--text-muted);font-size:.7rem;" id="wf-mo-tiempo"></span></span>
+                        <span class="wf-concept-sub"><i class="fa-solid fa-circle-dot" style="font-size:.48rem;"></i> Etapa de Producción</span>
+                    </div>
+                </div>
+                <div class="wf-right"><span class="wf-op">+</span><span class="wf-val" id="wf-mo">—</span></div>
+            </div>
+            <div class="wf-row wf-row--total">
+                <div class="wf-concept">
+                    <i class="fa-solid fa-equals" style="font-size:.7rem;flex-shrink:0;"></i>
+                    <div class="wf-concept-stack"><span class="wf-concept-main">Costo de Producción</span></div>
+                </div>
+                <div class="wf-right"><span class="wf-op" style="color:var(--accent);">=</span><span class="wf-val" id="wf-prod">—</span></div>
+            </div>
+            <div class="wf-row">
+                <div class="wf-concept">
+                    <i class="fa-solid fa-divide" style="font-size:.7rem;color:var(--green);flex-shrink:0;"></i>
+                    <div class="wf-concept-stack">
+                        <span class="wf-concept-main">Rendimiento <span style="color:var(--text-muted);font-size:.7rem;" id="wf-rend-label"></span></span>
+                    </div>
+                </div>
+                <div class="wf-right"><span class="wf-op">÷</span><span class="wf-val" id="wf-rendval">—</span></div>
+            </div>
+            <div class="wf-row wf-row--verde">
+                <div class="wf-concept">
+                    <i class="fa-solid fa-tag" style="font-size:.7rem;color:var(--green);flex-shrink:0;"></i>
+                    <div class="wf-concept-stack"><span class="wf-concept-main">Costo Receta / Unidad</span></div>
+                </div>
+                <div class="wf-right"><span class="wf-op" style="color:var(--green);">=</span><span class="wf-val" id="wf-unidad" style="color:var(--green);">—</span></div>
+            </div>
+        </div>
+
+        <div class="items-section">
+            <div class="items-header">
+                <div class="sec-label" style="margin-bottom:0;flex:1;"><i class="fa-solid fa-list-ul"></i> Ítems de la receta</div>
+                <a href="#" id="btn-agregar" class="btn-agregar"><i class="fa-solid fa-plus"></i> Agregar ítem</a>
+            </div>
+
+            <p id="items-loading" class="placeholder">Cargando ítems…</p>
+            <p id="items-empty" class="placeholder" style="display:none;">Sin ítems. Usá «Agregar ítem» para cargar materia prima.</p>
+
+            <div id="items-table-wrap" class="table-wrap" style="display:none;">
+                <table aria-label="Ítems de la receta">
+                    <thead>
+                        <tr>
+                            <th>Insumo / Materia Prima</th>
+                            <th class="th-r">Cantidad</th>
+                            <th>U.M.</th>
+                            <th class="th-r">Precio × U.M.</th>
+                            <th class="th-r">Importe</th>
+                        </tr>
+                    </thead>
+                    <tbody id="items-tbody"></tbody>
+                    <tfoot id="items-tfoot">
+                        <tr>
+                            <td colspan="4">Total Costo Directo</td>
+                            <td class="tf-total" id="tfoot-total">—</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+        <div class="actions-row" id="ver-actions">
+            <a href="receta-base.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Volver al listado</a>
+            <a href="editar-receta-base.html" id="btn-editar" class="btn-edit"><i class="fa-solid fa-pen"></i> Editar receta</a>
+        </div>
+
+    </div>
+</main>
+
+<script src="../armador-receta-nav.js"></script>
+<script src="../../Arquitectura/sheets/receta-base/receta-base-config.js"></script>
+<script>
+(function () {
+    var STORAGE_EDIT = "costosEditRecordRecetaBase";
+
+    function norm(s) {
+        return String(s != null ? s : "").trim().toLowerCase().replace(/\s+/g,"").replace(/-/g,"");
+    }
+    function escHtml(t) {
+        if (t == null) return "";
+        return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+    }
+    function fmtMoneda(num) {
+        if (typeof window.formatNumeroVisual === "function") return window.formatNumeroVisual(num, "moneda", 2);
+        return (isNaN(num) ? "—" : num.toFixed(2).replace(".", ","));
+    }
+    function mapRow(rowFromStorage, headersFromStorage, columnas) {
+        var out = [];
+        columnas.forEach(function(col) {
+            var n = col.nombre, idx = -1;
+            for (var j = 0; j < headersFromStorage.length; j++) {
+                if (norm(headersFromStorage[j]) === norm(n)) { idx = j; break; }
             }
-            function escapeHtml(text) { if (text == null) return ""; return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
-            function renderVerDetalle(detalleEl, columnas, row, escapeHtmlFn) {
-                var html = "<dl class=\"costos-ver-dl\">";
-                columnas.forEach(function (col, idx) {
-                    if (col.visible === false || col.visible === "false") return;
-                    var nombre = (col.alias != null ? col.alias : col.nombre || "").trim();
-                    if (!nombre) return;
-                    var val = (row[idx] != null && row[idx] !== "") ? String(row[idx]).trim() : "—";
-                    if ((col.tipoDato === "numeric" || col.tipo === "numeric") && col.formatoVisual && typeof window.formatNumeroVisual === "function" && val !== "—") {
-                        var num = parseFloat(String(val).replace(",", "."));
-                        if (!isNaN(num)) val = window.formatNumeroVisual(num, col.formatoVisual, col.decimales != null ? col.decimales : 2);
-                    }
-                    var nombreCol = (col.nombre || "").trim();
-                    html += "<dt class=\"costos-ver-dt\">" + escapeHtmlFn(nombre) + "</dt><dd class=\"costos-ver-dd\" data-nombre=\"" + escapeHtmlFn(nombreCol) + "\">" + escapeHtmlFn(val) + "</dd>";
+            out.push(idx >= 0 && rowFromStorage[idx] != null ? String(rowFromStorage[idx]) : "");
+        });
+        return out;
+    }
+    function getVal(columnas, row, nombreCol) {
+        for (var i = 0; i < columnas.length; i++) {
+            if (norm(columnas[i].nombre) === norm(nombreCol)) return row[i] != null ? String(row[i]).trim() : "";
+        }
+        return "";
+    }
+    function getNum(columnas, row, nombreCol) {
+        var s = getVal(columnas, row, nombreCol);
+        if (!s || s === "—") return 0;
+        return parseFloat(String(s).replace(",", ".")) || 0;
+    }
+    function txt(id, val)  { var el = document.getElementById(id); if (el) el.textContent = val; }
+    function html(id, val) { var el = document.getElementById(id); if (el) el.innerHTML = val; }
+    function show(id)  { var el = document.getElementById(id); if (el) el.style.display = ""; }
+    function hide(id)  { var el = document.getElementById(id); if (el) el.style.display = "none"; }
+
+    var loadingEl = document.getElementById("ver-loading");
+    var noDataEl  = document.getElementById("ver-no-data");
+    var detalleEl = document.getElementById("ver-detalle");
+
+    var raw = sessionStorage.getItem(STORAGE_EDIT);
+    if (!raw) { hide("ver-loading"); show("ver-no-data"); return; }
+
+    var loadConfig = window.RECETA_BASE_LOAD_CONFIG;
+    if (!loadConfig) { hide("ver-loading"); show("ver-no-data"); return; }
+
+    loadConfig().then(function(sheetConfig) {
+        var data; try { data = JSON.parse(raw); } catch(e) { data = {}; }
+        var columnas = sheetConfig.columnas || [];
+        var row = mapRow(data.row || [], data.headers || [], columnas);
+
+        var idReceta        = getVal(columnas, row, "IDReceta-Base");
+        var descripcion     = getVal(columnas, row, "Descripcion-Masa-Producto") || "—";
+        var tiempoMin       = getNum(columnas, row, "Tiempo-Produccion-Minutos");
+        var costoMO         = getNum(columnas, row, "Costo-Mano-Obra-Produccion");
+        var costoDirecto    = getNum(columnas, row, "Costo-Directo-Receta");
+        var costoProduccion = getNum(columnas, row, "Costo-Produccion[C+E]");
+        var cantRend        = getNum(columnas, row, "Rendimiento-Cantidad");
+        var umRend          = getVal(columnas, row, "Rendimiento-UnidadMedida");
+        var costoUnidad     = getNum(columnas, row, "Costo-Produccion-ProductoBase [F/G]");
+
+        if (costoProduccion === 0) costoProduccion = costoDirecto + costoMO;
+        if (costoUnidad === 0 && cantRend > 0) costoUnidad = costoProduccion / cantRend;
+
+        var pctDirecto = costoProduccion > 0 ? (costoDirecto / costoProduccion * 100) : 0;
+        var pctMO      = costoProduccion > 0 ? (costoMO / costoProduccion * 100) : 0;
+
+        var tiempoSeg = Math.round(tiempoMin * 60);
+        var tiempoStr = tiempoMin > 0 ? tiempoMin.toString().replace(".",",") + " min" : "—";
+        var tiempoSegStr = tiempoMin > 0 ? "(" + tiempoSeg + " seg)" : "";
+        var rendStr   = cantRend > 0 ? (Number.isInteger(cantRend) ? cantRend : cantRend.toFixed(0)) + "" : "—";
+        var umStr     = umRend || "";
+
+        hide("ver-loading");
+        hide("mock-banner");
+        detalleEl.style.display = "block";
+
+        var comercio = getVal(columnas, row, "Comercio-Sucursal") || "Panificación Colombres";
+        var tipoProducto = getVal(columnas, row, "Tipo-Producto");
+        html("badge-comercio", "<i class=\"fa-solid fa-store\"></i> " + escHtml(comercio));
+        if (tipoProducto) {
+            var bc = document.getElementById("badge-cat");
+            if (bc) { bc.style.display = "inline-flex"; txt("badge-cat-text", tipoProducto); }
+        }
+
+        txt("recipe-name", descripcion);
+        if (idReceta) {
+            document.getElementById("recipe-id").style.display = "flex";
+            txt("recipe-id-val", idReceta);
+        }
+        txt("hero-costo-unidad", fmtMoneda(costoUnidad));
+        txt("hero-rendimiento", rendStr);
+        txt("hero-um", umStr);
+
+        txt("val-directo", fmtMoneda(costoDirecto));
+        txt("pct-directo", pctDirecto.toFixed(1) + "% del costo prod.");
+        txt("val-mo", fmtMoneda(costoMO));
+        txt("pct-mo", pctMO.toFixed(1) + "% del costo prod.");
+        txt("val-prod", fmtMoneda(costoProduccion));
+        txt("val-unidad", fmtMoneda(costoUnidad));
+
+        html("val-tiempo", escHtml(tiempoStr) + " <small>" + escHtml(tiempoSegStr) + "</small>");
+        txt("val-rendimiento", rendStr + (umStr ? " · " + umStr : ""));
+
+        txt("wf-directo", fmtMoneda(costoDirecto));
+        txt("wf-mo", fmtMoneda(costoMO));
+        html("wf-mo-tiempo", tiempoMin > 0 ? "(" + escHtml(tiempoStr.replace(".", ",")) + " min)" : "");
+        txt("wf-prod", fmtMoneda(costoProduccion));
+        txt("wf-rendval", rendStr);
+        html("wf-rend-label", cantRend > 0 ? "(" + escHtml(rendStr) + " unidades)" : "");
+        txt("wf-unidad", fmtMoneda(costoUnidad));
+
+        setTimeout(function() {
+            var bDir = document.getElementById("bar-directo");
+            var bMo  = document.getElementById("bar-mo");
+            if (bDir) bDir.style.width = pctDirecto + "%";
+            if (bMo)  bMo.style.width  = pctMO + "%";
+        }, 300);
+
+        var btnAgregar = document.getElementById("btn-agregar");
+        if (btnAgregar) {
+            btnAgregar.addEventListener("click", function(e) {
+                e.preventDefault();
+                try {
+                    if (idReceta)    sessionStorage.setItem("recetaBaseIdForNewItem", idReceta);
+                    if (descripcion) sessionStorage.setItem("recetaBaseDescripcionForNewItem", descripcion);
+                } catch(err) {}
+                window.location.href = "../Receta-Detalle/crear-receta-detalle.html";
+            });
+        }
+
+        var config = window.APP_CONFIG || {};
+        var appsScriptUrl = (config.appsScriptUrl || "").trim();
+        if (!appsScriptUrl || !idReceta) {
+            hide("items-loading"); show("items-empty"); return;
+        }
+
+        function setAcciones(habilitado) {
+            var btnEd = document.getElementById("btn-editar");
+            var btnAg = document.getElementById("btn-agregar");
+            [btnEd, btnAg].forEach(function(b) {
+                if (!b) return;
+                if (habilitado) b.classList.remove("is-disabled");
+                else b.classList.add("is-disabled");
+            });
+        }
+
+        setAcciones(false);
+        var url = appsScriptUrl + "?action=search&sheet=Tabla-Receta-Base-Detalle&IDReceta-Base="
+                + encodeURIComponent(idReceta) + "&limit=500&_=" + Date.now();
+
+        fetch(url, { cache: "no-store" })
+        .then(function(r) { return r.json(); })
+        .then(function(json) {
+            hide("items-loading");
+            if (!json || !json.success || !json.data) {
+                show("items-empty"); setAcciones(true); return;
+            }
+            var rows = json.data.rows || [];
+            if (rows.length === 0) {
+                show("items-empty");
+                var colDestino = (window.RECETA_BASE_SHEET_BASE && window.RECETA_BASE_SHEET_BASE.hoja && window.RECETA_BASE_SHEET_BASE.hoja.costoDirectoDesdeDetalle && window.RECETA_BASE_SHEET_BASE.hoja.costoDirectoDesdeDetalle.columnaDestino) ? window.RECETA_BASE_SHEET_BASE.hoja.costoDirectoDesdeDetalle.columnaDestino : "Costo-Directo-Receta";
+                var bodyUpdate = new URLSearchParams();
+                bodyUpdate.append("action", "update");
+                bodyUpdate.append("sheet", "Tabla-Receta-Base");
+                bodyUpdate.append("IDReceta-Base", idReceta);
+                bodyUpdate.append(colDestino, "0");
+                fetch(appsScriptUrl, { method: "POST", body: bodyUpdate }).catch(function(){}).finally(function() {
+                    setAcciones(true);
                 });
-                html += "</dl>";
-                detalleEl.innerHTML = html;
+                return;
             }
-            var noDataEl = document.getElementById("ver-no-data"); var loadingEl = document.getElementById("ver-loading"); var detalleEl = document.getElementById("ver-detalle"); var actionsEl = document.getElementById("ver-actions");
-            var raw = sessionStorage.getItem(STORAGE_EDIT);
-            if (!raw) { loadingEl.style.display = "none"; noDataEl.style.display = "block"; } else {
-                var loadConfig = window.RECETA_BASE_LOAD_CONFIG;
-                if (!loadConfig) { loadingEl.style.display = "none"; noDataEl.style.display = "block"; noDataEl.textContent = "No se pudo cargar la configuración."; } else {
-                    loadConfig().then(function (sheetConfig) {
-                        var data; try { data = JSON.parse(raw); } catch (e) { data = {}; }
-                        var headersFromStorage = data.headers || []; var rowFromStorage = data.row || [];
-                        var columnas = sheetConfig.columnas || []; var row = mapRowToConfigOrder(rowFromStorage, headersFromStorage, columnas);
-                        loadingEl.style.display = "none"; detalleEl.style.display = "block"; actionsEl.style.display = "block";
-                        var html = "<dl class=\"costos-ver-dl\">";
-                        columnas.forEach(function (col, idx) {
-                            if (col.visible === false || col.visible === "false") return;
-                            var nombre = (col.alias != null ? col.alias : col.nombre || "").trim();
-                            if (!nombre) return;
-                            var val = (row[idx] != null && row[idx] !== "") ? String(row[idx]).trim() : "—";
-                            if ((col.tipoDato === "numeric" || col.tipo === "numeric") && col.formatoVisual && typeof window.formatNumeroVisual === "function" && val !== "—") {
-                                var num = parseFloat(String(val).replace(",", "."));
-                                if (!isNaN(num)) val = window.formatNumeroVisual(num, col.formatoVisual, col.decimales != null ? col.decimales : 2);
-                            }
-                            var nombreCol = (col.nombre || "").trim();
-                            html += "<dt class=\"costos-ver-dt\">" + escapeHtml(nombre) + "</dt><dd class=\"costos-ver-dd\" data-nombre=\"" + escapeHtml(nombreCol) + "\">" + escapeHtml(val) + "</dd>";
-                        });
-                        html += "</dl>";
-                        detalleEl.innerHTML = html;
-                        var idRecetaBase = "";
-                        var idxIdCol = -1;
-                        for (var i = 0; i < columnas.length; i++) { if ((columnas[i].nombre || "").trim() === "IDReceta-Base") { idxIdCol = i; break; } }
-                        if (idxIdCol >= 0 && row[idxIdCol] != null && row[idxIdCol] !== "") idRecetaBase = String(row[idxIdCol]).trim();
-                        if (idRecetaBase === "—") idRecetaBase = "";
-                        var btnAgregar = document.getElementById("btn-agregar-item-receta");
-                        if (btnAgregar) {
-                            btnAgregar.addEventListener("click", function (e) {
-                                e.preventDefault();
-                                var descripcionMasaProducto = "";
-                                var ddDesc = detalleEl.querySelector("dd[data-nombre=\"Descripcion-Masa-Producto\"]");
-                                if (ddDesc && ddDesc.textContent) descripcionMasaProducto = String(ddDesc.textContent).trim();
-                                if (descripcionMasaProducto === "—") descripcionMasaProducto = "";
-                                try {
-                                    if (idRecetaBase) sessionStorage.setItem("recetaBaseIdForNewItem", idRecetaBase);
-                                    if (descripcionMasaProducto) sessionStorage.setItem("recetaBaseDescripcionForNewItem", descripcionMasaProducto);
-                                } catch (err) {}
-                                window.location.href = "../Receta-Detalle/crear-receta-detalle.html";
-                            });
-                        }
-                        var sectionItems = document.getElementById("ver-items-receta");
-                        var itemsLoading = document.getElementById("ver-items-loading");
-                        var itemsEmpty = document.getElementById("ver-items-empty");
-                        var itemsContainer = document.getElementById("ver-items-container");
-                        var thead = document.getElementById("ver-items-thead");
-                        var tbody = document.getElementById("ver-items-tbody");
-                        if (sectionItems && idRecetaBase) {
-                            sectionItems.style.display = "block";
-                            var config = window.APP_CONFIG || {};
-                            var appsScriptUrl = (config.appsScriptUrl || "").trim();
-                            function deshabilitarAcciones() {
-                                if (!actionsEl) return;
-                                actionsEl.querySelectorAll("a, button").forEach(function (b) {
-                                    if (b.tagName === "BUTTON") b.disabled = true;
-                                    else { b.classList.add("costos-btn-disabled"); b.setAttribute("aria-disabled", "true"); }
-                                });
-                            }
-                            function habilitarAcciones() {
-                                if (!actionsEl) return;
-                                actionsEl.querySelectorAll("a, button").forEach(function (b) {
-                                    if (b.tagName === "BUTTON") b.disabled = false;
-                                    else { b.classList.remove("costos-btn-disabled"); b.removeAttribute("aria-disabled"); }
-                                });
-                            }
-                            if (appsScriptUrl && thead && tbody) {
-                                deshabilitarAcciones();
-                                var urlItems = appsScriptUrl + "?action=search&sheet=Tabla-Receta-Base-Detalle&IDReceta-Base=" + encodeURIComponent(idRecetaBase) + "&limit=500&_=" + Date.now();
-                                fetch(urlItems, { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (json) {
-                                    if (itemsLoading) itemsLoading.style.display = "none";
-                                    if (!json || !json.success || !json.data) {
-                                        if (itemsEmpty) { itemsEmpty.style.display = "block"; itemsEmpty.textContent = "No se pudieron cargar los ítems."; }
-                                        habilitarAcciones();
-                                        return;
-                                    }
-                                    var headers = json.data.headers || [];
-                                    var rows = json.data.rows || [];
-                                    if (rows.length === 0) {
-                                        if (itemsEmpty) itemsEmpty.style.display = "block";
-                                        var ddCostoDirectoVacio = detalleEl ? detalleEl.querySelector("dd[data-nombre=\"Costo-Directo-Receta\"]") : null;
-                                        if (ddCostoDirectoVacio) ddCostoDirectoVacio.textContent = (typeof window.formatNumeroVisual === "function") ? window.formatNumeroVisual(0, "moneda", 2) : "0,00";
-                                        var confCostoVacio = (window.RECETA_BASE_SHEET_BASE && window.RECETA_BASE_SHEET_BASE.hoja && window.RECETA_BASE_SHEET_BASE.hoja.costoDirectoDesdeDetalle) || {};
-                                        var colDestinoVacio = (confCostoVacio.columnaDestino || "Costo-Directo-Receta").trim();
-                                        var bodyUpdateVacio = new URLSearchParams();
-                                        bodyUpdateVacio.append("action", "update");
-                                        bodyUpdateVacio.append("sheet", "Tabla-Receta-Base");
-                                        bodyUpdateVacio.append("IDReceta-Base", idRecetaBase);
-                                        bodyUpdateVacio.append(colDestinoVacio, "0");
-                                        fetch(appsScriptUrl, { method: "POST", body: bodyUpdateVacio }).catch(function () {}).finally(function () {
-                                            var urlGetRbVacio = appsScriptUrl + "?action=get&sheet=Tabla-Receta-Base&id=" + encodeURIComponent(idRecetaBase) + "&_=" + Date.now();
-                                            fetch(urlGetRbVacio, { cache: "no-store" }).then(function (res) { return res.json(); }).then(function (jsonRb) {
-                                                if (!jsonRb || !jsonRb.success || !jsonRb.data || typeof jsonRb.data !== "object") return;
-                                                var dataRb = jsonRb.data;
-                                                var headersNew = columnas.map(function (c) { return c.nombre; });
-                                                var rowNew = headersNew.map(function (h) { return (dataRb[h] != null && dataRb[h] !== "") ? String(dataRb[h]).trim() : ""; });
-                                                var idxCostoVacio = headersNew.indexOf(colDestinoVacio);
-                                                if (idxCostoVacio >= 0) rowNew[idxCostoVacio] = 0;
-                                                try { sessionStorage.setItem(STORAGE_EDIT, JSON.stringify({ id: idRecetaBase, headers: headersNew, row: rowNew })); } catch (e) {}
-                                                renderVerDetalle(detalleEl, columnas, rowNew, escapeHtml);
-                                            }).catch(function () {}).finally(habilitarAcciones);
-                                        });
-                                        return;
-                                    }
-                                    var columnasVer = [
-                                        { nombre: "Nombre-Insumo", alias: "Nombre Insumo" },
-                                        { nombre: "Cantidad", alias: "Cantidad" },
-                                        { nombre: "Unidad-Medida", alias: "Unidad Medida" },
-                                        { nombre: "Precio-Equivalencia-x-Unidad", alias: "Precio x Unidad" },
-                                        { nombre: "Importe", alias: "Importe" }
-                                    ];
-                                    var idxCols = columnasVer.map(function (c) { return headers.indexOf(c.nombre); });
-                                    var idxImporte = headers.indexOf("Importe");
-                                    thead.innerHTML = "<tr>" + columnasVer.map(function (c) { return "<th scope=\"col\">" + escapeHtml(c.alias) + "</th>"; }).join("") + "</tr>";
-                                    tbody.innerHTML = "";
-                                    var sumaImporte = 0;
-                                    for (var r = 0; r < rows.length; r++) {
-                                        var rowRaw = rows[r];
-                                        var rowArr = Array.isArray(rowRaw) ? rowRaw : [];
-                                        var rowObj = (typeof rowRaw === "object" && rowRaw !== null && !Array.isArray(rowRaw)) ? rowRaw : null;
-                                        var cells = [];
-                                        for (var c = 0; c < idxCols.length; c++) {
-                                            var val = "—";
-                                            if (rowObj && rowObj[columnasVer[c].nombre] != null && rowObj[columnasVer[c].nombre] !== "") val = String(rowObj[columnasVer[c].nombre]).trim();
-                                            else if (rowArr.length) { var idx = idxCols[c]; if (idx >= 0 && idx < rowArr.length && rowArr[idx] != null && rowArr[idx] !== "") val = String(rowArr[idx]).trim(); }
-                                            if (val !== "—" && (columnasVer[c].nombre === "Cantidad" || columnasVer[c].nombre === "Precio-Equivalencia-x-Unidad" || columnasVer[c].nombre === "Importe")) {
-                                                var num = parseFloat(String(val).replace(",", "."));
-                                                if (!isNaN(num) && typeof window.formatNumeroVisual === "function") val = window.formatNumeroVisual(num, "moneda", 2);
-                                            }
-                                            cells.push("<td>" + escapeHtml(val) + "</td>");
-                                        }
-                                        var importeNum = 0;
-                                        if (rowObj && rowObj["Importe"] != null && rowObj["Importe"] !== "") importeNum = parseFloat(String(rowObj["Importe"]).replace(",", ".")) || 0;
-                                        else if (idxImporte >= 0 && rowArr[idxImporte] != null && rowArr[idxImporte] !== "") importeNum = parseFloat(String(rowArr[idxImporte]).replace(",", ".")) || 0;
-                                        sumaImporte += importeNum;
-                                        tbody.innerHTML += "<tr>" + cells.join("") + "</tr>";
-                                    }
-                                    var ddCostoDirecto = detalleEl ? detalleEl.querySelector("dd[data-nombre=\"Costo-Directo-Receta\"]") : null;
-                                    if (ddCostoDirecto) {
-                                        ddCostoDirecto.textContent = (typeof window.formatNumeroVisual === "function") ? window.formatNumeroVisual(sumaImporte, "moneda", 2) : sumaImporte.toFixed(2);
-                                    }
-                                    if (itemsContainer) itemsContainer.style.display = "block";
-                                    var confCosto = (window.RECETA_BASE_SHEET_BASE && window.RECETA_BASE_SHEET_BASE.hoja && window.RECETA_BASE_SHEET_BASE.hoja.costoDirectoDesdeDetalle) || {};
-                                    var colDestino = (confCosto.columnaDestino || "Costo-Directo-Receta").trim();
-                                    var bodyUpdate = new URLSearchParams();
-                                    bodyUpdate.append("action", "update");
-                                    bodyUpdate.append("sheet", "Tabla-Receta-Base");
-                                    bodyUpdate.append("IDReceta-Base", idRecetaBase);
-                                    bodyUpdate.append(colDestino, String(sumaImporte));
-                                    fetch(appsScriptUrl, { method: "POST", body: bodyUpdate }).catch(function () {}).finally(function () {
-                                        var urlGetRb = appsScriptUrl + "?action=get&sheet=Tabla-Receta-Base&id=" + encodeURIComponent(idRecetaBase) + "&_=" + Date.now();
-                                        fetch(urlGetRb, { cache: "no-store" }).then(function (res) { return res.json(); }).then(function (jsonRb) {
-                                            if (!jsonRb || !jsonRb.success || !jsonRb.data || typeof jsonRb.data !== "object") return;
-                                            var dataRb = jsonRb.data;
-                                            var headersNew = columnas.map(function (c) { return c.nombre; });
-                                            var rowNew = headersNew.map(function (h) { return (dataRb[h] != null && dataRb[h] !== "") ? String(dataRb[h]).trim() : ""; });
-                                            var idxCosto = headersNew.indexOf(colDestino);
-                                            if (idxCosto >= 0) rowNew[idxCosto] = sumaImporte;
-                                            try { sessionStorage.setItem(STORAGE_EDIT, JSON.stringify({ id: idRecetaBase, headers: headersNew, row: rowNew })); } catch (e) {}
-                                            renderVerDetalle(detalleEl, columnas, rowNew, escapeHtml);
-                                        }).catch(function () {}).finally(habilitarAcciones);
-                                    });
-                                }).catch(function (err) {
-                                    if (itemsLoading) itemsLoading.style.display = "none";
-                                    if (itemsEmpty) { itemsEmpty.style.display = "block"; itemsEmpty.textContent = "Error al cargar ítems: " + (err.message || ""); }
-                                    habilitarAcciones();
-                                });
-                            } else {
-                                if (itemsLoading) itemsLoading.style.display = "none";
-                                if (itemsEmpty) itemsEmpty.style.display = "block";
-                            }
-                        }
-                    }).catch(function (err) { loadingEl.style.display = "none"; noDataEl.style.display = "block"; noDataEl.textContent = "Error: " + (err.message || ""); });
+
+            var headers = json.data.headers || [];
+            function colIdx(nombre) { return headers.indexOf(nombre); }
+            var iInsumo = colIdx("Nombre-Insumo");
+            var iCant   = colIdx("Cantidad");
+            var iUM     = colIdx("Unidad-Medida");
+            var iPrecio = colIdx("Precio-Equivalencia-x-Unidad");
+            var iImp    = colIdx("Importe");
+
+            var tbody = document.getElementById("items-tbody");
+            var sumaImporte = 0;
+
+            rows.forEach(function(rowRaw) {
+                var obj  = (!Array.isArray(rowRaw) && typeof rowRaw === "object") ? rowRaw : null;
+                var arr  = Array.isArray(rowRaw) ? rowRaw : [];
+                function cell(nombre, idx) {
+                    if (obj) return obj[nombre] != null ? String(obj[nombre]).trim() : "";
+                    return idx >= 0 && arr[idx] != null ? String(arr[idx]).trim() : "";
                 }
-            }
-        })();
-    </script>
+                var insumo = cell("Nombre-Insumo", iInsumo) || "—";
+                var cant   = cell("Cantidad", iCant);
+                var um     = cell("Unidad-Medida", iUM) || "";
+                var precio = cell("Precio-Equivalencia-x-Unidad", iPrecio);
+                var importe= cell("Importe", iImp);
+
+                var cantNum   = parseFloat(String(cant).replace(",",".")) || 0;
+                var precioNum = parseFloat(String(precio).replace(",",".")) || 0;
+                var impNum    = parseFloat(String(importe).replace(",",".")) || 0;
+                sumaImporte  += impNum;
+
+                var tr = document.createElement("tr");
+                tr.innerHTML =
+                    "<td class=\"td-insumo\">" + escHtml(insumo) + "</td>" +
+                    "<td class=\"td-cant\">" + escHtml(Number.isInteger(cantNum) ? String(cantNum) : cantNum.toFixed(0)) + "</td>" +
+                    "<td class=\"td-um\">" + escHtml(um) + "</td>" +
+                    "<td class=\"td-precio\">" + escHtml(fmtMoneda(precioNum)) + "</td>" +
+                    "<td class=\"td-importe\">" + escHtml(fmtMoneda(impNum)) + "</td>";
+                tbody.appendChild(tr);
+            });
+
+            txt("tfoot-total", fmtMoneda(sumaImporte));
+            show("items-table-wrap");
+
+            var costoProduccionReal = sumaImporte + costoMO;
+            var costoUnidadReal = cantRend > 0 ? costoProduccionReal / cantRend : 0;
+            var pctDirReal = costoProduccionReal > 0 ? (sumaImporte / costoProduccionReal * 100) : 0;
+            var pctMOReal  = costoProduccionReal > 0 ? (costoMO / costoProduccionReal * 100) : 0;
+            txt("val-directo", fmtMoneda(sumaImporte));
+            txt("pct-directo", pctDirReal.toFixed(1) + "% del costo prod.");
+            txt("pct-mo",      pctMOReal.toFixed(1)  + "% del costo prod.");
+            txt("val-prod",    fmtMoneda(costoProduccionReal));
+            txt("val-unidad",  fmtMoneda(costoUnidadReal));
+            txt("hero-costo-unidad", fmtMoneda(costoUnidadReal));
+            txt("wf-directo",  fmtMoneda(sumaImporte));
+            txt("wf-prod",     fmtMoneda(costoProduccionReal));
+            txt("wf-unidad",   fmtMoneda(costoUnidadReal));
+            setTimeout(function() {
+                var bDir = document.getElementById("bar-directo");
+                var bMo  = document.getElementById("bar-mo");
+                if (bDir) bDir.style.width = pctDirReal + "%";
+                if (bMo)  bMo.style.width  = pctMOReal + "%";
+            }, 350);
+
+            var colDestino = (window.RECETA_BASE_SHEET_BASE && window.RECETA_BASE_SHEET_BASE.hoja && window.RECETA_BASE_SHEET_BASE.hoja.costoDirectoDesdeDetalle && window.RECETA_BASE_SHEET_BASE.hoja.costoDirectoDesdeDetalle.columnaDestino) ? window.RECETA_BASE_SHEET_BASE.hoja.costoDirectoDesdeDetalle.columnaDestino : "Costo-Directo-Receta";
+            var bodyUpdate = new URLSearchParams();
+            bodyUpdate.append("action", "update");
+            bodyUpdate.append("sheet", "Tabla-Receta-Base");
+            bodyUpdate.append("IDReceta-Base", idReceta);
+            bodyUpdate.append(colDestino, String(sumaImporte));
+            fetch(appsScriptUrl, { method: "POST", body: bodyUpdate }).catch(function(){}).then(function() {
+                var urlGet = appsScriptUrl + "?action=get&sheet=Tabla-Receta-Base&id=" + encodeURIComponent(idReceta) + "&_=" + Date.now();
+                return fetch(urlGet, { cache: "no-store" }).then(function(res) { return res.json(); });
+            }).then(function(jsonRb) {
+                if (jsonRb && jsonRb.success && jsonRb.data && typeof jsonRb.data === "object") {
+                    var dataRb = jsonRb.data;
+                    var headersNew = columnas.map(function(c) { return c.nombre; });
+                    var rowNew = headersNew.map(function(h) { return (dataRb[h] != null && dataRb[h] !== "") ? String(dataRb[h]).trim() : ""; });
+                    try { sessionStorage.setItem(STORAGE_EDIT, JSON.stringify({ id: idReceta, headers: headersNew, row: rowNew })); } catch(e) {}
+                }
+            }).finally(function() { setAcciones(true); });
+        })
+        .catch(function() {
+            hide("items-loading");
+            show("items-empty");
+            setAcciones(true);
+        });
+
+    }).catch(function(err) {
+        hide("ver-loading");
+        if (noDataEl) { noDataEl.style.display = "block"; noDataEl.textContent = "Error: " + (err.message || ""); }
+    });
+})();
+</script>
 </body>
 </html>
