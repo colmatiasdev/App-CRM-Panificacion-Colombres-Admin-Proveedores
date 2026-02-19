@@ -107,6 +107,7 @@
                             if (restr.min != null) input.min = restr.min; if (restr.max != null) input.max = restr.max;
                             if (col.obligatorio === true) input.required = true; if (col.formatoVisual) input.setAttribute("data-formato-visual", col.formatoVisual); if (col.descripcion) input.title = col.descripcion;
                             input.placeholder = col.decimales != null ? "0." + "0".repeat(col.decimales) : "0";
+                            if (col.valorPorDefecto != null && col.valorPorDefecto !== "") input.value = typeof col.valorPorDefecto === "number" ? col.valorPorDefecto : String(col.valorPorDefecto);
                             input.id = "field-" + idx; input.className = "costos-edit-input"; input.setAttribute("data-header-index", String(idx)); input.setAttribute("data-nombre", nombreCol); wrap.appendChild(input);
                         } else {
                             var input = document.createElement("input"); input.type = "text"; input.id = "field-" + idx; input.className = "costos-edit-input"; input.setAttribute("data-header-index", String(idx)); input.setAttribute("data-nombre", nombreCol);

@@ -104,6 +104,7 @@
                                     valoresCombo.forEach(function (v) { var o = document.createElement("option"); o.value = (v != null ? String(v) : ""); o.textContent = (v != null && v !== "") ? String(v) : "—"; if (val === (v != null ? String(v) : "")) o.selected = true; select.appendChild(o); });
                                     if (col.obligatorio === true) select.required = true; wrap.appendChild(select);
                                 } else if (tipoComp === "text-box" && (tipoDato === "numeric" || col.tipo === "numeric")) {
+                                    if (val === "" && col.valorPorDefecto != null && col.valorPorDefecto !== "") val = (typeof col.valorPorDefecto === "number" ? col.valorPorDefecto : String(col.valorPorDefecto));
                                     var input = document.createElement("input"); input.type = "number";
                                     input.step = (restr.entero === true) ? "1" : (col.decimales != null ? Math.pow(10, -col.decimales) : "0.01");
                                     if (restr.min != null) input.min = restr.min; if (restr.max != null) input.max = restr.max;
@@ -228,11 +229,30 @@
                                 });
                             }
                             var saveBtn = formEl.querySelector(".costos-edit-btn-save");
+                            var actionsEl = formEl.querySelector(".costos-edit-actions");
+                            var lookupEnCurso = false;
+                            function deshabilitarAccionesMientrasCalculo() {
+                                lookupEnCurso = true;
+                                if (!actionsEl) return;
+                                actionsEl.querySelectorAll(".costos-edit-btn-cancel, .costos-edit-btn-save, a, button").forEach(function (b) {
+                                    if (b.tagName === "BUTTON") b.disabled = true;
+                                    else { b.classList.add("costos-btn-disabled"); b.setAttribute("aria-disabled", "true"); }
+                                });
+                            }
+                            function habilitarAccionesDespuesCalculo() {
+                                lookupEnCurso = false;
+                                if (!actionsEl) return;
+                                actionsEl.querySelectorAll(".costos-edit-btn-cancel, .costos-edit-btn-save, a, button").forEach(function (b) {
+                                    if (b.tagName === "BUTTON") b.disabled = !hasFormChanged();
+                                    else { b.classList.remove("costos-btn-disabled"); b.removeAttribute("aria-disabled"); }
+                                });
+                                updateSaveButton();
+                            }
                             function getCurrentRowFromForm() {
                                 var out = []; for (var i = 0; i < headers.length; i++) out[i] = ""; formEl.querySelectorAll("[data-header-index]").forEach(function (el) { var idx = parseInt(el.getAttribute("data-header-index"), 10); if (idx < 0) return; var val = (el.value != null ? String(el.value).trim() : (el.textContent != null ? String(el.textContent).trim() : "")); var formato = el.getAttribute("data-formato-visual"); if (formato && typeof window.parseNumeroVisual === "function") val = window.parseNumeroVisual(val, formato) || val; if (idx < out.length) out[idx] = val; }); return out;
                             }
                             function hasFormChanged() { if (!initialRow) return false; var cur = getCurrentRowFromForm(); for (var i = 0; i < headers.length; i++) { if ((cur[i] || "") !== (initialRow[i] || "")) return true; } return false; }
-                            function updateSaveButton() { if (saveBtn) saveBtn.disabled = !hasFormChanged(); }
+                            function updateSaveButton() { if (saveBtn) saveBtn.disabled = lookupEnCurso || !hasFormChanged(); }
                             var initialRow = getCurrentRowFromForm();
                             formEl.querySelectorAll("input[data-nombre], select[data-nombre]").forEach(function (input) {
                                 var nombre = input.getAttribute("data-nombre");
@@ -254,8 +274,14 @@
                                     }
                                 }
                                 if (esClaveLookup) {
-                                    input.addEventListener("input", function () { applyLookupsRecetaBase(formEl, sheetConfig, appsScriptUrl).then(function () { applyFormulasRecetaBase(formEl, sheetConfig); updateSaveButton(); }); });
-                                    input.addEventListener("change", function () { applyLookupsRecetaBase(formEl, sheetConfig, appsScriptUrl).then(function () { applyFormulasRecetaBase(formEl, sheetConfig); updateSaveButton(); }); });
+                                    input.addEventListener("input", function () {
+                                        deshabilitarAccionesMientrasCalculo();
+                                        applyLookupsRecetaBase(formEl, sheetConfig, appsScriptUrl).then(function () { applyFormulasRecetaBase(formEl, sheetConfig); updateSaveButton(); }).finally(habilitarAccionesDespuesCalculo);
+                                    });
+                                    input.addEventListener("change", function () {
+                                        deshabilitarAccionesMientrasCalculo();
+                                        applyLookupsRecetaBase(formEl, sheetConfig, appsScriptUrl).then(function () { applyFormulasRecetaBase(formEl, sheetConfig); updateSaveButton(); }).finally(habilitarAccionesDespuesCalculo);
+                                    });
                                 }
                             });
                             formEl.addEventListener("input", updateSaveButton);
@@ -264,6 +290,7 @@
                             applyLookupsRecetaBase(formEl, sheetConfig, appsScriptUrl).then(function () {
                                 applyFormulasRecetaBase(formEl, sheetConfig);
                                 initialRow = getCurrentRowFromForm();
+                                updateSaveButton();
                             });
                             formEl.addEventListener("submit", function (e) {
                             e.preventDefault(); hideEditAlert();

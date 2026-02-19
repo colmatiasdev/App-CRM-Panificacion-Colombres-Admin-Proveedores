@@ -12,7 +12,7 @@
       alias: "ID Detalle",
       tipoDato: "text",
       tipoComponente: "label",
-      visible: false,
+      visible: true,
       obligatorio: true,
       descripcion: "ID (solo lectura).",
       restricciones: {}
@@ -21,23 +21,21 @@
       nombre: "IDReceta-Base",
       alias: "ID Receta Base",
       tipoDato: "text",
-      tipoComponente: "combo-desde-api",
+      tipoComponente: "label",
       visible: true,
       obligatorio: true,
       descripcion: "Receta base (Tabla-Receta-Base).",
       restricciones: { maxLongitud: 100 },
-      comboDesdeApi: { sheet: "Tabla-Receta-Base", valorColumna: "IDReceta-Base", etiquetaColumna: "Descripcion-Masa-Producto" }
     },
     {
       nombre: "IDInsumo-MateriaPrima",
       alias: "Insumo (Materia Prima)",
       tipoDato: "text",
-      tipoComponente: "combo-desde-api",
+      tipoComponente: "label",
       visible: true,
       obligatorio: true,
-      descripcion: "Insumo desde PRECIO-Materia-Prima.",
+      descripcion: "Insumo de los Precios Materia-Prima.",
       restricciones: { maxLongitud: 100 },
-      comboDesdeApi: { sheet: "PRECIO-Materia-Prima", valorColumna: "idmateria-prima", etiquetaColumna: "Nombre-Producto" }
     },
     {
       nombre: "Nombre-Insumo",
@@ -58,7 +56,7 @@
       visible: true,
       obligatorio: true,
       descripcion: "Cantidad.",
-      restricciones: { min: 0 }
+      restricciones: { min: 0 , entero: true}
     },
     {
       nombre: "Unidad-Medida",

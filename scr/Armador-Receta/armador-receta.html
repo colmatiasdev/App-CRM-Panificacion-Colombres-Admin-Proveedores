@@ -11,78 +11,96 @@
     <link rel="stylesheet" href="../costos/costos.css">
     <script src="../Arquitectura/config.js"></script>
     <script src="../Arquitectura/config-sheets.js"></script>
+    <script src="armador-receta-hub.config.js"></script>
 </head>
 <body class="costos-page">
-    <nav class="costos-nav" aria-label="Navegación principal">
+    <nav class="costos-nav" aria-label="Navegación principal" id="armador-receta-nav">
         <a href="../../index.html" class="costos-nav-link">Inicio</a>
         <a href="armador-receta.html" class="costos-nav-link is-active">Armador de Receta</a>
-        <a href="Receta-Base/receta-base.html" class="costos-nav-link">Receta Base</a>
-        <a href="Receta-Detalle/receta-detalle.html" class="costos-nav-link">Receta Detalle</a>
-        <a href="Producto-Unitario-Base/producto-unitario-base.html" class="costos-nav-link">Producto Unitario Base</a>
-        <a href="Elaboracion-Productos-Base/elaboracion-productos-base.html" class="costos-nav-link">Elaboración Productos Base</a>
     </nav>
     <main class="costos-main">
         <h1 class="costos-title">Armador de Receta</h1>
         <p class="costos-intro">Módulo para armar y configurar recetas (receta base, producto unitario base y elaboración productos base).</p>
-        <div class="costos-datos">
+        <div class="costos-datos" id="armador-receta-hub">
             <p class="costos-placeholder">Elegí una opción del módulo Armador de Receta.</p>
-
-            <section class="costos-hub-modulo" aria-label="Receta Base">
-                <h2 class="costos-hub-modulo-titulo"><i class="fa-solid fa-book" aria-hidden="true"></i> Receta Base</h2>
-                <div class="costos-hub-btns">
-                    <a href="Receta-Base/receta-base.html" class="costos-calc-btn" style="display: inline-flex; align-items: center; gap: 8px;">
-                        <i class="fa-solid fa-list" aria-hidden="true"></i>
-                        Listar
-                    </a>
-                    <a href="Receta-Base/crear-receta-base.html" class="costos-calc-btn" style="display: inline-flex; align-items: center; gap: 8px;">
-                        <i class="fa-solid fa-plus" aria-hidden="true"></i>
-                        Nuevo
-                    </a>
-                </div>
-            </section>
-
-            <section class="costos-hub-modulo" aria-label="Receta Detalle">
-                <h2 class="costos-hub-modulo-titulo"><i class="fa-solid fa-list-ul" aria-hidden="true"></i> Receta Detalle</h2>
-                <div class="costos-hub-btns">
-                    <a href="Receta-Detalle/receta-detalle.html" class="costos-calc-btn" style="display: inline-flex; align-items: center; gap: 8px;">
-                        <i class="fa-solid fa-list" aria-hidden="true"></i>
-                        Listar
-                    </a>
-                    <a href="Receta-Detalle/crear-receta-detalle.html" class="costos-calc-btn" style="display: inline-flex; align-items: center; gap: 8px;">
-                        <i class="fa-solid fa-plus" aria-hidden="true"></i>
-                        Nuevo Detalle de la Receta
-                    </a>
-                </div>
-            </section>
-
-            <section class="costos-hub-modulo" aria-label="Producto Unitario Base">
-                <h2 class="costos-hub-modulo-titulo"><i class="fa-solid fa-cube" aria-hidden="true"></i> Producto Unitario Base</h2>
-                <div class="costos-hub-btns">
-                    <a href="Producto-Unitario-Base/producto-unitario-base.html" class="costos-calc-btn" style="display: inline-flex; align-items: center; gap: 8px;">
-                        <i class="fa-solid fa-list" aria-hidden="true"></i>
-                        Listar
-                    </a>
-                    <a href="Producto-Unitario-Base/crear-producto-unitario-base.html" class="costos-calc-btn" style="display: inline-flex; align-items: center; gap: 8px;">
-                        <i class="fa-solid fa-plus" aria-hidden="true"></i>
-                        Nuevo
-                    </a>
-                </div>
-            </section>
-
-            <section class="costos-hub-modulo" aria-label="Elaboración Productos Base">
-                <h2 class="costos-hub-modulo-titulo"><i class="fa-solid fa-list-check" aria-hidden="true"></i> Elaboración Productos Base</h2>
-                <div class="costos-hub-btns">
-                    <a href="Elaboracion-Productos-Base/elaboracion-productos-base.html" class="costos-calc-btn" style="display: inline-flex; align-items: center; gap: 8px;">
-                        <i class="fa-solid fa-list" aria-hidden="true"></i>
-                        Listar
-                    </a>
-                    <a href="Elaboracion-Productos-Base/crear-elaboracion-productos-base.html" class="costos-calc-btn" style="display: inline-flex; align-items: center; gap: 8px;">
-                        <i class="fa-solid fa-plus" aria-hidden="true"></i>
-                        Nuevo
-                    </a>
-                </div>
-            </section>
         </div>
     </main>
+    <script>
+        (function () {
+            var config = window.ARMADOR_RECETA_HUB_CONFIG;
+            if (!config || !config.modulos) return;
+
+            var params = {};
+            try {
+                (window.location.search || "").replace(/^\?/, "").split("&").forEach(function (p) {
+                    var parts = p.split("=");
+                    if (parts[0]) params[parts[0]] = parts.length > 1 ? decodeURIComponent(parts[1].replace(/\+/g, " ")) : "";
+                });
+            } catch (e) {}
+            var referrer = (typeof document.referrer === "string" ? document.referrer : "").toLowerCase();
+            var ocultarRecetaDetallePorOrigen = (params.ocultarRecetaDetalle === "1" || params.desde === "receta-base") ||
+                (referrer.indexOf("receta-base") !== -1 || referrer.indexOf("ver-receta-base") !== -1);
+
+            function referrerOcultaModulo(mod) {
+                if (!mod.ocultarSiReferrerContiene || !mod.ocultarSiReferrerContiene.length) return false;
+                if (mod.id === "receta-detalle" && ocultarRecetaDetallePorOrigen) return true;
+                return mod.ocultarSiReferrerContiene.some(function (s) { return referrer.indexOf(s) !== -1; });
+            }
+
+            var nav = document.getElementById("armador-receta-nav");
+            if (nav && config.menuOpciones && config.menuOpciones.length) {
+                config.menuOpciones.forEach(function (opcion) {
+                    if (!opcion.visible) return;
+                    var a = document.createElement("a");
+                    a.href = opcion.href;
+                    a.className = "costos-nav-link";
+                    a.textContent = opcion.label || "";
+                    nav.appendChild(a);
+                });
+            }
+
+            var hub = document.getElementById("armador-receta-hub");
+            if (!hub) return;
+            var btnStyle = "display: inline-flex; align-items: center; gap: 8px;";
+
+            config.modulos.forEach(function (mod) {
+                if (!mod.visible || referrerOcultaModulo(mod)) return;
+
+                var section = document.createElement("section");
+                section.className = "costos-hub-modulo";
+                section.setAttribute("aria-label", mod.label);
+                if (mod.id) section.id = "hub-modulo-" + mod.id;
+
+                var h2 = document.createElement("h2");
+                h2.className = "costos-hub-modulo-titulo";
+                var iconClass = mod.icono ? "fa-solid " + (mod.icono.indexOf("fa-") === 0 ? mod.icono : "fa-" + mod.icono) : "fa-solid fa-folder";
+                h2.innerHTML = "<i class=\"" + iconClass + "\" aria-hidden=\"true\"></i> " + (mod.label || "");
+                section.appendChild(h2);
+
+                var btns = [];
+                if (mod.botones && mod.botones.listar && mod.botones.listar.visible && mod.rutaListar) {
+                    btns.push({ href: mod.rutaListar, icono: "fa-list", texto: mod.botones.listar.texto || "Listar" });
+                }
+                if (mod.botones && mod.botones.nuevo && mod.botones.nuevo.visible && mod.rutaNuevo) {
+                    btns.push({ href: mod.rutaNuevo, icono: "fa-plus", texto: mod.botones.nuevo.texto || "Nuevo" });
+                }
+
+                if (btns.length) {
+                    var divBtns = document.createElement("div");
+                    divBtns.className = "costos-hub-btns";
+                    btns.forEach(function (b) {
+                        var link = document.createElement("a");
+                        link.href = b.href;
+                        link.className = "costos-calc-btn";
+                        link.setAttribute("style", btnStyle);
+                        link.innerHTML = "<i class=\"fa-solid " + b.icono + "\" aria-hidden=\"true\"></i> " + (b.texto || "");
+                        divBtns.appendChild(link);
+                    });
+                    section.appendChild(divBtns);
+                }
+                hub.appendChild(section);
+            });
+        })();
+    </script>
 </body>
 </html>

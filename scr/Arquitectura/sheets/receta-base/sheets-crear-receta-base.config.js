@@ -62,7 +62,7 @@
     },
     {
       nombre: "Costo-Produccion[C+E]",
-      alias: "Costo Producción [C+E]",
+      alias: "Costo Producción",
       tipoDato: "numeric",
       tipoComponente: "label",
       decimales: 2,
@@ -73,14 +73,15 @@
     },
     {
       nombre: "Rendimiento-Cantidad",
-      alias: "Rendimiento Cantidad",
+      alias: "Cant. Rendimiento",
       tipoDato: "numeric",
       tipoComponente: "text-box",
       decimales: 2,
       visible: false,
       obligatorio: true,
       descripcion: "Rendimiento cantidad.",
-      restricciones: { min: 0 }
+      restricciones: { min: 1, max: 1000000 },
+      valorPorDefecto: 1
     },
     {
       nombre: "Rendimiento-UnidadMedida",
@@ -95,7 +96,7 @@
     },
     {
       nombre: "Costo-Produccion-ProductoBase [F/G]",
-      alias: "Costo Base [F/G]",
+      alias: "Costo [Receta / Rendimiento]",
       tipoDato: "numeric",
       tipoComponente: "label",
       decimales: 2,

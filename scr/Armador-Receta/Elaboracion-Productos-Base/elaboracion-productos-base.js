@@ -158,7 +158,7 @@
 
             var url = appsScriptUrl + "?action=list&sheet=" + encodeURIComponent(nombreHoja) + "&_=" + Date.now();
             if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.show("Cargando…");
-            if (btnNuevo) btnNuevo.disabled = true;
+            if (btnNuevo) { btnNuevo.classList.add("costos-btn-disabled"); btnNuevo.setAttribute("aria-disabled", "true"); }
             return fetch(url, { cache: "no-store" }).then(function (res) { return res.json(); }).then(function (json) {
                 if (!json || !json.success || !json.data) throw new Error(json && json.error ? json.error : "Error al cargar");
                 var apiHeaders = (json.data.headers || []).map(function (h) { return String(h != null ? h : "").trim(); });
@@ -192,10 +192,10 @@
                 if (filterInput) filterInput.addEventListener("input", redraw);
                 if (filtrarSelect) filtrarSelect.addEventListener("change", function () { try { sessionStorage.setItem(STORAGE_FILTRO, filtrarSelect.value || ""); } catch (e) {} redraw(); });
                 return { sheetConfig: sheetConfig, headers: headers, rows: rows };
-            }).finally(function () { if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.hide(); if (btnNuevo) btnNuevo.disabled = false; });
+            }).finally(function () { if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.hide(); if (btnNuevo) { btnNuevo.classList.remove("costos-btn-disabled"); btnNuevo.removeAttribute("aria-disabled"); } });
         }).catch(function (err) {
             if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.hide();
-            if (btnNuevo) btnNuevo.disabled = false;
+            if (btnNuevo) { btnNuevo.classList.remove("costos-btn-disabled"); btnNuevo.removeAttribute("aria-disabled"); }
             showMessage(container, "Error al cargar: " + (err.message || "Revisá la URL de la API."));
         });
     }
