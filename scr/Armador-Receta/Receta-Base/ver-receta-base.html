@@ -192,6 +192,21 @@
         .kpi-bar-wrap { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
         .kpi-bar { height: 100%; border-radius: 2px; transition: width 0.7s cubic-bezier(.4,0,.2,1); }
         .kpi-pct { font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-muted); margin-top: 0.28rem; }
+        .kpi-items-badge {
+            display: inline-flex; align-items: center;
+            font-family: var(--font-mono); font-size: 0.58rem; font-weight: 600;
+            color: var(--green); background: var(--green-dim);
+            border: 1px solid rgba(22,163,74,0.2);
+            border-radius: 10px; padding: 0.08rem 0.4rem;
+            white-space: nowrap; flex-shrink: 0;
+        }
+        .kpi-nombre-wrap--flex { display: flex; align-items: center; justify-content: space-between; gap: 0.3rem; }
+        .kpi-tiempo-mo {
+            display: flex; align-items: center; gap: 0.28rem;
+            font-family: var(--font-mono); font-size: 0.62rem;
+            color: var(--amber); margin-top: 0.22rem; font-weight: 600;
+        }
+        .kpi-tiempo-mo i { font-size: 0.6rem; opacity: 0.85; }
 
         .info-row {
             display: grid; grid-template-columns: 1fr 1fr; gap: 0.55rem;
@@ -209,8 +224,8 @@
             display: flex; align-items: center; justify-content: center;
             font-size: 0.75rem;
         }
-        .info-icon--tiempo { background: var(--accent-light); border: 1px solid rgba(37,99,235,0.15); color: var(--accent); }
-        .info-icon--rend   { background: rgba(22,163,74,0.08); border: 1px solid rgba(22,163,74,0.15); color: var(--green); }
+        .info-icon--tiempo { background: var(--amber-dim); border: 1px solid rgba(217,119,6,0.2); color: var(--amber); }
+        .info-icon--rend   { background: var(--green-dim); border: 1px solid rgba(22,163,74,0.15); color: var(--green); }
         .info-content { flex: 1; min-width: 0; }
         .info-lbl { font-size: 0.63rem; color: var(--text-muted); margin-bottom: 0.08rem; }
         .info-val {
@@ -219,6 +234,7 @@
         }
         .info-val small { font-weight: 400; color: var(--text-muted); font-size: 0.68rem; }
         .info-note { font-size: 0.62rem; color: var(--text-muted); font-style: italic; line-height: 1.35; text-align: right; }
+        .info-note--amber { color: var(--amber); }
 
         .waterfall {
             background: var(--surface); border: 1px solid var(--border);
@@ -314,7 +330,6 @@
             font-family: var(--font-mono); font-size: 0.8rem;
             font-weight: 600; text-align: right; color: var(--text-primary);
         }
-        .table-wrap .td-um { font-size: 0.72rem; color: var(--text-muted); }
         .table-wrap tfoot tr { background: var(--accent-light); border-top: 1px solid rgba(37,99,235,0.15); }
         .table-wrap tfoot td {
             padding: 0.5rem 0.75rem;
@@ -328,6 +343,64 @@
             padding: 1.5rem; text-align: center; color: var(--text-muted);
             background: var(--surface); border-radius: var(--radius);
             border: 1px solid var(--border); font-size: 0.82rem;
+        }
+
+        .proceso-band {
+            display: flex; align-items: center; gap: 0.6rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            border-radius: var(--radius);
+            padding: 0.55rem 0.85rem;
+            margin-bottom: 0.75rem;
+            animation: fadeUp 0.3s ease both;
+        }
+        .proceso-icon {
+            width: 30px; height: 30px; border-radius: 6px; flex-shrink: 0;
+            background: var(--accent-light);
+            border: 1px solid rgba(37,99,235,0.15);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--accent); font-size: 0.8rem;
+        }
+        .proceso-content { flex: 1; min-width: 0; }
+        .proceso-overline {
+            font-size: 0.58rem; font-weight: 700; letter-spacing: 0.1em;
+            text-transform: uppercase; color: var(--accent);
+            margin-bottom: 0.08rem; display: block;
+        }
+        .proceso-title {
+            font-size: 0.78rem; font-weight: 600;
+            color: var(--text-primary); line-height: 1.2;
+        }
+        .proceso-desc {
+            font-size: 0.67rem; color: var(--text-muted);
+            margin-top: 0.06rem; line-height: 1.35;
+        }
+        .proceso-steps {
+            display: flex; align-items: center; gap: 0.25rem; flex-shrink: 0;
+        }
+        .proceso-step {
+            display: flex; align-items: center; justify-content: center;
+            width: 20px; height: 20px; border-radius: 50%;
+            font-size: 0.58rem; font-weight: 700;
+            border: 1px solid var(--border); color: var(--text-muted);
+            background: var(--surface-2); flex-shrink: 0;
+        }
+        .proceso-step.is-active {
+            background: var(--accent); color: #fff;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
+        }
+        .proceso-step-sep { font-size: 0.55rem; color: var(--border-2); }
+
+        .td-num-item {
+            font-family: var(--font-mono); font-size: 0.62rem; font-weight: 600;
+            color: var(--text-muted); text-align: center;
+            width: 28px; padding-left: 0.5rem; padding-right: 0.25rem;
+            user-select: none; vertical-align: middle;
+        }
+        .table-wrap thead th.th-num {
+            width: 28px; padding-left: 0.5rem; padding-right: 0.25rem; text-align: center;
         }
 
         .mock-banner {
@@ -374,6 +447,11 @@
 
         @media (max-width: 600px) {
             .page         { padding: 1rem 0.85rem 2.5rem; padding-left: max(0.85rem, calc(0.85rem + var(--safe-left))); padding-right: max(0.85rem, calc(0.85rem + var(--safe-right))); }
+            .proceso-band { flex-wrap: wrap; gap: 0.5rem; }
+            .proceso-steps { order: -1; width: 100%; justify-content: flex-start; margin-bottom: 0.1rem; }
+            .proceso-icon { width: 26px; height: 26px; font-size: 0.72rem; }
+            .proceso-title { font-size: 0.74rem; }
+            .proceso-desc { font-size: 0.64rem; }
             .header       { flex-direction: column; gap: 0.75rem; }
             .header-hero  { text-align: left; width: 100%; min-width: 0; }
             .kpi-grid     { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
@@ -406,10 +484,9 @@
             .table-wrap td.td-insumo  { grid-area: insumo; font-size: 0.82rem; font-weight: 600; color: var(--text-primary); align-self: center; padding: 0.35rem 0; }
             .table-wrap td.td-importe { grid-area: importe; font-size: 0.92rem; font-weight: 700; color: var(--text-primary); text-align: right; align-self: center; padding: 0.35rem 0; }
             .table-wrap td.td-cant,
-            .table-wrap td.td-um,
             .table-wrap td.td-precio { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); font-weight: 400; }
             .table-wrap td.td-cant   { grid-column: 1; grid-row: 2; }
-            .table-wrap td.td-um     { display: none; }
+            .table-wrap td.td-num-item { display: none; }
             .table-wrap td.td-precio { grid-column: 2; grid-row: 2; text-align: right; }
 
             .tfoot-mobile {
@@ -458,6 +535,24 @@
 
     <div id="ver-detalle" style="display:none;">
 
+        <div class="proceso-band">
+            <div class="proceso-icon"><i class="fa-solid fa-wheat-awn"></i></div>
+            <div class="proceso-content">
+                <span class="proceso-overline">Proceso · Etapa 1 de 4</span>
+                <div class="proceso-title">Costeo de la Masa en Base a la Receta</div>
+                <div class="proceso-desc">Definición de insumos, cantidades y costos directos de producción de la masa base de la receta.</div>
+            </div>
+            <div class="proceso-steps">
+                <span class="proceso-step is-active" title="Masa Base">1</span>
+                <span class="proceso-step-sep">›</span>
+                <span class="proceso-step" title="Producto Compuesto">2</span>
+                <span class="proceso-step-sep">›</span>
+                <span class="proceso-step" title="Producto Unitario">3</span>
+                <span class="proceso-step-sep">›</span>
+                <span class="proceso-step" title="Precio Final">4</span>
+            </div>
+        </div>
+
         <div class="mock-banner" id="mock-banner" style="display:none;">
             <i class="fa-solid fa-flask"></i>
             Modo previsualización — datos de ejemplo. En producción se reemplazan con los datos reales del registro.
@@ -503,12 +598,16 @@
                 <div class="kpi-valor" id="val-mo">—</div>
                 <div class="kpi-bar-wrap"><div class="kpi-bar" id="bar-mo" style="background:var(--amber);width:0%;"></div></div>
                 <div class="kpi-pct" id="pct-mo">—</div>
+                <div class="kpi-tiempo-mo" id="kpi-tiempo-mo"><i class="fa-regular fa-clock"></i><span id="kpi-tiempo-mo-val">—</span></div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-nombre-wrap"><span class="kpi-nombre">Costo Producción</span></div>
+                <div class="kpi-nombre-wrap kpi-nombre-wrap--flex">
+                    <span class="kpi-nombre">Costo Producción</span>
+                    <span class="kpi-items-badge" id="badge-items-count">— ítems</span>
+                </div>
                 <div class="kpi-valor" id="val-prod">—</div>
                 <div class="kpi-bar-wrap"><div class="kpi-bar" id="bar-prod" style="background:var(--green);width:100%;"></div></div>
-                <div class="kpi-pct" id="pct-prod">= Directo + M.O.</div>
+                <div class="kpi-pct" id="pct-prod">= Directo + M.O. · <span id="pct-prod-items">— ítems</span></div>
             </div>
             <div class="kpi-card">
                 <div class="kpi-nombre-wrap"><span class="kpi-nombre">Por Unidad</span></div>
@@ -525,7 +624,7 @@
                     <div class="info-lbl">Tiempo de elaboración</div>
                     <div class="info-val" id="val-tiempo">— <small></small></div>
                 </div>
-                <div class="info-note">Base de cálculo del<br>costo M.O. Producción.</div>
+                <div class="info-note info-note--amber">Base de cálculo del<br>costo M.O. Producción.</div>
             </div>
             <div class="info-card">
                 <div class="info-icon info-icon--rend"><i class="fa-solid fa-scale-balanced"></i></div>
@@ -593,9 +692,9 @@
                 <table aria-label="Ítems de la receta">
                     <thead>
                         <tr>
+                            <th class="th-num">#</th>
                             <th>Insumo / Materia Prima</th>
                             <th class="th-r">Cantidad</th>
-                            <th>U.M.</th>
                             <th class="th-r">Precio × U.M.</th>
                             <th class="th-r">Importe</th>
                         </tr>
@@ -726,9 +825,10 @@
         txt("hero-um", umStr);
 
         txt("val-directo", fmtMoneda(costoDirecto));
-        txt("pct-directo", pctDirecto.toFixed(1) + "% del costo prod.");
+        txt("pct-directo", pctDirecto.toFixed(1) + "% del costo de producción");
         txt("val-mo", fmtMoneda(costoMO));
-        txt("pct-mo", pctMO.toFixed(1) + "% del costo prod.");
+        txt("pct-mo", pctMO.toFixed(1) + "% del costo de producción");
+        if (tiempoMin > 0) txt("kpi-tiempo-mo-val", tiempoMin.toString().replace(".", ",") + " min"); else hide("kpi-tiempo-mo");
         txt("val-prod", fmtMoneda(costoProduccion));
         txt("val-unidad", fmtMoneda(costoUnidad));
 
@@ -815,7 +915,7 @@
             var tbody = document.getElementById("items-tbody");
             var sumaImporte = 0;
 
-            rows.forEach(function(rowRaw) {
+            rows.forEach(function(rowRaw, rowIdx) {
                 var obj  = (!Array.isArray(rowRaw) && typeof rowRaw === "object") ? rowRaw : null;
                 var arr  = Array.isArray(rowRaw) ? rowRaw : [];
                 function cell(nombre, idx) {
@@ -835,9 +935,9 @@
 
                 var tr = document.createElement("tr");
                 tr.innerHTML =
+                    "<td class=\"td-num-item\">" + (rowIdx + 1) + "</td>" +
                     "<td class=\"td-insumo\">" + escHtml(insumo) + "</td>" +
                     "<td class=\"td-cant\">" + escHtml(Number.isInteger(cantNum) ? String(cantNum) : cantNum.toFixed(0)) + (um ? " <span style=\"font-weight:400;opacity:.7;\">" + escHtml(um) + "</span>" : "") + "</td>" +
-                    "<td class=\"td-um\">" + escHtml(um) + "</td>" +
                     "<td class=\"td-precio\">" + escHtml(fmtMoneda(precioNum)) + "</td>" +
                     "<td class=\"td-importe\">" + escHtml(fmtMoneda(impNum)) + "</td>";
                 tbody.appendChild(tr);
@@ -847,14 +947,16 @@
             txt("tfoot-mobile-total", fmtMoneda(sumaImporte));
             show("items-table-wrap");
             show("tfoot-mobile");
+            txt("badge-items-count", rows.length + " ítem" + (rows.length !== 1 ? "s" : ""));
+            txt("pct-prod-items", rows.length + " ítem" + (rows.length !== 1 ? "s" : ""));
 
             var costoProduccionReal = sumaImporte + costoMO;
             var costoUnidadReal = cantRend > 0 ? costoProduccionReal / cantRend : 0;
             var pctDirReal = costoProduccionReal > 0 ? (sumaImporte / costoProduccionReal * 100) : 0;
             var pctMOReal  = costoProduccionReal > 0 ? (costoMO / costoProduccionReal * 100) : 0;
             txt("val-directo", fmtMoneda(sumaImporte));
-            txt("pct-directo", pctDirReal.toFixed(1) + "% del costo prod.");
-            txt("pct-mo",      pctMOReal.toFixed(1)  + "% del costo prod.");
+            txt("pct-directo", pctDirReal.toFixed(1) + "% del costo de producción");
+            txt("pct-mo",      pctMOReal.toFixed(1)  + "% del costo de producción");
             txt("val-prod",    fmtMoneda(costoProduccionReal));
             txt("val-unidad",  fmtMoneda(costoUnidadReal));
             txt("hero-costo-unidad", fmtMoneda(costoUnidadReal));
