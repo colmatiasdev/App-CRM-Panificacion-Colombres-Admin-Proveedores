@@ -501,6 +501,48 @@ function rellenarRecetaDetalleDesdeInsumo(obj) {
   }
 }
 
+/**
+ * Actualiza Costo-Directo-Receta en Tabla-Receta-Base con la suma de Importe
+ * de todos los ítems (Tabla-Receta-Base-Detalle) para ese IDReceta-Base.
+ */
+function actualizarCostoDirectoRecetaBase(idRecetaBase) {
+  if (!idRecetaBase || String(idRecetaBase).trim() === '') return;
+  var idRb = String(idRecetaBase).trim();
+  var configDetalle = getSheetConfig('tabla-receta-base-detalle');
+  if (!configDetalle) return;
+  var sheetDetalle = getSheet(configDetalle);
+  if (!sheetDetalle) return;
+  var dataDetalle = sheetDetalle.getDataRange().getValues();
+  if (dataDetalle.length < 2) return;
+  var headerDetalle = (dataDetalle[0] || []).map(function (c) { return (c != null ? String(c) : '').trim(); });
+  var idxIdRb = headerDetalle.indexOf('IDReceta-Base');
+  var idxImporte = headerDetalle.indexOf('Importe');
+  if (idxIdRb === -1 || idxImporte === -1) return;
+  var suma = 0;
+  for (var r = 1; r < dataDetalle.length; r++) {
+    var fila = dataDetalle[r] || [];
+    if (String(fila[idxIdRb] || '').trim() !== idRb) continue;
+    var imp = fila[idxImporte];
+    if (imp != null && imp !== '') suma += (typeof imp === 'number' ? imp : parseFloat(String(imp).replace(',', '.')) || 0);
+  }
+  var configBase = getSheetConfig('tabla-receta-base');
+  if (!configBase) return;
+  var sheetBase = getSheet(configBase);
+  if (!sheetBase) return;
+  var dataBase = sheetBase.getDataRange().getValues();
+  if (dataBase.length < 2) return;
+  var headerBase = (dataBase[0] || []).map(function (c) { return (c != null ? String(c) : '').trim(); });
+  var idxIdBase = headerBase.indexOf('IDReceta-Base');
+  var idxCostoDirecto = headerBase.indexOf('Costo-Directo-Receta');
+  if (idxIdBase === -1 || idxCostoDirecto === -1) return;
+  for (var b = 1; b < dataBase.length; b++) {
+    if (String((dataBase[b] || [])[idxIdBase] || '').trim() === idRb) {
+      sheetBase.getRange(b + 1, idxCostoDirecto + 1).setValue(suma);
+      break;
+    }
+  }
+}
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // ENTRADA HTTP (doGet / doPost)
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -657,6 +699,9 @@ function handleRequest(params) {
       var newObjForSheet = normalizeRowToConfigHeaders(newObj, headerRow);
       var newRow = objectToRow(headerRow, newObjForSheet);
       sheet.appendRow(newRow);
+      if (sheetKey === 'tabla-receta-base-detalle') {
+        try { actualizarCostoDirectoRecetaBase(newObj['IDReceta-Base']); } catch (errCosto) {}
+      }
       if (sheetKey === 'tabla-costo-productos' && PROPAGACION_COSTO_PRODUCTOS && PROPAGACION_COSTO_PRODUCTOS.columnas && PROPAGACION_COSTO_PRODUCTOS.columnas.length > 0 && PROPAGACION_COSTO_PRODUCTOS.soloEnUpdate !== true) {
         try {
           propagarCostoProductosAReferenciadores(newObj[configSheet.idColumn] || '', newObj);
@@ -696,6 +741,9 @@ function handleRequest(params) {
       var upRow = objectToRow(headerRow, updatedObjForSheet);
       // getRange(filaInicio, colInicio, numFilas, numCols): 3er parámetro = CANTIDAD de filas (1), no la fila final
       sheet.getRange(rowIndex, 1, 1, upRow.length).setValues([upRow]);
+      if (sheetKey === 'tabla-receta-base-detalle') {
+        try { actualizarCostoDirectoRecetaBase(updatedObj['IDReceta-Base']); } catch (errCosto) {}
+      }
       if (sheetKey === 'tabla-costo-productos' && PROPAGACION_COSTO_PRODUCTOS && PROPAGACION_COSTO_PRODUCTOS.columnas && PROPAGACION_COSTO_PRODUCTOS.columnas.length > 0) {
         try {
           propagarCostoProductosAReferenciadores(idUp, updatedObj);
@@ -720,7 +768,15 @@ function handleRequest(params) {
         }
       }
       if (delRowIndex < 0) return jsonResponse(false, null, 'No encontrado');
+      var idRecetaBaseParaCosto = '';
+      if (sheetKey === 'tabla-receta-base-detalle') {
+        var idxIdRbDel = headerRow.indexOf('IDReceta-Base');
+        if (idxIdRbDel >= 0) idRecetaBaseParaCosto = String((rows[delRowIndex - 2] || [])[idxIdRbDel] || '').trim();
+      }
       sheet.deleteRow(delRowIndex);
+      if (sheetKey === 'tabla-receta-base-detalle' && idRecetaBaseParaCosto) {
+        try { actualizarCostoDirectoRecetaBase(idRecetaBaseParaCosto); } catch (errCosto) {}
+      }
       return jsonResponse(true, { deleted: idDel });
     }
 

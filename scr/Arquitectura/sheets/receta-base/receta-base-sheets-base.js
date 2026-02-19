@@ -55,5 +55,14 @@ window.RECETA_BASE_SHEET_BASE = {
         "decimales": 2
       }
     ],
+    /** Costo-Directo-Receta se calcula como suma de Importe de los ítems (Tabla-Receta-Base-Detalle) y se persiste en esta tabla. */
+    costoDirectoDesdeDetalle: {
+      hojaDetalle: "Tabla-Receta-Base-Detalle",
+      columnaSuma: "Importe",
+      columnaClaveForanea: "IDReceta-Base",
+      columnaDestino: "Costo-Directo-Receta",
+      formatoVisual: "moneda",
+      decimales: 2
+    }
   }
 };

@@ -55,7 +55,7 @@
     },
     {
       nombre: "Costo-Produccion[C+E]",
-      alias: "Costo Producción [C+E]",
+      alias: "Costo Producción",
       tipoDato: "numeric",
       tipoComponente: "label",
       decimales: 2,
@@ -65,7 +65,7 @@
     },
     {
       nombre: "Rendimiento-Cantidad",
-      alias: "Rendimiento Cantidad",
+      alias: "Cant. Rendimiento",
       tipoDato: "numeric",
       tipoComponente: "label",
       decimales: 2,
@@ -82,7 +82,7 @@
     },
     {
       nombre: "Costo-Produccion-ProductoBase [F/G]",
-      alias: "Costo Base [F/G]",
+      alias: "Costo [Receta / Rendimiento]",
       tipoDato: "numeric",
       tipoComponente: "label",
       decimales: 2,

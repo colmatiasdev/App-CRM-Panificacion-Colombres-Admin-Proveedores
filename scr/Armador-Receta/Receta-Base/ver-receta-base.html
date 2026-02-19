@@ -66,6 +66,23 @@
                 return out;
             }
             function escapeHtml(text) { if (text == null) return ""; return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+            function renderVerDetalle(detalleEl, columnas, row, escapeHtmlFn) {
+                var html = "<dl class=\"costos-ver-dl\">";
+                columnas.forEach(function (col, idx) {
+                    if (col.visible === false || col.visible === "false") return;
+                    var nombre = (col.alias != null ? col.alias : col.nombre || "").trim();
+                    if (!nombre) return;
+                    var val = (row[idx] != null && row[idx] !== "") ? String(row[idx]).trim() : "—";
+                    if ((col.tipoDato === "numeric" || col.tipo === "numeric") && col.formatoVisual && typeof window.formatNumeroVisual === "function" && val !== "—") {
+                        var num = parseFloat(String(val).replace(",", "."));
+                        if (!isNaN(num)) val = window.formatNumeroVisual(num, col.formatoVisual, col.decimales != null ? col.decimales : 2);
+                    }
+                    var nombreCol = (col.nombre || "").trim();
+                    html += "<dt class=\"costos-ver-dt\">" + escapeHtmlFn(nombre) + "</dt><dd class=\"costos-ver-dd\" data-nombre=\"" + escapeHtmlFn(nombreCol) + "\">" + escapeHtmlFn(val) + "</dd>";
+                });
+                html += "</dl>";
+                detalleEl.innerHTML = html;
+            }
             var noDataEl = document.getElementById("ver-no-data"); var loadingEl = document.getElementById("ver-loading"); var detalleEl = document.getElementById("ver-detalle"); var actionsEl = document.getElementById("ver-actions");
             var raw = sessionStorage.getItem(STORAGE_EDIT);
             if (!raw) { loadingEl.style.display = "none"; noDataEl.style.display = "block"; } else {
@@ -120,18 +137,56 @@
                             sectionItems.style.display = "block";
                             var config = window.APP_CONFIG || {};
                             var appsScriptUrl = (config.appsScriptUrl || "").trim();
+                            function deshabilitarAcciones() {
+                                if (!actionsEl) return;
+                                actionsEl.querySelectorAll("a, button").forEach(function (b) {
+                                    if (b.tagName === "BUTTON") b.disabled = true;
+                                    else { b.classList.add("costos-btn-disabled"); b.setAttribute("aria-disabled", "true"); }
+                                });
+                            }
+                            function habilitarAcciones() {
+                                if (!actionsEl) return;
+                                actionsEl.querySelectorAll("a, button").forEach(function (b) {
+                                    if (b.tagName === "BUTTON") b.disabled = false;
+                                    else { b.classList.remove("costos-btn-disabled"); b.removeAttribute("aria-disabled"); }
+                                });
+                            }
                             if (appsScriptUrl && thead && tbody) {
+                                deshabilitarAcciones();
                                 var urlItems = appsScriptUrl + "?action=search&sheet=Tabla-Receta-Base-Detalle&IDReceta-Base=" + encodeURIComponent(idRecetaBase) + "&limit=500&_=" + Date.now();
                                 fetch(urlItems, { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (json) {
                                     if (itemsLoading) itemsLoading.style.display = "none";
                                     if (!json || !json.success || !json.data) {
                                         if (itemsEmpty) { itemsEmpty.style.display = "block"; itemsEmpty.textContent = "No se pudieron cargar los ítems."; }
+                                        habilitarAcciones();
                                         return;
                                     }
                                     var headers = json.data.headers || [];
                                     var rows = json.data.rows || [];
                                     if (rows.length === 0) {
                                         if (itemsEmpty) itemsEmpty.style.display = "block";
+                                        var ddCostoDirectoVacio = detalleEl ? detalleEl.querySelector("dd[data-nombre=\"Costo-Directo-Receta\"]") : null;
+                                        if (ddCostoDirectoVacio) ddCostoDirectoVacio.textContent = (typeof window.formatNumeroVisual === "function") ? window.formatNumeroVisual(0, "moneda", 2) : "0,00";
+                                        var confCostoVacio = (window.RECETA_BASE_SHEET_BASE && window.RECETA_BASE_SHEET_BASE.hoja && window.RECETA_BASE_SHEET_BASE.hoja.costoDirectoDesdeDetalle) || {};
+                                        var colDestinoVacio = (confCostoVacio.columnaDestino || "Costo-Directo-Receta").trim();
+                                        var bodyUpdateVacio = new URLSearchParams();
+                                        bodyUpdateVacio.append("action", "update");
+                                        bodyUpdateVacio.append("sheet", "Tabla-Receta-Base");
+                                        bodyUpdateVacio.append("IDReceta-Base", idRecetaBase);
+                                        bodyUpdateVacio.append(colDestinoVacio, "0");
+                                        fetch(appsScriptUrl, { method: "POST", body: bodyUpdateVacio }).catch(function () {}).finally(function () {
+                                            var urlGetRbVacio = appsScriptUrl + "?action=get&sheet=Tabla-Receta-Base&id=" + encodeURIComponent(idRecetaBase) + "&_=" + Date.now();
+                                            fetch(urlGetRbVacio, { cache: "no-store" }).then(function (res) { return res.json(); }).then(function (jsonRb) {
+                                                if (!jsonRb || !jsonRb.success || !jsonRb.data || typeof jsonRb.data !== "object") return;
+                                                var dataRb = jsonRb.data;
+                                                var headersNew = columnas.map(function (c) { return c.nombre; });
+                                                var rowNew = headersNew.map(function (h) { return (dataRb[h] != null && dataRb[h] !== "") ? String(dataRb[h]).trim() : ""; });
+                                                var idxCostoVacio = headersNew.indexOf(colDestinoVacio);
+                                                if (idxCostoVacio >= 0) rowNew[idxCostoVacio] = 0;
+                                                try { sessionStorage.setItem(STORAGE_EDIT, JSON.stringify({ id: idRecetaBase, headers: headersNew, row: rowNew })); } catch (e) {}
+                                                renderVerDetalle(detalleEl, columnas, rowNew, escapeHtml);
+                                            }).catch(function () {}).finally(habilitarAcciones);
+                                        });
                                         return;
                                     }
                                     var columnasVer = [
@@ -142,8 +197,10 @@
                                         { nombre: "Importe", alias: "Importe" }
                                     ];
                                     var idxCols = columnasVer.map(function (c) { return headers.indexOf(c.nombre); });
+                                    var idxImporte = headers.indexOf("Importe");
                                     thead.innerHTML = "<tr>" + columnasVer.map(function (c) { return "<th scope=\"col\">" + escapeHtml(c.alias) + "</th>"; }).join("") + "</tr>";
                                     tbody.innerHTML = "";
+                                    var sumaImporte = 0;
                                     for (var r = 0; r < rows.length; r++) {
                                         var rowRaw = rows[r];
                                         var rowArr = Array.isArray(rowRaw) ? rowRaw : [];
@@ -159,12 +216,41 @@
                                             }
                                             cells.push("<td>" + escapeHtml(val) + "</td>");
                                         }
+                                        var importeNum = 0;
+                                        if (rowObj && rowObj["Importe"] != null && rowObj["Importe"] !== "") importeNum = parseFloat(String(rowObj["Importe"]).replace(",", ".")) || 0;
+                                        else if (idxImporte >= 0 && rowArr[idxImporte] != null && rowArr[idxImporte] !== "") importeNum = parseFloat(String(rowArr[idxImporte]).replace(",", ".")) || 0;
+                                        sumaImporte += importeNum;
                                         tbody.innerHTML += "<tr>" + cells.join("") + "</tr>";
                                     }
+                                    var ddCostoDirecto = detalleEl ? detalleEl.querySelector("dd[data-nombre=\"Costo-Directo-Receta\"]") : null;
+                                    if (ddCostoDirecto) {
+                                        ddCostoDirecto.textContent = (typeof window.formatNumeroVisual === "function") ? window.formatNumeroVisual(sumaImporte, "moneda", 2) : sumaImporte.toFixed(2);
+                                    }
                                     if (itemsContainer) itemsContainer.style.display = "block";
+                                    var confCosto = (window.RECETA_BASE_SHEET_BASE && window.RECETA_BASE_SHEET_BASE.hoja && window.RECETA_BASE_SHEET_BASE.hoja.costoDirectoDesdeDetalle) || {};
+                                    var colDestino = (confCosto.columnaDestino || "Costo-Directo-Receta").trim();
+                                    var bodyUpdate = new URLSearchParams();
+                                    bodyUpdate.append("action", "update");
+                                    bodyUpdate.append("sheet", "Tabla-Receta-Base");
+                                    bodyUpdate.append("IDReceta-Base", idRecetaBase);
+                                    bodyUpdate.append(colDestino, String(sumaImporte));
+                                    fetch(appsScriptUrl, { method: "POST", body: bodyUpdate }).catch(function () {}).finally(function () {
+                                        var urlGetRb = appsScriptUrl + "?action=get&sheet=Tabla-Receta-Base&id=" + encodeURIComponent(idRecetaBase) + "&_=" + Date.now();
+                                        fetch(urlGetRb, { cache: "no-store" }).then(function (res) { return res.json(); }).then(function (jsonRb) {
+                                            if (!jsonRb || !jsonRb.success || !jsonRb.data || typeof jsonRb.data !== "object") return;
+                                            var dataRb = jsonRb.data;
+                                            var headersNew = columnas.map(function (c) { return c.nombre; });
+                                            var rowNew = headersNew.map(function (h) { return (dataRb[h] != null && dataRb[h] !== "") ? String(dataRb[h]).trim() : ""; });
+                                            var idxCosto = headersNew.indexOf(colDestino);
+                                            if (idxCosto >= 0) rowNew[idxCosto] = sumaImporte;
+                                            try { sessionStorage.setItem(STORAGE_EDIT, JSON.stringify({ id: idRecetaBase, headers: headersNew, row: rowNew })); } catch (e) {}
+                                            renderVerDetalle(detalleEl, columnas, rowNew, escapeHtml);
+                                        }).catch(function () {}).finally(habilitarAcciones);
+                                    });
                                 }).catch(function (err) {
                                     if (itemsLoading) itemsLoading.style.display = "none";
                                     if (itemsEmpty) { itemsEmpty.style.display = "block"; itemsEmpty.textContent = "Error al cargar ítems: " + (err.message || ""); }
+                                    habilitarAcciones();
                                 });
                             } else {
                                 if (itemsLoading) itemsLoading.style.display = "none";

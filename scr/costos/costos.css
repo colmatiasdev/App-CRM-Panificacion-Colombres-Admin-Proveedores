@@ -965,6 +965,13 @@ body.costos-page {
     cursor: not-allowed;
     pointer-events: none;
 }
+/* Enlaces y botones deshabilitados mientras se cargan datos o se realizan operaciones */
+.costos-btn-disabled,
+a.costos-btn-disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+}
 .costos-edit-btn-editar {
     display: inline-flex;
     align-items: center;

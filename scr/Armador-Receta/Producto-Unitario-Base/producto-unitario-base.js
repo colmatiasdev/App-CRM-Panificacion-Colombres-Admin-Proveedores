@@ -329,7 +329,7 @@
                 var url = appsScriptUrl + "?action=list&sheet=" + encodeURIComponent(nombreHoja) + "&_=" + Date.now();
                 var spinner = window.COSTOS_SPINNER;
                 if (spinner) spinner.show("Cargando…");
-                if (btnNuevo) btnNuevo.disabled = true;
+                if (btnNuevo) { btnNuevo.classList.add("costos-btn-disabled"); btnNuevo.setAttribute("aria-disabled", "true"); }
                 return fetch(url, { cache: "no-store" })
                     .then(function (res) { return res.json(); })
                     .then(function (json) {
@@ -431,12 +431,12 @@
                     })
                     .finally(function () {
                         if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.hide();
-                        if (btnNuevo) btnNuevo.disabled = false;
+                        if (btnNuevo) { btnNuevo.classList.remove("costos-btn-disabled"); btnNuevo.removeAttribute("aria-disabled"); }
                     });
             })
             .catch(function (err) {
                 if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.hide();
-                if (btnNuevo) btnNuevo.disabled = false;
+                if (btnNuevo) { btnNuevo.classList.remove("costos-btn-disabled"); btnNuevo.removeAttribute("aria-disabled"); }
                 showMessage(container, "Error al cargar: " + (err.message || "Revisá la URL de la API y la configuración."));
             });
     }
