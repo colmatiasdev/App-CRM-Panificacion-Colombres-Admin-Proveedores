@@ -234,12 +234,12 @@ var CONFIG = {
   },
 
   /** Hoja Tabla Elaboración Productos Base (Armador Receta) – ?sheet=Tabla-Elaboracion-ProductosBase
-   * PK = ID-UNICO. FK IDReceta-Base → Tabla-Receta-Base.IDReceta-Base. FK IDElaboracion-ProductoBase → Tabla-Costos-ProductoUnitario.IDCosto-ProductoUnitario. */
+   * PK = IDElaboracion-ProductoBase. FK IDReceta-Base → Tabla-Receta-Base.IDReceta-Base.
+   * Tabla-Costos-ProductoUnitario tiene columna IDElaboracion-ProductoBase (FK a esta tabla). */
   'tabla-elaboracion-productos-base': {
     sheetName: 'Tabla-Elaboracion-ProductosBase',
     gid: 0,
     headers: [
-      'ID-UNICO',
       'IDElaboracion-ProductoBase',
       'IDReceta-Base',
       'Cantidad',
@@ -247,9 +247,9 @@ var CONFIG = {
       'Costo-Produccion-ProductoBase',
       'Monto'
     ],
-    idColumn: 'ID-UNICO',
-    idPrefix: 'ID-UNICO',
-    filterColumns: ['ID-UNICO', 'IDElaboracion-ProductoBase', 'IDReceta-Base', 'Cantidad', 'Descripcion-Masa-Producto'],
+    idColumn: 'IDElaboracion-ProductoBase',
+    idPrefix: 'ELAB-BASE-',
+    filterColumns: ['IDElaboracion-ProductoBase', 'IDReceta-Base', 'Cantidad', 'Descripcion-Masa-Producto'],
     requiredOnCreate: ['IDReceta-Base', 'Cantidad']
   },
 

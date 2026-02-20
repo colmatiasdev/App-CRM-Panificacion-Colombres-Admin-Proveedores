@@ -11,24 +11,14 @@
   var hoja = base.hoja;
   var columnas = [
     {
-      nombre: "ID-UNICO",
-      alias: "ID Único",
+      nombre: "IDElaboracion-ProductoBase",
+      alias: "ID Elaboración",
       tipoDato: "text",
       tipoComponente: "label",
       visible: true,
       obligatorio: true,
-      descripcion: "ID único autogenerado.",
+      descripcion: "PK autogenerado. Tras guardar, el producto unitario (si se creó desde uno) se vincula con este ID.",
       restricciones: {}
-    },
-    {
-      nombre: "IDElaboracion-ProductoBase",
-      alias: "ID Producto Unitario",
-      tipoDato: "text",
-      tipoComponente: "label",
-      visible: true,
-      obligatorio: false,
-      descripcion: "FK a Tabla-Costos-ProductoUnitario (IDCosto-ProductoUnitario). Se completa al crear desde producto unitario.",
-      restricciones: { maxLongitud: 100 }
     },
     {
       nombre: "IDReceta-Base",

@@ -112,12 +112,9 @@
                 if (datosProductoUnitario && datosProductoUnitario.id != null) {
                     var prevHeaders = datosProductoUnitario.headers || [];
                     var prevRow = datosProductoUnitario.row || [];
-                    var idProducto = String(datosProductoUnitario.id);
                     formEl.querySelectorAll("[data-nombre]").forEach(function (el) {
                         var nom = el.getAttribute("data-nombre");
-                        if (nom === "IDElaboracion-ProductoBase") {
-                            if (el.value !== undefined) el.value = idProducto; else if (el.textContent !== undefined) el.textContent = idProducto;
-                        } else if (nom === "Costo-Produccion-ProductoBase" && prevHeaders.length && prevRow.length) {
+                        if (nom === "Costo-Produccion-ProductoBase" && prevHeaders.length && prevRow.length) {
                             var idxPrev = prevHeaders.indexOf("Costo-Produccion"); if (idxPrev < 0) idxPrev = prevHeaders.indexOf("Costo-Produccion-ProductoBase");
                             if (idxPrev >= 0 && prevRow[idxPrev] != null && String(prevRow[idxPrev]).trim() !== "") { if (el.value !== undefined) el.value = String(prevRow[idxPrev]).trim(); else if (el.textContent !== undefined) el.textContent = String(prevRow[idxPrev]).trim(); }
                         }
@@ -220,13 +217,13 @@
                             showEditAlert("Error al guardar: " + ((json && json.error) ? json.error : "Respuesta inválida"), "error");
                             return Promise.reject(new Error(json && json.error ? json.error : "Error al guardar"));
                         }
-                        var idUnicoIdx = headers.indexOf("ID-UNICO");
+                        var idElabIdx = headers.indexOf("IDElaboracion-ProductoBase");
                         var montoIdx = headers.indexOf("Monto");
-                        var idElaboracionFinal = (idUnicoIdx >= 0 && newRow[idUnicoIdx] != null ? String(newRow[idUnicoIdx]) : "").trim();
-                        if (json.data && json.data["ID-UNICO"] != null && String(json.data["ID-UNICO"]).trim() !== "") idElaboracionFinal = String(json.data["ID-UNICO"]).trim();
+                        var idElaboracionFinal = (idElabIdx >= 0 && newRow[idElabIdx] != null ? String(newRow[idElabIdx]) : "").trim();
+                        if (json.data && json.data["IDElaboracion-ProductoBase"] != null && String(json.data["IDElaboracion-ProductoBase"]).trim() !== "") idElaboracionFinal = String(json.data["IDElaboracion-ProductoBase"]).trim();
                         var datosProducto = null;
                         try { var raw = sessionStorage.getItem("productoUnitarioBaseParaElaboracion"); if (raw) datosProducto = JSON.parse(raw); } catch (e) {}
-                        if (datosProducto && datosProducto.id != null && idUnicoIdx >= 0 && montoIdx >= 0) {
+                        if (datosProducto && datosProducto.id != null && idElabIdx >= 0 && montoIdx >= 0) {
                             var idProductoUnitario = String(datosProducto.id);
                             var bodyUpdate = {
                                 action: "update",
@@ -245,7 +242,7 @@
                                 }
                                 try {
                                     var rowRecienCreado = newRow.slice ? newRow.slice() : newRow.map(function (x) { return x; });
-                                    if (idUnicoIdx >= 0 && idElaboracionFinal) rowRecienCreado[idUnicoIdx] = idElaboracionFinal;
+                                    if (idElabIdx >= 0 && idElaboracionFinal) rowRecienCreado[idElabIdx] = idElaboracionFinal;
                                     sessionStorage.setItem("elaboracionProductoBaseRecienCreado", JSON.stringify({ headers: headers, row: rowRecienCreado }));
                                     var headersProd = (datosProducto.headers || []).slice();
                                     var rowForEdit = (datosProducto.row || []).slice();

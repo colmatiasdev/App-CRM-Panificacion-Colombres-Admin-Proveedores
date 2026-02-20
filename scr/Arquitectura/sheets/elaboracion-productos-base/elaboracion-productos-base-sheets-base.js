@@ -1,8 +1,8 @@
 /**
  * Configuración base del módulo Elaboración Productos Base (Armador Receta).
- * Tabla: Tabla-Elaboracion-ProductosBase. PK = ID-UNICO.
+ * Tabla: Tabla-Elaboracion-ProductosBase. PK = IDElaboracion-ProductoBase.
  * FK IDReceta-Base → Tabla-Receta-Base.IDReceta-Base.
- * FK IDElaboracion-ProductoBase → Tabla-Costos-ProductoUnitario.IDCosto-ProductoUnitario.
+ * Tabla-Costos-ProductoUnitario tiene columna IDElaboracion-ProductoBase (FK a esta tabla).
  * Debe cargarse antes de cualquier *-sheets.config.js de acción.
  */
 window.ELABORACION_PRODUCTOS_BASE_SHEET_BASE = {
@@ -11,9 +11,8 @@ window.ELABORACION_PRODUCTOS_BASE_SHEET_BASE = {
   hoja: {
     nombre: "Tabla-Elaboracion-ProductosBase",
     nombreHoja: "Tabla-Elaboracion-Productos-Base",
-    clavePrimaria: ["ID-UNICO"],
+    clavePrimaria: ["IDElaboracion-ProductoBase"],
     columnasPropias: [
-      "ID-UNICO",
       "IDElaboracion-ProductoBase",
       "IDReceta-Base",
       "Cantidad",
@@ -23,14 +22,12 @@ window.ELABORACION_PRODUCTOS_BASE_SHEET_BASE = {
     ],
     columnaOrden: null,
     clavesForaneas: [
-      { columna: "IDReceta-Base", tabla: "Tabla-Receta-Base", pkReferencia: "IDReceta-Base", cardinalidad: "N:1" },
-      { columna: "IDElaboracion-ProductoBase", tabla: "Tabla-Costos-ProductoUnitario", pkReferencia: "IDCosto-ProductoUnitario", cardinalidad: "N:1" }
+      { columna: "IDReceta-Base", tabla: "Tabla-Receta-Base", pkReferencia: "IDReceta-Base", cardinalidad: "N:1" }
     ],
-    prefijoId: "ID-UNICO",
+    prefijoId: "ELAB-BASE-",
     patronId: 1,
     indices: [
-      { columnas: ["ID-UNICO"], unico: true },
-      { columnas: ["IDElaboracion-ProductoBase"], unico: false },
+      { columnas: ["IDElaboracion-ProductoBase"], unico: true },
       { columnas: ["IDReceta-Base"], unico: false }
     ],
     /** Fórmulas: Monto = Cantidad × Costo-Produccion-ProductoBase */
