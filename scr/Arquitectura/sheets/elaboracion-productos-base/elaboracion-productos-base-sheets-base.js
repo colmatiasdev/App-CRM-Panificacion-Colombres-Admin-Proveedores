@@ -24,7 +24,7 @@ window.ELABORACION_PRODUCTOS_BASE_SHEET_BASE = {
     clavesForaneas: [
       { columna: "IDReceta-Base", tabla: "Tabla-Receta-Base", pkReferencia: "IDReceta-Base", cardinalidad: "N:1" }
     ],
-    prefijoId: "ELAB-BASE-",
+    prefijoId: "ELABORACION-BASE",
     patronId: 1,
     indices: [
       { columnas: ["IDElaboracion-ProductoBase"], unico: true },

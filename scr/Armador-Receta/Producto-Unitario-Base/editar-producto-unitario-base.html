@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Editar producto unitario base - Panificación Colombres</title>
+    <title>Costo de Elaboración del Producto - Panificación Colombres</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -19,7 +19,7 @@
 <body class="costos-page">
     <nav class="costos-nav" id="armador-receta-nav" aria-label="Navegación principal"></nav>
     <main class="costos-main">
-        <h1 class="costos-title costos-title--con-icono"><i class="fa-solid fa-pen costos-title-icono" aria-hidden="true"></i> Editar producto unitario base</h1>
+        <h1 class="costos-title costos-title--con-icono"><i class="fa-solid fa-pen costos-title-icono" aria-hidden="true"></i> Costo de Elaboración del Producto</h1>
         <p class="costos-intro">Modificá los datos y guardá los cambios.</p>
         <div id="edit-form-container" class="costos-datos">
             <div id="costos-edit-alert" class="costos-alert" role="alert" aria-live="polite" style="display:none;"></div>
@@ -31,8 +31,11 @@
                     <button type="submit" class="costos-edit-btn-save" id="costos-edit-btn-save"><i class="fa-solid fa-check" aria-hidden="true"></i> Guardar cambios</button>
                 </div>
             </form>
-            <section id="elaboracion-vinculada-section" class="costos-edit-seccion costos-tabla-elaboracion-vinculada" style="display:none;" aria-label="Elaboración producto base vinculada">
-                <h2 class="costos-edit-seccion-titulo">Elaboración producto base vinculada</h2>
+            <section id="elaboracion-vinculada-section" class="costos-edit-seccion costos-tabla-elaboracion-vinculada" style="display:none;" aria-label="Contenido de productos elaborados">
+                <div class="costos-edit-seccion-header">
+                    <h2 class="costos-edit-seccion-titulo">Contenido de productos elaborados</h2>
+                    <button type="button" id="elaboracion-vinculada-btn-agregar" class="costos-edit-btn costos-edit-btn-agregar-item" aria-label="Agregar otro item">Agregar otro item</button>
+                </div>
                 <p id="elaboracion-vinculada-sin-id" class="costos-placeholder" style="display:none;">No hay elaboración vinculada a este producto.</p>
                 <div id="elaboracion-vinculada-loading" class="costos-placeholder" style="display:none;">Cargando elaboración…</div>
                 <div id="elaboracion-vinculada-table-wrap" style="display:none;">
@@ -134,8 +137,21 @@
                         columnas.forEach(function (col, idx) {
                             var nombre = (col.alias != null ? col.alias : col.nombre || "").trim();
                             if (!nombre) return;
-                            if (col.visible === false) return;
                             var val = row[idx] != null ? String(row[idx]).trim() : "";
+                            if (col.visible === false) {
+                                var hiddenWrap = document.createElement("div");
+                                hiddenWrap.className = "costos-edit-field costos-edit-field-hidden";
+                                hiddenWrap.style.display = "none";
+                                var hiddenInput = document.createElement("input");
+                                hiddenInput.type = "hidden";
+                                hiddenInput.id = "field-" + idx;
+                                hiddenInput.setAttribute("data-header-index", String(idx));
+                                hiddenInput.setAttribute("data-nombre", col.nombre || nombre);
+                                hiddenInput.value = val;
+                                hiddenWrap.appendChild(hiddenInput);
+                                fieldsContainer.appendChild(hiddenWrap);
+                                return;
+                            }
                             var restr = col.restricciones || {};
                             var tipoComp = col.tipoComponente != null ? col.tipoComponente : col.tipo;
                             var tipoDato = col.tipoDato != null ? col.tipoDato : col.tipo;
@@ -279,8 +295,8 @@
                         var elaboracionTableWrap = document.getElementById("elaboracion-vinculada-table-wrap");
                         var elaboracionThead = document.getElementById("elaboracion-vinculada-thead");
                         var elaboracionTbody = document.getElementById("elaboracion-vinculada-tbody");
-                        var ELABORACION_HEADERS = ["IDElaboracion-ProductoBase", "IDReceta-Base", "Cantidad", "Descripcion-Masa-Producto", "Costo-Produccion-ProductoBase", "Monto"];
-                        var ELABORACION_ALIASES = { "IDElaboracion-ProductoBase": "ID Elaboración", "IDReceta-Base": "ID Receta Base", "Cantidad": "Cantidad", "Descripcion-Masa-Producto": "Descripción Masa", "Costo-Produccion-ProductoBase": "Costo Prod. Base", "Monto": "Monto" };
+                        var ELABORACION_HEADERS = ["Cantidad", "Descripcion-Masa-Producto", "Costo-Produccion-ProductoBase", "Monto"];
+                        var ELABORACION_ALIASES = { "Cantidad": "Cantidad", "Descripcion-Masa-Producto": "Descripción Masa", "Costo-Produccion-ProductoBase": "Costo Prod. Base", "Monto": "Monto" };
                         function renderElaboracionVinculada() {
                             if (!elaboracionSection) return;
                             elaboracionSection.style.display = "block";
@@ -296,7 +312,7 @@
                             if (elaboracionSinId) elaboracionSinId.style.display = "none";
                             if (elaboracionLoading) elaboracionLoading.style.display = "block";
                             if (elaboracionTableWrap) elaboracionTableWrap.style.display = "none";
-                            var sheetElab = "Tabla-Elaboracion-ProductosBase";
+                            var sheetElab = "Tabla-Elaboracion-Productos-Base";
                             var bodyGet = new URLSearchParams();
                             bodyGet.append("action", "get");
                             bodyGet.append("sheet", sheetElab);
@@ -353,6 +369,88 @@
                             applyFormulasProductoUnitario(formEl, sheetConfig);
                             renderElaboracionVinculada();
                         });
+                        var btnAgregarItem = document.getElementById("elaboracion-vinculada-btn-agregar");
+                        if (btnAgregarItem) {
+                            btnAgregarItem.addEventListener("click", function () {
+                                var orden = getFormValueByNombreProductoUnitario(formEl, "Orden");
+                                var comercioSucursal = getFormValueByNombreProductoUnitario(formEl, "Comercio-Sucursal");
+                                var categoria = getFormValueByNombreProductoUnitario(formEl, "Categoria");
+                                var nombreProducto = getFormValueByNombreProductoUnitario(formEl, "Nombre-Producto");
+                                orden = (orden != null ? String(orden).trim() : "");
+                                comercioSucursal = (comercioSucursal != null ? String(comercioSucursal).trim() : "");
+                                categoria = (categoria != null ? String(categoria).trim() : "");
+                                nombreProducto = (nombreProducto != null ? String(nombreProducto).trim() : "");
+                                if (nombreProducto === "—" || nombreProducto === "–" || nombreProducto === "-") nombreProducto = "";
+                                if (!nombreProducto) {
+                                    showEditAlert("Completá Nombre-Producto para agregar un item.", "error");
+                                    return;
+                                }
+                                function getDataVal(obj, key) {
+                                    if (obj[key] != null && obj[key] !== "") return obj[key];
+                                    var k2 = key.replace(/-/g, "");
+                                    for (var p in obj) { if (Object.prototype.hasOwnProperty.call(obj, p) && String(p).replace(/-/g, "") === k2) return obj[p]; }
+                                    return null;
+                                }
+                                var sheetElab = "Tabla-Elaboracion-Productos-Base";
+                                var sheetProducto = "Tabla-Costos-ProductoUnitario";
+                                btnAgregarItem.disabled = true;
+                                var btnText = btnAgregarItem.innerHTML;
+                                btnAgregarItem.innerHTML = "<i class=\"fa-solid fa-spinner fa-spin\" aria-hidden=\"true\"></i> Creando…";
+                                var bodyElab = new URLSearchParams();
+                                bodyElab.append("action", "create");
+                                bodyElab.append("sheet", sheetElab);
+                                bodyElab.append("IDReceta-Base", "PENDIENTE");
+                                bodyElab.append("Cantidad", "1");
+                                bodyElab.append("Descripcion-Masa-Producto", "");
+                                bodyElab.append("Costo-Produccion-ProductoBase", "0");
+                                bodyElab.append("Monto", "0");
+                                fetch(appsScriptUrl, { method: "POST", body: bodyElab, cache: "no-store" }).then(function (r) { return r.text(); }).then(function (text) {
+                                    var jsonElab;
+                                    try { jsonElab = JSON.parse(text); } catch (e) { jsonElab = null; }
+                                    if (!jsonElab || !jsonElab.success || !jsonElab.data) {
+                                        btnAgregarItem.disabled = false;
+                                        btnAgregarItem.innerHTML = btnText;
+                                        showEditAlert("Error al crear elaboración: " + ((jsonElab && jsonElab.error) ? jsonElab.error : "Respuesta inválida"), "error");
+                                        return Promise.reject(new Error(jsonElab && jsonElab.error ? jsonElab.error : "Error"));
+                                    }
+                                    var idElaboracion = getDataVal(jsonElab.data, "IDElaboracion-ProductoBase") || (jsonElab.data["IDElaboracion-ProductoBase"] != null ? String(jsonElab.data["IDElaboracion-ProductoBase"]) : "");
+                                    if (!idElaboracion) {
+                                        btnAgregarItem.disabled = false;
+                                        btnAgregarItem.innerHTML = btnText;
+                                        showEditAlert("Error: no se obtuvo el ID de elaboración.", "error");
+                                        return Promise.reject(new Error("Sin ID elaboración"));
+                                    }
+                                    var bodyProd = new URLSearchParams();
+                                    bodyProd.append("action", "create");
+                                    bodyProd.append("sheet", sheetProducto);
+                                    bodyProd.append("Orden", orden);
+                                    bodyProd.append("Comercio-Sucursal", comercioSucursal);
+                                    bodyProd.append("Categoria", categoria);
+                                    bodyProd.append("Nombre-Producto", nombreProducto);
+                                    bodyProd.append("IDElaboracion-ProductoBase", idElaboracion);
+                                    return fetch(appsScriptUrl, { method: "POST", body: bodyProd, cache: "no-store" }).then(function (r2) { return r2.text(); });
+                                }).then(function (text2) {
+                                    var jsonProd;
+                                    try { jsonProd = JSON.parse(text2); } catch (e) { jsonProd = null; }
+                                    btnAgregarItem.disabled = false;
+                                    btnAgregarItem.innerHTML = btnText;
+                                    if (!jsonProd || !jsonProd.success || !jsonProd.data) {
+                                        showEditAlert("Elaboración creada. Error al crear producto: " + ((jsonProd && jsonProd.error) ? jsonProd.error : "Respuesta inválida"), "error");
+                                        return;
+                                    }
+                                    var dataProd = jsonProd.data;
+                                    var newId = getDataVal(dataProd, "IDCosto-ProductoUnitario") || (dataProd["IDCosto-ProductoUnitario"] != null ? String(dataProd["IDCosto-ProductoUnitario"]) : "");
+                                    var newRow = headers.map(function (h) { var v = getDataVal(dataProd, h); return (v != null && v !== "") ? String(v) : ""; });
+                                    try {
+                                        sessionStorage.setItem(STORAGE_EDIT, JSON.stringify({ id: newId, headers: headers, row: newRow }));
+                                    } catch (e) {}
+                                    window.location.replace("editar-producto-unitario-base.html");
+                                }).catch(function (err) {
+                                    if (btnAgregarItem) { btnAgregarItem.disabled = false; btnAgregarItem.innerHTML = btnText; }
+                                    if (err && err.message && err.message.indexOf("Error") !== 0) showEditAlert("Error: " + (err.message || ""), "error");
+                                });
+                            });
+                        }
                         formEl.querySelectorAll("input[data-nombre], select[data-nombre]").forEach(function (input) {
                             var nombre = input.getAttribute("data-nombre");
                             if (!nombre) return;
