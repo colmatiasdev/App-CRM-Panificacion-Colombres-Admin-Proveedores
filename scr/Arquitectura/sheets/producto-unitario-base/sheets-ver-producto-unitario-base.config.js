@@ -53,7 +53,7 @@
       visible: true
     },
     {
-      nombre: "Costo-Produccion-ProductoBase",
+      nombre: "Costo-Produccion",
       alias: "Costo Producción Base",
       tipoDato: "numeric",
       tipoComponente: "label",

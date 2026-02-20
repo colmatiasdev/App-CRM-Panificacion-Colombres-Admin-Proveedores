@@ -71,7 +71,7 @@
       restricciones: { maxLongitud: 100 }
     },
     {
-      nombre: "Costo-Produccion-ProductoBase",
+      nombre: "Costo-Produccion",
       alias: "Costo Producción Base",
       tipoDato: "numeric",
       tipoComponente: "text-box",

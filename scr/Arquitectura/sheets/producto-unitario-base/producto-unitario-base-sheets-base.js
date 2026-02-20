@@ -18,7 +18,7 @@ window.PRODUCTO_UNITARIO_BASE_SHEET_BASE = {
       "Categoria",
       "Nombre-Producto",
       "IDElaboracion-ProductoBase",
-      "Costo-Produccion-ProductoBase",
+      "Costo-Produccion",
       "Costo-Relleno-Producto",
       "Costo-Decoracion-Producto",
       "Tiempo-Elaboracion-Minutos",
@@ -50,7 +50,7 @@ window.PRODUCTO_UNITARIO_BASE_SHEET_BASE = {
     formulas: {
       "Costo-Elaboracion-Actual [G + H + I + K]": {
         fuentes: [
-          "Costo-Produccion-ProductoBase",
+          "Costo-Produccion",
           "Costo-Relleno-Producto",
           "Costo-Decoracion-Producto",
           "Costo-Mano-Obra-Elaboracion"

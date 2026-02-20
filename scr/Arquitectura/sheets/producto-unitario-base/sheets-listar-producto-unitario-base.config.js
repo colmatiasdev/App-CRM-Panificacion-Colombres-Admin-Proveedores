@@ -60,7 +60,7 @@
       descripcion: "Referencia a elaboración productos base."
     },
     {
-      nombre: "Costo-Produccion-ProductoBase",
+      nombre: "Costo-Produccion",
       alias: "Costo Producción Base",
       tipoDato: "numeric",
       tipoComponente: "label",

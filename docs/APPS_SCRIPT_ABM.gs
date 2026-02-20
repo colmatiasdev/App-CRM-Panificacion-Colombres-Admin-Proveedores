@@ -203,7 +203,7 @@ var CONFIG = {
 
   /** Hoja Tabla Costos Producto Unitario (Armador Receta) – ?sheet=Tabla-Costos-ProductoUnitario
    * Headers deben coincidir con la primera fila de la hoja. PK = IDCosto-ProductoUnitario.
-   * Sincronizar con scr/Arquitectura/sheets/producto-unitario-base/producto-unitario-base-sheets-base.js */
+   * Costo-Produccion = resultado de Cantidad × Costo base (desde elaboración). Sincronizar con producto-unitario-base-sheets-base.js */
   'tabla-costos-productounitario': {
     sheetName: 'Tabla-Costos-ProductoUnitario',
     gid: 0,
@@ -214,7 +214,7 @@ var CONFIG = {
       'Categoria',
       'Nombre-Producto',
       'IDElaboracion-ProductoBase',
-      'Costo-Produccion-ProductoBase',
+      'Costo-Produccion',
       'Costo-Relleno-Producto',
       'Costo-Decoracion-Producto',
       'Tiempo-Elaboracion-Minutos',
