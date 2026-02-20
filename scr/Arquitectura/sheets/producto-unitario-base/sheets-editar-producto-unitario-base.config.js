@@ -38,18 +38,19 @@
       comboListadoValores: "COMPONENTE-COMBOS.Combo-Comercio-Sucursal",
       visible: true,
       obligatorio: true,
-      descripcion: "Comercio o sucursal.",
+      descripcion: "Comercio o sucursal (valores de hoja COMBOS, columna COMERCIO-SUCURSAL).",
       restricciones: {}
     },
     {
       nombre: "Categoria",
       alias: "Categoría",
       tipoDato: "text",
-      tipoComponente: "text-box",
+      tipoComponente: "combo-basico",
+      comboListadoValores: "COMPONENTE-COMBOS.Combo-Categoria",
       visible: true,
       obligatorio: false,
-      descripcion: "Categoría del producto.",
-      restricciones: { maxLongitud: 200 }
+      descripcion: "Categoría del producto (valores de hoja COMBOS, columna COMBO-CATEGORIA).",
+      restricciones: {}
     },
     {
       nombre: "Nombre-Producto",

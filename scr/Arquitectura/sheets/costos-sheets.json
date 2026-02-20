@@ -128,7 +128,8 @@
         { "name": "CONVERTIR-UNIDAD-MEDIDA", "type": "string", "required": false, "restrictions": {} },
         { "name": "TIPO-PRESENTACION", "type": "string", "required": false, "restrictions": {} },
         { "name": "COMBO-CATEGORIA", "type": "string", "required": false, "restrictions": {} },
-        { "name": "UNIDADES-MEDIDA-RENDIMIENTO", "type": "string", "required": false, "restrictions": {} }
+        { "name": "UNIDADES-MEDIDA-RENDIMIENTO", "type": "string", "required": false, "restrictions": {} },
+        { "name": "COMERCIO-SUCURSAL", "type": "string", "required": false, "restrictions": {} }
       ]
     },
     {

@@ -21,7 +21,7 @@
     <nav class="costos-nav" id="armador-receta-nav" aria-label="Navegación principal"></nav>
     <main class="costos-main">
         <h1 class="costos-title">Crear producto unitario base</h1>
-        <p class="costos-intro">Completá los datos según la estructura de la hoja <strong>Tabla-Receta-Base</strong>.</p>
+        <p class="costos-intro">Completá los datos según la estructura de la hoja <strong>Tabla-Costos-ProductoUnitario</strong>.</p>
         <div id="edit-form-container" class="costos-datos">
             <div id="costos-edit-alert" class="costos-alert" role="alert" aria-live="polite" style="display:none;"></div>
             <p id="edit-no-data" class="costos-placeholder" style="display:none;">No se pudo cargar el formulario. Revisá que existan producto-unitario-base-sheets-base.js y sheets-crear-producto-unitario-base.config.js.</p>
@@ -64,18 +64,34 @@
             }
             function ensureComboYPreviews(sheetConfig, url) {
                 if (!url || !sheetConfig || !sheetConfig.nombreHoja) return Promise.resolve();
-                if (window["COMPONENTE-COMBOS"] && Array.isArray(window["COMPONENTE-COMBOS"]["Combo-Comercio-Sucursal"]) && window["COMPONENTE-COMBOS"]["Combo-Comercio-Sucursal"].length > 0 && sheetConfig._ordenListaPreview != null) return Promise.resolve();
+                var base = window.PRODUCTO_UNITARIO_BASE_SHEET_BASE;
+                var combosConfig = (base && base.hoja && base.hoja.combos && Array.isArray(base.hoja.combos)) ? base.hoja.combos : [];
+                var combosOk = sheetConfig._ordenListaPreview != null && (!combosConfig.length || (window["COMPONENTE-COMBOS"] && combosConfig.every(function (c) { return Array.isArray(window["COMPONENTE-COMBOS"][c.claveCombo]); })));
+                if (combosOk) return Promise.resolve();
+                function loadCombosFromConfig() {
+                    if (!combosConfig.length) return Promise.resolve();
+                    var sheetsToFetch = {};
+                    combosConfig.forEach(function (c) { sheetsToFetch[c.sheetCombo] = true; });
+                    var sheetName = Object.keys(sheetsToFetch)[0];
+                    if (!sheetName) return Promise.resolve();
+                    return fetch(url + "?action=list&sheet=" + encodeURIComponent(sheetName) + "&limit=5000&_=" + Date.now(), { cache: "no-store" }).then(function (res) { return res.json(); }).then(function (json) {
+                        var apiHeaders = (json && json.data && json.data.headers) ? json.data.headers : [];
+                        var rows = (json && json.data && json.data.rows) ? json.data.rows : [];
+                        if (!window["COMPONENTE-COMBOS"]) window["COMPONENTE-COMBOS"] = {};
+                        combosConfig.forEach(function (def) {
+                            if (def.sheetCombo !== sheetName) return;
+                            var idx = apiHeaders.indexOf(def.columnaCombo);
+                            var unicos = [], set = {};
+                            if (idx >= 0) { for (var r = 0; r < rows.length; r++) { var v = Array.isArray(rows[r]) ? rows[r][idx] : (rows[r] && rows[r][def.columnaCombo] != null ? rows[r][def.columnaCombo] : null); var s = (v != null && String(v).trim() !== "") ? String(v).trim() : null; if (s && !set[s]) { set[s] = true; unicos.push(s); } } unicos.sort(); }
+                            window["COMPONENTE-COMBOS"][def.claveCombo] = unicos.length ? unicos : (window["COMPONENTE-COMBOS"][def.claveCombo] || []);
+                        });
+                    }).catch(function () { if (!window["COMPONENTE-COMBOS"]) window["COMPONENTE-COMBOS"] = {}; combosConfig.forEach(function (def) { if (!window["COMPONENTE-COMBOS"][def.claveCombo]) window["COMPONENTE-COMBOS"][def.claveCombo] = []; }); });
+                }
                 return fetch(url + "?action=list&sheet=" + encodeURIComponent(sheetConfig.nombreHoja) + "&limit=10000&_=" + Date.now(), { cache: "no-store" })
                     .then(function (res) { return res.json(); })
                     .then(function (json) {
                         var headers = (json && json.data && json.data.headers) ? json.data.headers : [];
                         var rows = (json && json.data && json.data.rows) ? json.data.rows : [];
-                        var colIdx = -1;
-                        for (var h = 0; h < headers.length; h++) { if (String(headers[h] || "").trim() === "Comercio-Sucursal") { colIdx = h; break; } }
-                        var unicos = [], set = {};
-                        if (colIdx >= 0) { for (var r = 0; r < rows.length; r++) { var v = Array.isArray(rows[r]) ? rows[r][colIdx] : (rows[r] && headers[colIdx] != null ? rows[r][headers[colIdx]] : null); var s = (v != null && String(v).trim() !== "") ? String(v).trim() : null; if (s && !set[s]) { set[s] = true; unicos.push(s); } } unicos.sort(); }
-                        if (!window["COMPONENTE-COMBOS"]) window["COMPONENTE-COMBOS"] = {};
-                        window["COMPONENTE-COMBOS"]["Combo-Comercio-Sucursal"] = unicos.length ? unicos : (window["COMPONENTE-COMBOS"]["Combo-Comercio-Sucursal"] || []);
                         if (sheetConfig.columnaOrden) {
                             var idxCol = -1;
                             for (var i = 0; i < headers.length; i++) { if (String(headers[i] || "").trim() === String(sheetConfig.columnaOrden).trim()) { idxCol = i; break; } }
@@ -83,11 +99,11 @@
                             if (idxCol >= 0) { for (var j = 0; j < rows.length; j++) { var val = Array.isArray(rows[j]) ? rows[j][idxCol] : (rows[j] && headers[idxCol] != null ? rows[j][headers[idxCol]] : null); var num = (val != null && val !== "") ? parseFloat(String(val), 10) : NaN; if (!isNaN(num) && num > maxVal) maxVal = num; } }
                             sheetConfig._ordenListaPreview = String(maxVal + 1);
                         } else sheetConfig._ordenListaPreview = "1";
+                        return loadCombosFromConfig();
                     })
                     .catch(function () {
-                        if (!window["COMPONENTE-COMBOS"]) window["COMPONENTE-COMBOS"] = {};
-                        if (!window["COMPONENTE-COMBOS"]["Combo-Comercio-Sucursal"]) window["COMPONENTE-COMBOS"]["Combo-Comercio-Sucursal"] = [];
                         if (sheetConfig) sheetConfig._ordenListaPreview = "1";
+                        return loadCombosFromConfig();
                     });
             }
             if (!appsScriptUrl) { loadingEl.style.display = "none"; noDataEl.style.display = "block"; noDataEl.textContent = "No está configurada la URL de la API (appsScriptUrl)."; return; }

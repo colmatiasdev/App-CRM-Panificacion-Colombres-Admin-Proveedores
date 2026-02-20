@@ -70,19 +70,26 @@
             if (!raw) { loadingEl.style.display = "none"; noDataEl.style.display = "block"; formEl.style.display = "none"; } else {
                 var loadConfig = window.PRODUCTO_UNITARIO_BASE_LOAD_CONFIG;
                 if (!loadConfig) { loadingEl.style.display = "none"; noDataEl.style.display = "block"; noDataEl.textContent = "No se pudo cargar la configuración."; formEl.style.display = "none"; } else {
-                    function ensureCombo(url, nombreHoja) {
-                        if (window["COMPONENTE-COMBOS"] && Array.isArray(window["COMPONENTE-COMBOS"]["Combo-Comercio-Sucursal"]) && window["COMPONENTE-COMBOS"]["Combo-Comercio-Sucursal"].length > 0) return Promise.resolve();
-                        if (!url || !nombreHoja) return Promise.resolve();
-                        return fetch(url + "?action=list&sheet=" + encodeURIComponent(nombreHoja) + "&limit=10000&_=" + Date.now(), { cache: "no-store" }).then(function (res) { return res.json(); }).then(function (json) {
-                            var headers = (json && json.data && json.data.headers) ? json.data.headers : [];
+                    function ensureCombo(url) {
+                        var base = window.PRODUCTO_UNITARIO_BASE_SHEET_BASE;
+                        var combosConfig = (base && base.hoja && base.hoja.combos && Array.isArray(base.hoja.combos)) ? base.hoja.combos : [];
+                        if (combosConfig.length && window["COMPONENTE-COMBOS"] && combosConfig.every(function (c) { return Array.isArray(window["COMPONENTE-COMBOS"][c.claveCombo]); })) return Promise.resolve();
+                        if (!url || !combosConfig.length) return Promise.resolve();
+                        var sheetName = combosConfig[0].sheetCombo;
+                        return fetch(url + "?action=list&sheet=" + encodeURIComponent(sheetName) + "&limit=5000&_=" + Date.now(), { cache: "no-store" }).then(function (res) { return res.json(); }).then(function (json) {
+                            var apiHeaders = (json && json.data && json.data.headers) ? json.data.headers : [];
                             var rows = (json && json.data && json.data.rows) ? json.data.rows : [];
-                            var colIdx = -1;
-                            for (var h = 0; h < headers.length; h++) { if (String(headers[h] || "").trim() === "Comercio-Sucursal") { colIdx = h; break; } }
-                            var unicos = [], set = {};
-                            if (colIdx >= 0) { for (var r = 0; r < rows.length; r++) { var v = Array.isArray(rows[r]) ? rows[r][colIdx] : (rows[r] && headers[colIdx] != null ? rows[r][headers[colIdx]] : null); var s = (v != null && String(v).trim() !== "") ? String(v).trim() : null; if (s && !set[s]) { set[s] = true; unicos.push(s); } } unicos.sort(); }
-                            if (!window["COMPONENTE-COMBOS"]) window["COMPONENTE-COMBOS"] = {}; window["COMPONENTE-COMBOS"]["Combo-Comercio-Sucursal"] = unicos.length ? unicos : []; }).catch(function () { if (!window["COMPONENTE-COMBOS"]) window["COMPONENTE-COMBOS"] = {}; window["COMPONENTE-COMBOS"]["Combo-Comercio-Sucursal"] = []; });
+                            if (!window["COMPONENTE-COMBOS"]) window["COMPONENTE-COMBOS"] = {};
+                            combosConfig.forEach(function (def) {
+                                if (def.sheetCombo !== sheetName) return;
+                                var idx = apiHeaders.indexOf(def.columnaCombo);
+                                var unicos = [], set = {};
+                                if (idx >= 0) { for (var r = 0; r < rows.length; r++) { var v = Array.isArray(rows[r]) ? rows[r][idx] : (rows[r] && rows[r][def.columnaCombo] != null ? rows[r][def.columnaCombo] : null); var s = (v != null && String(v).trim() !== "") ? String(v).trim() : null; if (s && !set[s]) { set[s] = true; unicos.push(s); } } unicos.sort(); }
+                                window["COMPONENTE-COMBOS"][def.claveCombo] = unicos.length ? unicos : [];
+                            });
+                        }).catch(function () { if (!window["COMPONENTE-COMBOS"]) window["COMPONENTE-COMBOS"] = {}; combosConfig.forEach(function (def) { if (!window["COMPONENTE-COMBOS"][def.claveCombo]) window["COMPONENTE-COMBOS"][def.claveCombo] = []; }); });
                     }
-                    loadConfig().then(function (sheetConfig) { return ensureCombo(appsScriptUrl, sheetConfig.nombreHoja).then(function () { return sheetConfig; }); }).then(function (sheetConfig) {
+                    loadConfig().then(function (sheetConfig) { return ensureCombo(appsScriptUrl).then(function () { return sheetConfig; }); }).then(function (sheetConfig) {
                         var data; try { data = JSON.parse(raw); } catch (e) { data = {}; }
                         var headersFromStorage = data.headers || [];
                         var rowFromStorage = data.row || [];

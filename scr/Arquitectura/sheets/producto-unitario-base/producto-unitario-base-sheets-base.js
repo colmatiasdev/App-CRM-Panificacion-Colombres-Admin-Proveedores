@@ -34,9 +34,18 @@ window.PRODUCTO_UNITARIO_BASE_SHEET_BASE = {
     prefijoId: "PROD-UNITARIO",
     patronId: 1,
     indices: [
-      { columnas: ["IDCosto-ProductoUnitario"], unico: true },
-      { columnas: ["Orden"], unico: false },
-      { columnas: ["Comercio-Sucursal"], unico: false }
+      {
+        columnas: ["IDCosto-ProductoUnitario"],
+        unico: true
+      },
+      {
+        columnas: ["Orden"],
+        unico: false
+      },
+      {
+        columnas: ["Comercio-Sucursal"],
+        unico: false
+      }
     ],
     formulas: {
       "Costo-Elaboracion-Actual [G + H + I + K]": {
@@ -56,6 +65,27 @@ window.PRODUCTO_UNITARIO_BASE_SHEET_BASE = {
       {
         columnaOrigen: "Costo-Elaboracion-Actual [G + H + I + K]",
         columnaDestino: "Costo-Elaboracion-Anterior"
+      }
+    ],
+    /**
+     * Combos: valores de listas desplegables desde la hoja COMBOS.
+     * sheetCombo: nombre para la API (?action=list&sheet=...).
+     * columnaCombo: columna en la hoja de combos.
+     * claveCombo: key en window["COMPONENTE-COMBOS"].
+     * Para cambiar hoja o columnas, editar aquí.
+     */
+    combos: [
+      {
+        columnaLocal: "Comercio-Sucursal",
+        sheetCombo: "combos",
+        columnaCombo: "COMERCIO-SUCURSAL",
+        claveCombo: "Combo-Comercio-Sucursal"
+      },
+      {
+        columnaLocal: "Categoria",
+        sheetCombo: "combos",
+        columnaCombo: "COMBO-CATEGORIA",
+        claveCombo: "Combo-Categoria"
       }
     ]
   }
