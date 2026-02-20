@@ -1,7 +1,8 @@
 /**
  * Configuración base del módulo Elaboración Productos Base (Armador Receta).
  * Tabla: Tabla-Elaboracion-ProductosBase. PK = IDElaboracion-ProductoBase.
- * FK: IDReceta-Base → Tabla-Receta-Base.IDCosto-ProductoUnitario.
+ * FK IDReceta-Base → Tabla-Receta-Base.IDReceta-Base.
+ * Tabla-Costos-ProductoUnitario tiene columna IDElaboracion-ProductoBase (FK a esta tabla).
  * Debe cargarse antes de cualquier *-sheets.config.js de acción.
  */
 window.ELABORACION_PRODUCTOS_BASE_SHEET_BASE = {
@@ -21,14 +22,9 @@ window.ELABORACION_PRODUCTOS_BASE_SHEET_BASE = {
     ],
     columnaOrden: null,
     clavesForaneas: [
-      {
-        columna: "IDReceta-Base",
-        tabla: "Tabla-Receta-Base",
-        pkReferencia: "IDCosto-ProductoUnitario",
-        cardinalidad: "N:1"
-      }
+      { columna: "IDReceta-Base", tabla: "Tabla-Receta-Base", pkReferencia: "IDReceta-Base", cardinalidad: "N:1" }
     ],
-    prefijoId: "PROD-BASE",
+    prefijoId: "ELABORACION-BASE",
     patronId: 1,
     indices: [
       { columnas: ["IDElaboracion-ProductoBase"], unico: true },

@@ -17,7 +17,7 @@
       tipoComponente: "label",
       visible: true,
       obligatorio: true,
-      descripcion: "ID autogenerado.",
+      descripcion: "PK autogenerado. Tras guardar, el producto unitario (si se creó desde uno) se vincula con este ID.",
       restricciones: {}
     },
     {

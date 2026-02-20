@@ -16,7 +16,7 @@
       tipoDato: "text",
       tipoComponente: "label",
       visible: true,
-      descripcion: "Identificador único."
+      descripcion: "PK del registro. Tabla-Costos-ProductoUnitario vincula por esta columna."
     },
     {
       nombre: "IDReceta-Base",

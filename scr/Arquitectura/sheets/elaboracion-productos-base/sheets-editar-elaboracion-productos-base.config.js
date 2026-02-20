@@ -17,7 +17,7 @@
       tipoComponente: "label",
       visible: true,
       obligatorio: true,
-      descripcion: "ID (solo lectura).",
+      descripcion: "PK (solo lectura).",
       restricciones: {}
     },
     {

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Editar producto unitario base - Panificación Colombres</title>
+    <title>Costo de Elaboración del Producto - Panificación Colombres</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -19,7 +19,7 @@
 <body class="costos-page">
     <nav class="costos-nav" id="armador-receta-nav" aria-label="Navegación principal"></nav>
     <main class="costos-main">
-        <h1 class="costos-title costos-title--con-icono"><i class="fa-solid fa-pen costos-title-icono" aria-hidden="true"></i> Editar producto unitario base</h1>
+        <h1 class="costos-title costos-title--con-icono"><i class="fa-solid fa-pen costos-title-icono" aria-hidden="true"></i> Costo de Elaboración del Producto</h1>
         <p class="costos-intro">Modificá los datos y guardá los cambios.</p>
         <div id="edit-form-container" class="costos-datos">
             <div id="costos-edit-alert" class="costos-alert" role="alert" aria-live="polite" style="display:none;"></div>
@@ -31,8 +31,8 @@
                     <button type="submit" class="costos-edit-btn-save" id="costos-edit-btn-save"><i class="fa-solid fa-check" aria-hidden="true"></i> Guardar cambios</button>
                 </div>
             </form>
-            <section id="elaboracion-vinculada-section" class="costos-edit-seccion costos-tabla-elaboracion-vinculada" style="display:none;" aria-label="Elaboración producto base vinculada">
-                <h2 class="costos-edit-seccion-titulo">Elaboración producto base vinculada</h2>
+            <section id="elaboracion-vinculada-section" class="costos-edit-seccion costos-tabla-elaboracion-vinculada" style="display:none;" aria-label="Contenido de productos elaborados">
+                <h2 class="costos-edit-seccion-titulo">Contenido de productos elaborados</h2>
                 <p id="elaboracion-vinculada-sin-id" class="costos-placeholder" style="display:none;">No hay elaboración vinculada a este producto.</p>
                 <div id="elaboracion-vinculada-loading" class="costos-placeholder" style="display:none;">Cargando elaboración…</div>
                 <div id="elaboracion-vinculada-table-wrap" style="display:none;">
@@ -43,6 +43,10 @@
                     </table>
                 </div>
             </section>
+            <div class="costos-edit-actions costos-edit-actions--final">
+                <button type="button" class="costos-edit-btn costos-edit-btn-relleno" id="btn-agregar-relleno" aria-label="Agregar Relleno">Agregar Relleno</button>
+                <button type="button" class="costos-edit-btn costos-edit-btn-decoracion" id="btn-agregar-decoracion" aria-label="Agregar Decoración">Agregar Decoración</button>
+            </div>
         </div>
     </main>
     <script src="../armador-receta-nav.js"></script>
@@ -134,8 +138,21 @@
                         columnas.forEach(function (col, idx) {
                             var nombre = (col.alias != null ? col.alias : col.nombre || "").trim();
                             if (!nombre) return;
-                            if (col.visible === false) return;
                             var val = row[idx] != null ? String(row[idx]).trim() : "";
+                            if (col.visible === false) {
+                                var hiddenWrap = document.createElement("div");
+                                hiddenWrap.className = "costos-edit-field costos-edit-field-hidden";
+                                hiddenWrap.style.display = "none";
+                                var hiddenInput = document.createElement("input");
+                                hiddenInput.type = "hidden";
+                                hiddenInput.id = "field-" + idx;
+                                hiddenInput.setAttribute("data-header-index", String(idx));
+                                hiddenInput.setAttribute("data-nombre", col.nombre || nombre);
+                                hiddenInput.value = val;
+                                hiddenWrap.appendChild(hiddenInput);
+                                fieldsContainer.appendChild(hiddenWrap);
+                                return;
+                            }
                             var restr = col.restricciones || {};
                             var tipoComp = col.tipoComponente != null ? col.tipoComponente : col.tipo;
                             var tipoDato = col.tipoDato != null ? col.tipoDato : col.tipo;
@@ -279,13 +296,14 @@
                         var elaboracionTableWrap = document.getElementById("elaboracion-vinculada-table-wrap");
                         var elaboracionThead = document.getElementById("elaboracion-vinculada-thead");
                         var elaboracionTbody = document.getElementById("elaboracion-vinculada-tbody");
-                        var ELABORACION_HEADERS = ["IDElaboracion-ProductoBase", "IDReceta-Base", "Cantidad", "Descripcion-Masa-Producto", "Costo-Produccion-ProductoBase", "Monto"];
-                        var ELABORACION_ALIASES = { "IDElaboracion-ProductoBase": "ID Elaboración", "IDReceta-Base": "ID Receta Base", "Cantidad": "Cantidad", "Descripcion-Masa-Producto": "Descripción Masa", "Costo-Produccion-ProductoBase": "Costo Prod. Base", "Monto": "Monto" };
+                        var ELABORACION_HEADERS = ["Cantidad", "Descripcion-Masa-Producto", "Costo-Produccion-ProductoBase", "Monto"];
+                        var ELABORACION_ALIASES = { "Cantidad": "Cantidad", "Descripcion-Masa-Producto": "Descripción Masa", "Costo-Produccion-ProductoBase": "Costo Prod. Base", "Monto": "Monto" };
                         function renderElaboracionVinculada() {
                             if (!elaboracionSection) return;
                             elaboracionSection.style.display = "block";
                             var idElab = getFormValueByNombreProductoUnitario(formEl, "IDElaboracion-ProductoBase");
                             idElab = (idElab != null ? String(idElab).trim() : "");
+                            if (idElab === "—" || idElab === "–" || idElab === "-") idElab = "";
                             if (!idElab) {
                                 if (elaboracionSinId) elaboracionSinId.style.display = "block";
                                 if (elaboracionLoading) elaboracionLoading.style.display = "none";
@@ -295,14 +313,31 @@
                             if (elaboracionSinId) elaboracionSinId.style.display = "none";
                             if (elaboracionLoading) elaboracionLoading.style.display = "block";
                             if (elaboracionTableWrap) elaboracionTableWrap.style.display = "none";
-                            var sheetElab = "Tabla-Elaboracion-ProductosBase";
-                            fetch(appsScriptUrl + "?action=get&sheet=" + encodeURIComponent(sheetElab) + "&id=" + encodeURIComponent(idElab), { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (resp) {
+                            var sheetElab = "Tabla-Elaboracion-Productos-Base";
+                            var bodyGet = new URLSearchParams();
+                            bodyGet.append("action", "get");
+                            bodyGet.append("sheet", sheetElab);
+                            bodyGet.append("id", idElab);
+                            fetch(appsScriptUrl, { method: "POST", body: bodyGet, cache: "no-store" }).then(function (r) { return r.text(); }).then(function (text) {
+                                var resp;
+                                try { resp = JSON.parse(text); } catch (e) { resp = null; }
                                 if (elaboracionLoading) elaboracionLoading.style.display = "none";
-                                if (!resp || !resp.success || !resp.data) {
+                                var data = null;
+                                if (resp && resp.success && resp.data != null) {
+                                    if (typeof resp.data === "object" && !Array.isArray(resp.data)) data = resp.data;
+                                    else if (Array.isArray(resp.data) && resp.data.length > 0) data = resp.data[0];
+                                    else if (resp.data && typeof resp.data === "object" && resp.data.rows && resp.data.rows.length > 0) data = resp.data.rows[0];
+                                }
+                                if (!data) {
                                     if (elaboracionSinId) { elaboracionSinId.textContent = "No se encontró la elaboración vinculada."; elaboracionSinId.style.display = "block"; }
                                     return;
                                 }
-                                var data = resp.data;
+                                function getDataVal(obj, key) {
+                                    if (obj[key] != null && obj[key] !== "") return obj[key];
+                                    var k2 = key.replace(/-/g, "");
+                                    for (var p in obj) { if (Object.prototype.hasOwnProperty.call(obj, p) && String(p).replace(/-/g, "") === k2) return obj[p]; }
+                                    return null;
+                                }
                                 if (elaboracionThead) {
                                     elaboracionThead.innerHTML = "";
                                     var tr = document.createElement("tr");
@@ -314,7 +349,8 @@
                                     var tr = document.createElement("tr");
                                     ELABORACION_HEADERS.forEach(function (h) {
                                         var td = document.createElement("td");
-                                        var val = (data[h] != null && data[h] !== "") ? String(data[h]) : "—";
+                                        var rawVal = getDataVal(data, h);
+                                        var val = (rawVal != null && rawVal !== "") ? String(rawVal) : "—";
                                         if ((h === "Costo-Produccion-ProductoBase" || h === "Monto") && val !== "—" && typeof window.formatNumeroVisual === "function") {
                                             var num = parseFloat(String(val).replace(",", "."));
                                             if (!isNaN(num)) val = window.formatNumeroVisual(num, "moneda", 2);

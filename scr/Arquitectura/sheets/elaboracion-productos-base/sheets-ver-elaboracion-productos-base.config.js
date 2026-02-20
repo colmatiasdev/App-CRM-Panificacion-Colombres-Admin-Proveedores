@@ -16,7 +16,7 @@
       tipoDato: "text",
       tipoComponente: "label",
       visible: true,
-      descripcion: "Identificador único."
+      descripcion: "PK del registro."
     },
     {
       nombre: "IDReceta-Base",

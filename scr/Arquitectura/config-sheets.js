@@ -11,7 +11,7 @@
     }
 
     /** Apps Script desplegado – ABM (list, get, search, create, update, delete). */
-    c.appsScriptUrl = "https://script.google.com/macros/s/AKfycbzlCyssmTuaIxPOJn_w6aMy9jHMNUOufU9G15cP2Cp0PWIFfI4Kyf2lc8i9N6NTDzbbgA/exec";
+    c.appsScriptUrl = "https://script.google.com/macros/s/AKfycbwM0LXRwUVeMYh0F1K9X7c2qFr4Gv1oTjzjGfSeCZj_hYandXDoBR1Oyqm-9YcA8IXAuA/exec";
 
     /**
      * Google Sheets – Un solo documento publicado con todas las hojas.

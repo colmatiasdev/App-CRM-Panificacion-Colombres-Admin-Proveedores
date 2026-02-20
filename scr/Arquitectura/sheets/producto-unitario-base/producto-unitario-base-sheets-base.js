@@ -31,8 +31,11 @@ window.PRODUCTO_UNITARIO_BASE_SHEET_BASE = {
     ],
     columnaOrden: "Orden",
     clavesForaneas: [],
+    /** ID único: prefijo + alfanumérico (15) + "-" + 4 dígitos. PK = IDCosto-ProductoUnitario para vinculación. */
     prefijoId: "PROD-UNITARIO",
-    patronId: 1,
+    patronId: 2,
+    longitudAlfanum: 15,
+    digitosSufijo: 4,
     indices: [
       {
         columnas: ["IDCosto-ProductoUnitario"],

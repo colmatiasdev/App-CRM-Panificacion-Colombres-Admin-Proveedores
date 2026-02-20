@@ -334,6 +334,22 @@ body.costos-page {
     border-bottom: 2px solid rgba(234, 88, 12, 0.25);
     letter-spacing: 0.02em;
 }
+.costos-edit-seccion-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+.costos-edit-seccion-header .costos-edit-seccion-titulo {
+    margin: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+.costos-edit-btn-agregar-item {
+    flex-shrink: 0;
+}
 .costos-edit-seccion-presentacion-equivalencia {
     margin: 14px 0 20px 0;
     padding: 16px 18px;
@@ -857,6 +873,9 @@ body.costos-page {
     margin-top: 20px;
     padding-top: 16px;
     border-top: 1px solid var(--border);
+}
+.costos-edit-actions--final {
+    margin-top: 24px;
 }
 .costos-edit-cabecera {
     margin-bottom: 20px;
