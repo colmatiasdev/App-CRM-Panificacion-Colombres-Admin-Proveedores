@@ -70,26 +70,46 @@
             if (!raw) { loadingEl.style.display = "none"; noDataEl.style.display = "block"; formEl.style.display = "none"; } else {
                 var loadConfig = window.PRODUCTO_UNITARIO_BASE_LOAD_CONFIG;
                 if (!loadConfig) { loadingEl.style.display = "none"; noDataEl.style.display = "block"; noDataEl.textContent = "No se pudo cargar la configuración."; formEl.style.display = "none"; } else {
-                    function ensureCombo(url) {
+                    function ensureCombo(sheetConfig, url) {
                         var base = window.PRODUCTO_UNITARIO_BASE_SHEET_BASE;
-                        var combosConfig = (base && base.hoja && base.hoja.combos && Array.isArray(base.hoja.combos)) ? base.hoja.combos : [];
-                        if (combosConfig.length && window["COMPONENTE-COMBOS"] && combosConfig.every(function (c) { return Array.isArray(window["COMPONENTE-COMBOS"][c.claveCombo]); })) return Promise.resolve();
+                        var combosConfig = (sheetConfig && Array.isArray(sheetConfig.combos)) ? sheetConfig.combos : ((base && base.hoja && base.hoja.combos && Array.isArray(base.hoja.combos)) ? base.hoja.combos : []);
                         if (!url || !combosConfig.length) return Promise.resolve();
                         var sheetName = combosConfig[0].sheetCombo;
+                        function findColIdx(headers, colNombre, alternativas) {
+                            var idx = headers.indexOf(colNombre);
+                            if (idx >= 0) return idx;
+                            if (alternativas && alternativas.length) { for (var a = 0; a < alternativas.length; a++) { idx = headers.indexOf(alternativas[a]); if (idx >= 0) return idx; } }
+                            var norm = function (s) { return String(s || "").trim().toLowerCase().replace(/[\s\-]/g, ""); };
+                            var n = norm(colNombre);
+                            for (var h = 0; h < headers.length; h++) { if (norm(headers[h]) === n) return h; }
+                            return -1;
+                        }
+                        function getValFromRow(row, headers, idx, colNombre) {
+                            if (Array.isArray(row)) return idx >= 0 && row[idx] != null ? row[idx] : null;
+                            if (!row || typeof row !== "object") return null;
+                            if (row[colNombre] != null && row[colNombre] !== "") return row[colNombre];
+                            if (idx >= 0 && headers[idx] != null && row[headers[idx]] != null && row[headers[idx]] !== "") return row[headers[idx]];
+                            var norm = function (s) { return String(s || "").trim().toLowerCase().replace(/[\s\-]/g, ""); };
+                            var n = norm(colNombre);
+                            for (var k in row) { if (Object.prototype.hasOwnProperty.call(row, k) && norm(k) === n) { var val = row[k]; if (val != null && val !== "") return val; } }
+                            return null;
+                        }
                         return fetch(url + "?action=list&sheet=" + encodeURIComponent(sheetName) + "&limit=5000&_=" + Date.now(), { cache: "no-store" }).then(function (res) { return res.json(); }).then(function (json) {
                             var apiHeaders = (json && json.data && json.data.headers) ? json.data.headers : [];
                             var rows = (json && json.data && json.data.rows) ? json.data.rows : [];
                             if (!window["COMPONENTE-COMBOS"]) window["COMPONENTE-COMBOS"] = {};
                             combosConfig.forEach(function (def) {
                                 if (def.sheetCombo !== sheetName) return;
-                                var idx = apiHeaders.indexOf(def.columnaCombo);
+                                var idx = findColIdx(apiHeaders, def.columnaCombo, def.columnaComboAlternativas);
+                                if (idx < 0 && def.columnaComboIndex >= 0 && def.columnaComboIndex < apiHeaders.length) idx = def.columnaComboIndex;
+                                var colNombre = idx >= 0 ? apiHeaders[idx] : def.columnaCombo;
                                 var unicos = [], set = {};
-                                if (idx >= 0) { for (var r = 0; r < rows.length; r++) { var v = Array.isArray(rows[r]) ? rows[r][idx] : (rows[r] && rows[r][def.columnaCombo] != null ? rows[r][def.columnaCombo] : null); var s = (v != null && String(v).trim() !== "") ? String(v).trim() : null; if (s && !set[s]) { set[s] = true; unicos.push(s); } } unicos.sort(); }
+                                if (idx >= 0 || colNombre) { for (var r = 0; r < rows.length; r++) { var v = getValFromRow(rows[r], apiHeaders, idx, colNombre); var s = (v != null && String(v).trim() !== "") ? String(v).trim() : null; if (s && !set[s]) { set[s] = true; unicos.push(s); } } unicos.sort(); }
                                 window["COMPONENTE-COMBOS"][def.claveCombo] = unicos.length ? unicos : [];
                             });
                         }).catch(function () { if (!window["COMPONENTE-COMBOS"]) window["COMPONENTE-COMBOS"] = {}; combosConfig.forEach(function (def) { if (!window["COMPONENTE-COMBOS"][def.claveCombo]) window["COMPONENTE-COMBOS"][def.claveCombo] = []; }); });
                     }
-                    loadConfig().then(function (sheetConfig) { return ensureCombo(appsScriptUrl).then(function () { return sheetConfig; }); }).then(function (sheetConfig) {
+                    loadConfig().then(function (sheetConfig) { return ensureCombo(sheetConfig, appsScriptUrl).then(function () { return sheetConfig; }); }).then(function (sheetConfig) {
                         var data; try { data = JSON.parse(raw); } catch (e) { data = {}; }
                         var headersFromStorage = data.headers || [];
                         var rowFromStorage = data.row || [];

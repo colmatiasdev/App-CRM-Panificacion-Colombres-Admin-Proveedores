@@ -47,7 +47,7 @@
       alias: "Categoría",
       tipoDato: "text",
       tipoComponente: "combo-basico",
-      comboListadoValores: "COMBOS.COMBO-CATEGORIA",
+      comboListadoValores: "COMPONENTE-COMBOS.Combo-Categoria",
       visible: true,
       obligatorio: false,
       descripcion: "Categoría del producto (valores de hoja COMBOS, columna COMBO-CATEGORIA).",
@@ -177,7 +177,8 @@
       prefijoId: hoja.prefijoId,
       patronId: hoja.patronId,
       indices: hoja.indices,
-      columnas: columnas
+      columnas: columnas,
+      combos: (base.hoja && Array.isArray(base.hoja.combos)) ? base.hoja.combos : []
     }]
   };
 })();

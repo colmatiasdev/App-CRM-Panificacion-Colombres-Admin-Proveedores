@@ -70,9 +70,9 @@ window.PRODUCTO_UNITARIO_BASE_SHEET_BASE = {
     /**
      * Combos: valores de listas desplegables desde la hoja COMBOS.
      * sheetCombo: nombre para la API (?action=list&sheet=...).
-     * columnaCombo: columna en la hoja de combos.
+     * columnaCombo: columna en la hoja de combos (nombre exacto o el que devuelve la API).
+     * columnaComboAlternativas: [opcional] otros nombres por si la hoja tiene distinto texto en la cabecera.
      * claveCombo: key en window["COMPONENTE-COMBOS"].
-     * Para cambiar hoja o columnas, editar aquí.
      */
     combos: [
       {
@@ -85,6 +85,9 @@ window.PRODUCTO_UNITARIO_BASE_SHEET_BASE = {
         columnaLocal: "Categoria",
         sheetCombo: "combos",
         columnaCombo: "COMBO-CATEGORIA",
+        columnaComboAlternativas: ["Categoria", "COMBO CATEGORIA", "Combo-Categoria"],
+        /** Índice de columna en la hoja COMBOS (0-based). Orden: 0=TIPO-UNIDAD-MEDIDA, 1=CONVERTIR, 2=TIPO-PRESENTACION, 3=COMBO-CATEGORIA, 4=UNIDADES, 5=COMERCIO-SUCURSAL. Usado si el nombre no coincide. */
+        columnaComboIndex: 3,
         claveCombo: "Combo-Categoria"
       }
     ]

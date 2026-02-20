@@ -72,6 +72,7 @@
     var columnas = hoja.columnas || [];
     var listado = hoja.listado || {};
     var columnaOrden = (hoja.columnaOrden && String(hoja.columnaOrden).trim()) || "Orden";
+    var baseHoja = (window.PRODUCTO_UNITARIO_BASE_SHEET_BASE && window.PRODUCTO_UNITARIO_BASE_SHEET_BASE.hoja) ? window.PRODUCTO_UNITARIO_BASE_SHEET_BASE.hoja : null;
     var config = {
       nombreHoja: nombreHoja,
       clavePrimaria: clavePrimaria,
@@ -86,7 +87,8 @@
       prefijoId: hoja.prefijoId != null ? hoja.prefijoId : null,
       patronId: hoja.patronId != null ? hoja.patronId : 1,
       longitudAlfanum: hoja.longitudAlfanum != null ? hoja.longitudAlfanum : 15,
-      digitosSufijo: hoja.digitosSufijo != null ? hoja.digitosSufijo : 4
+      digitosSufijo: hoja.digitosSufijo != null ? hoja.digitosSufijo : 4,
+      combos: Array.isArray(hoja.combos) ? hoja.combos : (baseHoja && Array.isArray(baseHoja.combos) ? baseHoja.combos : [])
     };
     columnas.forEach(function (col, idx) {
       var nombre = String((col.nombre || "").trim());

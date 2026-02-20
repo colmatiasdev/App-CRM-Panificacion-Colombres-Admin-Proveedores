@@ -183,7 +183,8 @@
       prefijoId: hoja.prefijoId,
       patronId: hoja.patronId,
       indices: hoja.indices,
-      columnas: columnas
+      columnas: columnas,
+      combos: (base.hoja && Array.isArray(base.hoja.combos)) ? base.hoja.combos : []
     }]
   };
 })();
