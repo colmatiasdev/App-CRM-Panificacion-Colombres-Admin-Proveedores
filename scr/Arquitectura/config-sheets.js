@@ -11,7 +11,7 @@
     }
 
     /** Apps Script desplegado – ABM (list, get, search, create, update, delete). */
-    c.appsScriptUrl = "https://script.google.com/macros/s/AKfycbz-9uQ98LldwRpyhBDY5ut2dsZ1Ghf3e0O6NM04y22wOrQQB9vgmhNnxLM73QQPDDugxQ/exec";
+    c.appsScriptUrl = "https://script.google.com/macros/s/AKfycbzlCyssmTuaIxPOJn_w6aMy9jHMNUOufU9G15cP2Cp0PWIFfI4Kyf2lc8i9N6NTDzbbgA/exec";
 
     /**
      * Google Sheets – Un solo documento publicado con todas las hojas.
@@ -99,6 +99,8 @@
 
     /**
      * Convierte un valor mostrado (moneda o porcentaje) de vuelta a número para envío al servidor.
+     * Nota: con "moneda", si el valor usa punto como decimal (ej. "638.36"), esta función lo
+     * interpreta mal (quita todos los puntos). Para envío al API usar normalizeNumeroParaEnvio.
      * @param {string} val - Texto formateado (ej. "$ 1.254,59" o "3 %")
      * @param {string} [formato] - "moneda" | "porcentaje"
      * @returns {string} - Número como string (ej. "1254.59")
@@ -113,5 +115,31 @@
         }
         var num = parseFloat(s);
         return isNaN(num) ? "" : String(num);
+    };
+
+    /**
+     * Normaliza un valor numérico visual para envío al servidor preservando decimales.
+     * - Si hay coma en el texto, se asume locale ES (coma decimal, punto miles): se quitan puntos y coma→punto.
+     * - Si no hay coma, se asume punto decimal (ej. "638.36") y no se alteran los puntos.
+     * @param {string|number} val - Valor mostrado (ej. "638.36", "638,36", "$ 1.254,59")
+     * @param {string} [formato] - "moneda" | "porcentaje" | "numero"
+     * @param {number} [decimales] - Cantidad de decimales (default 2). 0 = entero.
+     * @returns {string} - Número como string con punto decimal (ej. "638.36")
+     */
+    window.normalizeNumeroParaEnvio = function (val, formato, decimales) {
+        if (val == null || String(val).trim() === "") return "";
+        var s = String(val).trim()
+            .replace(/\$\s*/g, "")
+            .replace(/\s*%\s*$/g, "")
+            .trim();
+        if (s === "") return "";
+        if (s.indexOf(",") !== -1) {
+            s = s.replace(/\./g, "").replace(",", ".");
+        }
+        var num = parseFloat(s);
+        if (isNaN(num)) return "";
+        var dec = (decimales != null && !isNaN(decimales)) ? parseInt(decimales, 10) : 2;
+        if (dec <= 0) return String(Math.round(num));
+        return num.toFixed(dec);
     };
 })();

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Seleccionar Masa de la Receta - Panificación Colombres</title>
+    <link rel="stylesheet" href="../../costos/costos.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="../../Arquitectura/config.js"></script>
+    <script src="../../Arquitectura/config-sheets.js"></script>
+    <script src="../../Arquitectura/sheets/receta-base/receta-base-sheets-base.js"></script>
+    <script src="../../Arquitectura/sheets/receta-base/sheets-listar-receta-base.config.js"></script>
+    <script src="../armador-receta-hub.config.js"></script>
+    <script>window.RECETA_BASE_ACCION_ACTUAL = "listar"; window.ARMADOR_RECETA_SUBMODULO_ACTUAL = "receta-base";</script>
+</head>
+<body class="costos-page">
+    <nav class="costos-nav" id="armador-receta-nav" aria-label="Navegación principal"></nav>
+    <main class="costos-main">
+        <h1 class="costos-title">Seleccionar Masa de la Receta</h1>
+        <p class="costos-intro">Elegí una receta base para vincular con la elaboración. Los datos <strong>Descripción Masa Producto</strong> y <strong>Costo Producción Base</strong> se completarán automáticamente.</p>
+        <p class="costos-intro"><a href="#" id="seleccionar-volver-link" class="costos-edit-btn-cancel">Volver al formulario de elaboración</a></p>
+        <div id="seleccionar-list-container" class="costos-datos">
+            <p class="costos-placeholder">Cargando listado…</p>
+        </div>
+    </main>
+    <script src="../armador-receta-nav.js"></script>
+    <script src="../../Arquitectura/sheets/receta-base/receta-base-config.js"></script>
+    <script>
+        (function () {
+            var STORAGE_RETURN_URL = "elaboracionProductosBaseCrearReturnUrl";
+            var STORAGE_SELECCION = "recetaBaseSeleccionadaParaElaboracion";
+            var config = window.APP_CONFIG || {};
+            var appsScriptUrl = (config.appsScriptUrl || "").trim();
+            var container = document.getElementById("seleccionar-list-container");
+
+            function norm(s) {
+                return String(s != null ? s : "").trim().toLowerCase().replace(/\s+/g, "").replace(/-/g, "");
+            }
+            function findColIdx(headers, names) {
+                for (var i = 0; i < headers.length; i++) {
+                    var h = norm(headers[i]);
+                    for (var j = 0; j < names.length; j++) { if (h === norm(names[j])) return i; }
+                }
+                return -1;
+            }
+            function getVal(row, headers, colNameOrIdx) {
+                if (typeof colNameOrIdx === "number") return (row[colNameOrIdx] != null && String(row[colNameOrIdx]).trim() !== "") ? String(row[colNameOrIdx]).trim() : "";
+                var idx = headers.indexOf(colNameOrIdx);
+                if (idx >= 0) return (row[idx] != null && String(row[idx]).trim() !== "") ? String(row[idx]).trim() : "";
+                idx = findColIdx(headers, [colNameOrIdx]);
+                return idx >= 0 && row[idx] != null && String(row[idx]).trim() !== "" ? String(row[idx]).trim() : "";
+            }
+
+            function seleccionar(row, headers) {
+                var id = getVal(row, headers, "IDReceta-Base");
+                var descripcion = getVal(row, headers, "Descripcion-Masa-Producto");
+                var costoBase = getVal(row, headers, "Costo-Produccion-ProductoBase [F/G]");
+                if (!id) return;
+                try {
+                    sessionStorage.setItem(STORAGE_SELECCION, JSON.stringify({
+                        id: id,
+                        DescripcionMasaProducto: descripcion,
+                        CostoProduccionProductoBase: costoBase
+                    }));
+                } catch (e) {}
+                var returnUrl = "";
+                try { returnUrl = sessionStorage.getItem(STORAGE_RETURN_URL) || ""; } catch (e) {}
+                if (!returnUrl) returnUrl = "../Elaboracion-Productos-Base/crear-elaboracion-productos-base.html";
+                window.location.replace(returnUrl);
+            }
+
+            var volverLink = document.getElementById("seleccionar-volver-link");
+            if (volverLink) volverLink.addEventListener("click", function (e) { e.preventDefault(); var u = ""; try { u = sessionStorage.getItem(STORAGE_RETURN_URL) || ""; } catch (err) {} if (!u) u = "../Elaboracion-Productos-Base/crear-elaboracion-productos-base.html"; window.location.href = u; });
+            if (!appsScriptUrl) {
+                container.innerHTML = "<p class=\"costos-placeholder\">No está configurada la URL de la API (appsScriptUrl).</p>";
+                return;
+            }
+            var loadConfig = window.RECETA_BASE_LOAD_CONFIG;
+            if (!loadConfig) {
+                container.innerHTML = "<p class=\"costos-placeholder\">No se pudo cargar la configuración del módulo Receta Base.</p>";
+                return;
+            }
+
+            loadConfig().then(function (sheetConfig) {
+                var nombreHoja = sheetConfig.nombreHoja || "Tabla-Receta-Base";
+                var url = appsScriptUrl + "?action=list&sheet=" + encodeURIComponent(nombreHoja) + "&limit=5000&_=" + Date.now();
+                return fetch(url, { cache: "no-store" }).then(function (res) { return res.json(); }).then(function (json) {
+                    if (!json || !json.success || !json.data) throw new Error(json && json.error ? json.error : "Error al cargar");
+                    var apiHeaders = (json.data.headers || []).map(function (h) { return String(h != null ? h : "").trim(); });
+                    var apiRows = json.data.rows || [];
+                    var headers = apiHeaders;
+                    var rows = apiRows.map(function (obj) {
+                        if (Array.isArray(obj)) return obj;
+                        return apiHeaders.map(function (h) { return obj[h] != null ? obj[h] : ""; });
+                    });
+                    if (!rows.length) {
+                        container.innerHTML = "<p class=\"costos-placeholder\">No hay recetas base cargadas.</p>";
+                        return;
+                    }
+                    container.innerHTML = "";
+                    var idxId = findColIdx(headers, ["IDReceta-Base"]) >= 0 ? findColIdx(headers, ["IDReceta-Base"]) : 0;
+                    var idxDesc = findColIdx(headers, ["Descripcion-Masa-Producto"]) >= 0 ? findColIdx(headers, ["Descripcion-Masa-Producto"]) : 1;
+                    var idxCosto = findColIdx(headers, ["Costo-Produccion-ProductoBase [F/G]", "Costo-Produccion-ProductoBase"]);
+                    rows.forEach(function (row, i) {
+                        var card = document.createElement("div");
+                        card.className = "costos-card costos-card--seleccionar";
+                        var titulo = getVal(row, headers, idxDesc) || getVal(row, headers, "IDReceta-Base") || "Sin nombre";
+                        var idVal = getVal(row, headers, idxId);
+                        var costoVal = idxCosto >= 0 ? getVal(row, headers, idxCosto) : "";
+                        card.innerHTML = "<div class=\"costos-card-header\"><span class=\"costos-card-title\">" + (titulo.replace(/</g, "&lt;").replace(/>/g, "&gt;")) + "</span></div>" +
+                            "<div class=\"costos-card-body\">" +
+                            "<p class=\"costos-card-meta\"><strong>ID:</strong> " + (idVal.replace(/</g, "&lt;").replace(/>/g, "&gt;")) + "</p>" +
+                            (costoVal ? "<p class=\"costos-card-meta\"><strong>Costo prod. base:</strong> " + (costoVal.replace(/</g, "&lt;").replace(/>/g, "&gt;")) + "</p>" : "") +
+                            "</div>" +
+                            "<div class=\"costos-card-actions\"><button type=\"button\" class=\"costos-edit-btn-seleccionar-masa costos-card-btn-seleccionar\" data-row-index=\"" + i + "\">Seleccionar</button></div>";
+                        var btn = card.querySelector(".costos-card-btn-seleccionar");
+                        if (btn) btn.addEventListener("click", function () { seleccionar(row, headers); });
+                        container.appendChild(card);
+                    });
+                });
+            }).catch(function (err) {
+                container.innerHTML = "<p class=\"costos-placeholder\">Error al cargar: " + (err.message || "").replace(/</g, "&lt;").replace(/>/g, "&gt;") + "</p>";
+            });
+        })();
+    </script>
+</body>
+</html>

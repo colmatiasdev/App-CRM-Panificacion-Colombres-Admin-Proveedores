@@ -444,9 +444,9 @@
                 var nombreProducto = getVal(columnas, row, "Nombre-Producto") || "—";
                 var idProducto = getVal(columnas, row, "IDCosto-ProductoUnitario") || "";
                 var comercio = getVal(columnas, row, "Comercio-Sucursal") || "Panificación Colombres";
-                var tipoProducto = getVal(columnas, row, "Tipo-Producto") || "";
+                var categoria = getVal(columnas, row, "Categoria") || "";
 
-                var costoBase = getNum(columnas, row, "Costo-Produccion-ProductoBase");
+                var costoBase = getNum(columnas, row, "Costo-Produccion");
                 var costoRelleno = getNum(columnas, row, "Costo-Relleno-Producto");
                 var costoDeco = getNum(columnas, row, "Costo-Decoracion-Producto");
                 var costoMO = getNum(columnas, row, "Costo-Mano-Obra-Elaboracion");
@@ -476,7 +476,7 @@
                     "  <div class=\"header-left\">" +
                     "    <div class=\"meta-row\">" +
                     "      <span class=\"badge badge--store\"><i class=\"fa-solid fa-store\"></i> " + escapeHtml(comercio) + "</span>" +
-                    (tipoProducto ? "      <span class=\"badge badge--cat\"><i class=\"fa-solid fa-tag\"></i> " + escapeHtml(tipoProducto) + "</span>" : "") +
+                    (categoria ? "      <span class=\"badge badge--cat\"><i class=\"fa-solid fa-tag\"></i> " + escapeHtml(categoria) + "</span>" : "") +
                     "    </div>" +
                     "    <h1 class=\"product-name\">" + escapeHtml(nombreProducto) + "</h1>" +
                     (idProducto ? "    <div class=\"product-id\"><i class=\"fa-solid fa-fingerprint\"></i> " + escapeHtml(idProducto) + "</div>" : "") +

@@ -82,7 +82,7 @@ var CONFIG = {
   },
 
   /** Hoja Combos – listas para combos – ?sheet=combos o ?sheet=COMBO
-   * Columnas: TIPO-UNIDAD-MEDIDA, CONVERTIR-UNIDAD-MEDIDA, TIPO-PRESENTACION, COMBO-CATEGORIA, UNIDADES-MEDIDA-RENDIMIENTO */
+   * Columnas: TIPO-UNIDAD-MEDIDA, CONVERTIR-UNIDAD-MEDIDA, TIPO-PRESENTACION, COMBO-CATEGORIA, UNIDADES-MEDIDA-RENDIMIENTO, COMERCIO-SUCURSAL */
   combos: {
     sheetName: 'COMBOS',
     gid: 0,
@@ -91,10 +91,11 @@ var CONFIG = {
       'CONVERTIR-UNIDAD-MEDIDA',
       'TIPO-PRESENTACION',
       'COMBO-CATEGORIA',
-      'UNIDADES-MEDIDA-RENDIMIENTO'
+      'UNIDADES-MEDIDA-RENDIMIENTO',
+      'COMERCIO-SUCURSAL'
     ],
     idColumn: 'TIPO-UNIDAD-MEDIDA',
-    filterColumns: ['TIPO-UNIDAD-MEDIDA', 'CONVERTIR-UNIDAD-MEDIDA', 'TIPO-PRESENTACION', 'COMBO-CATEGORIA', 'UNIDADES-MEDIDA-RENDIMIENTO']
+    filterColumns: ['TIPO-UNIDAD-MEDIDA', 'CONVERTIR-UNIDAD-MEDIDA', 'TIPO-PRESENTACION', 'COMBO-CATEGORIA', 'UNIDADES-MEDIDA-RENDIMIENTO', 'COMERCIO-SUCURSAL']
   },
 
   /** Hoja Equivalencias – unidades y factores para conversión – ?sheet=equivalencias
@@ -202,7 +203,7 @@ var CONFIG = {
 
   /** Hoja Tabla Costos Producto Unitario (Armador Receta) – ?sheet=Tabla-Costos-ProductoUnitario
    * Headers deben coincidir con la primera fila de la hoja. PK = IDCosto-ProductoUnitario.
-   * Sincronizar con scr/Arquitectura/sheets/producto-unitario-base/producto-unitario-base-sheets-base.js */
+   * Costo-Produccion = resultado de Cantidad × Costo base (desde elaboración). Sincronizar con producto-unitario-base-sheets-base.js */
   'tabla-costos-productounitario': {
     sheetName: 'Tabla-Costos-ProductoUnitario',
     gid: 0,
@@ -210,10 +211,10 @@ var CONFIG = {
       'Orden',
       'IDCosto-ProductoUnitario',
       'Comercio-Sucursal',
-      'Tipo-Producto',
+      'Categoria',
       'Nombre-Producto',
       'IDElaboracion-ProductoBase',
-      'Costo-Produccion-ProductoBase',
+      'Costo-Produccion',
       'Costo-Relleno-Producto',
       'Costo-Decoracion-Producto',
       'Tiempo-Elaboracion-Minutos',
@@ -225,8 +226,8 @@ var CONFIG = {
       'Actualizado'
     ],
     idColumn: 'IDCosto-ProductoUnitario',
-    idPrefix: 'RECETA-',
-    filterColumns: ['IDCosto-ProductoUnitario', 'Comercio-Sucursal', 'Tipo-Producto', 'Nombre-Producto', 'Habilitado'],
+    idPrefix: 'PROD-UNITARIO-',
+    filterColumns: ['IDCosto-ProductoUnitario', 'Comercio-Sucursal', 'Categoria', 'Nombre-Producto', 'Habilitado'],
     requiredOnCreate: ['Nombre-Producto'],
     dateUpdatedColumn: 'Fecha-Registro-Actualizado-Al'
   },

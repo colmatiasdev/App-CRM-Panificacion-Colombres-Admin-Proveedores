@@ -28,10 +28,21 @@
             <form id="costos-edit-form" class="costos-edit-form" style="display:none;">
                 <div id="edit-fields"></div>
                 <div class="costos-edit-actions">
-                    <a href="producto-unitario-base.html" class="costos-edit-btn-cancel">Volver al listado</a>
                     <button type="submit" class="costos-edit-btn-save" id="costos-edit-btn-save"><i class="fa-solid fa-check" aria-hidden="true"></i> Guardar cambios</button>
                 </div>
             </form>
+            <section id="elaboracion-vinculada-section" class="costos-edit-seccion costos-tabla-elaboracion-vinculada" style="display:none;" aria-label="Elaboración producto base vinculada">
+                <h2 class="costos-edit-seccion-titulo">Elaboración producto base vinculada</h2>
+                <p id="elaboracion-vinculada-sin-id" class="costos-placeholder" style="display:none;">No hay elaboración vinculada a este producto.</p>
+                <div id="elaboracion-vinculada-loading" class="costos-placeholder" style="display:none;">Cargando elaboración…</div>
+                <div id="elaboracion-vinculada-table-wrap" style="display:none;">
+                    <table id="elaboracion-vinculada-table" class="costos-tabla costos-tabla--vinculada" role="table">
+                        <caption class="costos-sr-only">Datos de la elaboración producto base vinculada por IDElaboracion-ProductoBase</caption>
+                        <thead id="elaboracion-vinculada-thead"></thead>
+                        <tbody id="elaboracion-vinculada-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
         </div>
     </main>
     <script src="../armador-receta-nav.js"></script>
@@ -70,19 +81,46 @@
             if (!raw) { loadingEl.style.display = "none"; noDataEl.style.display = "block"; formEl.style.display = "none"; } else {
                 var loadConfig = window.PRODUCTO_UNITARIO_BASE_LOAD_CONFIG;
                 if (!loadConfig) { loadingEl.style.display = "none"; noDataEl.style.display = "block"; noDataEl.textContent = "No se pudo cargar la configuración."; formEl.style.display = "none"; } else {
-                    function ensureCombo(url, nombreHoja) {
-                        if (window["COMPONENTE-COMBOS"] && Array.isArray(window["COMPONENTE-COMBOS"]["Combo-Comercio-Sucursal"]) && window["COMPONENTE-COMBOS"]["Combo-Comercio-Sucursal"].length > 0) return Promise.resolve();
-                        if (!url || !nombreHoja) return Promise.resolve();
-                        return fetch(url + "?action=list&sheet=" + encodeURIComponent(nombreHoja) + "&limit=10000&_=" + Date.now(), { cache: "no-store" }).then(function (res) { return res.json(); }).then(function (json) {
-                            var headers = (json && json.data && json.data.headers) ? json.data.headers : [];
+                    function ensureCombo(sheetConfig, url) {
+                        var base = window.PRODUCTO_UNITARIO_BASE_SHEET_BASE;
+                        var combosConfig = (sheetConfig && Array.isArray(sheetConfig.combos)) ? sheetConfig.combos : ((base && base.hoja && base.hoja.combos && Array.isArray(base.hoja.combos)) ? base.hoja.combos : []);
+                        if (!url || !combosConfig.length) return Promise.resolve();
+                        var sheetName = combosConfig[0].sheetCombo;
+                        function findColIdx(headers, colNombre, alternativas) {
+                            var idx = headers.indexOf(colNombre);
+                            if (idx >= 0) return idx;
+                            if (alternativas && alternativas.length) { for (var a = 0; a < alternativas.length; a++) { idx = headers.indexOf(alternativas[a]); if (idx >= 0) return idx; } }
+                            var norm = function (s) { return String(s || "").trim().toLowerCase().replace(/[\s\-]/g, ""); };
+                            var n = norm(colNombre);
+                            for (var h = 0; h < headers.length; h++) { if (norm(headers[h]) === n) return h; }
+                            return -1;
+                        }
+                        function getValFromRow(row, headers, idx, colNombre) {
+                            if (Array.isArray(row)) return idx >= 0 && row[idx] != null ? row[idx] : null;
+                            if (!row || typeof row !== "object") return null;
+                            if (row[colNombre] != null && row[colNombre] !== "") return row[colNombre];
+                            if (idx >= 0 && headers[idx] != null && row[headers[idx]] != null && row[headers[idx]] !== "") return row[headers[idx]];
+                            var norm = function (s) { return String(s || "").trim().toLowerCase().replace(/[\s\-]/g, ""); };
+                            var n = norm(colNombre);
+                            for (var k in row) { if (Object.prototype.hasOwnProperty.call(row, k) && norm(k) === n) { var val = row[k]; if (val != null && val !== "") return val; } }
+                            return null;
+                        }
+                        return fetch(url + "?action=list&sheet=" + encodeURIComponent(sheetName) + "&limit=5000&_=" + Date.now(), { cache: "no-store" }).then(function (res) { return res.json(); }).then(function (json) {
+                            var apiHeaders = (json && json.data && json.data.headers) ? json.data.headers : [];
                             var rows = (json && json.data && json.data.rows) ? json.data.rows : [];
-                            var colIdx = -1;
-                            for (var h = 0; h < headers.length; h++) { if (String(headers[h] || "").trim() === "Comercio-Sucursal") { colIdx = h; break; } }
-                            var unicos = [], set = {};
-                            if (colIdx >= 0) { for (var r = 0; r < rows.length; r++) { var v = Array.isArray(rows[r]) ? rows[r][colIdx] : (rows[r] && headers[colIdx] != null ? rows[r][headers[colIdx]] : null); var s = (v != null && String(v).trim() !== "") ? String(v).trim() : null; if (s && !set[s]) { set[s] = true; unicos.push(s); } } unicos.sort(); }
-                            if (!window["COMPONENTE-COMBOS"]) window["COMPONENTE-COMBOS"] = {}; window["COMPONENTE-COMBOS"]["Combo-Comercio-Sucursal"] = unicos.length ? unicos : []; }).catch(function () { if (!window["COMPONENTE-COMBOS"]) window["COMPONENTE-COMBOS"] = {}; window["COMPONENTE-COMBOS"]["Combo-Comercio-Sucursal"] = []; });
+                            if (!window["COMPONENTE-COMBOS"]) window["COMPONENTE-COMBOS"] = {};
+                            combosConfig.forEach(function (def) {
+                                if (def.sheetCombo !== sheetName) return;
+                                var idx = findColIdx(apiHeaders, def.columnaCombo, def.columnaComboAlternativas);
+                                if (idx < 0 && def.columnaComboIndex >= 0 && def.columnaComboIndex < apiHeaders.length) idx = def.columnaComboIndex;
+                                var colNombre = idx >= 0 ? apiHeaders[idx] : def.columnaCombo;
+                                var unicos = [], set = {};
+                                if (idx >= 0 || colNombre) { for (var r = 0; r < rows.length; r++) { var v = getValFromRow(rows[r], apiHeaders, idx, colNombre); var s = (v != null && String(v).trim() !== "") ? String(v).trim() : null; if (s && !set[s]) { set[s] = true; unicos.push(s); } } unicos.sort(); }
+                                window["COMPONENTE-COMBOS"][def.claveCombo] = unicos.length ? unicos : [];
+                            });
+                        }).catch(function () { if (!window["COMPONENTE-COMBOS"]) window["COMPONENTE-COMBOS"] = {}; combosConfig.forEach(function (def) { if (!window["COMPONENTE-COMBOS"][def.claveCombo]) window["COMPONENTE-COMBOS"][def.claveCombo] = []; }); });
                     }
-                    loadConfig().then(function (sheetConfig) { return ensureCombo(appsScriptUrl, sheetConfig.nombreHoja).then(function () { return sheetConfig; }); }).then(function (sheetConfig) {
+                    loadConfig().then(function (sheetConfig) { return ensureCombo(sheetConfig, appsScriptUrl).then(function () { return sheetConfig; }); }).then(function (sheetConfig) {
                         var data; try { data = JSON.parse(raw); } catch (e) { data = {}; }
                         var headersFromStorage = data.headers || [];
                         var rowFromStorage = data.row || [];
@@ -130,7 +168,196 @@
                             }
                             fieldsContainer.appendChild(wrap);
                         });
+                        function getFormValueByNombreProductoUnitario(form, nombre) {
+                            if (!form || !nombre) return "";
+                            var el = null;
+                            form.querySelectorAll("[data-nombre]").forEach(function (e) { if (e.getAttribute("data-nombre") === nombre) el = e; });
+                            if (!el) return "";
+                            return (el.value != null ? String(el.value).trim() : (el.textContent != null ? String(el.textContent).trim() : ""));
+                        }
+                        function setFormValueByNombreProductoUnitario(form, nombre, val, decimales) {
+                            if (!form || !nombre) return;
+                            var el = null;
+                            form.querySelectorAll("[data-nombre]").forEach(function (e) { if (e.getAttribute("data-nombre") === nombre) el = e; });
+                            if (!el) return;
+                            var dec = (decimales != null && !isNaN(decimales)) ? parseInt(decimales, 10) : 2;
+                            var col = (sheetConfig.columnas || []).filter(function (c) { return (c.nombre || "") === nombre; })[0] || null;
+                            var formato = (col && col.formatoVisual) ? col.formatoVisual : null;
+                            if (el.value !== undefined) {
+                                el.value = (val != null && val !== "") ? String(val) : "";
+                            } else {
+                                var disp = (val != null && val !== "") ? String(val) : "—";
+                                if (formato && typeof window.formatNumeroVisual === "function" && val !== "" && val != null) {
+                                    var num = parseFloat(String(val).replace(",", "."));
+                                    if (!isNaN(num)) disp = window.formatNumeroVisual(num, formato, dec);
+                                }
+                                el.textContent = disp;
+                            }
+                        }
+                        function applyLookupsProductoUnitario(form, sheetConfig, apiUrl) {
+                            if (!sheetConfig.lookups || sheetConfig.lookups.length === 0 || !apiUrl) return Promise.resolve();
+                            var promesas = sheetConfig.lookups.map(function (lookup) {
+                                var claveVal = getFormValueByNombreProductoUnitario(form, lookup.columnaClaveLocal);
+                                if (!claveVal) {
+                                    setFormValueByNombreProductoUnitario(form, lookup.columnaDestino, "");
+                                    return Promise.resolve();
+                                }
+                                var url = apiUrl + "?action=get&sheet=" + encodeURIComponent(lookup.tablaOrigen) + "&id=" + encodeURIComponent(claveVal);
+                                return fetch(url, { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (resp) {
+                                    if (!resp || !resp.success || !resp.data) {
+                                        setFormValueByNombreProductoUnitario(form, lookup.columnaDestino, "");
+                                        return;
+                                    }
+                                    var data = resp.data;
+                                    var val = (data[lookup.columnaOrigen] != null && data[lookup.columnaOrigen] !== "") ? data[lookup.columnaOrigen] : (data[lookup.columnaDestino] != null && data[lookup.columnaDestino] !== "" ? data[lookup.columnaDestino] : null);
+                                    var dec = (lookup.decimales != null) ? lookup.decimales : 2;
+                                    if (typeof val === "number" && !isNaN(val)) val = val.toFixed(dec);
+                                    else if (val != null && val !== "") val = String(val).trim();
+                                    else val = "";
+                                    setFormValueByNombreProductoUnitario(form, lookup.columnaDestino, val, dec);
+                                }).catch(function () { setFormValueByNombreProductoUnitario(form, lookup.columnaDestino, ""); });
+                            });
+                            return Promise.all(promesas);
+                        }
+                        function ordenFormulasPorDependencias(formulas) {
+                            if (!formulas || typeof formulas !== "object") return [];
+                            var nombres = Object.keys(formulas);
+                            var orden = [];
+                            var restantes = nombres.slice();
+                            while (restantes.length > 0) {
+                                var agregado = false;
+                                for (var r = 0; r < restantes.length; r++) {
+                                    var nom = restantes[r];
+                                    var f = formulas[nom];
+                                    if (!f || !Array.isArray(f.fuentes)) { orden.push(nom); restantes.splice(r, 1); agregado = true; break; }
+                                    var depsCumplidas = true;
+                                    for (var d = 0; d < f.fuentes.length; d++) { if (nombres.indexOf(f.fuentes[d]) !== -1 && orden.indexOf(f.fuentes[d]) === -1) { depsCumplidas = false; break; } }
+                                    if (depsCumplidas) { orden.push(nom); restantes.splice(r, 1); agregado = true; break; }
+                                }
+                                if (!agregado) break;
+                            }
+                            return orden.concat(restantes);
+                        }
+                        function applyFormulasProductoUnitario(form, sheetConfig) {
+                            var columnas = (sheetConfig && sheetConfig.columnas) ? sheetConfig.columnas : [];
+                            var formulas = (sheetConfig && sheetConfig.formulas) ? sheetConfig.formulas : {};
+                            var orden = ordenFormulasPorDependencias(formulas);
+                            orden.forEach(function (nombreCol) {
+                                var el = null;
+                                form.querySelectorAll("[data-nombre]").forEach(function (e) { if (e.getAttribute("data-nombre") === nombreCol) el = e; });
+                                if (!el || el.value !== undefined) return;
+                                var f = formulas[nombreCol];
+                                if (!f || !f.fuentes || !f.expresion) return;
+                                var expr = f.expresion;
+                                var dec = (f.decimales != null) ? f.decimales : 2;
+                                var fuentes = f.fuentes;
+                                var exprEval = expr;
+                                for (var i = 0; i < fuentes.length; i++) {
+                                    var letter = String.fromCharCode(97 + i);
+                                    var val = getFormValueByNombreProductoUnitario(form, fuentes[i]);
+                                    var colFuente = columnas.filter(function (c) { return (c.nombre || "") === fuentes[i]; })[0] || null;
+                                    var num = parseFloat(String(val).replace(",", ".")) || 0;
+                                    if (colFuente && colFuente.formatoVisual && typeof window.parseNumeroVisual === "function" && val !== "") {
+                                        var raw = window.parseNumeroVisual(val, colFuente.formatoVisual);
+                                        if (raw !== "" && raw != null) num = parseFloat(String(raw).replace(",", ".")) || 0;
+                                    }
+                                    exprEval = exprEval.replace(new RegExp("\\b" + letter + "\\b", "g"), String(num));
+                                }
+                                var result;
+                                try { result = Function("return (" + exprEval + ");")(); } catch (err) { result = 0; }
+                                if (typeof result !== "number" || isNaN(result)) result = 0;
+                                result = Math.round(result * Math.pow(10, dec)) / Math.pow(10, dec);
+                                var col = columnas.filter(function (c) { return (c.nombre || "") === nombreCol; })[0] || null;
+                                var formato = (col && col.formatoVisual) ? col.formatoVisual : null;
+                                el.textContent = (typeof window.formatNumeroVisual === "function" && formato) ? window.formatNumeroVisual(result, formato, dec) : result.toFixed(dec);
+                            });
+                        }
                         var saveBtn = formEl.querySelector(".costos-edit-btn-save");
+                        var elaboracionSection = document.getElementById("elaboracion-vinculada-section");
+                        var elaboracionSinId = document.getElementById("elaboracion-vinculada-sin-id");
+                        var elaboracionLoading = document.getElementById("elaboracion-vinculada-loading");
+                        var elaboracionTableWrap = document.getElementById("elaboracion-vinculada-table-wrap");
+                        var elaboracionThead = document.getElementById("elaboracion-vinculada-thead");
+                        var elaboracionTbody = document.getElementById("elaboracion-vinculada-tbody");
+                        var ELABORACION_HEADERS = ["IDElaboracion-ProductoBase", "IDReceta-Base", "Cantidad", "Descripcion-Masa-Producto", "Costo-Produccion-ProductoBase", "Monto"];
+                        var ELABORACION_ALIASES = { "IDElaboracion-ProductoBase": "ID Elaboración", "IDReceta-Base": "ID Receta Base", "Cantidad": "Cantidad", "Descripcion-Masa-Producto": "Descripción Masa", "Costo-Produccion-ProductoBase": "Costo Prod. Base", "Monto": "Monto" };
+                        function renderElaboracionVinculada() {
+                            if (!elaboracionSection) return;
+                            elaboracionSection.style.display = "block";
+                            var idElab = getFormValueByNombreProductoUnitario(formEl, "IDElaboracion-ProductoBase");
+                            idElab = (idElab != null ? String(idElab).trim() : "");
+                            if (!idElab) {
+                                if (elaboracionSinId) elaboracionSinId.style.display = "block";
+                                if (elaboracionLoading) elaboracionLoading.style.display = "none";
+                                if (elaboracionTableWrap) elaboracionTableWrap.style.display = "none";
+                                return;
+                            }
+                            if (elaboracionSinId) elaboracionSinId.style.display = "none";
+                            if (elaboracionLoading) elaboracionLoading.style.display = "block";
+                            if (elaboracionTableWrap) elaboracionTableWrap.style.display = "none";
+                            var sheetElab = "Tabla-Elaboracion-ProductosBase";
+                            fetch(appsScriptUrl + "?action=get&sheet=" + encodeURIComponent(sheetElab) + "&id=" + encodeURIComponent(idElab), { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (resp) {
+                                if (elaboracionLoading) elaboracionLoading.style.display = "none";
+                                if (!resp || !resp.success || !resp.data) {
+                                    if (elaboracionSinId) { elaboracionSinId.textContent = "No se encontró la elaboración vinculada."; elaboracionSinId.style.display = "block"; }
+                                    return;
+                                }
+                                var data = resp.data;
+                                if (elaboracionThead) {
+                                    elaboracionThead.innerHTML = "";
+                                    var tr = document.createElement("tr");
+                                    ELABORACION_HEADERS.forEach(function (h) { var th = document.createElement("th"); th.scope = "col"; th.textContent = ELABORACION_ALIASES[h] || h; tr.appendChild(th); });
+                                    elaboracionThead.appendChild(tr);
+                                }
+                                if (elaboracionTbody) {
+                                    elaboracionTbody.innerHTML = "";
+                                    var tr = document.createElement("tr");
+                                    ELABORACION_HEADERS.forEach(function (h) {
+                                        var td = document.createElement("td");
+                                        var val = (data[h] != null && data[h] !== "") ? String(data[h]) : "—";
+                                        if ((h === "Costo-Produccion-ProductoBase" || h === "Monto") && val !== "—" && typeof window.formatNumeroVisual === "function") {
+                                            var num = parseFloat(String(val).replace(",", "."));
+                                            if (!isNaN(num)) val = window.formatNumeroVisual(num, "moneda", 2);
+                                        }
+                                        td.textContent = val;
+                                        tr.appendChild(td);
+                                    });
+                                    elaboracionTbody.appendChild(tr);
+                                }
+                                if (elaboracionTableWrap) elaboracionTableWrap.style.display = "block";
+                            }).catch(function () {
+                                if (elaboracionLoading) elaboracionLoading.style.display = "none";
+                                if (elaboracionSinId) { elaboracionSinId.textContent = "Error al cargar la elaboración vinculada."; elaboracionSinId.style.display = "block"; }
+                            });
+                        }
+                        applyLookupsProductoUnitario(formEl, sheetConfig, appsScriptUrl).then(function () {
+                            applyFormulasProductoUnitario(formEl, sheetConfig);
+                            renderElaboracionVinculada();
+                        });
+                        formEl.querySelectorAll("input[data-nombre], select[data-nombre]").forEach(function (input) {
+                            var nombre = input.getAttribute("data-nombre");
+                            if (!nombre) return;
+                            var esFuenteFormula = false;
+                            if (sheetConfig.formulas) {
+                                for (var k in sheetConfig.formulas) {
+                                    if (sheetConfig.formulas[k].fuentes && sheetConfig.formulas[k].fuentes.indexOf(nombre) !== -1) { esFuenteFormula = true; break; }
+                                }
+                            }
+                            if (esFuenteFormula) {
+                                input.addEventListener("input", function () { applyFormulasProductoUnitario(formEl, sheetConfig); updateSaveButton(); });
+                                input.addEventListener("change", function () { applyFormulasProductoUnitario(formEl, sheetConfig); updateSaveButton(); });
+                            }
+                            var esClaveLookup = false;
+                            if (sheetConfig.lookups && sheetConfig.lookups.length) {
+                                for (var l = 0; l < sheetConfig.lookups.length; l++) {
+                                    if (sheetConfig.lookups[l].columnaClaveLocal === nombre) { esClaveLookup = true; break; }
+                                }
+                            }
+                            if (esClaveLookup) {
+                                input.addEventListener("input", function () { applyLookupsProductoUnitario(formEl, sheetConfig, appsScriptUrl).then(function () { applyFormulasProductoUnitario(formEl, sheetConfig); updateSaveButton(); }); });
+                                input.addEventListener("change", function () { applyLookupsProductoUnitario(formEl, sheetConfig, appsScriptUrl).then(function () { applyFormulasProductoUnitario(formEl, sheetConfig); updateSaveButton(); }); });
+                            }
+                        });
                         function getCurrentRowFromForm() {
                             var out = []; for (var i = 0; i < headers.length; i++) out[i] = ""; formEl.querySelectorAll("[data-header-index]").forEach(function (el) { var idx = parseInt(el.getAttribute("data-header-index"), 10); if (idx < 0) return; var val = (el.value != null ? String(el.value).trim() : (el.textContent != null ? String(el.textContent).trim() : "")); var formato = el.getAttribute("data-formato-visual"); if (formato && typeof window.parseNumeroVisual === "function") val = window.parseNumeroVisual(val, formato) || val; if (idx < out.length) out[idx] = val; }); return out;
                         }

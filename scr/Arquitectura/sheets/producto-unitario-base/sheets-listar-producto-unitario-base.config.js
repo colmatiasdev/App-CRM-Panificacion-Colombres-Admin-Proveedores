@@ -36,12 +36,12 @@
       descripcion: "Comercio o sucursal."
     },
     {
-      nombre: "Tipo-Producto",
-      alias: "Tipo Producto",
+      nombre: "Categoria",
+      alias: "Categoría",
       tipoDato: "text",
       tipoComponente: "label",
-      visible: false,
-      descripcion: "Tipo de producto."
+      visible: true,
+      descripcion: "Categoría del producto."
     },
     {
       nombre: "Nombre-Producto",
@@ -60,7 +60,7 @@
       descripcion: "Referencia a elaboración productos base."
     },
     {
-      nombre: "Costo-Produccion-ProductoBase",
+      nombre: "Costo-Produccion",
       alias: "Costo Producción Base",
       tipoDato: "numeric",
       tipoComponente: "label",
@@ -168,7 +168,7 @@
         columnasAgrupacion: ["Comercio-Sucursal"],
         columnaFiltroValores: "Comercio-Sucursal",
         modosAgrupacion: [
-          ["Tipo-Producto"]
+          ["Categoria"]
         ]
       }
     }]

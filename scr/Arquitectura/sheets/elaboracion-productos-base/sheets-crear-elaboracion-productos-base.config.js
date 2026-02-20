@@ -35,33 +35,31 @@
       alias: "Cantidad",
       tipoDato: "numeric",
       tipoComponente: "text-box",
-      decimales: 2,
+      decimales: 0,
       visible: true,
       obligatorio: true,
-      descripcion: "Cantidad.",
-      restricciones: { min: 0 },
+      descripcion: "Cantidad (entero entre 1 y 1000).",
+      restricciones: { min: 1, max: 1000, entero: true },
       formatoVisual: "numero"
     },
     {
       nombre: "Descripcion-Masa-Producto",
       alias: "Descripción Masa Producto",
       tipoDato: "text",
-      tipoComponente: "text-box",
+      tipoComponente: "label",
       visible: true,
       obligatorio: false,
-      descripcion: "Descripción de la masa del producto.",
-      restricciones: { maxLongitud: 500 }
+      descripcion: "Descripción de la masa del producto (solo lectura, se completa al seleccionar la receta)."
     },
     {
       nombre: "Costo-Produccion-ProductoBase",
       alias: "Costo Producción Base",
       tipoDato: "numeric",
-      tipoComponente: "text-box",
+      tipoComponente: "label",
       decimales: 2,
       visible: true,
       obligatorio: false,
-      descripcion: "Costo de producción base.",
-      restricciones: { min: 0 },
+      descripcion: "Costo de producción base (solo lectura, se completa al seleccionar la receta).",
       formatoVisual: "moneda"
     },
     {
@@ -72,9 +70,10 @@
       decimales: 2,
       visible: true,
       obligatorio: false,
-      descripcion: "Monto.",
+      descripcion: "Cantidad × Costo Producción Base (calculado).",
       restricciones: { min: 0 },
-      formatoVisual: "moneda"
+      formatoVisual: "moneda",
+      formula: { fuentes: ["Cantidad", "Costo-Produccion-ProductoBase"], operacion: "multiplicacion" }
     }
   ];
   window.ELABORACION_PRODUCTOS_BASE_SHEETS_JSON = {
@@ -90,7 +89,8 @@
       prefijoId: hoja.prefijoId,
       patronId: hoja.patronId,
       indices: hoja.indices,
-      columnas: columnas
+      columnas: columnas,
+      formulas: (base.hoja && base.hoja.formulas) ? base.hoja.formulas : {}
     }]
   };
 })();

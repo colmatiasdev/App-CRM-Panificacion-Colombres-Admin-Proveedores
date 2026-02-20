@@ -25,7 +25,7 @@
     function findColumnIndex(headers, names) {
         for (var i = 0; i < headers.length; i++) {
             var h = norm(headers[i]);
-            for (var j = 0; j < names.length; j++) { if (h === names[j]) return i; }
+            for (var j = 0; j < names.length; j++) { if (h === norm(names[j])) return i; }
         }
         return -1;
     }
@@ -38,6 +38,22 @@
     function getRowTitle(headers, row, nameColumnIndex) {
         if (nameColumnIndex >= 0 && row[nameColumnIndex] != null) return String(row[nameColumnIndex]).trim();
         return row[0] != null ? String(row[0]).trim() : "Sin nombre";
+    }
+
+    function getVal(headers, row, nameVariants) {
+        for (var v = 0; v < nameVariants.length; v++) {
+            var idx = findColumnIndex(headers, [norm(nameVariants[v])]);
+            if (idx >= 0 && row[idx] != null && String(row[idx]).trim() !== "") return String(row[idx]).trim();
+        }
+        return "";
+    }
+
+    function parseNum(val) { return parseFloat(String(val || 0).replace(",", ".")) || 0; }
+
+    function fmtMoneda(n) {
+        if (typeof window.formatNumeroVisual === "function") return window.formatNumeroVisual(n, "moneda", 2);
+        if (isNaN(n) || n == null) return "—";
+        return "$ " + n.toFixed(2).replace(".", ",").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     }
 
     function alignRowsToConfig(headersConfig, apiHeaders, apiRows) {
@@ -61,8 +77,7 @@
         var pkNorms = clavePrimaria.map(function (k) { return norm(k); });
         var idColIdx = findColumnIndex(headers, pkNorms);
         if (idColIdx < 0) idColIdx = 0;
-        var nameColIdx = headers.indexOf("Descripcion-Masa-Producto");
-        if (nameColIdx < 0) nameColIdx = findColumnIndex(headers, ["descripcionmasaproducto", "descripcion-masa-producto", "nombre"]);
+        var nameColIdx = findColumnIndex(headers, ["descripcionmasaproducto", "descripcion-masa-producto", "descripcion", "nombre"]);
         if (nameColIdx < 0) nameColIdx = 0;
 
         var filter = (filterText || "").trim().toLowerCase();
@@ -78,48 +93,74 @@
             visible = visible.filter(function (row) { return (row[indiceColumnaFiltro] != null ? String(row[indiceColumnaFiltro]).trim() : "") === valorBuscar; });
         }
 
-        var extraIndexes = [];
-        columnas.forEach(function (col) {
-            var nombre = col.nombre || "";
-            if (!nombre || col.visible !== true) return;
-            if (norm(nombre) === norm((headers[idColIdx] || ""))) return;
-            if (norm(nombre) === norm((headers[nameColIdx] || ""))) return;
-            var idx = headers.indexOf(nombre);
-            if (idx >= 0) extraIndexes.push(idx);
+        var idxCd = findColumnIndex(headers, ["Costo-Directo-Receta", "CostoDirecto"]);
+        var idxMo = findColumnIndex(headers, ["Costo-Mano-Obra-Produccion", "Costo-Mano-Obra-Elaboracion", "CostoManoObra"]);
+        var idxCp = findColumnIndex(headers, ["Costo-Produccion[C+E]", "Costo-Produccion", "CostoProduccion"]);
+        var idxCu = findColumnIndex(headers, ["Costo-Produccion-ProductoBase [F/G]", "Costo [Receta / Rendimiento]"]);
+        var idxTi = findColumnIndex(headers, ["Tiempo-Produccion-Minutos", "Tiempo-Elaboracion-Minutos", "Tiempo (min)", "Tiempo"]);
+        var idxCr = findColumnIndex(headers, ["Rendimiento-Cantidad", "Cant-Rendimiento", "Cant. Rendimiento"]);
+        var idxUm = findColumnIndex(headers, ["Rendimiento-UnidadMedida", "Rendimiento U.M.", "Rendimiento-U.M."]);
+
+        function get(row, variants) { return getVal(headers, row, variants); }
+        function num(row, idx) { return idx >= 0 && row[idx] != null ? parseNum(row[idx]) : 0; }
+
+        var htmlParts = [];
+        visible.forEach(function (row, i) {
+            var origIdx = rows.indexOf(row);
+            var desc = (nameColIdx >= 0 && row[nameColIdx] != null && String(row[nameColIdx]).trim() !== "") ? String(row[nameColIdx]).trim() : "—";
+            var tipo = get(row, ["Tipo-Producto", "TipoProducto"]);
+            var um = get(row, ["Rendimiento-UnidadMedida", "Rendimiento U.M.", "Rendimiento-U.M."]);
+            var cd = num(row, idxCd);
+            var mo = num(row, idxMo);
+            var cp = num(row, idxCp);
+            if (cp === 0) cp = cd + mo;
+            var cr = num(row, idxCr);
+            var cu = num(row, idxCu);
+            if (cu === 0 && cr > 0) cu = cp / cr;
+            var ti = num(row, idxTi);
+            var tiStr = ti > 0 ? ti.toString().replace(".", ",") + " min" : "—";
+            var rendStr = cr > 0 ? (Number.isInteger(cr) ? cr : cr.toFixed(0)) + (um ? " · " + um : "") : "—";
+            var delay = Math.min(i * 0.045, 0.5);
+
+            htmlParts.push(
+                '<div class="card" style="animation-delay:' + delay.toFixed(2) + 's;">',
+                '<div class="card-stripe"></div>',
+                '<div class="card-body">',
+                '<div class="card-top">',
+                '<div class="card-name">' + escapeHtml(desc) + '</div>',
+                '<div class="card-hero">',
+                '<span class="card-hero-label">Costo / unidad</span>',
+                '<div class="card-hero-val">' + escapeHtml(fmtMoneda(cu)) + '</div>',
+                '</div>',
+                '</div>',
+                '<div class="card-badges">',
+                tipo ? '<span class="badge-tipo"><i class="fa-solid fa-tag" style="font-size:.5rem;"></i>' + escapeHtml(tipo) + '</span>' : '',
+                rendStr !== "—" ? '<div class="card-rend"><i class="fa-solid fa-scale-balanced"></i> Rend. ' + escapeHtml(rendStr) + '</div>' : '',
+                '</div>',
+                '<div class="card-metrics">',
+                '<div class="metric-card"><div class="metric-label">Costo Directo</div><div class="metric-val metric-val--accent">' + escapeHtml(fmtMoneda(cd)) + '</div></div>',
+                '<div class="metric-card"><div class="metric-label">Costo Producción</div><div class="metric-val metric-val--green">' + escapeHtml(fmtMoneda(cp)) + '</div></div>',
+                '<div class="metric-card"><div class="metric-label"><i class="fa-solid fa-circle-dot" style="font-size:.45rem;color:var(--amber);"></i>Mano de Obra</div><div class="metric-val metric-val--amber">' + escapeHtml(fmtMoneda(mo)) + '</div></div>',
+                '<div class="metric-card"><div class="metric-label"><i class="fa-regular fa-clock" style="font-size:.5rem;color:var(--amber);"></i>Tiempo Prod.</div><div class="metric-val ' + (ti > 0 ? "metric-val--amber" : "metric-val--muted") + '">' + escapeHtml(tiStr) + '</div></div>',
+                '</div>',
+                '</div>',
+                '<div class="card-footer">',
+                '<a href="' + VER_URL + '" class="btn-ver js-ver" data-id="' + escapeHtml(getRowId(headers, row, idColIdx)) + '" data-row-index="' + origIdx + '"><i class="fa-solid fa-eye"></i> Ver</a>',
+                '<a href="' + EDITAR_URL + '" class="btn-editar js-editar" data-id="' + escapeHtml(getRowId(headers, row, idColIdx)) + '" data-row-index="' + origIdx + '"><i class="fa-solid fa-pen"></i> Editar</a>',
+                '</div>',
+                '</div>'
+            );
         });
 
-        function cardActionsHtml(id, rowIndex) {
-            return "<a href=\"" + VER_URL + "\" class=\"costos-card-btn costos-card-btn-ver\" data-id=\"" + escapeHtml(id) + "\" data-row-index=\"" + rowIndex + "\"><i class=\"fa-solid fa-eye\" aria-hidden=\"true\"></i> Ver</a>" +
-                "<a href=\"" + EDITAR_URL + "\" class=\"costos-card-btn costos-card-btn-editar\" data-id=\"" + escapeHtml(id) + "\" data-row-index=\"" + rowIndex + "\"><i class=\"fa-solid fa-pen\" aria-hidden=\"true\"></i> Editar</a>";
+        if (htmlParts.length === 0) {
+            container.innerHTML = '<div class="placeholder"><i class="fa-solid fa-inbox"></i>No se encontraron recetas.</div>';
+        } else {
+            container.innerHTML = htmlParts.join("");
         }
-
-        var html = '<div class="costos-cards costos-cards-receta-base">';
-        visible.forEach(function (row) {
-            var id = getRowId(headers, row, idColIdx);
-            var title = (nameColIdx >= 0 && row[nameColIdx] != null && String(row[nameColIdx]).trim() !== "") ? String(row[nameColIdx]).trim() : "—";
-            var extra = [];
-            extraIndexes.forEach(function (c) {
-                var val = row[c] != null ? String(row[c]).trim() : "";
-                var colConfig = columnas.filter(function (col) { return norm(col.nombre) === norm(headers[c]); })[0];
-                if (colConfig && colConfig.formatoVisual && typeof window.formatNumeroVisual === "function") {
-                    var num = parseFloat(String(val).replace(",", "."));
-                    val = !isNaN(num) ? window.formatNumeroVisual(num, colConfig.formatoVisual, colConfig.decimales != null ? colConfig.decimales : 2) : (val || "—");
-                } else if (val === "") val = "—";
-                var label = (colConfig && colConfig.alias) ? colConfig.alias : headers[c];
-                extra.push(escapeHtml(label) + ": " + escapeHtml(val));
-            });
-            var extraHtml = extra.length ? "<ul class=\"costos-card-extra\">" + extra.map(function (item) { return "<li>" + item + "</li>"; }).join("") + "</ul>" : "";
-            html += "<div class=\"costos-card costos-card-receta-base\">";
-            html += "<div class=\"costos-card-header\"><h3 class=\"costos-card-title\">" + escapeHtml(title) + "</h3></div>";
-            html += "<div class=\"costos-card-body\">" + extraHtml + "</div>";
-            html += "<div class=\"costos-card-actions\">" + cardActionsHtml(id, rows.indexOf(row)) + "</div></div>";
-        });
-        html += "</div>";
-        container.innerHTML = html;
         container.classList.remove("costos-datos-message");
 
         var countEl = document.getElementById("receta-base-count");
-        if (countEl) countEl.textContent = visible.length + " de " + rows.length + " registro(s)";
+        if (countEl) countEl.textContent = visible.length === rows.length ? rows.length + " registro" + (rows.length !== 1 ? "s" : "") : visible.length + " de " + rows.length;
 
         function goToCardAction(btn) {
             var idx = parseInt(btn.getAttribute("data-row-index"), 10);
@@ -129,14 +170,14 @@
             } catch (err) {}
             window.location.href = btn.getAttribute("href");
         }
-        container.querySelectorAll(".costos-card-btn-editar, .costos-card-btn-ver").forEach(function (btn) {
+        container.querySelectorAll(".js-editar, .js-ver").forEach(function (btn) {
             btn.addEventListener("click", function (e) { e.preventDefault(); goToCardAction(btn); });
         });
     }
 
     function showMessage(container, text) {
         if (!container) return;
-        container.innerHTML = "<p class=\"costos-placeholder\">" + escapeHtml(text) + "</p>";
+        container.innerHTML = "<div class=\"placeholder\"><i class=\"fa-solid fa-inbox\"></i>" + escapeHtml(text) + "</div>";
         container.classList.add("costos-datos-message");
     }
 

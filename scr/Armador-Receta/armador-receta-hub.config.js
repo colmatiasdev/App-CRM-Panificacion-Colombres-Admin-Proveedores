@@ -91,14 +91,13 @@
                 id: "receta-detalle",
                 label: "Receta Detalle",
                 icono: "fa-list-ul",
-                visible: true,
+                visible: false,
                 rutaListar: "Receta-Detalle/receta-detalle.html",
                 rutaNuevo: "Receta-Detalle/crear-receta-detalle.html",
                 botones: {
                     listar: { visible: true, texto: "Listar" },
                     nuevo: { visible: true, texto: "Nuevo Detalle de la Receta" }
-                },
-                ocultarSiReferrerContiene: ["receta-base", "ver-receta-base"]
+                }
             },
             {
                 id: "producto-unitario-base",
