@@ -43,13 +43,13 @@
       restricciones: {}
     },
     {
-      nombre: "Tipo-Producto",
-      alias: "Tipo Producto",
+      nombre: "Categoria",
+      alias: "Categoría",
       tipoDato: "text",
       tipoComponente: "text-box",
       visible: true,
       obligatorio: false,
-      descripcion: "Tipo de producto.",
+      descripcion: "Categoría del producto.",
       restricciones: { maxLongitud: 200 }
     },
     {

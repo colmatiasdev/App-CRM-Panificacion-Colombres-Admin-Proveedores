@@ -15,7 +15,7 @@ window.PRODUCTO_UNITARIO_BASE_SHEET_BASE = {
       "Orden",
       "IDCosto-ProductoUnitario",
       "Comercio-Sucursal",
-      "Tipo-Producto",
+      "Categoria",
       "Nombre-Producto",
       "IDElaboracion-ProductoBase",
       "Costo-Produccion-ProductoBase",
@@ -31,7 +31,7 @@ window.PRODUCTO_UNITARIO_BASE_SHEET_BASE = {
     ],
     columnaOrden: "Orden",
     clavesForaneas: [],
-    prefijoId: "RECETA-",
+    prefijoId: "PROD-UNITARIO",
     patronId: 1,
     indices: [
       { columnas: ["IDCosto-ProductoUnitario"], unico: true },

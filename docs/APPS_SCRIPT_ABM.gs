@@ -210,7 +210,7 @@ var CONFIG = {
       'Orden',
       'IDCosto-ProductoUnitario',
       'Comercio-Sucursal',
-      'Tipo-Producto',
+      'Categoria',
       'Nombre-Producto',
       'IDElaboracion-ProductoBase',
       'Costo-Produccion-ProductoBase',
@@ -225,8 +225,8 @@ var CONFIG = {
       'Actualizado'
     ],
     idColumn: 'IDCosto-ProductoUnitario',
-    idPrefix: 'RECETA-',
-    filterColumns: ['IDCosto-ProductoUnitario', 'Comercio-Sucursal', 'Tipo-Producto', 'Nombre-Producto', 'Habilitado'],
+    idPrefix: 'PROD-UNITARIO-',
+    filterColumns: ['IDCosto-ProductoUnitario', 'Comercio-Sucursal', 'Categoria', 'Nombre-Producto', 'Habilitado'],
     requiredOnCreate: ['Nombre-Producto'],
     dateUpdatedColumn: 'Fecha-Registro-Actualizado-Al'
   },

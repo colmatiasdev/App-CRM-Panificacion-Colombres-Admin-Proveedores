@@ -42,12 +42,13 @@
       restricciones: {}
     },
     {
-      nombre: "Tipo-Producto",
-      alias: "Tipo Producto",
+      nombre: "Categoria",
+      alias: "Categoría",
       tipoDato: "text",
       tipoComponente: "text-box",
       visible: true,
       obligatorio: false,
+      descripcion: "Categoría del producto.",
       restricciones: { maxLongitud: 200 }
     },
     {
@@ -153,6 +154,14 @@
     },
     {
       nombre: "Fecha-Registro-Actualizado-Al",
+      alias: "Fecha actualización",
+      tipoDato: "text",
+      tipoComponente: "label",
+      visible: false,
+      obligatorio: false
+    },
+    {
+      nombre: "Actualizado",
       alias: "Actualizado",
       tipoDato: "text",
       tipoComponente: "label",

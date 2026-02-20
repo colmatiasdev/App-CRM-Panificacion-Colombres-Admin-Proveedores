@@ -32,8 +32,8 @@
       visible: true
     },
     {
-      nombre: "Tipo-Producto",
-      alias: "Tipo Producto",
+      nombre: "Categoria",
+      alias: "Categoría",
       tipoDato: "text",
       tipoComponente: "label",
       visible: true
@@ -122,6 +122,13 @@
     },
     {
       nombre: "Fecha-Registro-Actualizado-Al",
+      alias: "Fecha actualización",
+      tipoDato: "text",
+      tipoComponente: "label",
+      visible: false
+    },
+    {
+      nombre: "Actualizado",
       alias: "Actualizado",
       tipoDato: "text",
       tipoComponente: "label",
