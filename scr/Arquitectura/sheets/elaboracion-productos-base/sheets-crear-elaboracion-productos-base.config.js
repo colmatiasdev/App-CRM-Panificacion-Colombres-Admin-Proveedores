@@ -11,13 +11,23 @@
   var hoja = base.hoja;
   var columnas = [
     {
+      nombre: "ID-UNICO",
+      alias: "ID Único",
+      tipoDato: "text",
+      tipoComponente: "label",
+      visible: true,
+      obligatorio: true,
+      descripcion: "ID único autogenerado.",
+      restricciones: {}
+    },
+    {
       nombre: "IDElaboracion-ProductoBase",
       alias: "ID Elaboración",
       tipoDato: "text",
       tipoComponente: "label",
       visible: true,
       obligatorio: true,
-      descripcion: "ID autogenerado.",
+      descripcion: "ID para vinculación (mismo valor que ID Único).",
       restricciones: {}
     },
     {

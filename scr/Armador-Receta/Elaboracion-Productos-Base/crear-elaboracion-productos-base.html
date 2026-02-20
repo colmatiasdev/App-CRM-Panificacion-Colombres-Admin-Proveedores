@@ -200,7 +200,7 @@
                         }
                         newRow[idx] = val;
                     });
-                    if (window.GENERAR_ID_PARA_HOJA && sheetConfig.clavePrimaria && sheetConfig.clavePrimaria[0]) { var idColIdx = headers.indexOf(sheetConfig.clavePrimaria[0]); if (idColIdx >= 0) newRow[idColIdx] = window.GENERAR_ID_PARA_HOJA(sheetConfig); }
+                    if (window.GENERAR_ID_PARA_HOJA && sheetConfig.clavePrimaria && sheetConfig.clavePrimaria.length) { var idGenerado = window.GENERAR_ID_PARA_HOJA(sheetConfig); for (var p = 0; p < sheetConfig.clavePrimaria.length; p++) { var idColIdx = headers.indexOf(sheetConfig.clavePrimaria[p]); if (idColIdx >= 0) newRow[idColIdx] = idGenerado; } }
                     var saveBtn = formEl.querySelector(".costos-edit-btn-save"); var btnText = saveBtn ? saveBtn.innerHTML : "";
                     if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = "<i class=\"fa-solid fa-spinner fa-spin\" aria-hidden=\"true\"></i> Guardando…"; }
                     if (window.COSTOS_SPINNER) window.COSTOS_SPINNER.show("Guardando…");

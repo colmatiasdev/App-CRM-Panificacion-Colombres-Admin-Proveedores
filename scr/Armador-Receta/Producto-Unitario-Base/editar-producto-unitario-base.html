@@ -279,8 +279,8 @@
                         var elaboracionTableWrap = document.getElementById("elaboracion-vinculada-table-wrap");
                         var elaboracionThead = document.getElementById("elaboracion-vinculada-thead");
                         var elaboracionTbody = document.getElementById("elaboracion-vinculada-tbody");
-                        var ELABORACION_HEADERS = ["IDElaboracion-ProductoBase", "IDReceta-Base", "Cantidad", "Descripcion-Masa-Producto", "Costo-Produccion-ProductoBase", "Monto"];
-                        var ELABORACION_ALIASES = { "IDElaboracion-ProductoBase": "ID Elaboración", "IDReceta-Base": "ID Receta Base", "Cantidad": "Cantidad", "Descripcion-Masa-Producto": "Descripción Masa", "Costo-Produccion-ProductoBase": "Costo Prod. Base", "Monto": "Monto" };
+                        var ELABORACION_HEADERS = ["ID-UNICO", "IDElaboracion-ProductoBase", "IDReceta-Base", "Cantidad", "Descripcion-Masa-Producto", "Costo-Produccion-ProductoBase", "Monto"];
+                        var ELABORACION_ALIASES = { "ID-UNICO": "ID Único", "IDElaboracion-ProductoBase": "ID Elaboración", "IDReceta-Base": "ID Receta Base", "Cantidad": "Cantidad", "Descripcion-Masa-Producto": "Descripción Masa", "Costo-Produccion-ProductoBase": "Costo Prod. Base", "Monto": "Monto" };
                         function renderElaboracionVinculada() {
                             if (!elaboracionSection) return;
                             elaboracionSection.style.display = "block";

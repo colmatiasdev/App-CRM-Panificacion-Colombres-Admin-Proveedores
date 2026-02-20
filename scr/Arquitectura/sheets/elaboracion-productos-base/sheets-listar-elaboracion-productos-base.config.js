@@ -11,12 +11,20 @@
   var hoja = base.hoja;
   var columnas = [
     {
+      nombre: "ID-UNICO",
+      alias: "ID Único",
+      tipoDato: "text",
+      tipoComponente: "label",
+      visible: true,
+      descripcion: "ID único del registro."
+    },
+    {
       nombre: "IDElaboracion-ProductoBase",
       alias: "ID Elaboración",
       tipoDato: "text",
       tipoComponente: "label",
       visible: true,
-      descripcion: "Identificador único."
+      descripcion: "Identificador para vinculación."
     },
     {
       nombre: "IDReceta-Base",
