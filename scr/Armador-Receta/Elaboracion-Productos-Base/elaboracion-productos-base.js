@@ -138,7 +138,50 @@
         container.classList.add("costos-datos-message");
     }
 
+    var CABECERA_LABELS = {
+        "IDElaboracion-ProductoBase": "ID Elaboración",
+        "IDReceta-Base": "ID Receta Base",
+        "Cantidad": "Cantidad",
+        "Descripcion-Masa-Producto": "Descripción Masa Producto",
+        "Costo-Produccion-ProductoBase": "Costo Producción Base",
+        "Monto": "Monto"
+    };
+
+    function renderCabeceraRecienCreado() {
+        var cabeceraEl = document.getElementById("costos-listado-cabecera");
+        var cabeceraContent = document.getElementById("costos-listado-cabecera-content");
+        if (!cabeceraEl || !cabeceraContent) return;
+        var raw = null;
+        try { raw = sessionStorage.getItem("elaboracionProductoBaseRecienCreado"); } catch (e) {}
+        if (!raw) return;
+        var data;
+        try { data = JSON.parse(raw); } catch (e) { return; }
+        try { sessionStorage.removeItem("elaboracionProductoBaseRecienCreado"); } catch (e) {}
+        var headers = data.headers || [];
+        var row = data.row || [];
+        if (!headers.length) return;
+        cabeceraContent.innerHTML = "";
+        headers.forEach(function (h, idx) {
+            var label = CABECERA_LABELS[h] || h;
+            var val = (row[idx] != null && String(row[idx]).trim() !== "") ? String(row[idx]).trim() : "—";
+            var rowEl = document.createElement("div");
+            rowEl.className = "costos-edit-cabecera-row";
+            var lbl = document.createElement("span");
+            lbl.className = "costos-edit-cabecera-label";
+            lbl.textContent = label + ":";
+            var valEl = document.createElement("span");
+            valEl.className = "costos-edit-cabecera-value";
+            valEl.textContent = val;
+            rowEl.appendChild(lbl);
+            rowEl.appendChild(document.createTextNode(" "));
+            rowEl.appendChild(valEl);
+            cabeceraContent.appendChild(rowEl);
+        });
+        cabeceraEl.style.display = "block";
+    }
+
     function run() {
+        renderCabeceraRecienCreado();
         var container = document.getElementById("datos-elaboracion-productos-base");
         var filterInput = document.getElementById("filter-elaboracion-productos-base");
         var btnNuevo = document.getElementById("btn-nuevo-elaboracion-productos-base");

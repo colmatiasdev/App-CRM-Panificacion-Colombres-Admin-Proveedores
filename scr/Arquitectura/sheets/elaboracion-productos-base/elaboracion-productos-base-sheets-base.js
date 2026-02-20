@@ -28,11 +28,21 @@ window.ELABORACION_PRODUCTOS_BASE_SHEET_BASE = {
         cardinalidad: "N:1"
       }
     ],
-    prefijoId: "ELAB-",
+    prefijoId: "PROD-BASE",
     patronId: 1,
     indices: [
       { columnas: ["IDElaboracion-ProductoBase"], unico: true },
       { columnas: ["IDReceta-Base"], unico: false }
-    ]
+    ],
+    /** Fórmulas: Monto = Cantidad × Costo-Produccion-ProductoBase */
+    formulas: {
+      "Monto": {
+        fuentes: ["Cantidad", "Costo-Produccion-ProductoBase"],
+        operacion: "multiplicacion",
+        expresion: "a * b",
+        decimales: 2,
+        leyenda: "Cantidad × Costo Producción Base"
+      }
+    }
   }
 };

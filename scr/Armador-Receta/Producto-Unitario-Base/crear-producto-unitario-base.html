@@ -20,7 +20,7 @@
 <body class="costos-page">
     <nav class="costos-nav" id="armador-receta-nav" aria-label="Navegación principal"></nav>
     <main class="costos-main">
-        <h1 class="costos-title">Crear producto unitario base</h1>
+        <h1 class="costos-title">Crea un nuevo producto elaborado</h1>
         <p class="costos-intro">Completá los datos según la estructura de la hoja <strong>Tabla-Costos-ProductoUnitario</strong>.</p>
         <div id="edit-form-container" class="costos-datos">
             <div id="costos-edit-alert" class="costos-alert" role="alert" aria-live="polite" style="display:none;"></div>
@@ -29,8 +29,7 @@
             <form id="costos-edit-form" class="costos-edit-form" style="display:none;">
                 <div id="edit-fields"></div>
                 <div class="costos-edit-actions">
-                    <a href="producto-unitario-base.html" class="costos-edit-btn-cancel">Volver al listado</a>
-                    <button type="submit" class="costos-edit-btn-save" id="costos-edit-btn-save"><i class="fa-solid fa-plus" aria-hidden="true"></i> Crear</button>
+                    <button type="submit" class="costos-edit-btn-save" id="costos-edit-btn-save"><i class="fa-solid fa-plus" aria-hidden="true"></i> Nuevo producto elaborado</button>
                 </div>
             </form>
         </div>
@@ -245,16 +244,20 @@
                         for (var k = 0; k < headers.length; k++) { if (headers[k]) body[headers[k]] = rowFinal[k] != null ? rowFinal[k] : ""; }
                         var formBody = new URLSearchParams();
                         for (var key in body) { if (body.hasOwnProperty(key)) formBody.append(key, body[key] != null ? body[key] : ""); }
-                        return fetch(appsScriptUrl, { method: "POST", body: formBody });
-                    }).then(function (res) { return res.text(); }).then(function (text) {
-                        var json;
-                        try { json = JSON.parse(text); } catch (err) { throw new Error(text && (text.trim().indexOf("<!DOCTYPE") === 0 || text.trim().indexOf("<html") === 0) ? "El servidor respondió con HTML. Revisá que el Apps Script esté desplegado como aplicación web." : "Respuesta no válida"); }
-                        return json;
-                    }).then(function (json) {
-                        if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = btnText; }
-                        hideEditAlert();
-                        if (json && json.success) { window.location.replace("producto-unitario-base.html"); }
-                        else { showEditAlert("Error al guardar: " + ((json && json.error) ? json.error : "Respuesta inválida"), "error"); }
+                        return fetch(appsScriptUrl, { method: "POST", body: formBody }).then(function (res) { return res.text(); }).then(function (text) {
+                            var json;
+                            try { json = JSON.parse(text); } catch (err) { throw new Error(text && (text.trim().indexOf("<!DOCTYPE") === 0 || text.trim().indexOf("<html") === 0) ? "El servidor respondió con HTML. Revisá que el Apps Script esté desplegado como aplicación web." : "Respuesta no válida"); }
+                            return json;
+                        }).then(function (json) {
+                            if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = btnText; }
+                            hideEditAlert();
+                            if (json && json.success) {
+                                var idColIdx = sheetConfig.clavePrimaria && sheetConfig.clavePrimaria[0] ? headers.indexOf(sheetConfig.clavePrimaria[0]) : -1;
+                                var id = (idColIdx >= 0 && rowFinal[idColIdx] != null) ? String(rowFinal[idColIdx]) : "";
+                                try { sessionStorage.setItem("productoUnitarioBaseParaElaboracion", JSON.stringify({ id: id, headers: headers, row: rowFinal })); } catch (e) {}
+                                window.location.replace("../Elaboracion-Productos-Base/crear-elaboracion-productos-base.html");
+                            } else { showEditAlert("Error al guardar: " + ((json && json.error) ? json.error : "Respuesta inválida"), "error"); }
+                        });
                     }).catch(function (err) {
                         if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = btnText; }
                         showEditAlert("Error de conexión: " + (err.message || "Revisá appsScriptUrl."), "error");

@@ -26,6 +26,10 @@
             <div id="costos-edit-alert" class="costos-alert" role="alert" style="display:none;"></div>
             <p id="edit-no-data" class="costos-placeholder" style="display:none;">No se pudo cargar el formulario.</p>
             <p id="edit-loading" class="costos-placeholder">Cargando formulario…</p>
+            <section id="costos-edit-cabecera" class="costos-edit-cabecera" style="display:none;" aria-label="Información de cabecera del registro">
+                <h2 class="costos-edit-seccion-titulo">Información de cabecera</h2>
+                <div id="costos-edit-cabecera-content" class="costos-edit-cabecera-content"></div>
+            </section>
             <form id="costos-edit-form" class="costos-edit-form" style="display:none;">
                 <div id="edit-fields"></div>
                 <div class="costos-edit-actions">
@@ -43,7 +47,7 @@
             var appsScriptUrl = (config.appsScriptUrl || "").trim();
             function norm(s) { return String(s != null ? s : "").trim().toLowerCase().replace(/\s+/g, "").replace(/-/g, ""); }
             function isClavePrimaria(nombre, clavePrimaria) { var n = norm(nombre); for (var i = 0; i < (clavePrimaria || []).length; i++) { if (norm(clavePrimaria[i]) === n) return true; } return false; }
-            var noDataEl = document.getElementById("edit-no-data"); var loadingEl = document.getElementById("edit-loading"); var formEl = document.getElementById("costos-edit-form"); var fieldsContainer = document.getElementById("edit-fields"); var alertEl = document.getElementById("costos-edit-alert");
+            var noDataEl = document.getElementById("edit-no-data"); var loadingEl = document.getElementById("edit-loading"); var formEl = document.getElementById("costos-edit-form"); var fieldsContainer = document.getElementById("edit-fields"); var alertEl = document.getElementById("costos-edit-alert"); var cabeceraEl = document.getElementById("costos-edit-cabecera"); var cabeceraContent = document.getElementById("costos-edit-cabecera-content");
             function showEditAlert(message, type) { if (!alertEl) return; alertEl.textContent = message; alertEl.className = "costos-alert costos-alert--" + (type === "success" ? "success" : "error"); alertEl.style.display = "block"; }
             function hideEditAlert() { if (alertEl) { alertEl.style.display = "none"; alertEl.textContent = ""; alertEl.className = "costos-alert"; } }
             if (!appsScriptUrl) { loadingEl.style.display = "none"; noDataEl.style.display = "block"; noDataEl.textContent = "No está configurada la URL de la API."; return; }
@@ -76,6 +80,14 @@
                         if (col.formatoVisual && typeof window.formatNumeroVisual === "function") { var numVal = parseFloat(String(valorMostrar).replace(",", ".")); if (!isNaN(numVal)) valorMostrar = window.formatNumeroVisual(numVal, col.formatoVisual, col.decimales != null ? col.decimales : 2); }
                         var ro = document.createElement("span"); ro.id = "field-" + idx; ro.className = "costos-edit-input costos-edit-readonly"; ro.setAttribute("data-header-index", String(idx)); ro.setAttribute("data-nombre", nombreCol);
                         if (col.formatoVisual) ro.setAttribute("data-formato-visual", col.formatoVisual); if (col.descripcion) ro.title = col.descripcion; ro.setAttribute("aria-readonly", "true"); ro.textContent = valorMostrar; wrap.appendChild(ro);
+                        if (nombreCol === "IDElaboracion-ProductoBase") {
+                            var btnMasa = document.createElement("button"); btnMasa.type = "button"; btnMasa.className = "costos-edit-btn costos-edit-btn-seleccionar-masa"; btnMasa.textContent = "SELECCIONAR Masa de la Receta";
+                            btnMasa.addEventListener("click", function () {
+                                try { sessionStorage.setItem("elaboracionProductosBaseCrearReturnUrl", window.location.href); } catch (e) {}
+                                window.location.href = "../Receta-Base/seleccionar-lista-receta-base.html";
+                            });
+                            wrap.appendChild(btnMasa);
+                        }
                     } else if (tipoComp === "combo-basico") {
                         function getValoresCombo(ref) { if (typeof ref !== "string") return []; var parts = ref.trim().split("."); if (parts.length < 2) return []; var obj = window[parts[0]]; var key = parts.slice(1).join("."); if (obj && obj[key] && Array.isArray(obj[key])) return obj[key]; return []; }
                         var valoresCombo = (restr.valoresPermitidos && Array.isArray(restr.valoresPermitidos)) ? restr.valoresPermitidos : getValoresCombo(col.comboListadoValores);
@@ -95,6 +107,82 @@
                     }
                     fieldsContainer.appendChild(wrap);
                 });
+                var datosProductoUnitario = null;
+                try { var raw = sessionStorage.getItem("productoUnitarioBaseParaElaboracion"); if (raw) { datosProductoUnitario = JSON.parse(raw); } } catch (e) {}
+                if (datosProductoUnitario && datosProductoUnitario.id != null) {
+                    var prevHeaders = datosProductoUnitario.headers || [];
+                    var prevRow = datosProductoUnitario.row || [];
+                    var idProducto = String(datosProductoUnitario.id);
+                    formEl.querySelectorAll("[data-nombre]").forEach(function (el) {
+                        var nom = el.getAttribute("data-nombre");
+                        if (nom === "IDReceta-Base") { if (el.value !== undefined) el.value = idProducto; else if (el.textContent !== undefined) el.textContent = idProducto; }
+                        else if (nom === "Costo-Produccion-ProductoBase" && prevHeaders.length && prevRow.length) {
+                            var idxPrev = prevHeaders.indexOf("Costo-Produccion-ProductoBase");
+                            if (idxPrev >= 0 && prevRow[idxPrev] != null && String(prevRow[idxPrev]).trim() !== "") { if (el.value !== undefined) el.value = String(prevRow[idxPrev]).trim(); else if (el.textContent !== undefined) el.textContent = String(prevRow[idxPrev]).trim(); }
+                        }
+                    });
+                }
+                var recetaSeleccionada = null;
+                try { var rawRb = sessionStorage.getItem("recetaBaseSeleccionadaParaElaboracion"); if (rawRb) { recetaSeleccionada = JSON.parse(rawRb); sessionStorage.removeItem("recetaBaseSeleccionadaParaElaboracion"); } } catch (e) {}
+                if (recetaSeleccionada && recetaSeleccionada.id != null) {
+                    formEl.querySelectorAll("[data-nombre]").forEach(function (el) {
+                        var nom = el.getAttribute("data-nombre");
+                        if (nom === "IDReceta-Base" && (el.value !== undefined || el.textContent !== undefined)) { if (el.value !== undefined) el.value = String(recetaSeleccionada.id); else el.textContent = String(recetaSeleccionada.id); }
+                        else if (nom === "Descripcion-Masa-Producto" && recetaSeleccionada.DescripcionMasaProducto != null) { if (el.value !== undefined) el.value = String(recetaSeleccionada.DescripcionMasaProducto); else if (el.textContent !== undefined) el.textContent = String(recetaSeleccionada.DescripcionMasaProducto); }
+                        else if (nom === "Costo-Produccion-ProductoBase" && recetaSeleccionada.CostoProduccionProductoBase != null) { if (el.value !== undefined) el.value = String(recetaSeleccionada.CostoProduccionProductoBase); else if (el.textContent !== undefined) el.textContent = String(recetaSeleccionada.CostoProduccionProductoBase); }
+                    });
+                }
+                if (cabeceraEl && cabeceraContent) {
+                    cabeceraContent.innerHTML = "";
+                    var ph = (datosProductoUnitario && datosProductoUnitario.headers) ? datosProductoUnitario.headers : [];
+                    var pr = (datosProductoUnitario && datosProductoUnitario.row) ? datosProductoUnitario.row : [];
+                    function valFromRow(headerName) {
+                        var i = ph.indexOf(headerName);
+                        return (i >= 0 && pr[i] != null && String(pr[i]).trim() !== "") ? String(pr[i]).trim() : "—";
+                    }
+                    var itemsCabecera = [
+                        { label: "ID Costo Producto Unitario", value: (datosProductoUnitario && datosProductoUnitario.id != null) ? String(datosProductoUnitario.id) : valFromRow("IDCosto-ProductoUnitario") },
+                        { label: "Comercio-Sucursal", value: valFromRow("Comercio-Sucursal") },
+                        { label: "Categoría", value: valFromRow("Categoria") },
+                        { label: "Nombre-Producto", value: valFromRow("Nombre-Producto") }
+                    ];
+                    itemsCabecera.forEach(function (item) {
+                        var row = document.createElement("div");
+                        row.className = "costos-edit-cabecera-row";
+                        var lbl = document.createElement("span");
+                        lbl.className = "costos-edit-cabecera-label";
+                        lbl.textContent = (item.label || "") + ":";
+                        var val = document.createElement("span");
+                        val.className = "costos-edit-cabecera-value";
+                        val.textContent = item.value != null ? item.value : "—";
+                        row.appendChild(lbl);
+                        row.appendChild(document.createTextNode(" "));
+                        row.appendChild(val);
+                        cabeceraContent.appendChild(row);
+                    });
+                    cabeceraEl.style.display = "block";
+                }
+                if (sheetConfig.formulas && sheetConfig.formulas.Monto) {
+                    var inputCant = formEl.querySelector("[data-nombre=\"Cantidad\"]");
+                    var inputCosto = formEl.querySelector("[data-nombre=\"Costo-Produccion-ProductoBase\"]");
+                    var inputMonto = formEl.querySelector("[data-nombre=\"Monto\"]");
+                    if (inputCant && inputCosto && inputMonto) {
+                        function updateMonto() {
+                            var rawC = (inputCant.value != null ? String(inputCant.value) : "").trim();
+                            var rawP = (inputCosto.value != null ? String(inputCosto.value) : (inputCosto.textContent != null ? String(inputCosto.textContent) : "")).trim();
+                            function toNum(s) { return parseFloat(String(s).replace(",", ".").replace(/\s/g, "")) || 0; }
+                            var c = toNum(rawC);
+                            var p = toNum(rawP);
+                            var decimales = (sheetConfig.formulas.Monto.decimales != null) ? sheetConfig.formulas.Monto.decimales : 2;
+                            inputMonto.value = (c * p).toFixed(decimales);
+                        }
+                        inputCant.addEventListener("input", updateMonto);
+                        inputCant.addEventListener("change", updateMonto);
+                        inputCosto.addEventListener("input", updateMonto);
+                        inputCosto.addEventListener("change", updateMonto);
+                        updateMonto();
+                    }
+                }
                 formEl.addEventListener("submit", function (e) {
                     e.preventDefault(); hideEditAlert();
                     var newRow = headers.map(function () { return ""; });
@@ -119,8 +207,43 @@
                     }).then(function (json) {
                         if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = btnText; }
                         hideEditAlert();
-                        if (json && json.success) window.location.replace("elaboracion-productos-base.html");
-                        else showEditAlert("Error al guardar: " + ((json && json.error) ? json.error : "Respuesta inválida"), "error");
+                        if (!json || !json.success) {
+                            showEditAlert("Error al guardar: " + ((json && json.error) ? json.error : "Respuesta inválida"), "error");
+                            return Promise.reject(new Error(json && json.error ? json.error : "Error al guardar"));
+                        }
+                        var idElabIdx = headers.indexOf("IDElaboracion-ProductoBase");
+                        var costoIdx = headers.indexOf("Costo-Produccion-ProductoBase");
+                        var datosProducto = null;
+                        try { var raw = sessionStorage.getItem("productoUnitarioBaseParaElaboracion"); if (raw) datosProducto = JSON.parse(raw); } catch (e) {}
+                        if (datosProducto && datosProducto.id != null && idElabIdx >= 0 && costoIdx >= 0) {
+                            var bodyUpdate = {
+                                action: "update",
+                                sheet: "Tabla-Costos-ProductoUnitario",
+                                id: String(datosProducto.id),
+                                "IDElaboracion-ProductoBase": (newRow[idElabIdx] != null ? String(newRow[idElabIdx]) : "").trim(),
+                                "Costo-Produccion-ProductoBase": (newRow[costoIdx] != null ? String(newRow[costoIdx]) : "").trim()
+                            };
+                            var formBodyUpdate = new URLSearchParams();
+                            for (var k in bodyUpdate) { if (bodyUpdate.hasOwnProperty(k)) formBodyUpdate.append(k, bodyUpdate[k] != null ? bodyUpdate[k] : ""); }
+                            return fetch(appsScriptUrl, { method: "POST", body: formBodyUpdate }).then(function (res) { return res.text(); }).then(function (text) {
+                                var j; try { j = JSON.parse(text); } catch (err) { return { success: false, error: text }; } return j;
+                            }).then(function (updateJson) {
+                                if (!updateJson || !updateJson.success) {
+                                    showEditAlert("Elaboración guardada. No se pudo vincular al producto unitario: " + (updateJson && updateJson.error ? updateJson.error : "Error"), "error");
+                                }
+                                try {
+                                    sessionStorage.setItem("elaboracionProductoBaseRecienCreado", JSON.stringify({ headers: headers, row: newRow }));
+                                    sessionStorage.removeItem("productoUnitarioBaseParaElaboracion");
+                                } catch (e) {}
+                                window.location.replace("elaboracion-productos-base.html");
+                            });
+                        }
+                        try {
+                            sessionStorage.setItem("elaboracionProductoBaseRecienCreado", JSON.stringify({ headers: headers, row: newRow }));
+                            sessionStorage.removeItem("productoUnitarioBaseParaElaboracion");
+                        } catch (e) {}
+                        window.location.replace("elaboracion-productos-base.html");
+                        return Promise.resolve();
                     }).catch(function (err) {
                         if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = btnText; }
                         showEditAlert("Error: " + (err.message || ""), "error");

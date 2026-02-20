@@ -823,6 +823,35 @@ body.costos-page {
     padding-top: 16px;
     border-top: 1px solid var(--border);
 }
+.costos-edit-cabecera {
+    margin-bottom: 20px;
+    padding: 16px 18px;
+    background: rgba(13, 148, 136, 0.05);
+    border: 1px solid rgba(13, 148, 136, 0.22);
+    border-radius: 12px;
+}
+.costos-edit-cabecera .costos-edit-seccion-titulo {
+    border-bottom: 2px solid rgba(13, 148, 136, 0.35);
+    color: var(--logo-dark);
+    margin-bottom: 12px;
+}
+.costos-edit-cabecera-content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 24px;
+}
+.costos-edit-cabecera-row {
+    font-size: 0.9rem;
+}
+.costos-edit-cabecera-label {
+    font-weight: 600;
+    color: var(--muted);
+    margin-right: 4px;
+}
+.costos-edit-cabecera-value {
+    color: var(--logo-dark);
+    font-weight: 500;
+}
 .costos-ver-detalle {
     margin-bottom: 20px;
 }
@@ -1005,6 +1034,24 @@ a.costos-btn-disabled {
 }
 .costos-edit-btn-cancel:hover {
     text-decoration: underline;
+}
+.costos-edit-btn-seleccionar-masa {
+    display: block;
+    margin-top: 10px;
+    padding: 10px 18px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 10px;
+    background: var(--logo-teal);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+}
+.costos-edit-btn-seleccionar-masa:hover {
+    background: var(--logo-teal-dark);
+    color: #fff;
+    opacity: 0.95;
 }
 .costos-edit-actions--ver-costo {
     margin-bottom: 1rem;
@@ -1463,6 +1510,19 @@ a.costos-btn-disabled {
     margin-bottom: 12px;
     border: 1px solid #ffedd5;
     box-shadow: 0 4px 12px rgba(234, 88, 12, 0.06);
+}
+.costos-card-header {
+    margin-bottom: 6px;
+}
+.costos-card-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--logo-dark);
+}
+.costos-card-meta {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 4px 0;
 }
 .costos-card-body {
     margin-top: 8px;
