@@ -28,7 +28,7 @@ window.ELABORACION_PRODUCTOS_BASE_SHEET_BASE = {
         cardinalidad: "N:1"
       }
     ],
-    prefijoId: "PROD-BASE",
+    prefijoId: "ID-UNICO",
     patronId: 1,
     indices: [
       { columnas: ["IDElaboracion-ProductoBase"], unico: true },

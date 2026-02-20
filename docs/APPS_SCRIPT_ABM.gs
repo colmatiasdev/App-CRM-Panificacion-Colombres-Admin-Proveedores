@@ -202,8 +202,8 @@ var CONFIG = {
   },
 
   /** Hoja Tabla Costos Producto Unitario (Armador Receta) – ?sheet=Tabla-Costos-ProductoUnitario
-   * Headers deben coincidir con la primera fila de la hoja. PK = IDCosto-ProductoUnitario.
-   * Costo-Produccion = resultado de Cantidad × Costo base (desde elaboración). Sincronizar con producto-unitario-base-sheets-base.js */
+   * Headers deben coincidir con la primera fila de la hoja. PK = IDCosto-ProductoUnitario (vinculación por este ID).
+   * ID único: prefijo + alfanumérico (15) + "-" + 4 dígitos. Sincronizar con producto-unitario-base-sheets-base.js */
   'tabla-costos-productounitario': {
     sheetName: 'Tabla-Costos-ProductoUnitario',
     gid: 0,
@@ -226,7 +226,8 @@ var CONFIG = {
       'Actualizado'
     ],
     idColumn: 'IDCosto-ProductoUnitario',
-    idPrefix: 'PROD-UNITARIO-',
+    idPrefix: 'PROD-UNITARIO',
+    idPatron: 2,
     filterColumns: ['IDCosto-ProductoUnitario', 'Comercio-Sucursal', 'Categoria', 'Nombre-Producto', 'Habilitado'],
     requiredOnCreate: ['Nombre-Producto'],
     dateUpdatedColumn: 'Fecha-Registro-Actualizado-Al'
@@ -398,6 +399,24 @@ function generateId(prefix) {
     r += alfanum[Math.floor(Math.random() * alfanum.length)];
   }
   return (prefix || 'ID-') + base + r;
+}
+
+/**
+ * Genera ID con patrón 2: prefijo + "-" + alfanumérico (15) + "-" + 4 dígitos.
+ * Ejemplo: PROD-UNITARIO-s46g4dh4s5aazs-7522
+ */
+function generateIdPatron2(prefix) {
+  var alfanum = '0123456789abcdefghijklmnopqrstuvwxyz';
+  var pref = (prefix || 'ID').toString().replace(/-+$/, '');
+  var parteAlf = '';
+  for (var i = 0; i < 15; i++) {
+    parteAlf += alfanum[Math.floor(Math.random() * alfanum.length)];
+  }
+  var parteDig = '';
+  for (var j = 0; j < 4; j++) {
+    parteDig += Math.floor(Math.random() * 10);
+  }
+  return pref + '-' + parteAlf + '-' + parteDig;
 }
 
 function filterRows(rows, headers, filters) {
@@ -681,7 +700,7 @@ function handleRequest(params) {
         newObj[h] = params[h] != null ? params[h] : (params[idx] != null ? params[idx] : '');
       });
       if (!(configSheet.idColumn in newObj) || !String(newObj[configSheet.idColumn]).trim()) {
-        newObj[configSheet.idColumn] = generateId(configSheet.idPrefix);
+        newObj[configSheet.idColumn] = (configSheet.idPatron === 2) ? generateIdPatron2(configSheet.idPrefix) : generateId(configSheet.idPrefix);
       }
       if (configSheet.requiredOnCreate && configSheet.requiredOnCreate.length > 0) {
         for (var r = 0; r < configSheet.requiredOnCreate.length; r++) {
@@ -791,7 +810,7 @@ function handleRequest(params) {
       for (var f = 0; f < rows.length; f++) {
         var cellVal = rows[f][idColIdxFill];
         if (cellVal == null || String(cellVal).trim() === '') {
-          var newId = generateId(configSheet.idPrefix);
+          var newId = (configSheet.idPatron === 2) ? generateIdPatron2(configSheet.idPrefix) : generateId(configSheet.idPrefix);
           sheet.getRange(f + 2, idColIdxFill + 1).setValue(newId);
           updated++;
         }

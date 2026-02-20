@@ -286,6 +286,7 @@
                             elaboracionSection.style.display = "block";
                             var idElab = getFormValueByNombreProductoUnitario(formEl, "IDElaboracion-ProductoBase");
                             idElab = (idElab != null ? String(idElab).trim() : "");
+                            if (idElab === "—" || idElab === "–" || idElab === "-") idElab = "";
                             if (!idElab) {
                                 if (elaboracionSinId) elaboracionSinId.style.display = "block";
                                 if (elaboracionLoading) elaboracionLoading.style.display = "none";
@@ -296,13 +297,30 @@
                             if (elaboracionLoading) elaboracionLoading.style.display = "block";
                             if (elaboracionTableWrap) elaboracionTableWrap.style.display = "none";
                             var sheetElab = "Tabla-Elaboracion-ProductosBase";
-                            fetch(appsScriptUrl + "?action=get&sheet=" + encodeURIComponent(sheetElab) + "&id=" + encodeURIComponent(idElab), { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (resp) {
+                            var bodyGet = new URLSearchParams();
+                            bodyGet.append("action", "get");
+                            bodyGet.append("sheet", sheetElab);
+                            bodyGet.append("id", idElab);
+                            fetch(appsScriptUrl, { method: "POST", body: bodyGet, cache: "no-store" }).then(function (r) { return r.text(); }).then(function (text) {
+                                var resp;
+                                try { resp = JSON.parse(text); } catch (e) { resp = null; }
                                 if (elaboracionLoading) elaboracionLoading.style.display = "none";
-                                if (!resp || !resp.success || !resp.data) {
+                                var data = null;
+                                if (resp && resp.success && resp.data != null) {
+                                    if (typeof resp.data === "object" && !Array.isArray(resp.data)) data = resp.data;
+                                    else if (Array.isArray(resp.data) && resp.data.length > 0) data = resp.data[0];
+                                    else if (resp.data && typeof resp.data === "object" && resp.data.rows && resp.data.rows.length > 0) data = resp.data.rows[0];
+                                }
+                                if (!data) {
                                     if (elaboracionSinId) { elaboracionSinId.textContent = "No se encontró la elaboración vinculada."; elaboracionSinId.style.display = "block"; }
                                     return;
                                 }
-                                var data = resp.data;
+                                function getDataVal(obj, key) {
+                                    if (obj[key] != null && obj[key] !== "") return obj[key];
+                                    var k2 = key.replace(/-/g, "");
+                                    for (var p in obj) { if (Object.prototype.hasOwnProperty.call(obj, p) && String(p).replace(/-/g, "") === k2) return obj[p]; }
+                                    return null;
+                                }
                                 if (elaboracionThead) {
                                     elaboracionThead.innerHTML = "";
                                     var tr = document.createElement("tr");
@@ -314,7 +332,8 @@
                                     var tr = document.createElement("tr");
                                     ELABORACION_HEADERS.forEach(function (h) {
                                         var td = document.createElement("td");
-                                        var val = (data[h] != null && data[h] !== "") ? String(data[h]) : "—";
+                                        var rawVal = getDataVal(data, h);
+                                        var val = (rawVal != null && rawVal !== "") ? String(rawVal) : "—";
                                         if ((h === "Costo-Produccion-ProductoBase" || h === "Monto") && val !== "—" && typeof window.formatNumeroVisual === "function") {
                                             var num = parseFloat(String(val).replace(",", "."));
                                             if (!isNaN(num)) val = window.formatNumeroVisual(num, "moneda", 2);

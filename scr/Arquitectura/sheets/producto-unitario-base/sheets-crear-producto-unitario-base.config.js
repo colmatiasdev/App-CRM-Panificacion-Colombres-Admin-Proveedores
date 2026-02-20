@@ -176,6 +176,8 @@
       columnaOrden: hoja.columnaOrden,
       prefijoId: hoja.prefijoId,
       patronId: hoja.patronId,
+      longitudAlfanum: hoja.longitudAlfanum,
+      digitosSufijo: hoja.digitosSufijo,
       indices: hoja.indices,
       columnas: columnas,
       combos: (base.hoja && Array.isArray(base.hoja.combos)) ? base.hoja.combos : []

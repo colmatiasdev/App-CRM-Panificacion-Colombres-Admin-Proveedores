@@ -34,7 +34,7 @@
                 <div id="edit-fields"></div>
                 <div class="costos-edit-actions">
                     <a href="elaboracion-productos-base.html" class="costos-edit-btn-cancel">Volver al listado</a>
-                    <button type="submit" class="costos-edit-btn-save"><i class="fa-solid fa-plus" aria-hidden="true"></i> Crear</button>
+                    <button type="submit" class="costos-edit-btn-save" disabled aria-busy="true"><i class="fa-solid fa-plus" aria-hidden="true"></i> Crear</button>
                 </div>
             </form>
         </div>
@@ -112,11 +112,9 @@
                 if (datosProductoUnitario && datosProductoUnitario.id != null) {
                     var prevHeaders = datosProductoUnitario.headers || [];
                     var prevRow = datosProductoUnitario.row || [];
-                    var idProducto = String(datosProductoUnitario.id);
                     formEl.querySelectorAll("[data-nombre]").forEach(function (el) {
                         var nom = el.getAttribute("data-nombre");
-                        if (nom === "IDReceta-Base") { if (el.value !== undefined) el.value = idProducto; else if (el.textContent !== undefined) el.textContent = idProducto; }
-                        else if (nom === "Costo-Produccion-ProductoBase" && prevHeaders.length && prevRow.length) {
+                        if (nom === "Costo-Produccion-ProductoBase" && prevHeaders.length && prevRow.length) {
                             var idxPrev = prevHeaders.indexOf("Costo-Produccion"); if (idxPrev < 0) idxPrev = prevHeaders.indexOf("Costo-Produccion-ProductoBase");
                             if (idxPrev >= 0 && prevRow[idxPrev] != null && String(prevRow[idxPrev]).trim() !== "") { if (el.value !== undefined) el.value = String(prevRow[idxPrev]).trim(); else if (el.textContent !== undefined) el.textContent = String(prevRow[idxPrev]).trim(); }
                         }
@@ -183,6 +181,8 @@
                         updateMonto();
                     }
                 }
+                var saveBtnInit = formEl.querySelector(".costos-edit-btn-save");
+                if (saveBtnInit) { saveBtnInit.disabled = false; saveBtnInit.setAttribute("aria-busy", "false"); }
                 formEl.addEventListener("submit", function (e) {
                     e.preventDefault(); hideEditAlert();
                     var newRow = headers.map(function () { return ""; });
@@ -219,6 +219,8 @@
                         }
                         var idElabIdx = headers.indexOf("IDElaboracion-ProductoBase");
                         var montoIdx = headers.indexOf("Monto");
+                        var idElaboracionFinal = (newRow[idElabIdx] != null ? String(newRow[idElabIdx]) : "").trim();
+                        if (json.data && json.data["IDElaboracion-ProductoBase"] != null && String(json.data["IDElaboracion-ProductoBase"]).trim() !== "") idElaboracionFinal = String(json.data["IDElaboracion-ProductoBase"]).trim();
                         var datosProducto = null;
                         try { var raw = sessionStorage.getItem("productoUnitarioBaseParaElaboracion"); if (raw) datosProducto = JSON.parse(raw); } catch (e) {}
                         if (datosProducto && datosProducto.id != null && idElabIdx >= 0 && montoIdx >= 0) {
@@ -227,7 +229,7 @@
                                 action: "update",
                                 sheet: "Tabla-Costos-ProductoUnitario",
                                 id: idProductoUnitario,
-                                "IDElaboracion-ProductoBase": (newRow[idElabIdx] != null ? String(newRow[idElabIdx]) : "").trim(),
+                                "IDElaboracion-ProductoBase": idElaboracionFinal,
                                 "Costo-Produccion": (newRow[montoIdx] != null ? String(newRow[montoIdx]) : "").trim()
                             };
                             var formBodyUpdate = new URLSearchParams();
@@ -239,13 +241,15 @@
                                     showEditAlert("Elaboración guardada. No se pudo vincular al producto unitario: " + (updateJson && updateJson.error ? updateJson.error : "Error"), "error");
                                 }
                                 try {
-                                    sessionStorage.setItem("elaboracionProductoBaseRecienCreado", JSON.stringify({ headers: headers, row: newRow }));
+                                    var rowRecienCreado = newRow.slice ? newRow.slice() : newRow.map(function (x) { return x; });
+                                    if (idElabIdx >= 0 && idElaboracionFinal) rowRecienCreado[idElabIdx] = idElaboracionFinal;
+                                    sessionStorage.setItem("elaboracionProductoBaseRecienCreado", JSON.stringify({ headers: headers, row: rowRecienCreado }));
                                     var headersProd = (datosProducto.headers || []).slice();
                                     var rowForEdit = (datosProducto.row || []).slice();
                                     var idxElab = headersProd.indexOf("IDElaboracion-ProductoBase");
                                     var idxCosto = headersProd.indexOf("Costo-Produccion");
                                     if (idxCosto < 0) idxCosto = headersProd.indexOf("Costo-Produccion-ProductoBase");
-                                    if (idxElab >= 0) rowForEdit[idxElab] = (newRow[idElabIdx] != null ? String(newRow[idElabIdx]) : "").trim();
+                                    if (idxElab >= 0) rowForEdit[idxElab] = idElaboracionFinal;
                                     if (idxCosto >= 0) rowForEdit[idxCosto] = (newRow[montoIdx] != null ? String(newRow[montoIdx]) : "").trim();
                                     sessionStorage.setItem("costosEditRecordProductoUnitarioBase", JSON.stringify({ id: datosProducto.id, headers: headersProd, row: rowForEdit }));
                                     sessionStorage.removeItem("productoUnitarioBaseParaElaboracion");

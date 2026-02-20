@@ -83,10 +83,10 @@
       modosAgrupacion: Array.isArray(listado.modosAgrupacion) ? listado.modosAgrupacion : [],
       columnaFiltroValores: (listado.columnaFiltroValores && String(listado.columnaFiltroValores).trim()) || null,
       columnaOrden: columnaOrden,
-      prefijoId: hoja.prefijoId != null ? hoja.prefijoId : null,
-      patronId: hoja.patronId != null ? hoja.patronId : 1,
-      longitudAlfanum: hoja.longitudAlfanum != null ? hoja.longitudAlfanum : 15,
-      digitosSufijo: hoja.digitosSufijo != null ? hoja.digitosSufijo : 4,
+      prefijoId: hoja.prefijoId != null ? hoja.prefijoId : (baseHoja && baseHoja.prefijoId),
+      patronId: hoja.patronId != null ? hoja.patronId : (baseHoja && baseHoja.patronId != null ? baseHoja.patronId : 1),
+      longitudAlfanum: hoja.longitudAlfanum != null ? hoja.longitudAlfanum : (baseHoja && baseHoja.longitudAlfanum != null ? baseHoja.longitudAlfanum : 15),
+      digitosSufijo: hoja.digitosSufijo != null ? hoja.digitosSufijo : (baseHoja && baseHoja.digitosSufijo != null ? baseHoja.digitosSufijo : 4),
       formulas: (hoja.formulas && typeof hoja.formulas === "object") ? hoja.formulas : (baseHoja && baseHoja.formulas ? baseHoja.formulas : {})
     };
     columnas.forEach(function (col, idx) {
