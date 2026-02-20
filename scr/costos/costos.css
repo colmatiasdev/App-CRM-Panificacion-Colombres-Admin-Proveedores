@@ -874,6 +874,9 @@ body.costos-page {
     padding-top: 16px;
     border-top: 1px solid var(--border);
 }
+.costos-edit-actions--final {
+    margin-top: 24px;
+}
 .costos-edit-cabecera {
     margin-bottom: 20px;
     padding: 16px 18px;

@@ -32,10 +32,7 @@
                 </div>
             </form>
             <section id="elaboracion-vinculada-section" class="costos-edit-seccion costos-tabla-elaboracion-vinculada" style="display:none;" aria-label="Contenido de productos elaborados">
-                <div class="costos-edit-seccion-header">
-                    <h2 class="costos-edit-seccion-titulo">Contenido de productos elaborados</h2>
-                    <button type="button" id="elaboracion-vinculada-btn-agregar" class="costos-edit-btn costos-edit-btn-agregar-item" aria-label="Agregar otro item">Agregar otro item</button>
-                </div>
+                <h2 class="costos-edit-seccion-titulo">Contenido de productos elaborados</h2>
                 <p id="elaboracion-vinculada-sin-id" class="costos-placeholder" style="display:none;">No hay elaboración vinculada a este producto.</p>
                 <div id="elaboracion-vinculada-loading" class="costos-placeholder" style="display:none;">Cargando elaboración…</div>
                 <div id="elaboracion-vinculada-table-wrap" style="display:none;">
@@ -46,6 +43,10 @@
                     </table>
                 </div>
             </section>
+            <div class="costos-edit-actions costos-edit-actions--final">
+                <button type="button" class="costos-edit-btn costos-edit-btn-relleno" id="btn-agregar-relleno" aria-label="Agregar Relleno">Agregar Relleno</button>
+                <button type="button" class="costos-edit-btn costos-edit-btn-decoracion" id="btn-agregar-decoracion" aria-label="Agregar Decoración">Agregar Decoración</button>
+            </div>
         </div>
     </main>
     <script src="../armador-receta-nav.js"></script>
@@ -369,88 +370,6 @@
                             applyFormulasProductoUnitario(formEl, sheetConfig);
                             renderElaboracionVinculada();
                         });
-                        var btnAgregarItem = document.getElementById("elaboracion-vinculada-btn-agregar");
-                        if (btnAgregarItem) {
-                            btnAgregarItem.addEventListener("click", function () {
-                                var orden = getFormValueByNombreProductoUnitario(formEl, "Orden");
-                                var comercioSucursal = getFormValueByNombreProductoUnitario(formEl, "Comercio-Sucursal");
-                                var categoria = getFormValueByNombreProductoUnitario(formEl, "Categoria");
-                                var nombreProducto = getFormValueByNombreProductoUnitario(formEl, "Nombre-Producto");
-                                orden = (orden != null ? String(orden).trim() : "");
-                                comercioSucursal = (comercioSucursal != null ? String(comercioSucursal).trim() : "");
-                                categoria = (categoria != null ? String(categoria).trim() : "");
-                                nombreProducto = (nombreProducto != null ? String(nombreProducto).trim() : "");
-                                if (nombreProducto === "—" || nombreProducto === "–" || nombreProducto === "-") nombreProducto = "";
-                                if (!nombreProducto) {
-                                    showEditAlert("Completá Nombre-Producto para agregar un item.", "error");
-                                    return;
-                                }
-                                function getDataVal(obj, key) {
-                                    if (obj[key] != null && obj[key] !== "") return obj[key];
-                                    var k2 = key.replace(/-/g, "");
-                                    for (var p in obj) { if (Object.prototype.hasOwnProperty.call(obj, p) && String(p).replace(/-/g, "") === k2) return obj[p]; }
-                                    return null;
-                                }
-                                var sheetElab = "Tabla-Elaboracion-Productos-Base";
-                                var sheetProducto = "Tabla-Costos-ProductoUnitario";
-                                btnAgregarItem.disabled = true;
-                                var btnText = btnAgregarItem.innerHTML;
-                                btnAgregarItem.innerHTML = "<i class=\"fa-solid fa-spinner fa-spin\" aria-hidden=\"true\"></i> Creando…";
-                                var bodyElab = new URLSearchParams();
-                                bodyElab.append("action", "create");
-                                bodyElab.append("sheet", sheetElab);
-                                bodyElab.append("IDReceta-Base", "PENDIENTE");
-                                bodyElab.append("Cantidad", "1");
-                                bodyElab.append("Descripcion-Masa-Producto", "");
-                                bodyElab.append("Costo-Produccion-ProductoBase", "0");
-                                bodyElab.append("Monto", "0");
-                                fetch(appsScriptUrl, { method: "POST", body: bodyElab, cache: "no-store" }).then(function (r) { return r.text(); }).then(function (text) {
-                                    var jsonElab;
-                                    try { jsonElab = JSON.parse(text); } catch (e) { jsonElab = null; }
-                                    if (!jsonElab || !jsonElab.success || !jsonElab.data) {
-                                        btnAgregarItem.disabled = false;
-                                        btnAgregarItem.innerHTML = btnText;
-                                        showEditAlert("Error al crear elaboración: " + ((jsonElab && jsonElab.error) ? jsonElab.error : "Respuesta inválida"), "error");
-                                        return Promise.reject(new Error(jsonElab && jsonElab.error ? jsonElab.error : "Error"));
-                                    }
-                                    var idElaboracion = getDataVal(jsonElab.data, "IDElaboracion-ProductoBase") || (jsonElab.data["IDElaboracion-ProductoBase"] != null ? String(jsonElab.data["IDElaboracion-ProductoBase"]) : "");
-                                    if (!idElaboracion) {
-                                        btnAgregarItem.disabled = false;
-                                        btnAgregarItem.innerHTML = btnText;
-                                        showEditAlert("Error: no se obtuvo el ID de elaboración.", "error");
-                                        return Promise.reject(new Error("Sin ID elaboración"));
-                                    }
-                                    var bodyProd = new URLSearchParams();
-                                    bodyProd.append("action", "create");
-                                    bodyProd.append("sheet", sheetProducto);
-                                    bodyProd.append("Orden", orden);
-                                    bodyProd.append("Comercio-Sucursal", comercioSucursal);
-                                    bodyProd.append("Categoria", categoria);
-                                    bodyProd.append("Nombre-Producto", nombreProducto);
-                                    bodyProd.append("IDElaboracion-ProductoBase", idElaboracion);
-                                    return fetch(appsScriptUrl, { method: "POST", body: bodyProd, cache: "no-store" }).then(function (r2) { return r2.text(); });
-                                }).then(function (text2) {
-                                    var jsonProd;
-                                    try { jsonProd = JSON.parse(text2); } catch (e) { jsonProd = null; }
-                                    btnAgregarItem.disabled = false;
-                                    btnAgregarItem.innerHTML = btnText;
-                                    if (!jsonProd || !jsonProd.success || !jsonProd.data) {
-                                        showEditAlert("Elaboración creada. Error al crear producto: " + ((jsonProd && jsonProd.error) ? jsonProd.error : "Respuesta inválida"), "error");
-                                        return;
-                                    }
-                                    var dataProd = jsonProd.data;
-                                    var newId = getDataVal(dataProd, "IDCosto-ProductoUnitario") || (dataProd["IDCosto-ProductoUnitario"] != null ? String(dataProd["IDCosto-ProductoUnitario"]) : "");
-                                    var newRow = headers.map(function (h) { var v = getDataVal(dataProd, h); return (v != null && v !== "") ? String(v) : ""; });
-                                    try {
-                                        sessionStorage.setItem(STORAGE_EDIT, JSON.stringify({ id: newId, headers: headers, row: newRow }));
-                                    } catch (e) {}
-                                    window.location.replace("editar-producto-unitario-base.html");
-                                }).catch(function (err) {
-                                    if (btnAgregarItem) { btnAgregarItem.disabled = false; btnAgregarItem.innerHTML = btnText; }
-                                    if (err && err.message && err.message.indexOf("Error") !== 0) showEditAlert("Error: " + (err.message || ""), "error");
-                                });
-                            });
-                        }
                         formEl.querySelectorAll("input[data-nombre], select[data-nombre]").forEach(function (input) {
                             var nombre = input.getAttribute("data-nombre");
                             if (!nombre) return;
