@@ -98,7 +98,7 @@
                     } else if (tipoComp === "text-box" && (tipoDato === "numeric" || col.tipo === "numeric")) {
                         var input = document.createElement("input"); input.type = "number"; input.step = (restr.entero === true) ? "1" : (col.decimales != null ? Math.pow(10, -col.decimales) : "0.01");
                         if (restr.min != null) input.min = restr.min; if (restr.max != null) input.max = restr.max;
-                        if (col.obligatorio === true) input.required = true; if (col.formatoVisual) input.setAttribute("data-formato-visual", col.formatoVisual); if (col.descripcion) input.title = col.descripcion;
+                        if (col.obligatorio === true) input.required = true; if (col.formatoVisual) input.setAttribute("data-formato-visual", col.formatoVisual); if (col.decimales != null) input.setAttribute("data-decimales", String(col.decimales)); if (col.descripcion) input.title = col.descripcion;
                         input.placeholder = col.decimales != null ? "0." + "0".repeat(col.decimales) : "0";
                         input.id = "field-" + idx; input.className = "costos-edit-input"; input.setAttribute("data-header-index", String(idx)); input.setAttribute("data-nombre", nombreCol); wrap.appendChild(input);
                     } else {
@@ -191,7 +191,13 @@
                         if (idx < 0 || idx >= newRow.length) return;
                         var val = el.value != null ? String(el.value).trim() : (el.textContent != null ? String(el.textContent).trim() : "");
                         var formato = el.getAttribute("data-formato-visual");
-                        if (formato && typeof window.parseNumeroVisual === "function") val = window.parseNumeroVisual(val, formato) || val;
+                        var dataDec = el.getAttribute("data-decimales");
+                        var decimales = (dataDec !== null && dataDec !== "") ? parseInt(dataDec, 10) : null;
+                        if (formato && (formato === "moneda" || formato === "numero" || formato === "porcentaje") && typeof window.normalizeNumeroParaEnvio === "function") {
+                            val = window.normalizeNumeroParaEnvio(val, formato, decimales != null ? decimales : 2);
+                        } else if (formato && typeof window.parseNumeroVisual === "function") {
+                            val = window.parseNumeroVisual(val, formato) || val;
+                        }
                         newRow[idx] = val;
                     });
                     if (window.GENERAR_ID_PARA_HOJA && sheetConfig.clavePrimaria && sheetConfig.clavePrimaria[0]) { var idColIdx = headers.indexOf(sheetConfig.clavePrimaria[0]); if (idColIdx >= 0) newRow[idColIdx] = window.GENERAR_ID_PARA_HOJA(sheetConfig); }
@@ -216,10 +222,11 @@
                         var datosProducto = null;
                         try { var raw = sessionStorage.getItem("productoUnitarioBaseParaElaboracion"); if (raw) datosProducto = JSON.parse(raw); } catch (e) {}
                         if (datosProducto && datosProducto.id != null && idElabIdx >= 0 && montoIdx >= 0) {
+                            var idProductoUnitario = String(datosProducto.id);
                             var bodyUpdate = {
                                 action: "update",
                                 sheet: "Tabla-Costos-ProductoUnitario",
-                                id: String(datosProducto.id),
+                                id: idProductoUnitario,
                                 "IDElaboracion-ProductoBase": (newRow[idElabIdx] != null ? String(newRow[idElabIdx]) : "").trim(),
                                 "Costo-Produccion": (newRow[montoIdx] != null ? String(newRow[montoIdx]) : "").trim()
                             };
@@ -233,9 +240,17 @@
                                 }
                                 try {
                                     sessionStorage.setItem("elaboracionProductoBaseRecienCreado", JSON.stringify({ headers: headers, row: newRow }));
+                                    var headersProd = (datosProducto.headers || []).slice();
+                                    var rowForEdit = (datosProducto.row || []).slice();
+                                    var idxElab = headersProd.indexOf("IDElaboracion-ProductoBase");
+                                    var idxCosto = headersProd.indexOf("Costo-Produccion");
+                                    if (idxCosto < 0) idxCosto = headersProd.indexOf("Costo-Produccion-ProductoBase");
+                                    if (idxElab >= 0) rowForEdit[idxElab] = (newRow[idElabIdx] != null ? String(newRow[idElabIdx]) : "").trim();
+                                    if (idxCosto >= 0) rowForEdit[idxCosto] = (newRow[montoIdx] != null ? String(newRow[montoIdx]) : "").trim();
+                                    sessionStorage.setItem("costosEditRecordProductoUnitarioBase", JSON.stringify({ id: datosProducto.id, headers: headersProd, row: rowForEdit }));
                                     sessionStorage.removeItem("productoUnitarioBaseParaElaboracion");
                                 } catch (e) {}
-                                window.location.replace("elaboracion-productos-base.html");
+                                window.location.replace("../Producto-Unitario-Base/editar-producto-unitario-base.html");
                             });
                         }
                         try {
