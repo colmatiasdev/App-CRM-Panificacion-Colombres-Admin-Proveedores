@@ -80,15 +80,7 @@
                         if (col.formatoVisual && typeof window.formatNumeroVisual === "function") { var numVal = parseFloat(String(valorMostrar).replace(",", ".")); if (!isNaN(numVal)) valorMostrar = window.formatNumeroVisual(numVal, col.formatoVisual, col.decimales != null ? col.decimales : 2); }
                         var ro = document.createElement("span"); ro.id = "field-" + idx; ro.className = "costos-edit-input costos-edit-readonly"; ro.setAttribute("data-header-index", String(idx)); ro.setAttribute("data-nombre", nombreCol);
                         if (col.formatoVisual) ro.setAttribute("data-formato-visual", col.formatoVisual); if (col.descripcion) ro.title = col.descripcion; ro.setAttribute("aria-readonly", "true"); ro.textContent = valorMostrar; wrap.appendChild(ro);
-                        if (nombreCol === "IDElaboracion-ProductoBase") {
-                            var btnMasa = document.createElement("button"); btnMasa.type = "button"; btnMasa.className = "costos-edit-btn costos-edit-btn-seleccionar-masa"; btnMasa.textContent = "SELECCIONAR Masa de la Receta";
-                            btnMasa.addEventListener("click", function () {
-                                try { sessionStorage.setItem("elaboracionProductosBaseCrearReturnUrl", window.location.href); } catch (e) {}
-                                window.location.href = "../Receta-Base/seleccionar-lista-receta-base.html";
-                            });
-                            wrap.appendChild(btnMasa);
-                        }
-                    } else if (tipoComp === "combo-basico") {
+                        } else if (tipoComp === "combo-basico") {
                         function getValoresCombo(ref) { if (typeof ref !== "string") return []; var parts = ref.trim().split("."); if (parts.length < 2) return []; var obj = window[parts[0]]; var key = parts.slice(1).join("."); if (obj && obj[key] && Array.isArray(obj[key])) return obj[key]; return []; }
                         var valoresCombo = (restr.valoresPermitidos && Array.isArray(restr.valoresPermitidos)) ? restr.valoresPermitidos : getValoresCombo(col.comboListadoValores);
                         var select = document.createElement("select"); select.id = "field-" + idx; select.className = "costos-edit-input"; select.setAttribute("data-header-index", String(idx)); select.setAttribute("data-nombre", nombreCol);
@@ -104,6 +96,14 @@
                     } else {
                         var input = document.createElement("input"); input.type = "text"; input.id = "field-" + idx; input.className = "costos-edit-input"; input.setAttribute("data-header-index", String(idx)); input.setAttribute("data-nombre", nombreCol);
                         if (restr.maxLongitud) input.maxLength = restr.maxLongitud; if (col.obligatorio === true) input.required = true; if (col.descripcion) input.title = col.descripcion; wrap.appendChild(input);
+                        if (nombreCol === "IDReceta-Base") {
+                            var btnMasa = document.createElement("button"); btnMasa.type = "button"; btnMasa.className = "costos-edit-btn costos-edit-btn-seleccionar-masa"; btnMasa.textContent = "SELECCIONAR Masa de la Receta";
+                            btnMasa.addEventListener("click", function () {
+                                try { sessionStorage.setItem("elaboracionProductosBaseCrearReturnUrl", window.location.href); } catch (e) {}
+                                window.location.href = "../Receta-Base/seleccionar-lista-receta-base.html";
+                            });
+                            wrap.appendChild(btnMasa);
+                        }
                     }
                     fieldsContainer.appendChild(wrap);
                 });
@@ -112,9 +112,12 @@
                 if (datosProductoUnitario && datosProductoUnitario.id != null) {
                     var prevHeaders = datosProductoUnitario.headers || [];
                     var prevRow = datosProductoUnitario.row || [];
+                    var idProducto = String(datosProductoUnitario.id);
                     formEl.querySelectorAll("[data-nombre]").forEach(function (el) {
                         var nom = el.getAttribute("data-nombre");
-                        if (nom === "Costo-Produccion-ProductoBase" && prevHeaders.length && prevRow.length) {
+                        if (nom === "IDElaboracion-ProductoBase") {
+                            if (el.value !== undefined) el.value = idProducto; else if (el.textContent !== undefined) el.textContent = idProducto;
+                        } else if (nom === "Costo-Produccion-ProductoBase" && prevHeaders.length && prevRow.length) {
                             var idxPrev = prevHeaders.indexOf("Costo-Produccion"); if (idxPrev < 0) idxPrev = prevHeaders.indexOf("Costo-Produccion-ProductoBase");
                             if (idxPrev >= 0 && prevRow[idxPrev] != null && String(prevRow[idxPrev]).trim() !== "") { if (el.value !== undefined) el.value = String(prevRow[idxPrev]).trim(); else if (el.textContent !== undefined) el.textContent = String(prevRow[idxPrev]).trim(); }
                         }
@@ -217,13 +220,13 @@
                             showEditAlert("Error al guardar: " + ((json && json.error) ? json.error : "Respuesta inválida"), "error");
                             return Promise.reject(new Error(json && json.error ? json.error : "Error al guardar"));
                         }
-                        var idElabIdx = headers.indexOf("IDElaboracion-ProductoBase");
+                        var idUnicoIdx = headers.indexOf("ID-UNICO");
                         var montoIdx = headers.indexOf("Monto");
-                        var idElaboracionFinal = (newRow[idElabIdx] != null ? String(newRow[idElabIdx]) : "").trim();
-                        if (json.data && json.data["IDElaboracion-ProductoBase"] != null && String(json.data["IDElaboracion-ProductoBase"]).trim() !== "") idElaboracionFinal = String(json.data["IDElaboracion-ProductoBase"]).trim();
+                        var idElaboracionFinal = (idUnicoIdx >= 0 && newRow[idUnicoIdx] != null ? String(newRow[idUnicoIdx]) : "").trim();
+                        if (json.data && json.data["ID-UNICO"] != null && String(json.data["ID-UNICO"]).trim() !== "") idElaboracionFinal = String(json.data["ID-UNICO"]).trim();
                         var datosProducto = null;
                         try { var raw = sessionStorage.getItem("productoUnitarioBaseParaElaboracion"); if (raw) datosProducto = JSON.parse(raw); } catch (e) {}
-                        if (datosProducto && datosProducto.id != null && idElabIdx >= 0 && montoIdx >= 0) {
+                        if (datosProducto && datosProducto.id != null && idUnicoIdx >= 0 && montoIdx >= 0) {
                             var idProductoUnitario = String(datosProducto.id);
                             var bodyUpdate = {
                                 action: "update",
@@ -242,7 +245,7 @@
                                 }
                                 try {
                                     var rowRecienCreado = newRow.slice ? newRow.slice() : newRow.map(function (x) { return x; });
-                                    if (idElabIdx >= 0 && idElaboracionFinal) rowRecienCreado[idElabIdx] = idElaboracionFinal;
+                                    if (idUnicoIdx >= 0 && idElaboracionFinal) rowRecienCreado[idUnicoIdx] = idElaboracionFinal;
                                     sessionStorage.setItem("elaboracionProductoBaseRecienCreado", JSON.stringify({ headers: headers, row: rowRecienCreado }));
                                     var headersProd = (datosProducto.headers || []).slice();
                                     var rowForEdit = (datosProducto.row || []).slice();

@@ -22,13 +22,13 @@
     },
     {
       nombre: "IDElaboracion-ProductoBase",
-      alias: "ID Elaboración",
+      alias: "ID Producto Unitario",
       tipoDato: "text",
       tipoComponente: "label",
       visible: true,
-      obligatorio: true,
-      descripcion: "ID para vinculación (mismo valor que ID Único).",
-      restricciones: {}
+      obligatorio: false,
+      descripcion: "FK a Tabla-Costos-ProductoUnitario (IDCosto-ProductoUnitario). Se completa al crear desde producto unitario.",
+      restricciones: { maxLongitud: 100 }
     },
     {
       nombre: "IDReceta-Base",

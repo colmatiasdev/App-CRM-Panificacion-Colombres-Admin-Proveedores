@@ -234,7 +234,7 @@ var CONFIG = {
   },
 
   /** Hoja Tabla Elaboración Productos Base (Armador Receta) – ?sheet=Tabla-Elaboracion-ProductosBase
-   * Columnas: ID-UNICO, IDElaboracion-ProductoBase (vinculación). PK para API = IDElaboracion-ProductoBase. */
+   * PK = ID-UNICO. FK IDReceta-Base → Tabla-Receta-Base.IDReceta-Base. FK IDElaboracion-ProductoBase → Tabla-Costos-ProductoUnitario.IDCosto-ProductoUnitario. */
   'tabla-elaboracion-productos-base': {
     sheetName: 'Tabla-Elaboracion-ProductosBase',
     gid: 0,
@@ -247,7 +247,7 @@ var CONFIG = {
       'Costo-Produccion-ProductoBase',
       'Monto'
     ],
-    idColumn: 'IDElaboracion-ProductoBase',
+    idColumn: 'ID-UNICO',
     idPrefix: 'ID-UNICO',
     filterColumns: ['ID-UNICO', 'IDElaboracion-ProductoBase', 'IDReceta-Base', 'Cantidad', 'Descripcion-Masa-Producto'],
     requiredOnCreate: ['IDReceta-Base', 'Cantidad']
@@ -702,9 +702,6 @@ function handleRequest(params) {
       });
       if (!(configSheet.idColumn in newObj) || !String(newObj[configSheet.idColumn]).trim()) {
         newObj[configSheet.idColumn] = (configSheet.idPatron === 2) ? generateIdPatron2(configSheet.idPrefix) : generateId(configSheet.idPrefix);
-      }
-      if (sheetKey === 'tabla-elaboracion-productos-base' && configHeaders.indexOf('ID-UNICO') !== -1 && (!newObj['ID-UNICO'] || !String(newObj['ID-UNICO']).trim())) {
-        newObj['ID-UNICO'] = newObj[configSheet.idColumn];
       }
       if (configSheet.requiredOnCreate && configSheet.requiredOnCreate.length > 0) {
         for (var r = 0; r < configSheet.requiredOnCreate.length; r++) {
