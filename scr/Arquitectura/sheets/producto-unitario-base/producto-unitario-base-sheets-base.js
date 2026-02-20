@@ -47,6 +47,16 @@ window.PRODUCTO_UNITARIO_BASE_SHEET_BASE = {
         unico: false
       }
     ],
+    lookups: [
+      {
+        "columnaClaveLocal": "Tiempo-Elaboracion-Minutos",
+        "tablaOrigen": "COSTO-EMPLEADOS",
+        "columnaClaveRemota": "MINUTOS",
+        "columnaOrigen": "Costo-Mano-Obra-Elaboracion",
+        "columnaDestino": "Costo-Mano-Obra-Elaboracion",
+        "decimales": 2
+      }
+    ],
     formulas: {
       "Costo-Elaboracion-Actual [G + H + I + K]": {
         fuentes: [

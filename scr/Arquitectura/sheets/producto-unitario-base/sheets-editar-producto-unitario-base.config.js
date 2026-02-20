@@ -14,8 +14,8 @@
       nombre: "Orden",
       alias: "Orden",
       tipoDato: "numeric",
-      tipoComponente: "text-box",
-      visible: true,
+      tipoComponente: "label",
+      visible: false,
       obligatorio: true,
       descripcion: "Orden en listados.",
       restricciones: { min: 0, entero: true }
@@ -65,7 +65,7 @@
       nombre: "IDElaboracion-ProductoBase",
       alias: "ID Elaboración Base",
       tipoDato: "text",
-      tipoComponente: "text-box",
+      tipoComponente: "label",
       visible: true,
       obligatorio: false,
       restricciones: { maxLongitud: 100 }
@@ -74,7 +74,7 @@
       nombre: "Costo-Produccion",
       alias: "Costo Producción Base",
       tipoDato: "numeric",
-      tipoComponente: "text-box",
+      tipoComponente: "label",
       decimales: 2,
       visible: true,
       obligatorio: false,
@@ -85,7 +85,7 @@
       nombre: "Costo-Relleno-Producto",
       alias: "Costo Relleno",
       tipoDato: "numeric",
-      tipoComponente: "text-box",
+      tipoComponente: "label",
       decimales: 2,
       visible: true,
       obligatorio: false,
@@ -96,7 +96,7 @@
       nombre: "Costo-Decoracion-Producto",
       alias: "Costo Decoración",
       tipoDato: "numeric",
-      tipoComponente: "text-box",
+      tipoComponente: "label",
       decimales: 2,
       visible: true,
       obligatorio: false,
@@ -110,13 +110,13 @@
       tipoComponente: "text-box",
       visible: true,
       obligatorio: false,
-      restricciones: { min: 0, entero: true }
+      restricciones: { min: 0, max: 10000, entero: true }
     },
     {
       nombre: "Costo-Mano-Obra-Elaboracion",
       alias: "Costo Mano Obra",
       tipoDato: "numeric",
-      tipoComponente: "text-box",
+      tipoComponente: "label",
       decimales: 2,
       visible: true,
       obligatorio: false,
@@ -148,8 +148,8 @@
       nombre: "Habilitado",
       alias: "Habilitado",
       tipoDato: "text",
-      tipoComponente: "combo-basico",
-      visible: true,
+      tipoComponente: "label",
+      visible: false,
       obligatorio: true,
       restricciones: { valoresPermitidos: ["Sí", "No", ""] }
     },
@@ -184,7 +184,10 @@
       patronId: hoja.patronId,
       indices: hoja.indices,
       columnas: columnas,
-      combos: (base.hoja && Array.isArray(base.hoja.combos)) ? base.hoja.combos : []
+      combos: (base.hoja && Array.isArray(base.hoja.combos)) ? base.hoja.combos : [],
+      lookups: Array.isArray(hoja.lookups) ? hoja.lookups : [],
+      formulas: (hoja.formulas && typeof hoja.formulas === "object") ? hoja.formulas : {},
+      valorAnterior: Array.isArray(hoja.valorAnterior) ? hoja.valorAnterior : []
     }]
   };
 })();

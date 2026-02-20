@@ -88,7 +88,10 @@
       patronId: hoja.patronId != null ? hoja.patronId : 1,
       longitudAlfanum: hoja.longitudAlfanum != null ? hoja.longitudAlfanum : 15,
       digitosSufijo: hoja.digitosSufijo != null ? hoja.digitosSufijo : 4,
-      combos: Array.isArray(hoja.combos) ? hoja.combos : (baseHoja && Array.isArray(baseHoja.combos) ? baseHoja.combos : [])
+      combos: Array.isArray(hoja.combos) ? hoja.combos : (baseHoja && Array.isArray(baseHoja.combos) ? baseHoja.combos : []),
+      lookups: Array.isArray(hoja.lookups) ? hoja.lookups : [],
+      formulas: (hoja.formulas && typeof hoja.formulas === "object") ? hoja.formulas : {},
+      valorAnterior: Array.isArray(hoja.valorAnterior) ? hoja.valorAnterior : []
     };
     columnas.forEach(function (col, idx) {
       var nombre = String((col.nombre || "").trim());
