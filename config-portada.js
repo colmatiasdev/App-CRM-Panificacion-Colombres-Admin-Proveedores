@@ -6,5 +6,11 @@
  * - minimal: tercera opción de diseño (reservado para futuras variantes)
  */
 window.PORTADA_CONFIG = {
-  headerVariant: "gradient"
+  headerVariant: "gradient",
+  /** URL del módulo de Pedidos */
+  pedidosUrl: "https://colmatiasdev.github.io/App-Panificacion-Colombres-Pedidos/",
+  pedidosLabel: "PEDIDOS",
+  /** URL del control de ventas (Matías) */
+  ventasMatiasUrl: "https://colmatiasdev.github.io/App-EntradaSalida-Silvina-Ventas/",
+  ventasMatiasLabel: "CONTROL VENTAS DE MATIAS"
 };
