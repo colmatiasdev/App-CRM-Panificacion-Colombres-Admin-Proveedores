@@ -421,8 +421,8 @@ body {
         <p class="portada__line4">El Mejor Precio y Calidad</p>
 
         <div class="portada__btns">
-            <a href="scr/costos/Materia-Prima/materia-prima.html" class="btn btn--warm" target="_self">Materia Prima</a>
-            <a href="scr/costos/Packing/packing.html" class="btn btn--cool" target="_self">Packing</a>
+            <a id="portada-btn-pedidos" href="#" class="btn btn--warm" target="_self">PEDIDOS</a>
+            <a id="portada-btn-ventas-matias" href="#" class="btn btn--cool" target="_self">CONTROL VENTAS DE MATIAS</a>
             <a href="scr/Lista-Precios/lista-precios.html" class="btn btn--outline" target="_self">Lista de Precios</a>
         </div>
     </div>
@@ -437,7 +437,6 @@ body {
     <div class="costos-btns">
         <a href="scr/costos/Packing/packing.html" class="btn btn--warm" target="_self">Packing</a>
         <a href="scr/costos/Materia-Prima/materia-prima.html" class="btn btn--cool" target="_self">Materia Prima</a>
-        <a href="scr/Lista-Precios/lista-precios.html" class="btn btn--outline" target="_self">Lista de Precios</a>
         <a href="scr/Armador-Productos/armador-productos.html" class="btn btn--outline" target="_self">Armador de Productos</a>
         <a href="scr/Armador-Receta/armador-receta.html" class="btn btn--outline" target="_self">Armador de Receta</a>
     </div>
@@ -450,5 +449,21 @@ body {
     <p>© 2026 · Todos los derechos reservados.</p>
 </footer>
 
+<script src="config-portada.js"></script>
+<script>
+(function () {
+  var config = window.PORTADA_CONFIG;
+  var btnPedidos = document.getElementById("portada-btn-pedidos");
+  if (config && config.pedidosUrl && btnPedidos) {
+    btnPedidos.href = config.pedidosUrl;
+    if (config.pedidosLabel) btnPedidos.textContent = config.pedidosLabel;
+  }
+  var btnVentas = document.getElementById("portada-btn-ventas-matias");
+  if (config && config.ventasMatiasUrl && btnVentas) {
+    btnVentas.href = config.ventasMatiasUrl;
+    if (config.ventasMatiasLabel) btnVentas.textContent = config.ventasMatiasLabel;
+  }
+})();
+</script>
 </body>
 </html>
